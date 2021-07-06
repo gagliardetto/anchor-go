@@ -1,0 +1,538 @@
+{
+  "version": "0.0.0",
+  "name": "misc",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "data",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "udata",
+          "type": "u128"
+        },
+        {
+          "name": "idata",
+          "type": "i128"
+        }
+      ]
+    },
+    {
+      "name": "testOwner",
+      "accounts": [
+        {
+          "name": "data",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "misc",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "testExecutable",
+      "accounts": [
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "testStateCpi",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "cpiState",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "misc2Program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "testInitAssociatedAccount",
+      "accounts": [
+        {
+          "name": "myAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "data",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "testAssociatedAccount",
+      "accounts": [
+        {
+          "name": "myAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "data",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "testU16",
+      "accounts": [
+        {
+          "name": "myAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "testSimulate",
+      "accounts": [],
+      "args": [
+        {
+          "name": "data",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "testI8",
+      "accounts": [
+        {
+          "name": "data",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": "i8"
+        }
+      ]
+    },
+    {
+      "name": "testI16",
+      "accounts": [
+        {
+          "name": "data",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": "i16"
+        }
+      ]
+    },
+    {
+      "name": "testClose",
+      "accounts": [
+        {
+          "name": "data",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solDest",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "testInstructionConstraint",
+      "accounts": [
+        {
+          "name": "myPda",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "myAccount",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "testPdaInit",
+      "accounts": [
+        {
+          "name": "myPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "myPayer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "foo",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "domain",
+          "type": "string"
+        },
+        {
+          "name": "seed",
+          "type": "bytes"
+        },
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "testPdaInitZeroCopy",
+      "accounts": [
+        {
+          "name": "myPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "myPayer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "testPdaMutZeroCopy",
+      "accounts": [
+        {
+          "name": "myPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "myPayer",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "testTokenSeedsInit",
+      "accounts": [
+        {
+          "name": "myPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "struct": {
+      "name": "MyState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "v",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    "methods": [
+      {
+        "name": "new",
+        "accounts": [],
+        "args": []
+      },
+      {
+        "name": "remainingAccounts",
+        "accounts": [],
+        "args": []
+      }
+    ]
+  },
+  "accounts": [
+    {
+      "name": "TestData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Data",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "udata",
+            "type": "u128"
+          },
+          {
+            "name": "idata",
+            "type": "i128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DataU16",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DataI8",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": "i8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DataI16",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": "i16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DataZeroCopy",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "E1",
+      "fields": [
+        {
+          "name": "data",
+          "type": "u32",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "E2",
+      "fields": [
+        {
+          "name": "data",
+          "type": "u32",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "E3",
+      "fields": [
+        {
+          "name": "data",
+          "type": "u32",
+          "index": false
+        }
+      ]
+    }
+  ]
+}

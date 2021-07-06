@@ -1,0 +1,11 @@
+{
+  "version": "0.0.0",
+  "name": "typescript",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [],
+      "args": []
+    }
+  ]
+}

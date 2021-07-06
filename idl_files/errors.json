@@ -1,0 +1,93 @@
+{
+  "version": "0.0.0",
+  "name": "errors",
+  "instructions": [
+    {
+      "name": "hello",
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "helloNoMsg",
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "helloNext",
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "mutError",
+      "accounts": [
+        {
+          "name": "myAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "hasOneError",
+      "accounts": [
+        {
+          "name": "myAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "signerError",
+      "accounts": [
+        {
+          "name": "myAccount",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "HasOneAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 300,
+      "name": "Hello",
+      "msg": "This is an error message clients will automatically display"
+    },
+    {
+      "code": 423,
+      "name": "HelloNoMsg"
+    },
+    {
+      "code": 424,
+      "name": "HelloNext"
+    }
+  ]
+}

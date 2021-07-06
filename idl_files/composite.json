@@ -1,0 +1,88 @@
+{
+  "version": "0.0.0",
+  "name": "composite",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "dummyA",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "dummyB",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "compositeUpdate",
+      "accounts": [
+        {
+          "name": "foo",
+          "accounts": [
+            {
+              "name": "dummyA",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "bar",
+          "accounts": [
+            {
+              "name": "dummyB",
+              "isMut": true,
+              "isSigner": false
+            }
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "dummyA",
+          "type": "u64"
+        },
+        {
+          "name": "dummyB",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "DummyA",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DummyB",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

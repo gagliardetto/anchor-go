@@ -1,0 +1,27 @@
+{
+  "version": "0.0.0",
+  "name": "sysvars",
+  "instructions": [
+    {
+      "name": "sysvars",
+      "accounts": [
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeHistory",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ]
+}

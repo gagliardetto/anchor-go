@@ -1,0 +1,58 @@
+{
+  "version": "0.0.0",
+  "name": "counter",
+  "instructions": [],
+  "state": {
+    "struct": {
+      "name": "Counter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "count",
+            "type": "u64"
+          },
+          {
+            "name": "authProgram",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    "methods": [
+      {
+        "name": "new",
+        "accounts": [],
+        "args": [
+          {
+            "name": "authProgram",
+            "type": "publicKey"
+          }
+        ]
+      },
+      {
+        "name": "setCount",
+        "accounts": [
+          {
+            "name": "authProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": [
+          {
+            "name": "newCount",
+            "type": "u64"
+          }
+        ]
+      }
+    ]
+  },
+  "errors": [
+    {
+      "code": 300,
+      "name": "InvalidAuthProgram",
+      "msg": "Invalid auth program."
+    }
+  ]
+}

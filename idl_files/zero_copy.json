@@ -1,0 +1,327 @@
+{
+  "version": "0.0.0",
+  "name": "zero_copy",
+  "instructions": [
+    {
+      "name": "createFoo",
+      "accounts": [
+        {
+          "name": "foo",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateFoo",
+      "accounts": [
+        {
+          "name": "foo",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "updateFooSecond",
+      "accounts": [
+        {
+          "name": "foo",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "secondAuthority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "secondData",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "createBar",
+      "accounts": [
+        {
+          "name": "bar",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "foo",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateBar",
+      "accounts": [
+        {
+          "name": "bar",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "foo",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "createLargeAccount",
+      "accounts": [
+        {
+          "name": "eventQ",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateLargeAccount",
+      "accounts": [
+        {
+          "name": "eventQ",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "from",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "idx",
+          "type": "u32"
+        },
+        {
+          "name": "data",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "struct": {
+      "name": "Globals",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "events",
+            "type": {
+              "array": [
+                {
+                  "defined": "Event"
+                },
+                250
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "methods": [
+      {
+        "name": "new",
+        "accounts": [
+          {
+            "name": "authority",
+            "isMut": false,
+            "isSigner": true
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "setEvent",
+        "accounts": [
+          {
+            "name": "authority",
+            "isMut": false,
+            "isSigner": true
+          }
+        ],
+        "args": [
+          {
+            "name": "idx",
+            "type": "u32"
+          },
+          {
+            "name": "event",
+            "type": {
+              "defined": "RpcEvent"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "accounts": [
+    {
+      "name": "Foo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "data",
+            "type": "u64"
+          },
+          {
+            "name": "secondData",
+            "type": "u64"
+          },
+          {
+            "name": "secondAuthority",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Bar",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "data",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EventQ",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "events",
+            "type": {
+              "array": [
+                {
+                  "defined": "Event"
+                },
+                25000
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "Event",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "from",
+            "type": "publicKey"
+          },
+          {
+            "name": "data",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RpcEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "from",
+            "type": "publicKey"
+          },
+          {
+            "name": "data",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

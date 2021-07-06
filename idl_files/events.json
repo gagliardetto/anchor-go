@@ -1,0 +1,28 @@
+{
+  "version": "0.0.0",
+  "name": "events",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [],
+      "args": []
+    }
+  ],
+  "events": [
+    {
+      "name": "MyEvent",
+      "fields": [
+        {
+          "name": "data",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "index": true
+        }
+      ]
+    }
+  ]
+}
