@@ -16,8 +16,8 @@ func main() {
 		// "idl_files/zero_copy.json",
 		// "idl_files/typescript.json",
 		// "idl_files/sysvars.json",
-		"idl_files/swap.json",
-		// "idl_files/pyth.json",
+		// "idl_files/swap.json",
+		"idl_files/pyth.json",
 		// "idl_files/multisig.json",
 		// "idl_files/misc.json",
 		// "idl_files/lockup.json",
@@ -33,7 +33,6 @@ func main() {
 	}
 	for _, idlFilepath := range filenames {
 		Ln(LimeBG(idlFilepath))
-		// idlFilepath := "/home/withparty/go/src/github.com/project-serum/anchor/examples/escrow/target/idl/escrow.json"
 		idlFile, err := os.Open(idlFilepath)
 		if err != nil {
 			panic(err)
