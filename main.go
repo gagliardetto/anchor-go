@@ -17,7 +17,8 @@ func main() {
 		// "idl_files/typescript.json",
 		// "idl_files/sysvars.json",
 		// "idl_files/swap.json",
-		"idl_files/pyth.json",
+		"idl_files/swap_light.json",
+		// "idl_files/pyth.json",
 		// "idl_files/multisig.json",
 		// "idl_files/misc.json",
 		// "idl_files/lockup.json",
@@ -115,6 +116,35 @@ func GenerateClient(idl IDL) error {
 
 	file := NewGoFile(idl.Name, true)
 
+	// Instruction ID enum:
+	{
+		code := Empty()
+		code.Const().Parens(
+			DoGroup(func(gr *Group) {
+				for instructionIndex, instruction := range idl.Instructions {
+					insExportedName := ToCamel(instruction.Name)
+
+					ins := Id("Instruction_" + insExportedName)
+					if instructionIndex == 0 {
+						ins.Uint32().Op("=").Iota().Line()
+					}
+					gr.Add(ins)
+				}
+			}),
+		)
+		file.Add(code.Line())
+	}
+
+	{
+		// Base instruction struct:
+		code := Empty()
+		code.Type().Id("Instruction").Struct(
+			Qual("github.com/dfuse-io/binary", "BaseVariant"),
+		)
+
+		file.Add(code.Line())
+	}
+
 	// Instructions:
 	for _, instruction := range idl.Instructions {
 		insExportedName := ToCamel(instruction.Name)
@@ -210,134 +240,107 @@ func GenerateClient(idl IDL) error {
 		{
 			// Account setters/getters:
 			code := Empty()
-			for accountIndex, account := range instruction.Accounts {
+			index := -1
+			for _, account := range instruction.Accounts {
 				spew.Dump(account)
 				// single account (???)
 				// TODO: is this a parameter, or a hardcoded value?
 				if account.IdlAccount != nil {
+					index++
 					exportedAccountName := ToCamel(account.IdlAccount.Name)
 					lowerAccountName := ToLowerCamel(account.IdlAccount.Name)
 
-					// Create account setters:
-					code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Set" + exportedAccountName + "Account").
-						Params(
-							ListFunc(func(st *Group) {
-								// Parameters:
-								st.Id(lowerAccountName).Qual("github.com/gagliardetto/solana-go", "PublicKey")
-							}),
-						).
-						Params(
-							ListFunc(func(st *Group) {
-								// Results:
-								st.Op("*").Id(insExportedName)
-							}),
-						).
-						BlockFunc(func(gr *Group) {
-							// Body:
-							def := Id("ins").Dot("AccountMetaSlice").Index(Lit(accountIndex)).
-								Op("=").Qual("github.com/gagliardetto/solana-go", "NewMeta").Call(Id(lowerAccountName))
-							if account.IdlAccount.IsMut {
-								def.Dot("WRITE").Call()
-							}
-							if account.IdlAccount.IsSigner {
-								def.Dot("SIGNER").Call()
-							}
-
-							gr.Add(def)
-
-							gr.Return().Id("ins")
-						})
-
-					// Create account getters:
-					code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Get" + exportedAccountName + "Account").
-						Params(
-							ListFunc(func(st *Group) {
-								// Parameters:
-							}),
-						).
-						Params(
-							ListFunc(func(st *Group) {
-								// Results:
-								st.Op("*").Qual("github.com/gagliardetto/solana-go", "PublicKey")
-							}),
-						).
-						BlockFunc(func(gr *Group) {
-							// Body:
-							gr.Id("ac").Op(":=").Id("ins").Dot("AccountMetaSlice").Index(Lit(accountIndex))
-
-							gr.If(Id("ac").Op("==").Nil()).Block(
-								Return().Nil(),
-							)
-
-							gr.Return(Op("&").Id("ac").Dot("PublicKey"))
-						})
+					code.Add(createAccountGetterSetter(
+						insExportedName,
+						&account,
+						index,
+						exportedAccountName,
+						lowerAccountName,
+					))
 				}
 
-				// manu account (???)
+				// many accounts (???)
 				// TODO: are these all the wanted parameter accounts, or a list of valid accounts?
 				if account.IdlAccounts != nil {
-					for accountIndex, account := range account.IdlAccounts.Accounts {
+					for _, account := range account.IdlAccounts.Accounts {
+						index++
 						exportedAccountName := ToCamel(account.IdlAccount.Name)
 						lowerAccountName := ToLowerCamel(account.IdlAccount.Name)
 
-						// Create account setters:
-						code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Set" + exportedAccountName + "Account").
-							Params(
-								ListFunc(func(st *Group) {
-									// Parameters:
-									st.Id(lowerAccountName).Qual("github.com/gagliardetto/solana-go", "PublicKey")
-								}),
-							).
-							Params(
-								ListFunc(func(st *Group) {
-									// Results:
-									st.Op("*").Id(insExportedName)
-								}),
-							).
-							BlockFunc(func(gr *Group) {
-								// Body:
-								def := Id("ins").Dot("AccountMetaSlice").Index(Lit(accountIndex)).
-									Op("=").Qual("github.com/gagliardetto/solana-go", "NewMeta").Call(Id(lowerAccountName))
-								if account.IdlAccount.IsMut {
-									def.Dot("WRITE").Call()
-								}
-								if account.IdlAccount.IsSigner {
-									def.Dot("SIGNER").Call()
-								}
-
-								gr.Add(def)
-
-								gr.Return().Id("ins")
-							})
-
-						// Create account getters:
-						code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Get" + exportedAccountName + "Account").
-							Params(
-								ListFunc(func(st *Group) {
-									// Parameters:
-								}),
-							).
-							Params(
-								ListFunc(func(st *Group) {
-									// Results:
-									st.Op("*").Qual("github.com/gagliardetto/solana-go", "PublicKey")
-								}),
-							).
-							BlockFunc(func(gr *Group) {
-								// Body:
-								gr.Id("ac").Op(":=").Id("ins").Dot("AccountMetaSlice").Index(Lit(accountIndex))
-
-								gr.If(Id("ac").Op("==").Nil()).Block(
-									Return().Nil(),
-								)
-
-								gr.Return(Op("&").Id("ac").Dot("PublicKey"))
-							})
+						code.Add(createAccountGetterSetter(
+							insExportedName,
+							&account,
+							index,
+							exportedAccountName,
+							lowerAccountName,
+						))
+						// TODO: add setter that accepts just this group of accounts.
 					}
 				}
 
 			}
 
+			file.Add(code.Line())
+		}
+		{
+			// Add `Build` method:
+			code := Empty()
+
+			code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Build").
+				Params(
+					ListFunc(func(st *Group) {
+						// Parameters:
+					}),
+				).
+				Params(
+					ListFunc(func(st *Group) {
+						// Results:
+						st.Op("*").Id("Instruction")
+					}),
+				).
+				BlockFunc(func(gr *Group) {
+					// Body:
+
+					gr.Return().Op("&").Id("Instruction").Values(
+						Dict{
+							Id("BaseVariant"): Qual("github.com/dfuse-io/binary", "BaseVariant").Values(
+								Dict{
+									Id("TypeID"): Id("Instruction_" + insExportedName),
+									Id("Impl"):   Id("ins"),
+								},
+							),
+						},
+					)
+				})
+			file.Add(code.Line())
+		}
+		{
+			// Add `Verify` method:
+			code := Empty()
+
+			code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Verify").
+				Params(
+					ListFunc(func(st *Group) {
+						// Parameters:
+					}),
+				).
+				Params(
+					ListFunc(func(st *Group) {
+						// Results:
+						st.Error()
+					}),
+				).
+				BlockFunc(func(gr *Group) {
+					// Body:
+
+					gr.For(List(Id("accIndex"), Id("acc")).Op(":=").Range().Id("ins").Dot("AccountMetaSlice")).Block(
+						If(Id("acc").Op("==").Nil()).Block(
+							Return(Qual("fmt", "Errorf").Call(List(Lit("ins.AccountMetaSlice[%v] is nil"), Id("accIndex")))),
+						),
+					)
+
+					gr.Return(Nil())
+				})
 			file.Add(code.Line())
 		}
 	}
@@ -431,6 +434,9 @@ func GenerateClient(idl IDL) error {
 			}
 		}
 	}
+	{
+
+	}
 
 	{
 		err := file.Render(os.Stdout)
@@ -439,4 +445,69 @@ func GenerateClient(idl IDL) error {
 		}
 	}
 	return nil
+}
+
+func createAccountGetterSetter(
+	insExportedName string,
+	account *IdlAccountItem,
+	index int,
+	exportedAccountName string,
+	lowerAccountName string,
+) Code {
+	code := Empty()
+	// Create account setters:
+	code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Set" + exportedAccountName + "Account").
+		Params(
+			ListFunc(func(st *Group) {
+				// Parameters:
+				st.Id(lowerAccountName).Qual("github.com/gagliardetto/solana-go", "PublicKey")
+			}),
+		).
+		Params(
+			ListFunc(func(st *Group) {
+				// Results:
+				st.Op("*").Id(insExportedName)
+			}),
+		).
+		BlockFunc(func(gr *Group) {
+			// Body:
+			def := Id("ins").Dot("AccountMetaSlice").Index(Lit(index)).
+				Op("=").Qual("github.com/gagliardetto/solana-go", "NewMeta").Call(Id(lowerAccountName))
+			if account.IdlAccount.IsMut {
+				def.Dot("WRITE").Call()
+			}
+			if account.IdlAccount.IsSigner {
+				def.Dot("SIGNER").Call()
+			}
+
+			gr.Add(def)
+
+			gr.Return().Id("ins")
+		})
+
+	// Create account getters:
+	code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Get" + exportedAccountName + "Account").
+		Params(
+			ListFunc(func(st *Group) {
+				// Parameters:
+			}),
+		).
+		Params(
+			ListFunc(func(st *Group) {
+				// Results:
+				st.Op("*").Qual("github.com/gagliardetto/solana-go", "PublicKey")
+			}),
+		).
+		BlockFunc(func(gr *Group) {
+			// Body:
+			gr.Id("ac").Op(":=").Id("ins").Dot("AccountMetaSlice").Index(Lit(index))
+
+			gr.If(Id("ac").Op("==").Nil()).Block(
+				Return().Nil(),
+			)
+
+			gr.Return(Op("&").Id("ac").Dot("PublicKey"))
+		})
+
+	return code
 }

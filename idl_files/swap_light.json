@@ -1,0 +1,166 @@
+{
+  "version": "0.0.0",
+  "name": "swap",
+  "doc": [
+    "This program allows to make a swap.",
+    "This is another line of the doc."
+  ],
+  "instructions": [
+    {
+      "name": "swap",
+      "doc": [
+        "Instruction swap allows to make a swap."
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "accounts": [
+            {
+              "name": "market",
+              "isMut": true,
+              "isSigner": false,
+              "doc": [
+                "account for the market of the swap."
+              ]
+            },
+            {
+              "name": "openOrders",
+              "isMut": true,
+              "isSigner": false,
+              "doc": [
+                "account for the open orders."
+              ]
+            }
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "doc": [
+            "account for the authority."
+          ]
+        },
+        {
+          "name": "pcWallet",
+          "isMut": true,
+          "isSigner": false,
+          "doc": [
+            "account for the pcWallet."
+          ]
+        },
+        {
+          "name": "dexProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "side",
+          "type": {
+            "defined": "Side"
+          }
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "minExpectedSwapAmount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "Side",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Bid"
+          },
+          {
+            "name": "Ask"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "DidSwap",
+      "fields": [
+        {
+          "name": "givenAmount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "minExpectedSwapAmount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "fromAmount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "toAmount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "spillAmount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "fromMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "toMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "quoteMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 300,
+      "name": "SwapTokensCannotMatch",
+      "msg": "The tokens being swapped must have different mints"
+    },
+    {
+      "code": 301,
+      "name": "SlippageExceeded",
+      "msg": "Slippage tolerance exceeded"
+    }
+  ]
+}
