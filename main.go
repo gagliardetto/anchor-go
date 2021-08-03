@@ -88,7 +88,7 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 	case IdlTypeString:
 		stat.String()
 	case IdlTypePublicKey:
-		stat.Qual("github.com/dfuse-io/solana-go", "PublicKey")
+		stat.Qual("github.com/gagliardetto/solana-go", "PublicKey")
 	default:
 		panic(Sf("unknown type string: %s", ts))
 	}
