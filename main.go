@@ -177,7 +177,7 @@ func GenerateClient(idl IDL) error {
 				for _, arg := range instruction.Args {
 					fieldsGroup.Id(ToCamel(arg.Name)).Add(
 						DoGroup(func(fieldTypeGroup *Group) {
-							setType(fieldTypeGroup, arg)
+							setFieldNameAndType(fieldTypeGroup, arg)
 						}),
 					)
 				}
@@ -410,7 +410,7 @@ func GenerateClient(idl IDL) error {
 					for _, field := range *typ.Type.Fields {
 						fieldsGroup.Id(ToCamel(field.Name)).Add(
 							DoGroup(func(fieldTypeGroup *Group) {
-								setType(fieldTypeGroup, field)
+								setFieldNameAndType(fieldTypeGroup, field)
 							}),
 						)
 					}
@@ -447,7 +447,7 @@ func GenerateClient(idl IDL) error {
 					for _, field := range *acc.Type.Fields {
 						fieldsGroup.Id(ToCamel(field.Name)).Add(
 							DoGroup(func(fieldTypeGroup *Group) {
-								setType(fieldTypeGroup, field)
+								setFieldNameAndType(fieldTypeGroup, field)
 							}),
 						)
 					}
@@ -534,7 +534,7 @@ func createAccountGetterSetter(
 	return code
 }
 
-func setType(fieldTypeGroup *Group, idlField IdlField) {
+func setFieldNameAndType(fieldTypeGroup *Group, idlField IdlField) {
 	if idlField.Type.IsString() {
 		fieldTypeGroup.Add(typeStringToType(idlField.Type.GetString()))
 	} else if idlField.Type.IsIdlTypeDefined() {
