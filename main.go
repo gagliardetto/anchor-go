@@ -143,13 +143,264 @@ func GenerateClient(idl IDL) error {
 	}
 
 	{
-		// Base Instruction struct:
-		code := Empty()
-		code.Type().Id("Instruction").Struct(
-			Qual("github.com/dfuse-io/binary", "BaseVariant"),
-		)
+		{ // Base Instruction struct:
+			code := Empty()
+			code.Type().Id("Instruction").Struct(
+				Qual("github.com/dfuse-io/binary", "BaseVariant"),
+			)
+			file.Add(code.Line())
+		}
+		{
+			// PROGRAM_ID variable:
+			code := Empty()
+			// TODO: add this to IDL???
+			programID := "TODO"
+			code.Var().Id("PROGRAM_ID").Op("=").Qual("github.com/gagliardetto/solana-go", "MustPublicKeyFromBase58").Call(Lit(programID))
+			file.Add(code.Line())
+		}
+		{
+			// register decoder:
+			code := Empty()
+			code.Func().Id("init").Call().Block(
+				Qual("github.com/gagliardetto/solana-go", "RegisterInstructionDecoder").Call(Id("PROGRAM_ID"), Id("registryDecodeInstruction")),
+			)
+			file.Add(code.Line())
+		}
+		{
+			// variant definitions for the decoder:
+			code := Empty()
+			code.Var().Id("InstructionImplDef").Op("=").Qual("github.com/dfuse-io/binary", "NewVariantDefinition").
+				Parens(DoGroup(func(call *Group) {
+					call.Line()
+					// TODO: make this configurable?
+					call.Qual("github.com/dfuse-io/binary", "Uint32TypeIDEncoding").Op(",").Line()
 
-		file.Add(code.Line())
+					call.Index().Qual("github.com/dfuse-io/binary", "VariantType").
+						BlockFunc(func(variantBlock *Group) {
+							for _, instruction := range idl.Instructions {
+								insName := ToSnake(instruction.Name)
+								insExportedName := ToCamel(instruction.Name)
+								variantBlock.Block(
+									List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
+								).Op(",")
+							}
+						}).Op(",").Line()
+				}))
+
+			file.Add(code.Line())
+		}
+		{
+			// method to return programID:
+			code := Empty()
+			code.Func().Parens(Id("inst").Op("*").Id("Instruction")).Id("ProgramID").Params().
+				Parens(Qual("github.com/gagliardetto/solana-go", "PublicKey")).
+				BlockFunc(func(gr *Group) {
+					gr.Return(
+						Id("PROGRAM_ID"),
+					)
+				})
+			file.Add(code.Line())
+		}
+		{
+			// method to return accounts:
+			code := Empty()
+			code.Func().Parens(Id("inst").Op("*").Id("Instruction")).Id("Accounts").Params().
+				Parens(Id("out").Index().Op("*").Qual("github.com/gagliardetto/solana-go", "AccountMeta")).
+				BlockFunc(func(body *Group) {
+					body.Return(
+						Id("inst").Dot("Impl").Op(".").Parens(Qual("github.com/gagliardetto/solana-go", "AccountsGettable")).Dot("GetAccounts").Call(),
+					)
+				})
+			file.Add(code.Line())
+		}
+		{
+			// `Data() ([]byte, error)` method:
+			code := Empty()
+			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("Data").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Index().Byte()
+						results.Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					body.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
+					body.If(
+						Err().Op(":=").Qual("github.com/dfuse-io/binary", "NewEncoder").Call(Id("buf")).Dot("Encode").Call(Id("i")).
+							Op(";").
+							Err().Op("!=").Nil(),
+					).Block(
+						Return(List(Nil(), Qual("fmt", "Errorf").Call(Lit("unable to encode instruction: %w"), Err()))),
+					)
+					body.Return(Id("buf").Dot("Bytes").Call(), Nil())
+				})
+			file.Add(code.Line())
+		}
+		{
+			// `TextEncode(encoder *text.Encoder, option *text.Option) error` method:
+			code := Empty()
+			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("TextEncode").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						params.Id("encoder").Op("*").Qual("github.com/gagliardetto/solana-go/text", "Encoder")
+						params.Id("option").Op("*").Qual("github.com/gagliardetto/solana-go/text", "Option")
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					body.Return(Id("encoder").Dot("Encode").Call(Id("inst").Dot("Impl"), Id("option")))
+				})
+			file.Add(code.Line())
+		}
+		{
+			// `UnmarshalBinary(decoder *bin.Decoder) error` method:
+			code := Empty()
+			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("UnmarshalBinary").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						params.Id("decoder").Op("*").Qual("github.com/dfuse-io/binary", "Decoder")
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					body.Return(Id("inst").Dot("BaseVariant").Dot("UnmarshalBinaryVariant").Call(Id("decoder"), Id("InstructionImplDef")))
+				})
+			file.Add(code.Line())
+		}
+		{
+			// `MarshalBinary(encoder *bin.Encoder) error ` method:
+			code := Empty()
+			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("MarshalBinary").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						params.Id("encoder").Op("*").Qual("github.com/dfuse-io/binary", "Encoder")
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID"), Qual("encoding/binary", "LittleEndian"))
+
+					body.If(
+						Err().Op("!=").Nil(),
+					).Block(
+						Return(List(Nil(), Qual("fmt", "Errorf").Call(Lit("unable to write variant type: %w"), Err()))),
+					)
+					body.Return(Id("encoder").Dot("Encode").Call(Id("inst").Dot("Impl")))
+				})
+			file.Add(code.Line())
+		}
+		{
+			// `registryDecodeInstruction` func:
+			code := Empty()
+			code.Func().Id("registryDecodeInstruction").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						params.Id("accounts").Index().Op("*").Qual("github.com/gagliardetto/solana-go", "AccountMeta")
+						params.Id("data").Index().Byte()
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Interface()
+						results.Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					body.List(Id("inst"), Err()).Op(":=").Id("DecodeInstruction").Call(Id("accounts"), Id("data"))
+
+					body.If(
+						Err().Op("!=").Nil(),
+					).Block(
+						Return(Nil(), Err()),
+					)
+					body.Return(Id("inst"), Nil())
+				})
+			file.Add(code.Line())
+		}
+		{
+			// `DecodeInstruction` func:
+			code := Empty()
+			code.Func().Id("DecodeInstruction").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						params.Id("accounts").Index().Op("*").Qual("github.com/gagliardetto/solana-go", "AccountMeta")
+						params.Id("data").Index().Byte()
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Op("*").Id("Instruction")
+						results.Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+
+					body.Id("inst").Op(":=").New(Id("Instruction"))
+
+					body.If(
+						Err().Op(":=").Qual("github.com/dfuse-io/binary", "NewDecoder").Call(Id("data")).Dot("Decode").Call(Id("inst")).
+							Op(";").
+							Err().Op("!=").Nil(),
+					).Block(
+						Return(
+							Nil(),
+							Qual("fmt", "Errorf").Call(Lit("unable to decode instruction: %w"), Err()),
+						),
+					)
+
+					body.If(
+
+						List(Id("v"), Id("ok")).Op(":=").Id("inst").Dot("Impl").Op(".").Parens(Qual("github.com/gagliardetto/solana-go", "AccountsSettable")).
+							Op(";").
+							Id("ok"),
+					).BlockFunc(func(gr *Group) {
+						gr.Err().Op(":=").Id("v").Dot("SetAccounts").Call(Id("accounts"))
+						gr.If(Nil().Op("!=").Nil()).Block(
+							Return(
+								Nil(),
+								Qual("fmt", "Errorf").Call(Lit("unable to set accounts for instruction: %w"), Err()),
+							),
+						)
+					})
+
+					body.Return(Id("inst"), Nil())
+				})
+			file.Add(code.Line())
+		}
 	}
 
 	// Instructions:
@@ -221,7 +472,7 @@ func GenerateClient(idl IDL) error {
 					code.Comment(doc).Line()
 				}
 
-				code.Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Set" + exportedArgName).
+				code.Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Set" + exportedArgName).
 					Params(
 						ListFunc(func(st *Group) {
 							// Parameters:
@@ -238,9 +489,9 @@ func GenerateClient(idl IDL) error {
 					).
 					BlockFunc(func(gr *Group) {
 						// Body:
-						gr.Id("ins").Dot(exportedArgName).Op("=").Id(arg.Name)
+						gr.Id("inst").Dot(exportedArgName).Op("=").Id(arg.Name)
 
-						gr.Return().Id("ins")
+						gr.Return().Id("inst")
 					})
 			}
 
@@ -272,7 +523,7 @@ func GenerateClient(idl IDL) error {
 				// TODO: are these all the wanted parameter accounts, or a list of valid accounts?
 				if account.IdlAccounts != nil {
 					// builder struct for this accounts group:
-					builderStructName := ToCamel(account.IdlAccounts.Name) + "AccountsBuilder"
+					builderStructName := insExportedName + ToCamel(account.IdlAccounts.Name) + "AccountsBuilder"
 					code.Line().Line().Type().Id(builderStructName).Struct(
 						Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice").Tag(map[string]string{
 							"bin": "-",
@@ -282,13 +533,13 @@ func GenerateClient(idl IDL) error {
 					// func that returns a new builder for this account group:
 					code.Line().Line().Func().Id("New" + builderStructName).Params().Op("*").Id(builderStructName).
 						BlockFunc(func(gr *Group) {
-							gr.Return().Op("&").Id(insExportedName).Block(
+							gr.Return().Op("&").Id(builderStructName).Block(
 								Id("AccountMetaSlice").Op(":").Make(Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice"), Lit(account.IdlAccounts.Accounts.NumAccounts())).Op(","),
 							)
 						}).Line().Line()
 
-					// MEthod on intruction builder that accepts the accounts group builder, and copies the accounts:
-					code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Set" + ToCamel(account.IdlAccounts.Name) + "AccountsFromBuilder").
+					// Method on intruction builder that accepts the accounts group builder, and copies the accounts:
+					code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Set" + ToCamel(account.IdlAccounts.Name) + "AccountsFromBuilder").
 						Params(
 							ListFunc(func(st *Group) {
 								// Parameters:
@@ -309,13 +560,13 @@ func GenerateClient(idl IDL) error {
 								tpIndex++
 								exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
 
-								def := Id("ins").Dot("AccountMetaSlice").Index(Lit(tpIndex)).
+								def := Id("inst").Dot("AccountMetaSlice").Index(Lit(tpIndex)).
 									Op("=").Id(ToLowerCamel(builderStructName)).Dot("Get" + exportedAccountName + "Account").Call()
 
 								gr.Add(def)
 							}
 
-							gr.Return().Id("ins")
+							gr.Return().Id("inst")
 						})
 
 					for _, subAccount := range account.IdlAccounts.Accounts {
@@ -341,7 +592,7 @@ func GenerateClient(idl IDL) error {
 			// Add `Build` method to instruction:
 			code := Empty()
 
-			code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Build").
+			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Build").
 				Params(
 					ListFunc(func(st *Group) {
 						// Parameters:
@@ -361,7 +612,7 @@ func GenerateClient(idl IDL) error {
 							Id("BaseVariant"): Qual("github.com/dfuse-io/binary", "BaseVariant").Values(
 								Dict{
 									Id("TypeID"): Id("Instruction_" + insExportedName),
-									Id("Impl"):   Id("ins"),
+									Id("Impl"):   Id("inst"),
 								},
 							),
 						},
@@ -373,7 +624,7 @@ func GenerateClient(idl IDL) error {
 			// Add `Verify` method to instruction:
 			code := Empty()
 
-			code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Verify").
+			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Verify").
 				Params(
 					ListFunc(func(st *Group) {
 						// Parameters:
@@ -388,7 +639,7 @@ func GenerateClient(idl IDL) error {
 				BlockFunc(func(gr *Group) {
 					// Body:
 
-					gr.For(List(Id("accIndex"), Id("acc")).Op(":=").Range().Id("ins").Dot("AccountMetaSlice")).Block(
+					gr.For(List(Id("accIndex"), Id("acc")).Op(":=").Range().Id("inst").Dot("AccountMetaSlice")).Block(
 						If(Id("acc").Op("==").Nil()).Block(
 							Return(Qual("fmt", "Errorf").Call(List(Lit("ins.AccountMetaSlice[%v] is nil"), Id("accIndex")))),
 						),
@@ -484,7 +735,7 @@ func createAccountGetterSetter(
 		code.Comment(doc).Line()
 	}
 	// Create account setters:
-	code.Func().Params(Id("ins").Op("*").Id(receiverTypeName)).Id("Set" + exportedAccountName + "Account").
+	code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id("Set" + exportedAccountName + "Account").
 		Params(
 			ListFunc(func(st *Group) {
 				// Parameters:
@@ -499,7 +750,7 @@ func createAccountGetterSetter(
 		).
 		BlockFunc(func(gr *Group) {
 			// Body:
-			def := Id("ins").Dot("AccountMetaSlice").Index(Lit(index)).
+			def := Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).
 				Op("=").Qual("github.com/gagliardetto/solana-go", "NewMeta").Call(Id(lowerAccountName))
 			if account.IsMut {
 				def.Dot("WRITE").Call()
@@ -510,11 +761,11 @@ func createAccountGetterSetter(
 
 			gr.Add(def)
 
-			gr.Return().Id("ins")
+			gr.Return().Id("inst")
 		})
 
 	// Create account getters:
-	code.Line().Line().Func().Params(Id("ins").Op("*").Id(receiverTypeName)).Id("Get" + exportedAccountName + "Account").
+	code.Line().Line().Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id("Get" + exportedAccountName + "Account").
 		Params(
 			ListFunc(func(st *Group) {
 				// Parameters:
@@ -528,7 +779,7 @@ func createAccountGetterSetter(
 		).
 		BlockFunc(func(gr *Group) {
 			// Body:
-			gr.Return(Id("ins").Dot("AccountMetaSlice").Index(Lit(index)))
+			gr.Return(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)))
 		})
 
 	return code

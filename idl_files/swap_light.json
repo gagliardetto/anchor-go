@@ -98,6 +98,99 @@
           ]
         }
       ]
+    },
+        {
+      "name": "swapDouble",
+      "docs": [
+        "Instruction swapDouble allows to make a swap."
+      ],
+      "accounts": [
+        {
+          "name": "foo",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "account for the foo."
+          ]
+        },
+        {
+          "name": "market",
+          "accounts": [
+            {
+              "name": "market",
+              "isMut": true,
+              "isSigner": false,
+              "docs": [
+                "account for the market of the swap."
+              ]
+            },
+            {
+              "name": "openOrders",
+              "isMut": true,
+              "isSigner": false,
+              "docs": [
+                "account for the open orders."
+              ]
+            }
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "account for the authority."
+          ]
+        },
+        {
+          "name": "pcWallet",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "account for the pcWallet."
+          ]
+        },
+        {
+          "name": "dexProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "side",
+          "type": {
+            "defined": "Side"
+          },
+          "docs": [
+            "Side of the swap."
+          ]
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "docs": [
+            "Amount for the swap."
+          ]
+        },
+        {
+          "name": "minExpectedSwapAmount",
+          "type": "u64",
+          "docs": [
+            "Minimum expected swap amount."
+          ]
+        }
+      ]
     }
   ],
   "types": [
