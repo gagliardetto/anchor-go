@@ -122,6 +122,7 @@ type IdlAccount struct {
 // A nested/recursive version of IdlAccount.
 type IdlAccounts struct {
 	Name     string              `json:"name"`
+	Docs     []string            `json:"docs"`
 	Accounts IdlAccountItemSlice `json:"accounts"`
 }
 

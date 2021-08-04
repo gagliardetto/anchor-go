@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
+	"time"
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
@@ -32,6 +34,10 @@ func main() {
 		// "idl_files/counter_auth.json",
 		// "idl_files/counter.json",
 	}
+
+	ts := time.Now()
+	outDir := "generated"
+
 	for _, idlFilepath := range filenames {
 		Ln(LimeBG(idlFilepath))
 		idlFile, err := os.Open(idlFilepath)
@@ -50,11 +56,53 @@ func main() {
 
 		spew.Dump(idl)
 
-		err = GenerateClient(idl)
+		// Create subfolder for package for generated assets:
+		packageAssetFolderName := ToLowerCamel(idl.Name)
+		packageAssetFolderPath := path.Join(outDir, packageAssetFolderName)
+		MustCreateFolderIfNotExists(packageAssetFolderPath, os.ModePerm)
+		// Create folder for assets generated during this run:
+		thisRunAssetFolderName := ToLowerCamel(idl.Name) + "_" + ts.Format(FilenameTimeFormat)
+		thisRunAssetFolderPath := path.Join(packageAssetFolderPath, thisRunAssetFolderName)
+		// Create a new assets folder inside the main assets folder:
+		MustCreateFolderIfNotExists(thisRunAssetFolderPath, os.ModePerm)
+
+		files, err := GenerateClient(idl)
 		if err != nil {
 			panic(err)
 		}
+
+		for _, file := range files {
+			// err := file.Render(os.Stdout)
+			// if err != nil {
+			// 	panic(err)
+			// }
+
+			{
+				// Save codeql assets:
+				assetFileName := file.Name + ".go"
+				assetFilepath := path.Join(thisRunAssetFolderPath, assetFileName)
+
+				// Create file codeql file:
+				goFile, err := os.Create(assetFilepath)
+				if err != nil {
+					panic(err)
+				}
+				defer goFile.Close()
+
+				// Write generated codeql to file:
+				Infof("Saving codeql assets to %q", MustAbs(assetFilepath))
+				err = file.File.Render(goFile)
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
 	}
+}
+
+type FileWrapper struct {
+	Name string
+	File *File
 }
 
 func typeStringToType(ts IdlTypeAsString) *Statement {
@@ -108,15 +156,27 @@ func idlTypeToType(envel IdlTypeEnvelope) *Statement {
 	}
 }
 
-func GenerateClient(idl IDL) error {
-	// TODO:
-	// - validate IDL (???)
-	// - create new go file
-	// - add instructions, etc.
-
+func generateInstructionBoilerplate(idl IDL) (*File, error) {
 	file := NewGoFile(idl.Name, true)
 	for _, programDoc := range idl.Docs {
 		file.HeaderComment(programDoc)
+	}
+
+	{
+		// PROGRAM_ID variable:
+		code := Empty()
+		// TODO: add this to IDL???
+		programID := "TODO"
+		code.Var().Id("PROGRAM_ID").Op("=").Qual("github.com/gagliardetto/solana-go", "MustPublicKeyFromBase58").Call(Lit(programID))
+		file.Add(code.Line())
+	}
+	{
+		// register decoder:
+		code := Empty()
+		code.Func().Id("init").Call().Block(
+			Qual("github.com/gagliardetto/solana-go", "RegisterInstructionDecoder").Call(Id("PROGRAM_ID"), Id("registryDecodeInstruction")),
+		)
+		file.Add(code.Line())
 	}
 
 	// Instruction ID enum:
@@ -147,22 +207,6 @@ func GenerateClient(idl IDL) error {
 			code := Empty()
 			code.Type().Id("Instruction").Struct(
 				Qual("github.com/dfuse-io/binary", "BaseVariant"),
-			)
-			file.Add(code.Line())
-		}
-		{
-			// PROGRAM_ID variable:
-			code := Empty()
-			// TODO: add this to IDL???
-			programID := "TODO"
-			code.Var().Id("PROGRAM_ID").Op("=").Qual("github.com/gagliardetto/solana-go", "MustPublicKeyFromBase58").Call(Lit(programID))
-			file.Add(code.Line())
-		}
-		{
-			// register decoder:
-			code := Empty()
-			code.Func().Id("init").Call().Block(
-				Qual("github.com/gagliardetto/solana-go", "RegisterInstructionDecoder").Call(Id("PROGRAM_ID"), Id("registryDecodeInstruction")),
 			)
 			file.Add(code.Line())
 		}
@@ -233,7 +277,7 @@ func GenerateClient(idl IDL) error {
 					// Body:
 					body.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
 					body.If(
-						Err().Op(":=").Qual("github.com/dfuse-io/binary", "NewEncoder").Call(Id("buf")).Dot("Encode").Call(Id("i")).
+						Err().Op(":=").Qual("github.com/dfuse-io/binary", "NewEncoder").Call(Id("buf")).Dot("Encode").Call(Id("inst")).
 							Op(";").
 							Err().Op("!=").Nil(),
 					).Block(
@@ -403,8 +447,28 @@ func GenerateClient(idl IDL) error {
 		}
 	}
 
+	return file, nil
+}
+
+func GenerateClient(idl IDL) ([]*FileWrapper, error) {
+	// TODO:
+	// - validate IDL (???)
+
+	files := make([]*FileWrapper, 0)
+	{
+		file, err := generateInstructionBoilerplate(idl)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, &FileWrapper{
+			Name: ToLowerCamel("instruction"),
+			File: file,
+		})
+	}
+
 	// Instructions:
 	for _, instruction := range idl.Instructions {
+		file := NewGoFile(idl.Name, true)
 		insExportedName := ToCamel(instruction.Name)
 
 		fmt.Println(RedBG(instruction.Name))
@@ -524,7 +588,12 @@ func GenerateClient(idl IDL) error {
 				if account.IdlAccounts != nil {
 					// builder struct for this accounts group:
 					builderStructName := insExportedName + ToCamel(account.IdlAccounts.Name) + "AccountsBuilder"
-					code.Line().Line().Type().Id(builderStructName).Struct(
+
+					code.Line().Line()
+					for _, doc := range account.IdlAccounts.Docs {
+						code.Comment(doc).Line()
+					}
+					code.Type().Id(builderStructName).Struct(
 						Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice").Tag(map[string]string{
 							"bin": "-",
 						}),
@@ -649,9 +718,14 @@ func GenerateClient(idl IDL) error {
 				})
 			file.Add(code.Line())
 		}
+		files = append(files, &FileWrapper{
+			Name: insExportedName,
+			File: file,
+		})
 	}
 
 	{
+		file := NewGoFile(idl.Name, true)
 		// Types:
 		for _, typ := range idl.Types {
 			switch typ.Type.Kind {
@@ -686,9 +760,14 @@ func GenerateClient(idl IDL) error {
 				panic(Sf("not implemented: %s", spew.Sdump(typ.Type.Kind)))
 			}
 		}
+		files = append(files, &FileWrapper{
+			Name: "types",
+			File: file,
+		})
 	}
 
 	{
+		file := NewGoFile(idl.Name, true)
 		// Accounts:
 		for _, acc := range idl.Accounts {
 			switch acc.Type.Kind {
@@ -711,15 +790,13 @@ func GenerateClient(idl IDL) error {
 				panic("not implemented")
 			}
 		}
+		files = append(files, &FileWrapper{
+			Name: "accounts",
+			File: file,
+		})
 	}
 
-	{
-		err := file.Render(os.Stdout)
-		if err != nil {
-			panic(err)
-		}
-	}
-	return nil
+	return files, nil
 }
 
 func createAccountGetterSetter(
