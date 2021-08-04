@@ -115,6 +115,9 @@ func GenerateClient(idl IDL) error {
 	// - add instructions, etc.
 
 	file := NewGoFile(idl.Name, true)
+	for _, programDoc := range idl.Docs {
+		file.HeaderComment(programDoc)
+	}
 
 	// Instruction ID enum:
 	{
@@ -124,11 +127,15 @@ func GenerateClient(idl IDL) error {
 				for instructionIndex, instruction := range idl.Instructions {
 					insExportedName := ToCamel(instruction.Name)
 
-					ins := Id("Instruction_" + insExportedName)
+					ins := Empty().Line()
+					for _, doc := range instruction.Docs {
+						ins.Comment(doc).Line()
+					}
+					ins.Id("Instruction_" + insExportedName)
 					if instructionIndex == 0 {
 						ins.Uint32().Op("=").Iota().Line()
 					}
-					gr.Add(ins)
+					gr.Add(ins.Line().Line())
 				}
 			}),
 		)
@@ -136,7 +143,7 @@ func GenerateClient(idl IDL) error {
 	}
 
 	{
-		// Base instruction struct:
+		// Base Instruction struct:
 		code := Empty()
 		code.Type().Id("Instruction").Struct(
 			Qual("github.com/dfuse-io/binary", "BaseVariant"),
@@ -152,29 +159,25 @@ func GenerateClient(idl IDL) error {
 		fmt.Println(RedBG(instruction.Name))
 
 		{
-			code := Empty()
-			code.Commentf(
-				"%s is the `%s` instruction.",
-				insExportedName,
-				instruction.Name,
-			).Line()
+			code := Empty().Line().Line()
+
+			for _, doc := range instruction.Docs {
+				code.Comment(doc).Line()
+			}
+
+			if len(instruction.Docs) == 0 {
+				code.Commentf(
+					"%s is the `%s` instruction.",
+					insExportedName,
+					instruction.Name,
+				).Line()
+			}
+
 			code.Type().Id(insExportedName).StructFunc(func(fieldsGroup *Group) {
 				for _, arg := range instruction.Args {
 					fieldsGroup.Id(ToCamel(arg.Name)).Add(
 						DoGroup(func(fieldTypeGroup *Group) {
-							if arg.Type.IsString() {
-								fieldTypeGroup.Add(typeStringToType(arg.Type.GetString()))
-							}
-
-							if arg.Type.IsArray() {
-								arr := arg.Type.GetArray()
-								_ = arr
-
-								if arr.Thing.IsString() {
-									fieldTypeGroup.Index()
-									fieldTypeGroup.Add(typeStringToType(arr.Thing.GetString()))
-								}
-							}
+							setType(fieldTypeGroup, arg)
 						}),
 					)
 				}
@@ -190,10 +193,10 @@ func GenerateClient(idl IDL) error {
 		}
 
 		if len(instruction.Accounts) > 0 {
-			builderFuncName := "New" + insExportedName + "Builder"
+			builderFuncName := "New" + insExportedName + "InstructionBuilder"
 			code := Empty()
 			code.Commentf(
-				"%s initializes a new %s builder.",
+				"%s creates a new `%s` instruction builder.",
 				builderFuncName,
 				insExportedName,
 			).Line()
@@ -201,7 +204,7 @@ func GenerateClient(idl IDL) error {
 			code.Func().Id(builderFuncName).Params().Op("*").Id(insExportedName).
 				BlockFunc(func(gr *Group) {
 					gr.Return().Op("&").Id(insExportedName).Block(
-						Id("AccountMetaSlice").Op(":").Make(Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice"), Lit(len(instruction.Accounts))).Op(","),
+						Id("AccountMetaSlice").Op(":").Make(Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice"), Lit(instruction.Accounts.NumAccounts())).Op(","),
 					)
 				})
 			file.Add(code.Line())
@@ -212,7 +215,13 @@ func GenerateClient(idl IDL) error {
 			code := Empty()
 			for _, arg := range instruction.Args {
 				exportedArgName := ToCamel(arg.Name)
-				code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Set" + exportedArgName).
+
+				code.Line().Line()
+				for _, doc := range arg.Docs {
+					code.Comment(doc).Line()
+				}
+
+				code.Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Set" + exportedArgName).
 					Params(
 						ListFunc(func(st *Group) {
 							// Parameters:
@@ -252,7 +261,7 @@ func GenerateClient(idl IDL) error {
 
 					code.Add(createAccountGetterSetter(
 						insExportedName,
-						&account,
+						account.IdlAccount,
 						index,
 						exportedAccountName,
 						lowerAccountName,
@@ -262,19 +271,65 @@ func GenerateClient(idl IDL) error {
 				// many accounts (???)
 				// TODO: are these all the wanted parameter accounts, or a list of valid accounts?
 				if account.IdlAccounts != nil {
-					for _, account := range account.IdlAccounts.Accounts {
+					// builder struct for this accounts group:
+					builderStructName := ToCamel(account.IdlAccounts.Name) + "AccountsBuilder"
+					code.Line().Line().Type().Id(builderStructName).Struct(
+						Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice").Tag(map[string]string{
+							"bin": "-",
+						}),
+					)
+
+					// func that returns a new builder for this account group:
+					code.Line().Line().Func().Id("New" + builderStructName).Params().Op("*").Id(builderStructName).
+						BlockFunc(func(gr *Group) {
+							gr.Return().Op("&").Id(insExportedName).Block(
+								Id("AccountMetaSlice").Op(":").Make(Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice"), Lit(account.IdlAccounts.Accounts.NumAccounts())).Op(","),
+							)
+						}).Line().Line()
+
+					// MEthod on intruction builder that accepts the accounts group builder, and copies the accounts:
+					code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Set" + ToCamel(account.IdlAccounts.Name) + "AccountsFromBuilder").
+						Params(
+							ListFunc(func(st *Group) {
+								// Parameters:
+								st.Id(ToLowerCamel(builderStructName)).Op("*").Id(builderStructName)
+							}),
+						).
+						Params(
+							ListFunc(func(st *Group) {
+								// Results:
+								st.Op("*").Id(insExportedName)
+							}),
+						).
+						BlockFunc(func(gr *Group) {
+							// Body:
+
+							tpIndex := index
+							for _, subAccount := range account.IdlAccounts.Accounts {
+								tpIndex++
+								exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
+
+								def := Id("ins").Dot("AccountMetaSlice").Index(Lit(tpIndex)).
+									Op("=").Id(ToLowerCamel(builderStructName)).Dot("Get" + exportedAccountName + "Account").Call()
+
+								gr.Add(def)
+							}
+
+							gr.Return().Id("ins")
+						})
+
+					for _, subAccount := range account.IdlAccounts.Accounts {
 						index++
-						exportedAccountName := ToCamel(account.IdlAccount.Name)
-						lowerAccountName := ToLowerCamel(account.IdlAccount.Name)
+						exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
+						lowerAccountName := ToLowerCamel(subAccount.IdlAccount.Name)
 
 						code.Add(createAccountGetterSetter(
-							insExportedName,
-							&account,
+							builderStructName,
+							subAccount.IdlAccount,
 							index,
 							exportedAccountName,
 							lowerAccountName,
 						))
-						// TODO: add setter that accepts just this group of accounts.
 					}
 				}
 
@@ -283,7 +338,7 @@ func GenerateClient(idl IDL) error {
 			file.Add(code.Line())
 		}
 		{
-			// Add `Build` method:
+			// Add `Build` method to instruction:
 			code := Empty()
 
 			code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Build").
@@ -315,7 +370,7 @@ func GenerateClient(idl IDL) error {
 			file.Add(code.Line())
 		}
 		{
-			// Add `Verify` method:
+			// Add `Verify` method to instruction:
 			code := Empty()
 
 			code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Verify").
@@ -355,19 +410,7 @@ func GenerateClient(idl IDL) error {
 					for _, field := range *typ.Type.Fields {
 						fieldsGroup.Id(ToCamel(field.Name)).Add(
 							DoGroup(func(fieldTypeGroup *Group) {
-								if field.Type.IsString() {
-									fieldTypeGroup.Add(typeStringToType(field.Type.GetString()))
-								}
-
-								if field.Type.IsArray() {
-									arr := field.Type.GetArray()
-									_ = arr
-
-									if arr.Thing.IsString() {
-										fieldTypeGroup.Index()
-										fieldTypeGroup.Add(typeStringToType(arr.Thing.GetString()))
-									}
-								}
+								setType(fieldTypeGroup, field)
 							}),
 						)
 					}
@@ -376,11 +419,12 @@ func GenerateClient(idl IDL) error {
 				file.Add(code.Line())
 			case IdlTypeDefTyKindEnum:
 				code := Empty()
-				code.Type().Id(typ.Name).String()
+				enumTypeName := typ.Name
+				code.Type().Id(enumTypeName).String()
 
 				code.Line().Const().Parens(DoGroup(func(gr *Group) {
 					for _, variant := range typ.Type.Variants {
-						gr.Id(variant.Name).Id(typ.Name).Op("=").Lit(variant.Name).Line()
+						gr.Id(variant.Name).Id(enumTypeName).Op("=").Lit(variant.Name).Line()
 					}
 					// TODO: check for fields, etc.
 				}))
@@ -403,24 +447,7 @@ func GenerateClient(idl IDL) error {
 					for _, field := range *acc.Type.Fields {
 						fieldsGroup.Id(ToCamel(field.Name)).Add(
 							DoGroup(func(fieldTypeGroup *Group) {
-								if field.Type.IsString() {
-									fieldTypeGroup.Add(typeStringToType(field.Type.GetString()))
-								}
-
-								if field.Type.IsArray() {
-									arr := field.Type.GetArray()
-									_ = arr
-
-									if arr.Thing.IsString() {
-										fieldTypeGroup.Index()
-										fieldTypeGroup.Add(typeStringToType(arr.Thing.GetString()))
-									} else if arr.Thing.IsIdlTypeDefined() {
-										fieldTypeGroup.Index()
-										fieldTypeGroup.Add(Id(arr.Thing.GetIdlTypeDefined().Defined))
-									} else {
-										panic(spew.Sdump(arr))
-									}
-								}
+								setType(fieldTypeGroup, field)
 							}),
 						)
 					}
@@ -434,9 +461,6 @@ func GenerateClient(idl IDL) error {
 			}
 		}
 	}
-	{
-
-	}
 
 	{
 		err := file.Render(os.Stdout)
@@ -448,15 +472,19 @@ func GenerateClient(idl IDL) error {
 }
 
 func createAccountGetterSetter(
-	insExportedName string,
-	account *IdlAccountItem,
+	receiverTypeName string,
+	account *IdlAccount,
 	index int,
 	exportedAccountName string,
 	lowerAccountName string,
 ) Code {
-	code := Empty()
+	code := Empty().Line().Line()
+
+	for _, doc := range account.Docs {
+		code.Comment(doc).Line()
+	}
 	// Create account setters:
-	code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Set" + exportedAccountName + "Account").
+	code.Func().Params(Id("ins").Op("*").Id(receiverTypeName)).Id("Set" + exportedAccountName + "Account").
 		Params(
 			ListFunc(func(st *Group) {
 				// Parameters:
@@ -466,17 +494,17 @@ func createAccountGetterSetter(
 		Params(
 			ListFunc(func(st *Group) {
 				// Results:
-				st.Op("*").Id(insExportedName)
+				st.Op("*").Id(receiverTypeName)
 			}),
 		).
 		BlockFunc(func(gr *Group) {
 			// Body:
 			def := Id("ins").Dot("AccountMetaSlice").Index(Lit(index)).
 				Op("=").Qual("github.com/gagliardetto/solana-go", "NewMeta").Call(Id(lowerAccountName))
-			if account.IdlAccount.IsMut {
+			if account.IsMut {
 				def.Dot("WRITE").Call()
 			}
-			if account.IdlAccount.IsSigner {
+			if account.IsSigner {
 				def.Dot("SIGNER").Call()
 			}
 
@@ -486,7 +514,7 @@ func createAccountGetterSetter(
 		})
 
 	// Create account getters:
-	code.Line().Line().Func().Params(Id("ins").Op("*").Id(insExportedName)).Id("Get" + exportedAccountName + "Account").
+	code.Line().Line().Func().Params(Id("ins").Op("*").Id(receiverTypeName)).Id("Get" + exportedAccountName + "Account").
 		Params(
 			ListFunc(func(st *Group) {
 				// Parameters:
@@ -495,19 +523,35 @@ func createAccountGetterSetter(
 		Params(
 			ListFunc(func(st *Group) {
 				// Results:
-				st.Op("*").Qual("github.com/gagliardetto/solana-go", "PublicKey")
+				st.Op("*").Qual("github.com/gagliardetto/solana-go", "AccountMeta")
 			}),
 		).
 		BlockFunc(func(gr *Group) {
 			// Body:
-			gr.Id("ac").Op(":=").Id("ins").Dot("AccountMetaSlice").Index(Lit(index))
-
-			gr.If(Id("ac").Op("==").Nil()).Block(
-				Return().Nil(),
-			)
-
-			gr.Return(Op("&").Id("ac").Dot("PublicKey"))
+			gr.Return(Id("ins").Dot("AccountMetaSlice").Index(Lit(index)))
 		})
 
 	return code
+}
+
+func setType(fieldTypeGroup *Group, idlField IdlField) {
+	if idlField.Type.IsString() {
+		fieldTypeGroup.Add(typeStringToType(idlField.Type.GetString()))
+	} else if idlField.Type.IsIdlTypeDefined() {
+		fieldTypeGroup.Add(Id(idlField.Type.GetIdlTypeDefined().Defined))
+	} else if idlField.Type.IsArray() {
+		arr := idlField.Type.GetArray()
+
+		if arr.Thing.IsString() {
+			fieldTypeGroup.Index()
+			fieldTypeGroup.Add(typeStringToType(arr.Thing.GetString()))
+		} else if arr.Thing.IsIdlTypeDefined() {
+			fieldTypeGroup.Index()
+			fieldTypeGroup.Add(Id(arr.Thing.GetIdlTypeDefined().Defined))
+		} else {
+			panic(spew.Sdump(arr))
+		}
+	} else {
+		panic(spew.Sdump(idlField))
+	}
 }

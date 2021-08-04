@@ -11,6 +11,7 @@ import (
 // https://github.com/project-serum/anchor/blob/97e9e03fb041b8b888a9876a7c0676d9bb4736f3/ts/src/idl.ts
 type IDL struct {
 	Version      string           `json:"version"`
+	Docs         []string         `json:"docs"`
 	Name         string           `json:"name"`
 	Instructions []IdlInstruction `json:"instructions"`
 	State        *IdlState        `json:"state,omitempty"`
@@ -32,9 +33,27 @@ type IdlEventField struct {
 }
 
 type IdlInstruction struct {
-	Name     string           `json:"name"`
-	Accounts []IdlAccountItem `json:"accounts"`
-	Args     []IdlField       `json:"args"`
+	Name     string              `json:"name"`
+	Docs     []string            `json:"docs"`
+	Accounts IdlAccountItemSlice `json:"accounts"`
+	Args     []IdlField          `json:"args"`
+}
+
+type IdlAccountItemSlice []IdlAccountItem
+
+func (slice IdlAccountItemSlice) NumAccounts() (count int) {
+
+	for _, item := range slice {
+		if item.IdlAccount != nil {
+			count++
+		}
+
+		if item.IdlAccounts != nil {
+			count += item.IdlAccounts.Accounts.NumAccounts()
+		}
+	}
+
+	return count
 }
 
 type IdlState struct {
@@ -94,19 +113,21 @@ func (env *IdlAccountItem) UnmarshalJSON(data []byte) error {
 }
 
 type IdlAccount struct {
-	Name     string `json:"name"`
-	IsMut    bool   `json:"isMut"`
-	IsSigner bool   `json:"isSigner"`
+	Docs     []string `json:"docs"`
+	Name     string   `json:"name"`
+	IsMut    bool     `json:"isMut"`
+	IsSigner bool     `json:"isSigner"`
 }
 
 // A nested/recursive version of IdlAccount.
 type IdlAccounts struct {
-	Name     string           `json:"name"`
-	Accounts []IdlAccountItem `json:"accounts"`
+	Name     string              `json:"name"`
+	Accounts IdlAccountItemSlice `json:"accounts"`
 }
 
 type IdlField struct {
 	Name string          `json:"name"`
+	Docs []string        `json:"docs"`
 	Type IdlTypeEnvelope `json:"type"`
 }
 

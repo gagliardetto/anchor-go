@@ -1,17 +1,25 @@
 {
   "version": "0.0.0",
   "name": "swap",
-  "doc": [
+  "docs": [
     "This program allows to make a swap.",
     "This is another line of the doc."
   ],
   "instructions": [
     {
       "name": "swap",
-      "doc": [
+      "docs": [
         "Instruction swap allows to make a swap."
       ],
       "accounts": [
+        {
+          "name": "foo",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "account for the foo."
+          ]
+        },
         {
           "name": "market",
           "accounts": [
@@ -19,7 +27,7 @@
               "name": "market",
               "isMut": true,
               "isSigner": false,
-              "doc": [
+              "docs": [
                 "account for the market of the swap."
               ]
             },
@@ -27,7 +35,7 @@
               "name": "openOrders",
               "isMut": true,
               "isSigner": false,
-              "doc": [
+              "docs": [
                 "account for the open orders."
               ]
             }
@@ -37,7 +45,7 @@
           "name": "authority",
           "isMut": false,
           "isSigner": true,
-          "doc": [
+          "docs": [
             "account for the authority."
           ]
         },
@@ -45,7 +53,7 @@
           "name": "pcWallet",
           "isMut": true,
           "isSigner": false,
-          "doc": [
+          "docs": [
             "account for the pcWallet."
           ]
         },
@@ -70,15 +78,24 @@
           "name": "side",
           "type": {
             "defined": "Side"
-          }
+          },
+          "docs": [
+            "Side of the swap."
+          ]
         },
         {
           "name": "amount",
-          "type": "u64"
+          "type": "u64",
+          "docs": [
+            "Amount for the swap."
+          ]
         },
         {
           "name": "minExpectedSwapAmount",
-          "type": "u64"
+          "type": "u64",
+          "docs": [
+            "Minimum expected swap amount."
+          ]
         }
       ]
     }
