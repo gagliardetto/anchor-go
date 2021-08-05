@@ -544,7 +544,9 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 						for _, doc := range ia.Docs {
 							fieldsGroup.Comment(strings.Repeat(" ", indent) + doc)
 						}
-						fieldsGroup.Comment("")
+						if accountIndex < instruction.Accounts.NumAccounts()-1 {
+							fieldsGroup.Comment("")
+						}
 
 						accountIndex++
 						return true
