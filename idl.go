@@ -56,6 +56,21 @@ func (slice IdlAccountItemSlice) NumAccounts() (count int) {
 	return count
 }
 
+func (slice IdlAccountItemSlice) Walk(group string, callback func(string, *IdlAccount) bool) {
+	for _, item := range slice {
+		if item.IdlAccount != nil {
+			doContinue := callback(group, item.IdlAccount)
+			if !doContinue {
+				return
+			}
+		}
+
+		if item.IdlAccounts != nil {
+			item.IdlAccounts.Accounts.Walk(item.IdlAccounts.Name, callback)
+		}
+	}
+}
+
 type IdlState struct {
 	Struct  IdlTypeDef       `json:"struct"`
 	Methods []IdlStateMethod `json:"methods"`

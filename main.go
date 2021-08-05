@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	. "github.com/dave/jennifer/jen"
@@ -489,16 +490,66 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 			}
 
 			code.Type().Id(insExportedName).StructFunc(func(fieldsGroup *Group) {
-				for _, arg := range instruction.Args {
+				for argIndex, arg := range instruction.Args {
+					if len(arg.Docs) > 0 {
+						if argIndex > 0 {
+							fieldsGroup.Line()
+						}
+						for _, doc := range arg.Docs {
+							fieldsGroup.Comment(doc)
+						}
+					}
 					fieldsGroup.Id(ToCamel(arg.Name)).Add(
 						DoGroup(func(fieldTypeGroup *Group) {
-							setFieldNameAndType(fieldTypeGroup, arg)
+							setFieldType(fieldTypeGroup, arg)
 						}),
 					)
 				}
 
 				fieldsGroup.Line()
 
+				{
+					accountIndex := 0
+					lastGroupName := ""
+					// Add comments of the accounts from rust docs.
+					instruction.Accounts.Walk("", func(group string, ia *IdlAccount) bool {
+						comment := &strings.Builder{}
+						indent := 6
+
+						if group != "" {
+							indent = len(group) + 2
+							if lastGroupName != group {
+								comment.WriteString(Sf("%s: ", group))
+							} else {
+								comment.WriteString(Sf("%s", strings.Repeat(" ", indent)))
+							}
+							lastGroupName = group
+						}
+
+						comment.WriteString(Sf("[%v] = ", accountIndex))
+						comment.WriteString("[")
+						if ia.IsMut {
+							comment.WriteString("WRITE")
+						}
+						if ia.IsSigner {
+							if ia.IsMut {
+								comment.WriteString(", ")
+							}
+							comment.WriteString("SIGNER")
+						}
+						comment.WriteString("] ")
+						comment.WriteString(ia.Name)
+
+						fieldsGroup.Comment(comment.String())
+						for _, doc := range ia.Docs {
+							fieldsGroup.Comment(strings.Repeat(" ", indent) + doc)
+						}
+						fieldsGroup.Comment("")
+
+						accountIndex++
+						return true
+					})
+				}
 				fieldsGroup.Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice").Tag(map[string]string{
 					"bin": "-",
 				})
@@ -735,7 +786,7 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 					for _, field := range *typ.Type.Fields {
 						fieldsGroup.Id(ToCamel(field.Name)).Add(
 							DoGroup(func(fieldTypeGroup *Group) {
-								setFieldNameAndType(fieldTypeGroup, field)
+								setFieldType(fieldTypeGroup, field)
 							}),
 						)
 					}
@@ -777,7 +828,7 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 					for _, field := range *acc.Type.Fields {
 						fieldsGroup.Id(ToCamel(field.Name)).Add(
 							DoGroup(func(fieldTypeGroup *Group) {
-								setFieldNameAndType(fieldTypeGroup, field)
+								setFieldType(fieldTypeGroup, field)
 							}),
 						)
 					}
@@ -862,7 +913,7 @@ func createAccountGetterSetter(
 	return code
 }
 
-func setFieldNameAndType(fieldTypeGroup *Group, idlField IdlField) {
+func setFieldType(fieldTypeGroup *Group, idlField IdlField) {
 	if idlField.Type.IsString() {
 		fieldTypeGroup.Add(typeStringToType(idlField.Type.GetString()))
 	} else if idlField.Type.IsIdlTypeDefined() {
