@@ -16,11 +16,13 @@ import (
 func main() {
 
 	filenames := []string{
+		// "idl_files/swap_light.json",
+		"solana/native/system.json",
+
 		// "idl_files/zero_copy.json",
 		// "idl_files/typescript.json",
 		// "idl_files/sysvars.json",
 		// "idl_files/swap.json",
-		"idl_files/swap_light.json",
 		// "idl_files/pyth.json",
 		// "idl_files/multisig.json",
 		// "idl_files/misc.json",
