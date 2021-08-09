@@ -5,6 +5,8 @@ import (
 	"path"
 
 	. "github.com/dave/jennifer/jen"
+	"github.com/gagliardetto/solana-go"
+	"github.com/gagliardetto/solana-go/programs/system"
 	. "github.com/gagliardetto/utilz"
 )
 
@@ -65,4 +67,22 @@ func DoGroupMultiline(f func(*Group)) *Statement {
 }
 func newStatement() *Statement {
 	return &Statement{}
+}
+
+var sysVars = map[string]solana.PublicKey{
+	"SysVarClockPubkey":             system.SysVarClockPubkey,
+	"SysVarEpochSchedulePubkey":     system.SysVarEpochSchedulePubkey,
+	"SysVarFeesPubkey":              system.SysVarFeesPubkey,
+	"SysVarInstructionsPubkey":      system.SysVarInstructionsPubkey,
+	"SysVarRecentBlockHashesPubkey": system.SysVarRecentBlockHashesPubkey,
+	"SysVarRentPubkey":              system.SysVarRentPubkey,
+	"SysVarSlotHashesPubkey":        system.SysVarSlotHashesPubkey,
+	"SysVarSlotHistoryPubkey":       system.SysVarSlotHistoryPubkey,
+	"SysVarStakeHistoryPubkey":      system.SysVarStakeHistoryPubkey,
+	"SysVarRewardsPubkey":           system.SysVarRewardsPubkey,
+}
+
+func isSysVar(name string) bool {
+	_, ok := sysVars[name]
+	return ok
 }
