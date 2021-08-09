@@ -214,6 +214,25 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 			file.Add(code.Line())
 		}
 		{
+			// `EncodeToTree(parent treeout.Branches)` method
+			code := Empty()
+			code.Func().Parens(Id("inst").Op("*").Id("Instruction")).Id("EncodeToTree").
+				Params(Id("parent").Qual("github.com/gagliardetto/treeout", "Branches")).
+				Params().
+				BlockFunc(func(body *Group) {
+					body.If(
+						List(Id("enToTree"), Id("ok")).Op(":=").Id("inst").Dot("Impl").Op(".").Parens(Qual("github.com/gagliardetto/solana-go/text", "EncodableToTree")).
+							Op(";").
+							Id("ok"),
+					).Block(
+						Id("enToTree").Dot("EncodeToTree").Call(Id("parent")),
+					).Else().Block(
+						Id("parent").Dot("Child").Call(Qual("github.com/davecgh/go-spew/spew", "Sdump").Call(Id("inst"))),
+					)
+				})
+			file.Add(code.Line())
+		}
+		{
 			// variant definitions for the decoder:
 			code := Empty()
 			code.Var().Id("InstructionImplDef").Op("=").Qual("github.com/dfuse-io/binary", "NewVariantDefinition").
@@ -241,8 +260,8 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 			code := Empty()
 			code.Func().Parens(Id("inst").Op("*").Id("Instruction")).Id("ProgramID").Params().
 				Parens(Qual("github.com/gagliardetto/solana-go", "PublicKey")).
-				BlockFunc(func(gr *Group) {
-					gr.Return(
+				BlockFunc(func(body *Group) {
+					body.Return(
 						Id("PROGRAM_ID"),
 					)
 				})
