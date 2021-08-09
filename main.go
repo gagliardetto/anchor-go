@@ -377,7 +377,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 					body.If(
 						Err().Op("!=").Nil(),
 					).Block(
-						Return(List(Nil(), Qual("fmt", "Errorf").Call(Lit("unable to write variant type: %w"), Err()))),
+						Return(Qual("fmt", "Errorf").Call(Lit("unable to write variant type: %w"), Err())),
 					)
 					body.Return(Id("encoder").Dot("Encode").Call(Id("inst").Dot("Impl")))
 				})
@@ -455,7 +455,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 							Id("ok"),
 					).BlockFunc(func(gr *Group) {
 						gr.Err().Op(":=").Id("v").Dot("SetAccounts").Call(Id("accounts"))
-						gr.If(Nil().Op("!=").Nil()).Block(
+						gr.If(Err().Op("!=").Nil()).Block(
 							Return(
 								Nil(),
 								Qual("fmt", "Errorf").Call(Lit("unable to set accounts for instruction: %w"), Err()),
@@ -642,12 +642,12 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 			for _, account := range instruction.Accounts {
 				spew.Dump(account)
 				// single account (???)
-				// TODO: is this a parameter, or a hardcoded value?
 				if account.IdlAccount != nil {
 					index++
 					exportedAccountName := ToCamel(account.IdlAccount.Name)
 					lowerAccountName := ToLowerCamel(account.IdlAccount.Name)
 
+					// TODO: if this is a SysVar, set it in the NewBuilder.
 					code.Add(createAccountGetterSetter(
 						insExportedName,
 						account.IdlAccount,
@@ -658,7 +658,6 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 				}
 
 				// many accounts (???)
-				// TODO: are these all the wanted parameter accounts, or a list of valid accounts?
 				if account.IdlAccounts != nil {
 					// builder struct for this accounts group:
 					builderStructName := insExportedName + ToCamel(account.IdlAccounts.Name) + "AccountsBuilder"
@@ -902,7 +901,7 @@ func createAccountGetterSetter(
 		BlockFunc(func(gr *Group) {
 			// Body:
 			def := Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).
-				Op("=").Qual("github.com/gagliardetto/solana-go", "NewMeta").Call(Id(lowerAccountName))
+				Op("=").Qual("github.com/gagliardetto/solana-go", "Meta").Call(Id(lowerAccountName))
 			if account.IsMut {
 				def.Dot("WRITE").Call()
 			}
