@@ -13,6 +13,12 @@ import (
 	. "github.com/gagliardetto/utilz"
 )
 
+const (
+	PkgSolanaGo     = "github.com/gagliardetto/solana-go"
+	PkgSolanaGoText = "github.com/gagliardetto/solana-go/text"
+	PkgDfuseBinary  = "github.com/dfuse-io/binary"
+)
+
 func main() {
 
 	filenames := []string{
@@ -81,19 +87,19 @@ func main() {
 			// }
 
 			{
-				// Save codeql assets:
+				// Save assets:
 				assetFileName := file.Name + ".go"
 				assetFilepath := path.Join(thisRunAssetFolderPath, assetFileName)
 
-				// Create file codeql file:
+				// Create file:
 				goFile, err := os.Create(assetFilepath)
 				if err != nil {
 					panic(err)
 				}
 				defer goFile.Close()
 
-				// Write generated codeql to file:
-				Infof("Saving codeql assets to %q", MustAbs(assetFilepath))
+				// Write generated code file:
+				Infof("Saving assets to %q", MustAbs(assetFilepath))
 				err = file.File.Render(goFile)
 				if err != nil {
 					panic(err)
@@ -131,16 +137,16 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 	case IdlTypeI64:
 		stat.Int64()
 	case IdlTypeU128:
-		stat.Qual("github.com/dfuse-io/binary", "Uint128")
+		stat.Qual(PkgDfuseBinary, "Uint128")
 	case IdlTypeI128:
-		stat.Qual("github.com/dfuse-io/binary", "Int128")
+		stat.Qual(PkgDfuseBinary, "Int128")
 	case IdlTypeBytes:
 		// TODO:
-		stat.Qual("github.com/dfuse-io/binary", "HexBytes")
+		stat.Qual(PkgDfuseBinary, "HexBytes")
 	case IdlTypeString:
 		stat.String()
 	case IdlTypePublicKey:
-		stat.Qual("github.com/gagliardetto/solana-go", "PublicKey")
+		stat.Qual(PkgSolanaGo, "PublicKey")
 	default:
 		panic(Sf("unknown type string: %s", ts))
 	}
@@ -170,14 +176,14 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 		code := Empty()
 		// TODO: add this to IDL???
 		programID := "TODO"
-		code.Var().Id("PROGRAM_ID").Op("=").Qual("github.com/gagliardetto/solana-go", "MustPublicKeyFromBase58").Call(Lit(programID))
+		code.Var().Id("PROGRAM_ID").Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(programID))
 		file.Add(code.Line())
 	}
 	{
 		// register decoder:
 		code := Empty()
 		code.Func().Id("init").Call().Block(
-			Qual("github.com/gagliardetto/solana-go", "RegisterInstructionDecoder").Call(Id("PROGRAM_ID"), Id("registryDecodeInstruction")),
+			Qual(PkgSolanaGo, "RegisterInstructionDecoder").Call(Id("PROGRAM_ID"), Id("registryDecodeInstruction")),
 		)
 		file.Add(code.Line())
 	}
@@ -209,7 +215,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 		{ // Base Instruction struct:
 			code := Empty()
 			code.Type().Id("Instruction").Struct(
-				Qual("github.com/dfuse-io/binary", "BaseVariant"),
+				Qual(PkgDfuseBinary, "BaseVariant"),
 			)
 			file.Add(code.Line())
 		}
@@ -221,7 +227,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 				Params().
 				BlockFunc(func(body *Group) {
 					body.If(
-						List(Id("enToTree"), Id("ok")).Op(":=").Id("inst").Dot("Impl").Op(".").Parens(Qual("github.com/gagliardetto/solana-go/text", "EncodableToTree")).
+						List(Id("enToTree"), Id("ok")).Op(":=").Id("inst").Dot("Impl").Op(".").Parens(Qual(PkgSolanaGoText, "EncodableToTree")).
 							Op(";").
 							Id("ok"),
 					).Block(
@@ -235,13 +241,13 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 		{
 			// variant definitions for the decoder:
 			code := Empty()
-			code.Var().Id("InstructionImplDef").Op("=").Qual("github.com/dfuse-io/binary", "NewVariantDefinition").
+			code.Var().Id("InstructionImplDef").Op("=").Qual(PkgDfuseBinary, "NewVariantDefinition").
 				Parens(DoGroup(func(call *Group) {
 					call.Line()
 					// TODO: make this configurable?
-					call.Qual("github.com/dfuse-io/binary", "Uint32TypeIDEncoding").Op(",").Line()
+					call.Qual(PkgDfuseBinary, "Uint32TypeIDEncoding").Op(",").Line()
 
-					call.Index().Qual("github.com/dfuse-io/binary", "VariantType").
+					call.Index().Qual(PkgDfuseBinary, "VariantType").
 						BlockFunc(func(variantBlock *Group) {
 							for _, instruction := range idl.Instructions {
 								insName := ToSnake(instruction.Name)
@@ -259,7 +265,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 			// method to return programID:
 			code := Empty()
 			code.Func().Parens(Id("inst").Op("*").Id("Instruction")).Id("ProgramID").Params().
-				Parens(Qual("github.com/gagliardetto/solana-go", "PublicKey")).
+				Parens(Qual(PkgSolanaGo, "PublicKey")).
 				BlockFunc(func(body *Group) {
 					body.Return(
 						Id("PROGRAM_ID"),
@@ -271,10 +277,10 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 			// method to return accounts:
 			code := Empty()
 			code.Func().Parens(Id("inst").Op("*").Id("Instruction")).Id("Accounts").Params().
-				Parens(Id("out").Index().Op("*").Qual("github.com/gagliardetto/solana-go", "AccountMeta")).
+				Parens(Id("out").Index().Op("*").Qual(PkgSolanaGo, "AccountMeta")).
 				BlockFunc(func(body *Group) {
 					body.Return(
-						Id("inst").Dot("Impl").Op(".").Parens(Qual("github.com/gagliardetto/solana-go", "AccountsGettable")).Dot("GetAccounts").Call(),
+						Id("inst").Dot("Impl").Op(".").Parens(Qual(PkgSolanaGo, "AccountsGettable")).Dot("GetAccounts").Call(),
 					)
 				})
 			file.Add(code.Line())
@@ -299,7 +305,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 					// Body:
 					body.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
 					body.If(
-						Err().Op(":=").Qual("github.com/dfuse-io/binary", "NewEncoder").Call(Id("buf")).Dot("Encode").Call(Id("inst")).
+						Err().Op(":=").Qual(PkgDfuseBinary, "NewEncoder").Call(Id("buf")).Dot("Encode").Call(Id("inst")).
 							Op(";").
 							Err().Op("!=").Nil(),
 					).Block(
@@ -316,8 +322,8 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
-						params.Id("encoder").Op("*").Qual("github.com/gagliardetto/solana-go/text", "Encoder")
-						params.Id("option").Op("*").Qual("github.com/gagliardetto/solana-go/text", "Option")
+						params.Id("encoder").Op("*").Qual(PkgSolanaGoText, "Encoder")
+						params.Id("option").Op("*").Qual(PkgSolanaGoText, "Option")
 					}),
 				).
 				Params(
@@ -339,7 +345,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
-						params.Id("decoder").Op("*").Qual("github.com/dfuse-io/binary", "Decoder")
+						params.Id("decoder").Op("*").Qual(PkgDfuseBinary, "Decoder")
 					}),
 				).
 				Params(
@@ -361,7 +367,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
-						params.Id("encoder").Op("*").Qual("github.com/dfuse-io/binary", "Encoder")
+						params.Id("encoder").Op("*").Qual(PkgDfuseBinary, "Encoder")
 					}),
 				).
 				Params(
@@ -390,7 +396,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
-						params.Id("accounts").Index().Op("*").Qual("github.com/gagliardetto/solana-go", "AccountMeta")
+						params.Id("accounts").Index().Op("*").Qual(PkgSolanaGo, "AccountMeta")
 						params.Id("data").Index().Byte()
 					}),
 				).
@@ -421,7 +427,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
-						params.Id("accounts").Index().Op("*").Qual("github.com/gagliardetto/solana-go", "AccountMeta")
+						params.Id("accounts").Index().Op("*").Qual(PkgSolanaGo, "AccountMeta")
 						params.Id("data").Index().Byte()
 					}),
 				).
@@ -438,7 +444,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 					body.Id("inst").Op(":=").New(Id("Instruction"))
 
 					body.If(
-						Err().Op(":=").Qual("github.com/dfuse-io/binary", "NewDecoder").Call(Id("data")).Dot("Decode").Call(Id("inst")).
+						Err().Op(":=").Qual(PkgDfuseBinary, "NewDecoder").Call(Id("data")).Dot("Decode").Call(Id("inst")).
 							Op(";").
 							Err().Op("!=").Nil(),
 					).Block(
@@ -450,7 +456,7 @@ func generateInstructionBoilerplate(idl IDL) (*File, error) {
 
 					body.If(
 
-						List(Id("v"), Id("ok")).Op(":=").Id("inst").Dot("Impl").Op(".").Parens(Qual("github.com/gagliardetto/solana-go", "AccountsSettable")).
+						List(Id("v"), Id("ok")).Op(":=").Id("inst").Dot("Impl").Op(".").Parens(Qual(PkgSolanaGo, "AccountsSettable")).
 							Op(";").
 							Id("ok"),
 					).BlockFunc(func(gr *Group) {
@@ -573,7 +579,7 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 						return true
 					})
 				}
-				fieldsGroup.Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice").Tag(map[string]string{
+				fieldsGroup.Qual(PkgSolanaGo, "AccountMetaSlice").Tag(map[string]string{
 					"bin": "-",
 				})
 			})
@@ -593,7 +599,7 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 			code.Func().Id(builderFuncName).Params().Op("*").Id(insExportedName).
 				BlockFunc(func(gr *Group) {
 					gr.Return().Op("&").Id(insExportedName).Block(
-						Id("AccountMetaSlice").Op(":").Make(Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice"), Lit(instruction.Accounts.NumAccounts())).Op(","),
+						Id("AccountMetaSlice").Op(":").Make(Qual(PkgSolanaGo, "AccountMetaSlice"), Lit(instruction.Accounts.NumAccounts())).Op(","),
 					)
 				})
 			file.Add(code.Line())
@@ -667,7 +673,7 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 						code.Comment(doc).Line()
 					}
 					code.Type().Id(builderStructName).Struct(
-						Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice").Tag(map[string]string{
+						Qual(PkgSolanaGo, "AccountMetaSlice").Tag(map[string]string{
 							"bin": "-",
 						}),
 					)
@@ -676,7 +682,7 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 					code.Line().Line().Func().Id("New" + builderStructName).Params().Op("*").Id(builderStructName).
 						BlockFunc(func(gr *Group) {
 							gr.Return().Op("&").Id(builderStructName).Block(
-								Id("AccountMetaSlice").Op(":").Make(Qual("github.com/gagliardetto/solana-go", "AccountMetaSlice"), Lit(account.IdlAccounts.Accounts.NumAccounts())).Op(","),
+								Id("AccountMetaSlice").Op(":").Make(Qual(PkgSolanaGo, "AccountMetaSlice"), Lit(account.IdlAccounts.Accounts.NumAccounts())).Op(","),
 							)
 						}).Line().Line()
 
@@ -751,7 +757,7 @@ func GenerateClient(idl IDL) ([]*FileWrapper, error) {
 
 					gr.Return().Op("&").Id("Instruction").Values(
 						Dict{
-							Id("BaseVariant"): Qual("github.com/dfuse-io/binary", "BaseVariant").Values(
+							Id("BaseVariant"): Qual(PkgDfuseBinary, "BaseVariant").Values(
 								Dict{
 									Id("TypeID"): Id("Instruction_" + insExportedName),
 									Id("Impl"):   Id("inst"),
@@ -889,7 +895,7 @@ func createAccountGetterSetter(
 		Params(
 			ListFunc(func(st *Group) {
 				// Parameters:
-				st.Id(lowerAccountName).Qual("github.com/gagliardetto/solana-go", "PublicKey")
+				st.Id(lowerAccountName).Qual(PkgSolanaGo, "PublicKey")
 			}),
 		).
 		Params(
@@ -901,7 +907,7 @@ func createAccountGetterSetter(
 		BlockFunc(func(gr *Group) {
 			// Body:
 			def := Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).
-				Op("=").Qual("github.com/gagliardetto/solana-go", "Meta").Call(Id(lowerAccountName))
+				Op("=").Qual(PkgSolanaGo, "Meta").Call(Id(lowerAccountName))
 			if account.IsMut {
 				def.Dot("WRITE").Call()
 			}
@@ -924,7 +930,7 @@ func createAccountGetterSetter(
 		Params(
 			ListFunc(func(st *Group) {
 				// Results:
-				st.Op("*").Qual("github.com/gagliardetto/solana-go", "AccountMeta")
+				st.Op("*").Qual(PkgSolanaGo, "AccountMeta")
 			}),
 		).
 		BlockFunc(func(gr *Group) {
