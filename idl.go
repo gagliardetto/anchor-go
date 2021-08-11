@@ -62,18 +62,9 @@ func (slice IdlAccountItemSlice) NumAccounts() (count int) {
 	return count
 }
 
-func (slice IdlAccountItemSlice) Walk(group string, callback func(string, *IdlAccount) bool) {
+func (slice IdlAccountItemSlice) Walk(parentGroup string, callback func(string, *IdlAccount) bool) {
 	for _, item := range slice {
-		if item.IdlAccount != nil {
-			doContinue := callback(group, item.IdlAccount)
-			if !doContinue {
-				return
-			}
-		}
-
-		if item.IdlAccounts != nil {
-			item.IdlAccounts.Accounts.Walk(item.IdlAccounts.Name, callback)
-		}
+		item.Walk(parentGroup, callback)
 	}
 }
 
@@ -88,6 +79,19 @@ type IdlStateMethod = IdlInstruction
 type IdlAccountItem struct {
 	IdlAccount  *IdlAccount
 	IdlAccounts *IdlAccounts
+}
+
+func (item IdlAccountItem) Walk(parentGroup string, callback func(string, *IdlAccount) bool) {
+	if item.IdlAccount != nil {
+		doContinue := callback(parentGroup, item.IdlAccount)
+		if !doContinue {
+			return
+		}
+	}
+
+	if item.IdlAccounts != nil {
+		item.IdlAccounts.Accounts.Walk(item.IdlAccounts.Name, callback)
+	}
 }
 
 // TODO: verify with examples
@@ -105,18 +109,20 @@ func (env *IdlAccountItem) UnmarshalJSON(data []byte) error {
 	switch v := temp.(type) {
 	case map[string]interface{}:
 		{
-			Ln(ShakespeareBG("::IdlAccountItem"))
-			spew.Dump(v)
+			// Ln(ShakespeareBG("::IdlAccountItem"))
+			// spew.Dump(v)
 
 			if len(v) == 0 {
 				return nil
 			}
 
+			// Multiple accounts:
 			if _, ok := v["accounts"]; ok {
 				if err := TranscodeJSON(temp, &env.IdlAccounts); err != nil {
 					return err
 				}
 			}
+			// Single account:
 			// TODO: check both isMut and isSigner
 			if _, ok := v["isMut"]; ok {
 				if err := TranscodeJSON(temp, &env.IdlAccount); err != nil {

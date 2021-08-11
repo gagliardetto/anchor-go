@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	. "github.com/dave/jennifer/jen"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
@@ -182,4 +183,78 @@ func Test_genField(t *testing.T) {
 			require.Equal(t, scenario.expected, got)
 		}
 	}
+}
+
+func Test_IdlAccountItemSlice_Walk(t *testing.T) {
+	data := `[
+        {
+          "name": "authorityBefore",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "marketGroup",
+          "accounts": [
+            {
+              "name": "marketMarket",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "foo",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "subMarket",
+              "accounts": [
+                {
+                  "name": "subMarketMarket",
+                  "isMut": true,
+                  "isSigner": false
+                },
+                {
+                  "name": "openOrders",
+                  "isMut": true,
+                  "isSigner": false
+                } 
+              ]
+            }
+          ]
+        },
+        {
+          "name": "authorityAfter",
+          "isMut": false,
+          "isSigner": true
+        }
+      ]`
+	var target IdlAccountItemSlice
+	err := json.Unmarshal([]byte(data), &target)
+	if err != nil {
+		panic(err)
+	}
+
+	spew.Dump(target)
+
+	expectedGroups := []string{
+		"",
+		"marketGroup",
+		"marketGroup",
+		"subMarket",
+		"subMarket",
+		"",
+	}
+	gotGroups := []string{}
+
+	expectedAccountNames := []string{"authorityBefore", "marketMarket", "foo", "subMarketMarket", "openOrders", "authorityAfter"}
+	gotAccountNames := []string{}
+
+	target.Walk("", func(parentGroup string, ia *IdlAccount) bool {
+		gotGroups = append(gotGroups, parentGroup)
+		gotAccountNames = append(gotAccountNames, ia.Name)
+		return true
+	})
+
+	require.Equal(t, expectedGroups, gotGroups)
+	require.Equal(t, expectedAccountNames, gotAccountNames)
 }
