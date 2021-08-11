@@ -116,7 +116,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			return nil, err
 		}
 		files = append(files, &FileWrapper{
-			Name: ToLowerCamel("instruction"),
+			Name: "instructions",
 			File: file,
 		})
 	}
@@ -572,24 +572,31 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 	}
 
 	{
-		// PROGRAM_ID variable:
+		// ProgramID variable:
 		code := Empty()
 		// TODO: add this to IDL???
 		programID := "TODO"
-		code.Var().Id("PROGRAM_ID").Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(programID))
+		code.Var().Id("ProgramID").Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(programID))
+		file.Add(code.Line())
+	}
+	{
+		// ProgramName variable:
+		code := Empty()
+		programName := ToCamel(idl.Name)
+		code.Const().Id("ProgramName").Op("=").Lit(programName)
 		file.Add(code.Line())
 	}
 	{
 		// register decoder:
 		code := Empty()
 		code.Func().Id("init").Call().Block(
-			Qual(PkgSolanaGo, "RegisterInstructionDecoder").Call(Id("PROGRAM_ID"), Id("registryDecodeInstruction")),
+			Qual(PkgSolanaGo, "RegisterInstructionDecoder").Call(Id("ProgramID"), Id("registryDecodeInstruction")),
 		)
 		file.Add(code.Line())
 	}
 
-	// Instruction ID enum:
 	{
+		// Instruction ID enum:
 		code := Empty()
 		code.Const().Parens(
 			DoGroup(func(gr *Group) {
@@ -608,6 +615,25 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 				}
 			}),
 		)
+		file.Add(code.Line())
+	}
+	{
+		// InstructionIDToName
+		code := Empty()
+		code.Comment("InstructionIDToName returns the name of the instruction given its ID.").Line()
+		code.Func().Id("InstructionIDToName").
+			Params(Id("id").Uint32()).
+			Params(String()).
+			BlockFunc(func(body *Group) {
+				body.Switch(Id("id")).BlockFunc(func(switchBlock *Group) {
+					for _, instruction := range idl.Instructions {
+						insExportedName := ToCamel(instruction.Name)
+						switchBlock.Case(Id("Instruction_" + insExportedName)).Line().Return(Lit(insExportedName))
+					}
+					switchBlock.Default().Line().Return(Lit(""))
+				})
+
+			})
 		file.Add(code.Line())
 	}
 
@@ -650,7 +676,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 					call.Index().Qual(PkgDfuseBinary, "VariantType").
 						BlockFunc(func(variantBlock *Group) {
 							for _, instruction := range idl.Instructions {
-								insName := ToSnake(instruction.Name)
+								insName := ToCamel(instruction.Name)
 								insExportedName := ToCamel(instruction.Name)
 								variantBlock.Block(
 									List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
@@ -668,7 +694,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 				Parens(Qual(PkgSolanaGo, "PublicKey")).
 				BlockFunc(func(body *Group) {
 					body.Return(
-						Id("PROGRAM_ID"),
+						Id("ProgramID"),
 					)
 				})
 			file.Add(code.Line())
