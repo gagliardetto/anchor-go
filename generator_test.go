@@ -151,3 +151,35 @@ func Test_genTypeName(t *testing.T) {
 		}
 	}
 }
+
+func Test_genField(t *testing.T) {
+	type jsonToSource struct {
+		from     string
+		expected string
+	}
+
+	tests := []jsonToSource{
+		{
+			`{"name":"space","type":"u64"}`,
+			"var thing struct {\n	Space uint64\n}",
+		},
+		{
+			`{"name":"space","type": {"option": {"vec": {"array":[{"array":[{"defined":"Message"},123]},33607]}}}}`,
+			"var thing struct {\n	Space *[][33607][123]Message\n}",
+		},
+	}
+	{
+		for _, scenario := range tests {
+			var target IdlField
+			err := json.Unmarshal([]byte(scenario.from), &target)
+			if err != nil {
+				panic(err)
+			}
+			code := Var().Id("thing").Struct(
+				genField(target),
+			)
+			got := codeToString(code)
+			require.Equal(t, scenario.expected, got)
+		}
+	}
+}
