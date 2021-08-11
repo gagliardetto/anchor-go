@@ -374,20 +374,20 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Build").
 				Params(
-					ListFunc(func(st *Group) {
+					ListFunc(func(params *Group) {
 						// Parameters:
 					}),
 				).
 				Params(
-					ListFunc(func(st *Group) {
+					ListFunc(func(results *Group) {
 						// Results:
-						st.Op("*").Id("Instruction")
+						results.Op("*").Id("Instruction")
 					}),
 				).
-				BlockFunc(func(gr *Group) {
+				BlockFunc(func(body *Group) {
 					// Body:
 
-					gr.Return().Op("&").Id("Instruction").Values(
+					body.Return().Op("&").Id("Instruction").Values(
 						Dict{
 							Id("BaseVariant"): Qual(PkgDfuseBinary, "BaseVariant").Values(
 								Dict{
@@ -406,26 +406,79 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Verify").
 				Params(
-					ListFunc(func(st *Group) {
+					ListFunc(func(params *Group) {
 						// Parameters:
 					}),
 				).
 				Params(
-					ListFunc(func(st *Group) {
+					ListFunc(func(results *Group) {
 						// Results:
-						st.Error()
+						results.Error()
 					}),
 				).
-				BlockFunc(func(gr *Group) {
+				BlockFunc(func(body *Group) {
 					// Body:
 
-					gr.For(List(Id("accIndex"), Id("acc")).Op(":=").Range().Id("inst").Dot("AccountMetaSlice")).Block(
+					body.For(List(Id("accIndex"), Id("acc")).Op(":=").Range().Id("inst").Dot("AccountMetaSlice")).Block(
 						If(Id("acc").Op("==").Nil()).Block(
 							Return(Qual("fmt", "Errorf").Call(List(Lit("ins.AccountMetaSlice[%v] is nil"), Id("accIndex")))),
 						),
 					)
 
-					gr.Return(Nil())
+					body.Return(Nil())
+				})
+			file.Add(code.Line())
+		}
+		{
+			// Add `EncodeToTree(parent treeout.Branches)` method to instruction:
+			code := Empty()
+
+			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("EncodeToTree").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						params.Id("parent").Qual(PkgTreeout, "Branches")
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+
+					body.Id("parent").Dot("Child").Call(Qual(PkgFormat, "Program").Call(Id("ProgramName"), Id("ProgramID"))).Op(".").
+						Line().Comment("").Line().
+						Id("ParentFunc").Parens(Func().Parens(Id("programBranch").Qual(PkgTreeout, "Branches")).BlockFunc(
+						func(programBranchGroup *Group) {
+							programBranchGroup.Id("programBranch").Dot("Child").Call(Qual(PkgFormat, "Instruction").Call(Lit(insExportedName))).Op(".").
+								Line().Comment("").Line().
+								Id("ParentFunc").Parens(Func().Parens(Id("instructionBranch").Qual(PkgTreeout, "Branches")).BlockFunc(
+								func(instructionBranchGroup *Group) {
+
+									instructionBranchGroup.Comment("Parameters of the instruction:")
+
+									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit("Params")).Dot("ParentFunc").Parens(Func().Parens(Id("paramsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(paramsBranchGroup *Group) {
+										for _, arg := range instruction.Args {
+											exportedArgName := ToCamel(arg.Name)
+											paramsBranchGroup.Id("paramsBranch").Dot("Child").Call(Qual(PkgFormat, "Param").Call(Lit(exportedArgName), Id("inst").Dot(exportedArgName)))
+										}
+									}))
+
+									instructionBranchGroup.Line().Comment("Accounts of the instruction:")
+
+									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit("Accounts")).Dot("ParentFunc").Parens(
+										Func().Parens(Id("accountsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(accountsBranchGroup *Group) {
+
+											instruction.Accounts.Walk("", nil, nil, func(groupPath string, accountIndex int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
+												exportedAccountName := filepath.Join(groupPath, ia.Name)
+												accountsBranchGroup.Id("accountsBranch").Dot("Child").Call(Qual(PkgFormat, "Account").Call(Lit(exportedAccountName), Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex)).Dot("PublicKey")))
+												return true
+											})
+										}))
+								}))
+						}))
 				})
 			file.Add(code.Line())
 		}
@@ -649,7 +702,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 			// `EncodeToTree(parent treeout.Branches)` method
 			code := Empty()
 			code.Func().Parens(Id("inst").Op("*").Id("Instruction")).Id("EncodeToTree").
-				Params(Id("parent").Qual("github.com/gagliardetto/treeout", "Branches")).
+				Params(Id("parent").Qual(PkgTreeout, "Branches")).
 				Params().
 				BlockFunc(func(body *Group) {
 					body.If(

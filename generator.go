@@ -10,6 +10,8 @@ const (
 	PkgSolanaGo     = "github.com/gagliardetto/solana-go"
 	PkgSolanaGoText = "github.com/gagliardetto/solana-go/text"
 	PkgDfuseBinary  = "github.com/dfuse-io/binary"
+	PkgTreeout      = "github.com/gagliardetto/treeout"
+	PkgFormat       = "github.com/gagliardetto/solana-go/text/format"
 )
 
 type FileWrapper struct {
