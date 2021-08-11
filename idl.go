@@ -62,9 +62,18 @@ func (slice IdlAccountItemSlice) NumAccounts() (count int) {
 	return count
 }
 
-func (slice IdlAccountItemSlice) Walk(parentGroup string, callback func(string, *IdlAccount) bool) {
+func (slice IdlAccountItemSlice) Walk(
+	parentGroupPath string,
+	previousIndex *int,
+	parentGroup *IdlAccounts,
+	callback func(string, int, *IdlAccounts, *IdlAccount) bool,
+) {
+	defaultVal := -1
+	if previousIndex == nil {
+		previousIndex = &defaultVal
+	}
 	for _, item := range slice {
-		item.Walk(parentGroup, callback)
+		item.Walk(parentGroupPath, previousIndex, parentGroup, callback)
 	}
 }
 
@@ -81,16 +90,32 @@ type IdlAccountItem struct {
 	IdlAccounts *IdlAccounts
 }
 
-func (item IdlAccountItem) Walk(parentGroup string, callback func(string, *IdlAccount) bool) {
+func (item IdlAccountItem) Walk(
+	parentGroupPath string,
+	previousIndex *int,
+	parentGroup *IdlAccounts,
+	callback func(string, int, *IdlAccounts, *IdlAccount) bool,
+) {
+	defaultVal := -1
+	if previousIndex == nil {
+		previousIndex = &defaultVal
+	}
 	if item.IdlAccount != nil {
-		doContinue := callback(parentGroup, item.IdlAccount)
+		*previousIndex++
+		doContinue := callback(parentGroupPath, *previousIndex, parentGroup, item.IdlAccount)
 		if !doContinue {
 			return
 		}
 	}
 
 	if item.IdlAccounts != nil {
-		item.IdlAccounts.Accounts.Walk(item.IdlAccounts.Name, callback)
+		var thisGroupName string
+		if parentGroupPath == "" {
+			thisGroupName = item.IdlAccounts.Name
+		} else {
+			thisGroupName = parentGroupPath + "/" + item.IdlAccounts.Name
+		}
+		item.IdlAccounts.Accounts.Walk(thisGroupName, previousIndex, item.IdlAccounts, callback)
 	}
 }
 

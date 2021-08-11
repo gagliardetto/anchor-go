@@ -237,24 +237,37 @@ func Test_IdlAccountItemSlice_Walk(t *testing.T) {
 	spew.Dump(target)
 
 	expectedGroups := []string{
-		"",
-		"marketGroup",
-		"marketGroup",
-		"subMarket",
-		"subMarket",
-		"",
+		"instruction",
+		"instruction/marketGroup",
+		"instruction/marketGroup",
+		"instruction/marketGroup/subMarket",
+		"instruction/marketGroup/subMarket",
+		"instruction",
 	}
 	gotGroups := []string{}
 
-	expectedAccountNames := []string{"authorityBefore", "marketMarket", "foo", "subMarketMarket", "openOrders", "authorityAfter"}
+	expectedAccountNames := []string{
+		"authorityBefore",
+		"marketMarket",
+		"foo",
+		"subMarketMarket",
+		"openOrders",
+		"authorityAfter",
+	}
 	gotAccountNames := []string{}
 
-	target.Walk("", func(parentGroup string, ia *IdlAccount) bool {
-		gotGroups = append(gotGroups, parentGroup)
+	expectedIndexes := []int{0, 1, 2, 3, 4, 5}
+	gotIndexes := []int{}
+
+	instructionName := "instruction"
+	target.Walk(instructionName, nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
+		gotGroups = append(gotGroups, parentGroupPath)
 		gotAccountNames = append(gotAccountNames, ia.Name)
+		gotIndexes = append(gotIndexes, index)
 		return true
 	})
 
 	require.Equal(t, expectedGroups, gotGroups)
 	require.Equal(t, expectedAccountNames, gotAccountNames)
+	require.Equal(t, expectedIndexes, gotIndexes)
 }

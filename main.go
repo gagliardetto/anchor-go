@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -158,21 +159,27 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				fieldsGroup.Line()
 
 				{
-					accountIndex := 0
 					lastGroupName := ""
 					// Add comments of the accounts from rust docs.
-					instruction.Accounts.Walk("", func(group string, ia *IdlAccount) bool {
+					instruction.Accounts.Walk("", nil, nil, func(groupPath string, accountIndex int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
 						comment := &strings.Builder{}
 						indent := 6
+						var prepend int
 
-						if group != "" {
-							indent = len(group) + 2
-							if lastGroupName != group {
-								comment.WriteString(Sf("%s: ", group))
+						if groupPath != "" {
+							thisGroupName := filepath.Base(groupPath)
+							indent = len(thisGroupName) + 2
+							if strings.Count(groupPath, "/") == 0 {
+								prepend = 6
 							} else {
-								comment.WriteString(Sf("%s", strings.Repeat(" ", indent)))
+								prepend = 6 + (strings.Count(groupPath, "/") * 2) + len(strings.TrimSuffix(groupPath, thisGroupName)) - 1
 							}
-							lastGroupName = group
+							if lastGroupName != groupPath {
+								comment.WriteString(strings.Repeat("·", prepend-1) + Sf(" %s: ", thisGroupName))
+							} else {
+								comment.WriteString(strings.Repeat("·", prepend+indent-1) + " ")
+							}
+							lastGroupName = groupPath
 						}
 
 						comment.WriteString(Sf("[%v] = ", accountIndex))
@@ -191,7 +198,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 						fieldsGroup.Comment(comment.String())
 						for _, doc := range ia.Docs {
-							fieldsGroup.Comment(strings.Repeat(" ", indent) + doc)
+							fieldsGroup.Comment(strings.Repeat("·", prepend+indent-1+6) + " " + doc)
 						}
 						if accountIndex < instruction.Accounts.NumAccounts()-1 {
 							fieldsGroup.Comment("")
@@ -266,32 +273,25 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		{
 			// Account setters/getters:
 			code := Empty()
-			index := -1
-			for _, account := range instruction.Accounts {
-				spew.Dump(account)
-				// single account (???)
-				if account.IdlAccount != nil {
-					index++
-					exportedAccountName := ToCamel(account.IdlAccount.Name)
-					lowerAccountName := ToLowerCamel(account.IdlAccount.Name)
 
-					// TODO: if this is a SysVar, set it in the NewBuilder.
-					code.Add(genAccountGettersSetters(
-						insExportedName,
-						account.IdlAccount,
-						index,
-						exportedAccountName,
-						lowerAccountName,
-					))
+			declaredReceivers := []string{}
+			groupMemberIndex := 0
+			instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
+				builderStructName := insExportedName + ToCamel(parentGroupPath) + "AccountsBuilder"
+				hasNestedParent := parentGroupPath != ""
+				isDeclaredReceiver := SliceContains(declaredReceivers, parentGroupPath)
+
+				if !hasNestedParent {
+					groupMemberIndex = index
 				}
-
-				// many accounts (???)
-				if account.IdlAccounts != nil {
+				if hasNestedParent && !isDeclaredReceiver {
+					groupMemberIndex = 0
+					declaredReceivers = append(declaredReceivers, parentGroupPath)
+					// many accounts (???)
 					// builder struct for this accounts group:
-					builderStructName := insExportedName + ToCamel(account.IdlAccounts.Name) + "AccountsBuilder"
 
 					code.Line().Line()
-					for _, doc := range account.IdlAccounts.Docs {
+					for _, doc := range parentGroup.Docs {
 						code.Comment(doc).Line()
 					}
 					code.Type().Id(builderStructName).Struct(
@@ -304,12 +304,12 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					code.Line().Line().Func().Id("New" + builderStructName).Params().Op("*").Id(builderStructName).
 						BlockFunc(func(gr *Group) {
 							gr.Return().Op("&").Id(builderStructName).Block(
-								Id("AccountMetaSlice").Op(":").Make(Qual(PkgSolanaGo, "AccountMetaSlice"), Lit(account.IdlAccounts.Accounts.NumAccounts())).Op(","),
+								Id("AccountMetaSlice").Op(":").Make(Qual(PkgSolanaGo, "AccountMetaSlice"), Lit(parentGroup.Accounts.NumAccounts())).Op(","),
 							)
 						}).Line().Line()
 
 					// Method on intruction builder that accepts the accounts group builder, and copies the accounts:
-					code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Set" + ToCamel(account.IdlAccounts.Name) + "AccountsFromBuilder").
+					code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Set" + ToCamel(parentGroup.Name) + "AccountsFromBuilder").
 						Params(
 							ListFunc(func(st *Group) {
 								// Parameters:
@@ -326,35 +326,45 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							// Body:
 
 							tpIndex := index
-							for _, subAccount := range account.IdlAccounts.Accounts {
+							spew.Dump(parentGroup)
+							for _, subAccount := range parentGroup.Accounts {
+								if subAccount.IdlAccount != nil {
+									exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
+
+									def := Id("inst").Dot("AccountMetaSlice").Index(Lit(tpIndex)).
+										Op("=").Id(ToLowerCamel(builderStructName)).Dot("Get" + exportedAccountName + "Account").Call()
+
+									gr.Add(def)
+								}
 								tpIndex++
-								exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
-
-								def := Id("inst").Dot("AccountMetaSlice").Index(Lit(tpIndex)).
-									Op("=").Id(ToLowerCamel(builderStructName)).Dot("Get" + exportedAccountName + "Account").Call()
-
-								gr.Add(def)
 							}
 
 							gr.Return().Id("inst")
 						})
-
-					for _, subAccount := range account.IdlAccounts.Accounts {
-						index++
-						exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
-						lowerAccountName := ToLowerCamel(subAccount.IdlAccount.Name)
-
-						code.Add(genAccountGettersSetters(
-							builderStructName,
-							subAccount.IdlAccount,
-							index,
-							exportedAccountName,
-							lowerAccountName,
-						))
-					}
 				}
 
-			}
+				{
+					exportedAccountName := ToCamel(account.Name)
+					lowerAccountName := ToLowerCamel(account.Name)
+
+					var receiverTypeName string
+					if parentGroupPath == "" {
+						receiverTypeName = insExportedName
+					} else {
+						receiverTypeName = builderStructName
+					}
+
+					code.Add(genAccountGettersSetters(
+						receiverTypeName,
+						account,
+						groupMemberIndex,
+						exportedAccountName,
+						lowerAccountName,
+					))
+					groupMemberIndex++
+				}
+				return true
+			})
 
 			file.Add(code.Line())
 		}
