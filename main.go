@@ -226,10 +226,38 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			).Line()
 			//
 			code.Func().Id(builderFuncName).Params().Op("*").Id(insExportedName).
-				BlockFunc(func(gr *Group) {
-					gr.Return().Op("&").Id(insExportedName).Block(
+				BlockFunc(func(body *Group) {
+					body.Id("nd").Op(":=").Op("&").Id(insExportedName).Block(
 						Id("AccountMetaSlice").Op(":").Make(Qual(PkgSolanaGo, "AccountMetaSlice"), Lit(instruction.Accounts.NumAccounts())).Op(","),
 					)
+
+					// Set sysvar accounts:
+					instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
+						if isVar(account.Name) {
+							pureVarName := getVarName(account.Name)
+							is := isSysVar(pureVarName)
+							if is {
+								_, ok := sysVars[pureVarName]
+								if !ok {
+									panic(account)
+								}
+								def := Qual(PkgSolanaGo, "Meta").Call(Qual(PkgSolanaGo, pureVarName))
+								if account.IsMut {
+									def.Dot("WRITE").Call()
+								}
+								if account.IsSigner {
+									def.Dot("SIGNER").Call()
+								}
+
+								body.Id("nd").Dot("AccountMetaSlice").Index(Lit(index)).Op("=").Add(def)
+							} else {
+								panic(account)
+							}
+						}
+						return true
+					})
+
+					body.Return(Id("nd"))
 				})
 			file.Add(code.Line())
 		}

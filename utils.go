@@ -3,10 +3,10 @@ package main
 import (
 	"os"
 	"path"
+	"strings"
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/programs/system"
 	. "github.com/gagliardetto/utilz"
 )
 
@@ -70,16 +70,26 @@ func newStatement() *Statement {
 }
 
 var sysVars = map[string]solana.PublicKey{
-	"SysVarClockPubkey":             system.SysVarClockPubkey,
-	"SysVarEpochSchedulePubkey":     system.SysVarEpochSchedulePubkey,
-	"SysVarFeesPubkey":              system.SysVarFeesPubkey,
-	"SysVarInstructionsPubkey":      system.SysVarInstructionsPubkey,
-	"SysVarRecentBlockHashesPubkey": system.SysVarRecentBlockHashesPubkey,
-	"SysVarRentPubkey":              system.SysVarRentPubkey,
-	"SysVarSlotHashesPubkey":        system.SysVarSlotHashesPubkey,
-	"SysVarSlotHistoryPubkey":       system.SysVarSlotHistoryPubkey,
-	"SysVarStakeHistoryPubkey":      system.SysVarStakeHistoryPubkey,
-	"SysVarRewardsPubkey":           system.SysVarRewardsPubkey,
+	"SysVarClockPubkey":             solana.SysVarClockPubkey,
+	"SysVarEpochSchedulePubkey":     solana.SysVarEpochSchedulePubkey,
+	"SysVarFeesPubkey":              solana.SysVarFeesPubkey,
+	"SysVarInstructionsPubkey":      solana.SysVarInstructionsPubkey,
+	"SysVarRecentBlockHashesPubkey": solana.SysVarRecentBlockHashesPubkey,
+	"SysVarRentPubkey":              solana.SysVarRentPubkey,
+	"SysVarSlotHashesPubkey":        solana.SysVarSlotHashesPubkey,
+	"SysVarSlotHistoryPubkey":       solana.SysVarSlotHistoryPubkey,
+	"SysVarStakeHistoryPubkey":      solana.SysVarStakeHistoryPubkey,
+	"SysVarRewardsPubkey":           solana.SysVarRewardsPubkey,
+}
+
+func isVar(name string) bool {
+	return strings.HasPrefix(name, "$(") && strings.HasSuffix(name, ")")
+}
+
+func getVarName(variable string) string {
+	variable = strings.TrimPrefix(variable, "$(")
+	variable = strings.TrimSuffix(variable, ")")
+	return variable
 }
 
 func isSysVar(name string) bool {
