@@ -21,6 +21,12 @@ type IDL struct {
 	Errors       []IdlErrorCode   `json:"errors,omitempty"`
 }
 
+// Validate validates and IDL
+func (idl *IDL) Validate() error {
+	// TODO
+	return nil
+}
+
 type IdlEvent struct {
 	Name   string          `json:"name"`
 	Fields []IdlEventField `json:"fields"`
@@ -205,7 +211,7 @@ type IdlTypeDefined struct {
 // Wrapper type:
 type IdlTypeEnvelopeArray struct {
 	Thing IdlTypeEnvelope
-	Num   float64
+	Num   int
 }
 
 func (env *IdlTypeEnvelope) UnmarshalJSON(data []byte) error {
@@ -226,8 +232,8 @@ func (env *IdlTypeEnvelope) UnmarshalJSON(data []byte) error {
 		}
 	case map[string]interface{}:
 		{
-			Ln(PurpleBG("::IdlTypeEnvelope"))
-			spew.Dump(v)
+			// Ln(PurpleBG("::IdlTypeEnvelope"))
+			// spew.Dump(v)
 
 			if len(v) == 0 {
 				return nil
@@ -268,7 +274,7 @@ func (env *IdlTypeEnvelope) UnmarshalJSON(data []byte) error {
 					return err
 				}
 
-				target.Num = arrVal[1].(float64)
+				target.Num = int(arrVal[1].(float64))
 
 				env.asIdlTypeEnvelopeArray = &target
 			}
