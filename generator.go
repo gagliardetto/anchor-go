@@ -59,17 +59,6 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 	return stat
 }
 
-func idlTypeToType(envel IdlTypeEnvelope) *Statement {
-	switch {
-	case envel.IsString():
-		return typeStringToType(envel.GetString())
-	case envel.IsIdlTypeDefined():
-		return Id(envel.GetIdlTypeDefined().Defined)
-	default:
-		panic(spew.Sdump(envel))
-	}
-}
-
 func genField(field IdlField) Code {
 	st := newStatement()
 	st.Id(ToCamel(field.Name)).Add(genTypeName(field.Type))
@@ -110,4 +99,36 @@ func genTypeName(idlTypeEnv IdlTypeEnvelope) Code {
 
 func codeToString(code Code) string {
 	return Sf("%#v", code)
+}
+
+func genTypeDef(def IdlTypeDef) Code {
+	st := newStatement()
+	switch def.Type.Kind {
+	case IdlTypeDefTyKindStruct:
+		code := Empty()
+		code.Type().Id(def.Name).StructFunc(func(fieldsGroup *Group) {
+			for _, field := range *def.Type.Fields {
+				fieldsGroup.Add(genField(field))
+			}
+		})
+
+		st.Add(code.Line())
+	case IdlTypeDefTyKindEnum:
+		code := Empty()
+		enumTypeName := def.Name
+		code.Type().Id(enumTypeName).String()
+
+		code.Line().Const().Parens(DoGroup(func(gr *Group) {
+			for _, variant := range def.Type.Variants {
+				gr.Id(variant.Name).Id(enumTypeName).Op("=").Lit(variant.Name).Line()
+			}
+			// TODO: check for fields, etc.
+		}))
+		st.Add(code.Line())
+
+		// panic(Sf("not implemented: %s", spew.Sdump(def)))
+	default:
+		panic(Sf("not implemented: %s", spew.Sdump(def.Type.Kind)))
+	}
+	return st
 }

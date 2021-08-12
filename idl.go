@@ -372,6 +372,10 @@ type IdlEnumFields struct {
 	IdlEnumFieldsTuple *IdlEnumFieldsTuple
 }
 
+type IdlEnumFieldsNamed []IdlField
+
+type IdlEnumFieldsTuple []IdlTypeEnvelope
+
 // TODO: verify with examples
 func (env *IdlEnumFields) UnmarshalJSON(data []byte) error {
 
@@ -416,10 +420,6 @@ func (env *IdlEnumFields) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
-
-type IdlEnumFieldsNamed []IdlField
-
-type IdlEnumFieldsTuple []IdlTypeEnvelope
 
 type IdlErrorCode struct {
 	Code int    `json:"code"`

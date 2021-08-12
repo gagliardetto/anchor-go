@@ -18,25 +18,28 @@ func main() {
 
 	filenames := []string{
 		// "idl_files/swap_light.json",
-		"solana/native/system.json",
+		// "solana/native/system.json",
+		//
+		"idl_files/registry.json",
 
-		// "idl_files/zero_copy.json",
-		// "idl_files/typescript.json",
-		// "idl_files/sysvars.json",
-		// "idl_files/swap.json",
-		// "idl_files/pyth.json",
-		// "idl_files/multisig.json",
-		// "idl_files/misc.json",
-		// "idl_files/lockup.json",
-		// "idl_files/ido_pool.json",
-		// "idl_files/events.json",
-		// "idl_files/escrow.json",
-		// "idl_files/errors.json",
-		// "idl_files/composite.json",
-		// "idl_files/chat.json",
 		// "idl_files/cashiers_check.json",
+		// "idl_files/chat.json",
+		// "idl_files/composite.json",
 		// "idl_files/counter_auth.json",
 		// "idl_files/counter.json",
+		// "idl_files/errors.json",
+		// "idl_files/escrow.json",
+		// "idl_files/events.json",
+		// "idl_files/ido_pool.json",
+		// "idl_files/lockup.json",
+		// "idl_files/misc.json",
+		// "idl_files/multisig.json",
+		// "idl_files/pyth.json",
+		// "idl_files/swap.json",
+		// "idl_files/swap_light.json",
+		// "idl_files/sysvars.json",
+		// "idl_files/typescript.json",
+		// "idl_files/zero_copy.json",
 	}
 
 	ts := time.Now()
@@ -111,6 +114,8 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 	files := make([]*FileWrapper, 0)
 	{
+		// Create and populate Go file that holds all the basic
+		// elements of an instruction client:
 		file, err := genProgramBoilerplate(idl)
 		if err != nil {
 			return nil, err
@@ -209,7 +214,8 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					})
 				}
 				fieldsGroup.Qual(PkgSolanaGo, "AccountMetaSlice").Tag(map[string]string{
-					"bin": "-",
+					"bin":        "-",
+					"borsh_skip": "true",
 				})
 			})
 
@@ -263,7 +269,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 
 		{
-			// Create parameters setters:
+			// Declare methods that set the parameters of the instruction:
 			code := Empty()
 			for _, arg := range instruction.Args {
 				exportedArgName := ToCamel(arg.Name)
@@ -277,9 +283,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					Params(
 						ListFunc(func(st *Group) {
 							// Parameters:
-							st.Id(arg.Name).Add(idlTypeToType(arg.Type))
-							// TODO: determine the right type for the arg.
-
+							st.Id(arg.Name).Add(genTypeName(arg.Type))
 						}),
 					).
 					Params(
@@ -299,7 +303,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			file.Add(code.Line())
 		}
 		{
-			// Account setters/getters:
+			// Declare methods that set/get accountf for the instruction:
 			code := Empty()
 
 			declaredReceivers := []string{}
@@ -324,7 +328,8 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					}
 					code.Type().Id(builderStructName).Struct(
 						Qual(PkgSolanaGo, "AccountMetaSlice").Tag(map[string]string{
-							"bin": "-",
+							"bin":        "-",
+							"borsh_skip": "true",
 						}),
 					)
 
@@ -397,7 +402,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			file.Add(code.Line())
 		}
 		{
-			// Add `Build` method to instruction:
+			// Declare `Build` method on instruction:
 			code := Empty()
 
 			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Build").
@@ -429,7 +434,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			file.Add(code.Line())
 		}
 		{
-			// Add `Verify` method to instruction:
+			// Declare `Verify` method on instruction:
 			code := Empty()
 
 			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Verify").
@@ -458,7 +463,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			file.Add(code.Line())
 		}
 		{
-			// Add `EncodeToTree(parent treeout.Branches)` method to instruction:
+			// Declare `EncodeToTree(parent treeout.Branches)` method in instruction:
 			code := Empty()
 
 			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("EncodeToTree").
@@ -485,7 +490,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 								Id("ParentFunc").Parens(Func().Parens(Id("instructionBranch").Qual(PkgTreeout, "Branches")).BlockFunc(
 								func(instructionBranchGroup *Group) {
 
-									instructionBranchGroup.Comment("Parameters of the instruction:")
+									instructionBranchGroup.Line().Comment("Parameters of the instruction:")
 
 									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit("Params")).Dot("ParentFunc").Parens(Func().Parens(Id("paramsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(paramsBranchGroup *Group) {
 										for _, arg := range instruction.Args {
@@ -518,35 +523,9 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 	{
 		file := NewGoFile(idl.Name, true)
-		// Types:
+		// Declare types from IDL:
 		for _, typ := range idl.Types {
-			switch typ.Type.Kind {
-			case IdlTypeDefTyKindStruct:
-				code := Empty()
-				code.Type().Id(typ.Name).StructFunc(func(fieldsGroup *Group) {
-					for _, field := range *typ.Type.Fields {
-						fieldsGroup.Add(genField(field))
-					}
-				})
-
-				file.Add(code.Line())
-			case IdlTypeDefTyKindEnum:
-				code := Empty()
-				enumTypeName := typ.Name
-				code.Type().Id(enumTypeName).String()
-
-				code.Line().Const().Parens(DoGroup(func(gr *Group) {
-					for _, variant := range typ.Type.Variants {
-						gr.Id(variant.Name).Id(enumTypeName).Op("=").Lit(variant.Name).Line()
-					}
-					// TODO: check for fields, etc.
-				}))
-				file.Add(code.Line())
-
-				// panic(Sf("not implemented: %s", spew.Sdump(typ)))
-			default:
-				panic(Sf("not implemented: %s", spew.Sdump(typ.Type.Kind)))
-			}
+			file.Add(genTypeDef(typ))
 		}
 		files = append(files, &FileWrapper{
 			Name: "types",
@@ -556,23 +535,9 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 	{
 		file := NewGoFile(idl.Name, true)
-		// Accounts:
+		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
-			switch acc.Type.Kind {
-			case IdlTypeDefTyKindStruct:
-				code := Empty()
-				code.Type().Id(acc.Name).StructFunc(func(fieldsGroup *Group) {
-					for _, field := range *acc.Type.Fields {
-						fieldsGroup.Add(genField(field))
-					}
-				})
-
-				file.Add(code.Line())
-			case IdlTypeDefTyKindEnum:
-				panic("not implemented")
-			default:
-				panic("not implemented")
-			}
+			file.Add(genTypeDef(acc))
 		}
 		files = append(files, &FileWrapper{
 			Name: "accounts",
