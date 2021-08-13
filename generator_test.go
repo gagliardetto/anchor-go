@@ -177,7 +177,7 @@ func Test_genField(t *testing.T) {
 				panic(err)
 			}
 			code := Var().Id("thing").Struct(
-				genField(target),
+				genField(target, false),
 			)
 			got := codeToString(code)
 			require.Equal(t, scenario.expected, got)

@@ -158,7 +158,12 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							fieldsGroup.Comment(doc)
 						}
 					}
-					fieldsGroup.Add(genField(arg))
+					fieldsGroup.Add(genField(arg, true)).Add(func() Code {
+						if arg.Type.IsIdlTypeOption() {
+							return Comment("OPTIONAL")
+						}
+						return nil
+					}())
 				}
 
 				fieldsGroup.Line()
@@ -294,7 +299,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					).
 					BlockFunc(func(gr *Group) {
 						// Body:
-						gr.Id("inst").Dot(exportedArgName).Op("=").Id(arg.Name)
+						gr.Id("inst").Dot(exportedArgName).Op("=").Op("&").Id(arg.Name)
 
 						gr.Return().Id("inst")
 					})
@@ -451,10 +456,30 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				).
 				BlockFunc(func(body *Group) {
 					// Body:
+					body.Comment("Check whether all parameters are set:")
 
+					body.BlockFunc(func(paramVerifyBody *Group) {
+						for _, arg := range instruction.Args {
+							exportedArgName := ToCamel(arg.Name)
+
+							// Optional params can be empty.
+							if arg.Type.IsIdlTypeOption() {
+								continue
+							}
+
+							paramVerifyBody.If(Id("inst").Dot(exportedArgName).Op("==").Nil()).Block(
+								Return(
+									Qual("errors", "New").Call(Lit(Sf("%s parameter is not set", exportedArgName))),
+								),
+							)
+						}
+					})
+
+					body.Line()
+					body.Comment("Check whether all accounts are set:")
 					body.For(List(Id("accIndex"), Id("acc")).Op(":=").Range().Id("inst").Dot("AccountMetaSlice")).Block(
 						If(Id("acc").Op("==").Nil()).Block(
-							Return(Qual("fmt", "Errorf").Call(List(Lit("ins.AccountMetaSlice[%v] is nil"), Id("accIndex")))),
+							Return(Qual("fmt", "Errorf").Call(List(Lit("ins.AccountMetaSlice[%v] is not set"), Id("accIndex")))),
 						),
 					)
 

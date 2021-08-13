@@ -59,9 +59,16 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 	return stat
 }
 
-func genField(field IdlField) Code {
+func genField(field IdlField, pointer bool) Code {
 	st := newStatement()
-	st.Id(ToCamel(field.Name)).Add(genTypeName(field.Type))
+	st.Id(ToCamel(field.Name)).
+		Add(func() Code {
+			if pointer {
+				return Op("*")
+			}
+			return nil
+		}()).
+		Add(genTypeName(field.Type))
 	return st
 }
 
@@ -108,7 +115,7 @@ func genTypeDef(def IdlTypeDef) Code {
 		code := Empty()
 		code.Type().Id(def.Name).StructFunc(func(fieldsGroup *Group) {
 			for _, field := range *def.Type.Fields {
-				fieldsGroup.Add(genField(field))
+				fieldsGroup.Add(genField(field, false))
 			}
 		})
 
