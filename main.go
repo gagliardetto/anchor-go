@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -14,7 +15,45 @@ import (
 	. "github.com/gagliardetto/utilz"
 )
 
+var conf = &Config{}
+
+type Config struct {
+	Encoder EncoderName
+}
+
+// Validate validates
+func (cfg *Config) Validate() error {
+	if cfg == nil {
+		return errors.New("cfg is nil")
+	}
+	if !isValidEncoder(cfg.Encoder) {
+		return fmt.Errorf("Encoder is not valid: %q", cfg.Encoder)
+	}
+	return nil
+}
+
+func isValidEncoder(enc EncoderName) bool {
+	return SliceContains(
+		[]string{
+			string(EncoderBorsh),
+		},
+		string(enc),
+	)
+}
+
+type EncoderName string
+
+const (
+	EncoderBorsh EncoderName = "borsh"
+)
+
 func main() {
+	// TODO: load config from flags, etc.
+	conf.Encoder = EncoderBorsh
+
+	if err := conf.Validate(); err != nil {
+		panic(fmt.Errorf("error while validating config: %w", err))
+	}
 
 	filenames := []string{
 		// "idl_files/swap_light.json",
