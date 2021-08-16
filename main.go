@@ -643,7 +643,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
-						params.Id("encoder").Qual(PkgDfuseBinary, "Encoder")
+						params.Id("encoder").Op("*").Qual(PkgDfuseBinary, "Encoder")
 					}),
 				).
 				Params(
@@ -701,6 +701,82 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 								)
 
 								argBody.Err().Op("=").Id("encoder").Dot("WriteByteArray").Call(Id("got"), False())
+
+								argBody.If(
+									Err().Op("!=").Nil(),
+								).Block(
+									Return(Err()),
+								)
+							})
+						}
+
+					}
+
+					body.Return(Nil())
+				})
+			file.Add(code.Line())
+		}
+
+		{
+			// Declare `UnmarshalBinary(decoder *bin.Decoder) error` method on instruction:
+			code := Empty()
+
+			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("UnmarshalBinary").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						params.Id("decoder").Op("*").Qual(PkgDfuseBinary, "Decoder")
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					for _, arg := range instruction.Args {
+						exportedArgName := ToCamel(arg.Name)
+						body.Commentf("Deserialize `%s` param:", exportedArgName)
+
+						if isTypeNameAnInterface(arg.Type) {
+							enumName := arg.Type.GetIdlTypeDefined().Defined
+							body.BlockFunc(func(argBody *Group) {
+
+								argBody.List(Id("dec")).Op(":=").Qual(PkgBorshGo, "NewDecoder").Call(Id("decoder"))
+								argBody.List(Id("tmp")).Op(":=").New(Id(formatEnumContainerName(enumName)))
+
+								argBody.Err().Op(":=").Id("dec").Dot("Decode").Call(Id("tmp"))
+
+								argBody.If(
+									Err().Op("!=").Nil(),
+								).Block(
+									Return(Err()),
+								)
+
+								argBody.Switch(Id("tmp").Dot("Enum")).
+									BlockFunc(func(switchGroup *Group) {
+										interfaceType := idl.Types.GetByName(enumName)
+										for variantIndex, variant := range interfaceType.Type.Variants {
+											switchGroup.Case(Lit(variantIndex)).
+												BlockFunc(func(caseGroup *Group) {
+													caseGroup.Id("inst").Dot(exportedArgName).Op("=").Op("&").Id("tmp").Dot(ToCamel(variant.Name))
+												})
+										}
+										switchGroup.Default().
+											BlockFunc(func(caseGroup *Group) {
+												caseGroup.Return(Qual("fmt", "Errorf").Call(Lit("unknown enum index: %v"), Id("tmp").Dot("Enum")))
+											})
+									})
+
+							})
+						} else {
+							body.BlockFunc(func(argBody *Group) {
+								argBody.List(Id("dec")).Op(":=").Qual(PkgBorshGo, "NewDecoder").Call(Id("decoder"))
+								argBody.List(Id("inst")).Dot(exportedArgName).Op("=").New(genTypeName(arg.Type))
+
+								argBody.Err().Op(":=").Id("dec").Dot("Decode").Call(Id("inst").Dot(exportedArgName))
 
 								argBody.If(
 									Err().Op("!=").Nil(),
