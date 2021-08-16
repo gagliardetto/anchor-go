@@ -531,10 +531,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			file.Add(code.Line())
 		}
 		{
-			// Declare `Verify` method on instruction:
+			// Declare `Validate` method on instruction:
 			code := Empty()
 
-			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Verify").
+			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Validate").
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -817,18 +817,18 @@ func genAccountGettersSetters(
 	// Create account setters:
 	code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id("Set" + exportedAccountName + "Account").
 		Params(
-			ListFunc(func(st *Group) {
+			ListFunc(func(params *Group) {
 				// Parameters:
-				st.Id(lowerAccountName).Qual(PkgSolanaGo, "PublicKey")
+				params.Id(lowerAccountName).Qual(PkgSolanaGo, "PublicKey")
 			}),
 		).
 		Params(
-			ListFunc(func(st *Group) {
+			ListFunc(func(results *Group) {
 				// Results:
-				st.Op("*").Id(receiverTypeName)
+				results.Op("*").Id(receiverTypeName)
 			}),
 		).
-		BlockFunc(func(gr *Group) {
+		BlockFunc(func(body *Group) {
 			// Body:
 			def := Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).
 				Op("=").Qual(PkgSolanaGo, "Meta").Call(Id(lowerAccountName))
@@ -839,27 +839,27 @@ func genAccountGettersSetters(
 				def.Dot("SIGNER").Call()
 			}
 
-			gr.Add(def)
+			body.Add(def)
 
-			gr.Return().Id("inst")
+			body.Return().Id("inst")
 		})
 
 	// Create account getters:
 	code.Line().Line().Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id("Get" + exportedAccountName + "Account").
 		Params(
-			ListFunc(func(st *Group) {
+			ListFunc(func(params *Group) {
 				// Parameters:
 			}),
 		).
 		Params(
-			ListFunc(func(st *Group) {
+			ListFunc(func(results *Group) {
 				// Results:
-				st.Op("*").Qual(PkgSolanaGo, "AccountMeta")
+				results.Op("*").Qual(PkgSolanaGo, "AccountMeta")
 			}),
 		).
-		BlockFunc(func(gr *Group) {
+		BlockFunc(func(body *Group) {
 			// Body:
-			gr.Return(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)))
+			body.Return(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)))
 		})
 
 	return code
