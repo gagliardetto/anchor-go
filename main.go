@@ -550,7 +550,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				BlockFunc(func(body *Group) {
 					// Body:
 					if len(instruction.Args) > 0 {
-						body.Comment("Check whether all parameters are set:")
+						body.Comment("Check whether all (required) parameters are set:")
 
 						body.BlockFunc(func(paramVerifyBody *Group) {
 							for _, arg := range instruction.Args {
