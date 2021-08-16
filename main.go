@@ -371,20 +371,20 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 				code.Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Set" + exportedArgName).
 					Params(
-						ListFunc(func(st *Group) {
+						ListFunc(func(params *Group) {
 							// Parameters:
-							st.Id(arg.Name).Add(genTypeName(arg.Type))
+							params.Id(arg.Name).Add(genTypeName(arg.Type))
 						}),
 					).
 					Params(
-						ListFunc(func(st *Group) {
+						ListFunc(func(results *Group) {
 							// Results:
-							st.Op("*").Id(insExportedName)
+							results.Op("*").Id(insExportedName)
 						}),
 					).
-					BlockFunc(func(gr *Group) {
+					BlockFunc(func(body *Group) {
 						// Body:
-						gr.Id("inst").Dot(exportedArgName).Op("=").
+						body.Id("inst").Dot(exportedArgName).Op("=").
 							Add(func() Code {
 								if isTypeNameAnInterface(arg.Type) {
 									return nil
@@ -393,7 +393,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							}()).
 							Id(arg.Name)
 
-						gr.Return().Id("inst")
+						body.Return().Id("inst")
 					})
 			}
 
@@ -793,6 +793,73 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				})
 			file.Add(code.Line())
 		}
+
+		{
+			// Declare instruction initializer func:
+			code := Empty()
+			code.Func().Id("New" + insExportedName).
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						{
+							for _, arg := range instruction.Args {
+								params.Line().Id(arg.Name).Add(genTypeName(arg.Type))
+							}
+						}
+						{
+							instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
+
+								// skip sysvars:
+								if isSysVar(account.Name) {
+									return true
+								}
+								var accountName string
+
+								if parentGroupPath == "" {
+									accountName = ToLowerCamel(account.Name)
+								} else {
+									accountName = ToLowerCamel(parentGroupPath + "/" + ToLowerCamel(account.Name))
+								}
+								params.Add(func() Code {
+									if index == 0 {
+										return Line().Line()
+									}
+									return Line()
+								}()).Id(accountName).Qual(PkgSolanaGo, "PublicKey")
+								return true
+							})
+						}
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Op("*").Id("Instruction")
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					builder := body.Return().Id("New" + insExportedName + "InstructionBuilder").Call()
+					{
+						for _, arg := range instruction.Args {
+							exportedArgName := ToCamel(arg.Name)
+							builder.Op(".").Line().Id("Set" + exportedArgName).Call(Id(arg.Name))
+						}
+					}
+
+					{
+						for _, arg := range instruction.Args {
+							exportedArgName := ToCamel(arg.Name)
+							builder.Op(".").Line().Id("Set" + exportedArgName).Call(Id(arg.Name))
+						}
+					}
+
+					builder.Op(".").Line().Id("Build").Call()
+				})
+
+			file.Add(code.Line())
+		}
+		////
 		files = append(files, &FileWrapper{
 			Name: insExportedName,
 			File: file,
