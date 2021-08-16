@@ -15,10 +15,22 @@ type IDL struct {
 	Docs         []string         `json:"docs"` // @custom
 	Instructions []IdlInstruction `json:"instructions"`
 	State        *IdlState        `json:"state,omitempty"`
-	Accounts     []IdlTypeDef     `json:"accounts,omitempty"`
-	Types        []IdlTypeDef     `json:"types,omitempty"`
+	Accounts     IdlTypeDefSlice  `json:"accounts,omitempty"`
+	Types        IdlTypeDefSlice  `json:"types,omitempty"`
 	Events       []IdlEvent       `json:"events,omitempty"`
 	Errors       []IdlErrorCode   `json:"errors,omitempty"`
+}
+
+type IdlTypeDefSlice []IdlTypeDef
+
+func (named IdlTypeDefSlice) GetByName(name string) *IdlTypeDef {
+	for i := range named {
+		v := named[i]
+		if v.Name == name {
+			return &v
+		}
+	}
+	return nil
 }
 
 // Validate validates and IDL
@@ -184,26 +196,6 @@ type IdlField struct {
 	Type IdlTypeEnvelope `json:"type"`
 }
 
-type IdlTypeDef struct {
-	Name string       `json:"name"`
-	Type IdlTypeDefTy `json:"type"`
-}
-
-type IdlTypeDefTyKind string
-
-const (
-	IdlTypeDefTyKindStruct IdlTypeDefTyKind = "struct"
-	IdlTypeDefTyKindEnum   IdlTypeDefTyKind = "enum"
-)
-
-type IdlTypeDefTy struct {
-	Kind     IdlTypeDefTyKind  `json:"kind"`
-	Fields   *IdlTypeDefStruct `json:"fields,omitempty"`
-	Variants []IdlEnumVariant  `json:"variants,omitempty"`
-}
-
-type IdlTypeDefStruct = []IdlField
-
 type IdlTypeAsString string
 
 const (
@@ -360,9 +352,46 @@ func (env *IdlTypeEnvelope) GetArray() *IdlTypeEnvelopeArray {
 	return env.asIdlTypeEnvelopeArray
 }
 
+type IdlTypeDef struct {
+	Name string       `json:"name"`
+	Type IdlTypeDefTy `json:"type"`
+}
+
+type IdlTypeDefTyKind string
+
+const (
+	IdlTypeDefTyKindStruct IdlTypeDefTyKind = "struct"
+	IdlTypeDefTyKindEnum   IdlTypeDefTyKind = "enum"
+)
+
+type IdlTypeDefTy struct {
+	Kind IdlTypeDefTyKind `json:"kind"`
+
+	Fields   *IdlTypeDefStruct   `json:"fields,omitempty"`
+	Variants IdlEnumVariantSlice `json:"variants,omitempty"`
+}
+
+type IdlEnumVariantSlice []IdlEnumVariant
+
+func (slice IdlEnumVariantSlice) IsAllUint8() bool {
+	for _, elem := range slice {
+		if !elem.IsUint8() {
+			return false
+		}
+	}
+	return true
+}
+
+type IdlTypeDefStruct = []IdlField
+
 type IdlEnumVariant struct {
 	Name   string         `json:"name"`
 	Fields *IdlEnumFields `json:"fields,omitempty"`
+}
+
+func (variant *IdlEnumVariant) IsUint8() bool {
+	// it's a simple uint8 if there is no fields data
+	return variant.Fields == nil
 }
 
 // TODO

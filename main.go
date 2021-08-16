@@ -75,8 +75,9 @@ func main() {
 		// "idl_files/swap_light.json",
 		// "solana/native/system.json",
 		//
-		"idl_files/registry.json",
+		"idl_files/testing/enum.json",
 
+		// "idl_files/registry.json",
 		// "idl_files/cashiers_check.json",
 		// "idl_files/chat.json",
 		// "idl_files/composite.json",
@@ -182,6 +183,30 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 		files = append(files, &FileWrapper{
 			Name: "instructions",
+			File: file,
+		})
+	}
+
+	{
+		file := NewGoFile(idl.Name, true)
+		// Declare types from IDL:
+		for _, typ := range idl.Types {
+			file.Add(genTypeDef(typ))
+		}
+		files = append(files, &FileWrapper{
+			Name: "types",
+			File: file,
+		})
+	}
+
+	{
+		file := NewGoFile(idl.Name, true)
+		// Declare account layouts from IDL:
+		for _, acc := range idl.Accounts {
+			file.Add(genTypeDef(acc))
+		}
+		files = append(files, &FileWrapper{
+			Name: "accounts",
 			File: file,
 		})
 	}
@@ -359,7 +384,14 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					).
 					BlockFunc(func(gr *Group) {
 						// Body:
-						gr.Id("inst").Dot(exportedArgName).Op("=").Op("&").Id(arg.Name)
+						gr.Id("inst").Dot(exportedArgName).Op("=").
+							Add(func() Code {
+								if isTypeNameAnInterface(arg.Type) {
+									return nil
+								}
+								return Op("&")
+							}()).
+							Id(arg.Name)
 
 						gr.Return().Id("inst")
 					})
@@ -368,7 +400,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			file.Add(code.Line())
 		}
 		{
-			// Declare methods that set/get accountf for the instruction:
+			// Declare methods that set/get accounts for the instruction:
 			code := Empty()
 
 			declaredReceivers := []string{}
@@ -516,26 +548,28 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				).
 				BlockFunc(func(body *Group) {
 					// Body:
-					body.Comment("Check whether all parameters are set:")
+					if len(instruction.Args) > 0 {
+						body.Comment("Check whether all parameters are set:")
 
-					body.BlockFunc(func(paramVerifyBody *Group) {
-						for _, arg := range instruction.Args {
-							exportedArgName := ToCamel(arg.Name)
+						body.BlockFunc(func(paramVerifyBody *Group) {
+							for _, arg := range instruction.Args {
+								exportedArgName := ToCamel(arg.Name)
 
-							// Optional params can be empty.
-							if arg.Type.IsIdlTypeOption() {
-								continue
+								// Optional params can be empty.
+								if arg.Type.IsIdlTypeOption() {
+									continue
+								}
+
+								paramVerifyBody.If(Id("inst").Dot(exportedArgName).Op("==").Nil()).Block(
+									Return(
+										Qual("errors", "New").Call(Lit(Sf("%s parameter is not set", exportedArgName))),
+									),
+								)
 							}
+						})
+						body.Line()
+					}
 
-							paramVerifyBody.If(Id("inst").Dot(exportedArgName).Op("==").Nil()).Block(
-								Return(
-									Qual("errors", "New").Call(Lit(Sf("%s parameter is not set", exportedArgName))),
-								),
-							)
-						}
-					})
-
-					body.Line()
 					body.Comment("Check whether all accounts are set:")
 					body.For(List(Id("accIndex"), Id("acc")).Op(":=").Range().Id("inst").Dot("AccountMetaSlice")).Block(
 						If(Id("acc").Op("==").Nil()).Block(
@@ -600,32 +634,90 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				})
 			file.Add(code.Line())
 		}
+
+		{
+			// Declare `MarshalBinary(encoder *bin.Encoder) error` method on instruction:
+			code := Empty()
+
+			code.Line().Line().Func().Params(Id("inst").Id(insExportedName)).Id("MarshalBinary").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						params.Id("encoder").Qual(PkgDfuseBinary, "Encoder")
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					for _, arg := range instruction.Args {
+						exportedArgName := ToCamel(arg.Name)
+						body.Commentf("Serialize `%s` param:", exportedArgName)
+
+						if isTypeNameAnInterface(arg.Type) {
+							enumName := arg.Type.GetIdlTypeDefined().Defined
+							body.BlockFunc(func(argBody *Group) {
+								argBody.List(Id("tmp")).Op(":=").Id(formatEnumContainerName(enumName)).Block()
+								argBody.Switch(Id("realvalue").Op(":=").Id("inst").Dot(exportedArgName).Op(".").Parens(Type())).
+									BlockFunc(func(switchGroup *Group) {
+										interfaceType := idl.Types.GetByName(enumName)
+										for variantIndex, variant := range interfaceType.Type.Variants {
+											switchGroup.Case(Op("*").Id(ToCamel(variant.Name))).
+												BlockFunc(func(caseGroup *Group) {
+													caseGroup.Id("tmp").Dot("Enum").Op("=").Lit(variantIndex)
+													caseGroup.Id("tmp").Dot(ToCamel(variant.Name)).Op("=").Op("*").Id("realvalue")
+												})
+										}
+									})
+
+								argBody.List(Id("got"), Err()).Op(":=").Qual(PkgBorshGo, "Serialize").Call(Id("tmp"))
+
+								argBody.If(
+									Err().Op("!=").Nil(),
+								).Block(
+									Return(Err()),
+								)
+
+								argBody.Err().Op("=").Id("encoder").Dot("WriteByteArray").Call(Id("got"), False())
+
+								argBody.If(
+									Err().Op("!=").Nil(),
+								).Block(
+									Return(Err()),
+								)
+							})
+						} else {
+							body.BlockFunc(func(argBody *Group) {
+								argBody.List(Id("got"), Err()).Op(":=").Qual(PkgBorshGo, "Serialize").Call(Id("inst").Dot(exportedArgName))
+
+								argBody.If(
+									Err().Op("!=").Nil(),
+								).Block(
+									Return(Err()),
+								)
+
+								argBody.Err().Op("=").Id("encoder").Dot("WriteByteArray").Call(Id("got"), False())
+
+								argBody.If(
+									Err().Op("!=").Nil(),
+								).Block(
+									Return(Err()),
+								)
+							})
+						}
+
+					}
+
+					body.Return(Nil())
+				})
+			file.Add(code.Line())
+		}
 		files = append(files, &FileWrapper{
 			Name: insExportedName,
-			File: file,
-		})
-	}
-
-	{
-		file := NewGoFile(idl.Name, true)
-		// Declare types from IDL:
-		for _, typ := range idl.Types {
-			file.Add(genTypeDef(typ))
-		}
-		files = append(files, &FileWrapper{
-			Name: "types",
-			File: file,
-		})
-	}
-
-	{
-		file := NewGoFile(idl.Name, true)
-		// Declare account layouts from IDL:
-		for _, acc := range idl.Accounts {
-			file.Add(genTypeDef(acc))
-		}
-		files = append(files, &FileWrapper{
-			Name: "accounts",
 			File: file,
 		})
 	}

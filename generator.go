@@ -12,6 +12,7 @@ const (
 	PkgDfuseBinary  = "github.com/dfuse-io/binary"
 	PkgTreeout      = "github.com/gagliardetto/treeout"
 	PkgFormat       = "github.com/gagliardetto/solana-go/text/format"
+	PkgBorshGo      = "github.com/near/borsh-go"
 )
 
 type FileWrapper struct {
@@ -63,6 +64,9 @@ func genField(field IdlField, pointer bool) Code {
 	st := newStatement()
 	st.Id(ToCamel(field.Name)).
 		Add(func() Code {
+			if isTypeNameAnInterface(field.Type) {
+				return nil
+			}
 			if pointer {
 				return Op("*")
 			}
@@ -109,6 +113,21 @@ func codeToString(code Code) string {
 	return Sf("%#v", code)
 }
 
+// typeRegistryInterface contains all types that are an interface
+var typeRegistryInterface = make(map[string]struct{})
+
+func isTypeNameAnInterface(envel IdlTypeEnvelope) bool {
+	if envel.IsIdlTypeDefined() {
+		_, ok := typeRegistryInterface[envel.GetIdlTypeDefined().Defined]
+		return ok
+	}
+	return false
+}
+
+func addTypeNameIsAnInterface(name string) {
+	typeRegistryInterface[name] = struct{}{}
+}
+
 func genTypeDef(def IdlTypeDef) Code {
 	st := newStatement()
 	switch def.Type.Kind {
@@ -122,21 +141,88 @@ func genTypeDef(def IdlTypeDef) Code {
 
 		st.Add(code.Line())
 	case IdlTypeDefTyKindEnum:
-		code := Empty()
+		code := newStatement()
 		enumTypeName := def.Name
-		code.Type().Id(enumTypeName).String()
 
-		code.Line().Const().Parens(DoGroup(func(gr *Group) {
+		if def.Type.Variants.IsAllUint8() {
+			code.Type().Id(enumTypeName).Qual(PkgBorshGo, "Enum")
+			code.Line().Const().Parens(DoGroup(func(gr *Group) {
+				for variantIndex, variant := range def.Type.Variants {
+
+					gr.Id(variant.Name).Add(func() Code {
+						if variantIndex == 0 {
+							return Id(enumTypeName).Op("=").Iota()
+						}
+						return nil
+					}()).Line()
+				}
+				// TODO: check for fields, etc.
+			}))
+			st.Add(code.Line())
+		} else {
+			addTypeNameIsAnInterface(enumTypeName)
+			containerName := formatEnumContainerName(enumTypeName)
+			interfaceMethodName := formatInterfaceMethodName(enumTypeName)
+
+			// Declare the interface of the enum type:
+			code.Type().Id(enumTypeName).Interface(
+				Id(interfaceMethodName).Call(),
+			).Line().Line()
+
+			// Declare the enum variants container (non-exported, used internally)
+			code.Type().Id(containerName).StructFunc(
+				func(structGroup *Group) {
+					structGroup.Id("Enum").Qual(PkgBorshGo, "Enum").Tag(map[string]string{
+						"borsh_enum": "true",
+					})
+
+					for _, variant := range def.Type.Variants {
+						structGroup.Id(ToCamel(variant.Name)).Id(ToCamel(variant.Name))
+					}
+				},
+			).Line().Line()
+
 			for _, variant := range def.Type.Variants {
-				gr.Id(variant.Name).Id(enumTypeName).Op("=").Lit(variant.Name).Line()
+				variantTypeName := ToCamel(variant.Name)
+
+				// Declare the enum variant types:
+				code.Type().Id(variantTypeName).StructFunc(
+					func(structGroup *Group) {
+						if variant.IsUint8() {
+							structGroup.Id(variantTypeName).Op("*").Uint8()
+						} else {
+							switch {
+							case variant.Fields.IdlEnumFieldsNamed != nil:
+								for _, variantField := range *variant.Fields.IdlEnumFieldsNamed {
+									// TODO: pointer, or not?
+									structGroup.Add(genField(variantField, true))
+								}
+							default:
+								// TODO: handle tuples
+								panic("not handled")
+							}
+						}
+					},
+				).Line().Line()
+
+				// Declare the method to implement the parent enum interface:
+				code.Func().Params(Id("_").Op("*").Id(variantTypeName)).Id(interfaceMethodName).Params().Block().Line().Line()
 			}
-			// TODO: check for fields, etc.
-		}))
-		st.Add(code.Line())
+
+			st.Add(code.Line().Line())
+		}
 
 		// panic(Sf("not implemented: %s", spew.Sdump(def)))
 	default:
 		panic(Sf("not implemented: %s", spew.Sdump(def.Type.Kind)))
 	}
 	return st
+}
+
+func formatEnumContainerName(enumTypeName string) string {
+	return ToLowerCamel(enumTypeName) + "Container"
+}
+
+func formatInterfaceMethodName(enumTypeName string) string {
+	return "is" + ToLowerCamel(enumTypeName)
 }
