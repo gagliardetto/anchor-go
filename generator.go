@@ -82,6 +82,7 @@ func genTypeName(idlTypeEnv IdlTypeEnvelope) Code {
 	case idlTypeEnv.IsIdlTypeOption():
 		{
 			opt := idlTypeEnv.GetIdlTypeOption()
+			// TODO: optional = pointer?
 			st.Op("*").Add(genTypeName(opt.Option))
 		}
 	case idlTypeEnv.IsIdlTypeVec():

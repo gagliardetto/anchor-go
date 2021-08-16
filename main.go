@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"path"
@@ -19,6 +20,11 @@ var conf = &Config{}
 
 type Config struct {
 	Encoder EncoderName
+	Debug   bool
+}
+
+func GetConfig() *Config {
+	return conf
 }
 
 // Validate validates
@@ -36,6 +42,8 @@ func isValidEncoder(enc EncoderName) bool {
 	return SliceContains(
 		[]string{
 			string(EncoderBorsh),
+			string(EncoderBin),
+			string(EncoderCompact),
 		},
 		string(enc),
 	)
@@ -44,12 +52,20 @@ func isValidEncoder(enc EncoderName) bool {
 type EncoderName string
 
 const (
+	// github.com/gagliardetto/borsh-go
 	EncoderBorsh EncoderName = "borsh"
+	// github.com/gagliardetto/binary
+	EncoderBin EncoderName = "bin"
+	// https://docs.solana.com/developing/programming-model/transactions#compact-array-format
+	EncoderCompact EncoderName = "compact"
 )
 
 func main() {
 	// TODO: load config from flags, etc.
 	conf.Encoder = EncoderBorsh
+
+	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
+	flag.Parse()
 
 	if err := conf.Validate(); err != nil {
 		panic(fmt.Errorf("error while validating config: %w", err))
@@ -81,7 +97,12 @@ func main() {
 		// "idl_files/zero_copy.json",
 	}
 
-	ts := time.Now()
+	var ts time.Time
+	if GetConfig().Debug {
+		ts = time.Unix(0, 0)
+	} else {
+		ts = time.Now()
+	}
 	outDir := "generated"
 
 	for _, idlFilepath := range filenames {
