@@ -76,6 +76,7 @@ func main() {
 		// "solana/native/system.json",
 		//
 		"idl_files/testing/enum.json",
+		// "idl_files/testing/deeply-nested-accounts.json",
 
 		// "idl_files/registry.json",
 		// "idl_files/cashiers_check.json",
@@ -802,27 +803,32 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					ListFunc(func(params *Group) {
 						// Parameters:
 						{
-							for _, arg := range instruction.Args {
-								params.Line().Id(arg.Name).Add(genTypeName(arg.Type))
+
+							for argIndex, arg := range instruction.Args {
+								params.Add(func() Code {
+									if argIndex == 0 {
+										return Line().Comment("Parameters:")
+									}
+									return Empty()
+								}()).Line().Id(arg.Name).Add(genTypeName(arg.Type))
 							}
 						}
 						{
 							instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
-
 								// skip sysvars:
 								if isSysVar(account.Name) {
 									return true
 								}
 								var accountName string
-
 								if parentGroupPath == "" {
 									accountName = ToLowerCamel(account.Name)
 								} else {
 									accountName = ToLowerCamel(parentGroupPath + "/" + ToLowerCamel(account.Name))
 								}
+
 								params.Add(func() Code {
 									if index == 0 {
-										return Line().Line()
+										return Line().Comment("Accounts:").Line()
 									}
 									return Line()
 								}()).Id(accountName).Qual(PkgSolanaGo, "PublicKey")
@@ -848,10 +854,57 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					}
 
 					{
-						for _, arg := range instruction.Args {
-							exportedArgName := ToCamel(arg.Name)
-							builder.Op(".").Line().Id("Set" + exportedArgName).Call(Id(arg.Name))
-						}
+						declaredReceivers := []string{}
+						instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
+							// skip sysvars:
+							if isSysVar(account.Name) {
+								return true
+							}
+							var accountName string
+							if parentGroupPath == "" {
+								accountName = ToLowerCamel(account.Name)
+							} else {
+							}
+
+							builderStructName := insExportedName + ToCamel(parentGroupPath) + "AccountsBuilder"
+							hasNestedParent := parentGroupPath != ""
+							isDeclaredReceiver := SliceContains(declaredReceivers, parentGroupPath)
+
+							if hasNestedParent && !isDeclaredReceiver {
+								declaredReceivers = append(declaredReceivers, parentGroupPath)
+								builder.Op(".").Line().Id("Set" + ToCamel(parentGroup.Name) + "AccountsFromBuilder").Call(
+									Line().Id("New" + builderStructName).Call().
+										Add(
+											DoGroup(func(gr *Group) {
+												// Body:
+												for subIndex, subAccount := range parentGroup.Accounts {
+													if subAccount.IdlAccount != nil {
+														exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
+														accountName = ToLowerCamel(parentGroupPath + "/" + ToLowerCamel(exportedAccountName))
+
+														gr.Op(".").Add(func() Code {
+															if subIndex == 0 {
+																return Line().Line()
+															}
+															return Line()
+														}()).Id("Set" + exportedAccountName + "Account").Call(Id(accountName))
+
+														if subIndex == len(parentGroup.Accounts)-1 {
+															gr.Op(",").Line()
+														}
+													}
+												}
+											}),
+										),
+								)
+							}
+
+							if !hasNestedParent {
+								builder.Op(".").Line().Id("Set" + ToCamel(account.Name) + "Account").Call(Id(accountName))
+							}
+
+							return true
+						})
 					}
 
 					builder.Op(".").Line().Id("Build").Call()
