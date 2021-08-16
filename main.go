@@ -664,6 +664,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 								argBody.List(Id("tmp")).Op(":=").Id(formatEnumContainerName(enumName)).Block()
 								argBody.Switch(Id("realvalue").Op(":=").Id("inst").Dot(exportedArgName).Op(".").Parens(Type())).
 									BlockFunc(func(switchGroup *Group) {
+										// TODO: maybe it's from idl.Accounts ???
 										interfaceType := idl.Types.GetByName(enumName)
 										for variantIndex, variant := range interfaceType.Type.Variants {
 											switchGroup.Case(Op("*").Id(ToCamel(variant.Name))).
