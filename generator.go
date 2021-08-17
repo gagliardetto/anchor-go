@@ -113,19 +113,19 @@ func codeToString(code Code) string {
 	return Sf("%#v", code)
 }
 
-// typeRegistryInterface contains all types that are an interface
-var typeRegistryInterface = make(map[string]struct{})
+// typeRegistryComplexEnum contains all types that are a complex enum (and thus implemented as an interface).
+var typeRegistryComplexEnum = make(map[string]struct{})
 
 func isComplexEnum(envel IdlTypeEnvelope) bool {
 	if envel.IsIdlTypeDefined() {
-		_, ok := typeRegistryInterface[envel.GetIdlTypeDefined().Defined]
+		_, ok := typeRegistryComplexEnum[envel.GetIdlTypeDefined().Defined]
 		return ok
 	}
 	return false
 }
 
 func addTypeNameIsAnInterface(name string) {
-	typeRegistryInterface[name] = struct{}{}
+	typeRegistryComplexEnum[name] = struct{}{}
 }
 
 func genTypeDef(def IdlTypeDef) Code {
