@@ -1494,5 +1494,8 @@
       "name": "InvalidProgramAuthority",
       "msg": "Please specify the correct authority for this program."
     }
-  ]
+  ],
+    "metadata": {
+      "address": "11111111111111111111111111111112"
+    }
 }

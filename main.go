@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"time"
 
@@ -61,6 +62,15 @@ const (
 )
 
 func main() {
+	var err error
+	rv := reflect.ValueOf(err)
+
+	spew.Dump(rv.IsValid())
+	spew.Dump(rv.Kind())
+	spew.Dump(rv.Kind() == reflect.Invalid)
+	// TODO: github.com/google/gofuzz@v1.0.0/fuzz.go:285
+	// add `case reflect.Invalid: return`
+	return
 	// TODO: load config from flags, etc.
 	conf.Encoder = EncoderBorsh
 
@@ -314,7 +324,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 
 		if len(instruction.Accounts) > 0 {
-			builderFuncName := "New" + insExportedName + "InstructionBuilder"
+			builderFuncName := formatBuilderFuncName(insExportedName)
 			code := Empty()
 			code.Commentf(
 				"%s creates a new `%s` instruction builder.",
@@ -694,7 +704,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							})
 						} else {
 							body.BlockFunc(func(argBody *Group) {
-								argBody.List(Id("got"), Err()).Op(":=").Qual(PkgBorshGo, "Serialize").Call(Id("inst").Dot(exportedArgName))
+								argBody.List(Id("got"), Err()).Op(":=").Qual(PkgBorshGo, "Serialize").Call(Op("*").Id("inst").Dot(exportedArgName))
 
 								argBody.If(
 									Err().Op("!=").Nil(),
@@ -845,7 +855,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				).
 				BlockFunc(func(body *Group) {
 					// Body:
-					builder := body.Return().Id("New" + insExportedName + "InstructionBuilder").Call()
+					builder := body.Return().Id(formatBuilderFuncName(insExportedName)).Call()
 					{
 						for _, arg := range instruction.Args {
 							exportedArgName := ToCamel(arg.Name)
@@ -917,6 +927,14 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			Name: insExportedName,
 			File: file,
 		})
+	}
+
+	{
+		testFiles, err := genTestingFuncs(idl)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, testFiles...)
 	}
 
 	return files, nil

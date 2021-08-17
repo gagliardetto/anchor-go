@@ -7,12 +7,14 @@ import (
 )
 
 const (
-	PkgSolanaGo     = "github.com/gagliardetto/solana-go"
-	PkgSolanaGoText = "github.com/gagliardetto/solana-go/text"
-	PkgDfuseBinary  = "github.com/dfuse-io/binary"
-	PkgTreeout      = "github.com/gagliardetto/treeout"
-	PkgFormat       = "github.com/gagliardetto/solana-go/text/format"
-	PkgBorshGo      = "github.com/near/borsh-go"
+	PkgSolanaGo       = "github.com/gagliardetto/solana-go"
+	PkgSolanaGoText   = "github.com/gagliardetto/solana-go/text"
+	PkgDfuseBinary    = "github.com/dfuse-io/binary"
+	PkgTreeout        = "github.com/gagliardetto/treeout"
+	PkgFormat         = "github.com/gagliardetto/solana-go/text/format"
+	PkgBorshGo        = "github.com/near/borsh-go"
+	PkgGoFuzz         = "github.com/google/gofuzz"
+	PkgTestifyRequire = "github.com/stretchr/testify/require"
 )
 
 type FileWrapper struct {
@@ -124,7 +126,7 @@ func isComplexEnum(envel IdlTypeEnvelope) bool {
 	return false
 }
 
-func addTypeNameIsAnInterface(name string) {
+func addTypeNameIsComplexEnum(name string) {
 	typeRegistryComplexEnum[name] = struct{}{}
 }
 
@@ -160,7 +162,7 @@ func genTypeDef(def IdlTypeDef) Code {
 			}))
 			st.Add(code.Line())
 		} else {
-			addTypeNameIsAnInterface(enumTypeName)
+			addTypeNameIsComplexEnum(enumTypeName)
 			containerName := formatEnumContainerName(enumTypeName)
 			interfaceMethodName := formatInterfaceMethodName(enumTypeName)
 
@@ -225,4 +227,8 @@ func formatEnumContainerName(enumTypeName string) string {
 
 func formatInterfaceMethodName(enumTypeName string) string {
 	return "is" + ToCamel(enumTypeName)
+}
+
+func formatBuilderFuncName(insExportedName string) string {
+	return "New" + insExportedName + "InstructionBuilder"
 }
