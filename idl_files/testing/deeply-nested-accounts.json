@@ -1,6 +1,6 @@
 {
     "version": "0.0.0",
-    "name": "system",
+    "name": "deeply-nested-accounts",
     "docs": [
         "Create new accounts, allocate account data, assign accounts to owning programs,",
         "transfer lamports from System Program owned accounts and pay transacation fees."

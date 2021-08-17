@@ -1,6 +1,6 @@
 {
   "version": "0.0.0",
-  "name": "registry",
+  "name": "enum",
   "instructions": [
     {
       "name": "initialize",

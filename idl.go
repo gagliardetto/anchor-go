@@ -19,6 +19,11 @@ type IDL struct {
 	Types        IdlTypeDefSlice  `json:"types,omitempty"`
 	Events       []IdlEvent       `json:"events,omitempty"`
 	Errors       []IdlErrorCode   `json:"errors,omitempty"`
+	Metadata     *IdlMetadata     `json:"metadata,omitempty"`
+}
+
+type IdlMetadata struct {
+	Address string `json:"address"`
 }
 
 type IdlTypeDefSlice []IdlTypeDef

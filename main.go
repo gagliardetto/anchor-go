@@ -387,7 +387,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						// Body:
 						body.Id("inst").Dot(exportedArgName).Op("=").
 							Add(func() Code {
-								if isTypeNameAnInterface(arg.Type) {
+								if isComplexEnum(arg.Type) {
 									return nil
 								}
 								return Op("&")
@@ -659,7 +659,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						exportedArgName := ToCamel(arg.Name)
 						body.Commentf("Serialize `%s` param:", exportedArgName)
 
-						if isTypeNameAnInterface(arg.Type) {
+						if isComplexEnum(arg.Type) {
 							enumName := arg.Type.GetIdlTypeDefined().Defined
 							body.BlockFunc(func(argBody *Group) {
 								argBody.List(Id("tmp")).Op(":=").Id(formatEnumContainerName(enumName)).Block()
@@ -742,7 +742,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						exportedArgName := ToCamel(arg.Name)
 						body.Commentf("Deserialize `%s` param:", exportedArgName)
 
-						if isTypeNameAnInterface(arg.Type) {
+						if isComplexEnum(arg.Type) {
 							enumName := arg.Type.GetIdlTypeDefined().Defined
 							body.BlockFunc(func(argBody *Group) {
 
@@ -994,8 +994,13 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 	{
 		// ProgramID variable:
 		code := Empty()
-		// TODO: add this to IDL???
-		programID := "TODO"
+		var programID string
+
+		if idl.Metadata != nil && idl.Metadata.Address != "" {
+			programID = idl.Metadata.Address
+		} else {
+			programID = "TODO"
+		}
 		code.Var().Id("ProgramID").Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(programID))
 		file.Add(code.Line())
 	}

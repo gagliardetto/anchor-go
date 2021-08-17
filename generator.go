@@ -64,7 +64,7 @@ func genField(field IdlField, pointer bool) Code {
 	st := newStatement()
 	st.Id(ToCamel(field.Name)).
 		Add(func() Code {
-			if isTypeNameAnInterface(field.Type) {
+			if isComplexEnum(field.Type) {
 				return nil
 			}
 			if pointer {
@@ -116,7 +116,7 @@ func codeToString(code Code) string {
 // typeRegistryInterface contains all types that are an interface
 var typeRegistryInterface = make(map[string]struct{})
 
-func isTypeNameAnInterface(envel IdlTypeEnvelope) bool {
+func isComplexEnum(envel IdlTypeEnvelope) bool {
 	if envel.IsIdlTypeDefined() {
 		_, ok := typeRegistryInterface[envel.GetIdlTypeDefined().Defined]
 		return ok
@@ -224,5 +224,5 @@ func formatEnumContainerName(enumTypeName string) string {
 }
 
 func formatInterfaceMethodName(enumTypeName string) string {
-	return "is" + ToLowerCamel(enumTypeName)
+	return "is" + ToCamel(enumTypeName)
 }
