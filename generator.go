@@ -12,7 +12,6 @@ const (
 	PkgDfuseBinary    = "github.com/dfuse-io/binary"
 	PkgTreeout        = "github.com/gagliardetto/treeout"
 	PkgFormat         = "github.com/gagliardetto/solana-go/text/format"
-	PkgBorshGo        = "github.com/near/borsh-go"
 	PkgGoFuzz         = "github.com/google/gofuzz"
 	PkgTestifyRequire = "github.com/stretchr/testify/require"
 )
@@ -89,7 +88,7 @@ func genTypeName(idlTypeEnv IdlTypeEnvelope) Code {
 		{
 			opt := idlTypeEnv.GetIdlTypeOption()
 			// TODO: optional = pointer?
-			st.Op("*").Add(genTypeName(opt.Option))
+			st.Add(genTypeName(opt.Option))
 		}
 	case idlTypeEnv.IsIdlTypeVec():
 		{
@@ -147,7 +146,7 @@ func genTypeDef(def IdlTypeDef) Code {
 		enumTypeName := def.Name
 
 		if def.Type.Variants.IsAllUint8() {
-			code.Type().Id(enumTypeName).Qual(PkgBorshGo, "Enum")
+			code.Type().Id(enumTypeName).Qual(PkgDfuseBinary, "BorshEnum")
 			code.Line().Const().Parens(DoGroup(func(gr *Group) {
 				for variantIndex, variant := range def.Type.Variants {
 
@@ -174,7 +173,7 @@ func genTypeDef(def IdlTypeDef) Code {
 			// Declare the enum variants container (non-exported, used internally)
 			code.Type().Id(containerName).StructFunc(
 				func(structGroup *Group) {
-					structGroup.Id("Enum").Qual(PkgBorshGo, "Enum").Tag(map[string]string{
+					structGroup.Id("Enum").Qual(PkgDfuseBinary, "BorshEnum").Tag(map[string]string{
 						"borsh_enum": "true",
 					})
 

@@ -425,8 +425,8 @@ func (env *IdlEnumFields) UnmarshalJSON(data []byte) error {
 	switch v := temp.(type) {
 	case []interface{}:
 		{
-			Ln(LimeBG("::IdlEnumFields"))
-			spew.Dump(v)
+			// Ln(LimeBG("::IdlEnumFields"))
+			// spew.Dump(v)
 
 			if len(v) == 0 {
 				return nil
@@ -458,5 +458,6 @@ func (env *IdlEnumFields) UnmarshalJSON(data []byte) error {
 type IdlErrorCode struct {
 	Code int    `json:"code"`
 	Name string `json:"name"`
-	Msg  string `json:"msg,omitempty"`
+	// TODO: is Msg an interface?
+	Msg string `json:"msg,omitempty"`
 }

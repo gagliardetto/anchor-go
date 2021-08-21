@@ -49,7 +49,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 				BlockFunc(func(body *Group) {
 					// Body:
 					body.If(
-						Err().Op(":=").Qual(PkgDfuseBinary, "NewEncoder").Call(Id("buf")).Dot("Encode").Call(Id("data")),
+						Err().Op(":=").Qual(PkgDfuseBinary, GetConfig().Encoding._NewEncoder()).Call(Id("buf")).Dot("Encode").Call(Id("data")),
 						Err().Op("!=").Nil(),
 					).Block(
 						Return(Qual("fmt", "Errorf").Call(Lit("unable to encode instruction: %w"), Err())),
@@ -76,7 +76,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 				).
 				BlockFunc(func(body *Group) {
 					// Body:
-					body.Return(Qual(PkgDfuseBinary, "NewDecoder").Call(Id("data")).Dot("Decode").Call(Id("dst")))
+					body.Return(Qual(PkgDfuseBinary, GetConfig().Encoding._NewDecoder()).Call(Id("data")).Dot("Decode").Call(Id("dst")))
 				})
 			file.Add(code.Line())
 		}
@@ -153,7 +153,7 @@ func genTestNOComplexEnum(tFunGroup *Group, insExportedName string, instruction 
 	tFunGroup.Id("params").Dot("AccountMetaSlice").Op("=").Nil()
 
 	tFunGroup.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
-	tFunGroup.Id("err").Op(":=").Id("encodeT").Call(Id("params"), Id("buf"))
+	tFunGroup.Id("err").Op(":=").Id("encodeT").Call(Op("*").Id("params"), Id("buf"))
 	tFunGroup.Qual(PkgTestifyRequire, "NoError").Call(Id("t"), Err())
 
 	tFunGroup.Comment("//")
@@ -190,7 +190,7 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 					variantBlock.Id("params").Dot("Set" + exportedArgName).Call(Id("tmp"))
 
 					variantBlock.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
-					variantBlock.Id("err").Op(":=").Id("encodeT").Call(Id("params"), Id("buf"))
+					variantBlock.Id("err").Op(":=").Id("encodeT").Call(Op("*").Id("params"), Id("buf"))
 					variantBlock.Qual(PkgTestifyRequire, "NoError").Call(Id("t"), Err())
 
 					variantBlock.Comment("//")

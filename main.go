@@ -8,20 +8,18 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"time"
 
 	. "github.com/dave/jennifer/jen"
-	"github.com/davecgh/go-spew/spew"
 	. "github.com/gagliardetto/utilz"
 )
 
 var conf = &Config{}
 
 type Config struct {
-	Encoder EncoderName
-	Debug   bool
+	Encoding EncoderName
+	Debug    bool
 }
 
 func GetConfig() *Config {
@@ -33,8 +31,8 @@ func (cfg *Config) Validate() error {
 	if cfg == nil {
 		return errors.New("cfg is nil")
 	}
-	if !isValidEncoder(cfg.Encoder) {
-		return fmt.Errorf("Encoder is not valid: %q", cfg.Encoder)
+	if !isValidEncoder(cfg.Encoding) {
+		return fmt.Errorf("Encoder is not valid: %q", cfg.Encoding)
 	}
 	return nil
 }
@@ -42,9 +40,9 @@ func (cfg *Config) Validate() error {
 func isValidEncoder(enc EncoderName) bool {
 	return SliceContains(
 		[]string{
-			string(EncoderBorsh),
-			string(EncoderBin),
-			string(EncoderCompact),
+			string(EncodingBorsh),
+			string(EncodingBin),
+			string(EncodingCompactU16),
 		},
 		string(enc),
 	)
@@ -53,26 +51,43 @@ func isValidEncoder(enc EncoderName) bool {
 type EncoderName string
 
 const (
-	// github.com/gagliardetto/borsh-go
-	EncoderBorsh EncoderName = "borsh"
 	// github.com/gagliardetto/binary
-	EncoderBin EncoderName = "bin"
+	EncodingBin EncoderName = "bin"
+	// github.com/gagliardetto/borsh-go
+	EncodingBorsh EncoderName = "borsh"
 	// https://docs.solana.com/developing/programming-model/transactions#compact-array-format
-	EncoderCompact EncoderName = "compact"
+	EncodingCompactU16 EncoderName = "compact-u16"
 )
 
-func main() {
-	var err error
-	rv := reflect.ValueOf(err)
+func (name EncoderName) _NewEncoder() string {
+	switch enc := GetConfig().Encoding; enc {
+	case EncodingBin:
+		return "NewBinEncoder"
+	case EncodingBorsh:
+		return "NewBorshEncoder"
+	case EncodingCompactU16:
+		return "NewCompact16Encoder"
+	default:
+		panic(enc)
+	}
+}
 
-	spew.Dump(rv.IsValid())
-	spew.Dump(rv.Kind())
-	spew.Dump(rv.Kind() == reflect.Invalid)
-	// TODO: github.com/google/gofuzz@v1.0.0/fuzz.go:285
-	// add `case reflect.Invalid: return`
-	return
+func (name EncoderName) _NewDecoder() string {
+	switch enc := GetConfig().Encoding; enc {
+	case EncodingBin:
+		return "NewBinDecoder"
+	case EncodingBorsh:
+		return "NewBorshDecoder"
+	case EncodingCompactU16:
+		return "NewCompact16Decoder"
+	default:
+		panic(enc)
+	}
+}
+
+func main() {
 	// TODO: load config from flags, etc.
-	conf.Encoder = EncoderBorsh
+	conf.Encoding = EncodingBorsh
 
 	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
 	flag.Parse()
@@ -118,7 +133,7 @@ func main() {
 	outDir := "generated"
 
 	for _, idlFilepath := range filenames {
-		Ln(LimeBG(idlFilepath))
+		Ln("Generating client for", LimeBG(idlFilepath))
 		idlFile, err := os.Open(idlFilepath)
 		if err != nil {
 			panic(err)
@@ -133,7 +148,7 @@ func main() {
 			panic(err)
 		}
 
-		spew.Dump(idl)
+		// spew.Dump(idl)
 
 		// Create subfolder for package for generated assets:
 		packageAssetFolderName := ToLowerCamel(idl.Name)
@@ -227,7 +242,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		file := NewGoFile(idl.Name, true)
 		insExportedName := ToCamel(instruction.Name)
 
-		fmt.Println(RedBG(instruction.Name))
+		// fmt.Println(RedBG(instruction.Name))
 
 		{
 			code := Empty().Line().Line()
@@ -256,7 +271,9 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					}
 					fieldsGroup.Add(genField(arg, true)).Add(func() Code {
 						if arg.Type.IsIdlTypeOption() {
-							return Comment("OPTIONAL")
+							return Tag(map[string]string{
+								"bin": "optional",
+							}).Comment("OPTIONAL")
 						}
 						return nil
 					}())
@@ -467,7 +484,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							// Body:
 
 							tpIndex := index
-							spew.Dump(parentGroup)
+							// spew.Dump(parentGroup)
 							for _, subAccount := range parentGroup.Accounts {
 								if subAccount.IdlAccount != nil {
 									exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
@@ -647,10 +664,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 
 		{
-			// Declare `MarshalBinary(encoder *bin.Encoder) error` method on instruction:
+			// Declare `MarshalWithEncoder(encoder *bin.Encoder) error` method on instruction:
 			code := Empty()
 
-			code.Line().Line().Func().Params(Id("inst").Id(insExportedName)).Id("MarshalBinary").
+			code.Line().Line().Func().Params(Id("inst").Id(insExportedName)).Id("MarshalWithEncoder").
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -686,7 +703,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 										}
 									})
 
-								argBody.List(Id("got"), Err()).Op(":=").Qual(PkgBorshGo, "Serialize").Call(Id("tmp"))
+								argBody.Err().Op(":=").Id("encoder").Dot("Encode").Call(Id("tmp"))
 
 								argBody.If(
 									Err().Op("!=").Nil(),
@@ -694,17 +711,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 									Return(Err()),
 								)
 
-								argBody.Err().Op("=").Id("encoder").Dot("WriteByteArray").Call(Id("got"), False())
-
-								argBody.If(
-									Err().Op("!=").Nil(),
-								).Block(
-									Return(Err()),
-								)
 							})
 						} else {
 							body.BlockFunc(func(argBody *Group) {
-								argBody.List(Id("got"), Err()).Op(":=").Qual(PkgBorshGo, "Serialize").Call(Op("*").Id("inst").Dot(exportedArgName))
+								argBody.Err().Op(":=").Id("encoder").Dot("Encode").Call(Op("*").Id("inst").Dot(exportedArgName))
 
 								argBody.If(
 									Err().Op("!=").Nil(),
@@ -712,13 +722,6 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 									Return(Err()),
 								)
 
-								argBody.Err().Op("=").Id("encoder").Dot("WriteByteArray").Call(Id("got"), False())
-
-								argBody.If(
-									Err().Op("!=").Nil(),
-								).Block(
-									Return(Err()),
-								)
 							})
 						}
 
@@ -730,10 +733,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 
 		{
-			// Declare `UnmarshalBinary(decoder *bin.Decoder) error` method on instruction:
+			// Declare `UnmarshalWithDecoder(decoder *bin.Decoder) error` method on instruction:
 			code := Empty()
 
-			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("UnmarshalBinary").
+			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("UnmarshalWithDecoder").
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -756,10 +759,9 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							enumName := arg.Type.GetIdlTypeDefined().Defined
 							body.BlockFunc(func(argBody *Group) {
 
-								argBody.List(Id("dec")).Op(":=").Qual(PkgBorshGo, "NewDecoder").Call(Id("decoder"))
 								argBody.List(Id("tmp")).Op(":=").New(Id(formatEnumContainerName(enumName)))
 
-								argBody.Err().Op(":=").Id("dec").Dot("Decode").Call(Id("tmp"))
+								argBody.Err().Op(":=").Id("decoder").Dot("Decode").Call(Id("tmp"))
 
 								argBody.If(
 									Err().Op("!=").Nil(),
@@ -785,10 +787,9 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							})
 						} else {
 							body.BlockFunc(func(argBody *Group) {
-								argBody.List(Id("dec")).Op(":=").Qual(PkgBorshGo, "NewDecoder").Call(Id("decoder"))
 								argBody.List(Id("inst")).Dot(exportedArgName).Op("=").New(genTypeName(arg.Type))
 
-								argBody.Err().Op(":=").Id("dec").Dot("Decode").Call(Id("inst").Dot(exportedArgName))
+								argBody.Err().Op(":=").Id("decoder").Dot("Decode").Call(Id("inst").Dot(exportedArgName))
 
 								argBody.If(
 									Err().Op("!=").Nil(),
@@ -1173,8 +1174,9 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 				BlockFunc(func(body *Group) {
 					// Body:
 					body.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
+
 					body.If(
-						Err().Op(":=").Qual(PkgDfuseBinary, "NewEncoder").Call(Id("buf")).Dot("Encode").Call(Id("inst")).
+						Err().Op(":=").Qual(PkgDfuseBinary, GetConfig().Encoding._NewEncoder()).Call(Id("buf")).Dot("Encode").Call(Id("inst")).
 							Op(";").
 							Err().Op("!=").Nil(),
 					).Block(
@@ -1208,9 +1210,9 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 			file.Add(code.Line())
 		}
 		{
-			// `UnmarshalBinary(decoder *bin.Decoder) error` method:
+			// `UnmarshalWithDecoder(decoder *bin.Decoder) error` method:
 			code := Empty()
-			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("UnmarshalBinary").
+			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("UnmarshalWithDecoder").
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -1230,9 +1232,9 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 			file.Add(code.Line())
 		}
 		{
-			// `MarshalBinary(encoder *bin.Encoder) error ` method:
+			// `MarshalWithEncoder(encoder *bin.Encoder) error ` method:
 			code := Empty()
-			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("MarshalBinary").
+			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("MarshalWithEncoder").
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -1313,7 +1315,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 					body.Id("inst").Op(":=").New(Id("Instruction"))
 
 					body.If(
-						Err().Op(":=").Qual(PkgDfuseBinary, "NewDecoder").Call(Id("data")).Dot("Decode").Call(Id("inst")).
+						Err().Op(":=").Qual(PkgDfuseBinary, GetConfig().Encoding._NewDecoder()).Call(Id("data")).Dot("Decode").Call(Id("inst")).
 							Op(";").
 							Err().Op("!=").Nil(),
 					).Block(
