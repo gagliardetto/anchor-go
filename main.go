@@ -90,39 +90,42 @@ func main() {
 	conf.Encoding = EncodingBorsh
 
 	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
+	filenames := FlagStringArray{}
+	flag.Var(&filenames, "src", "Path to source; can use multiple times.")
 	flag.Parse()
 
 	if err := conf.Validate(); err != nil {
 		panic(fmt.Errorf("error while validating config: %w", err))
 	}
 
-	filenames := []string{
-		// "idl_files/swap_light.json",
+	filenamesExtra := []string{
+		// "idl/swap_light.json",
 		// "solana/native/system.json",
 		//
-		"idl_files/testing/enum.json",
-		// "idl_files/testing/deeply-nested-accounts.json",
+		"idl/testing/enum.json",
+		// "idl/testing/deeply-nested-accounts.json",
 
-		// "idl_files/registry.json",
-		// "idl_files/cashiers_check.json",
-		// "idl_files/chat.json",
-		// "idl_files/composite.json",
-		// "idl_files/counter_auth.json",
-		// "idl_files/counter.json",
-		// "idl_files/errors.json",
-		// "idl_files/escrow.json",
-		// "idl_files/events.json",
-		// "idl_files/ido_pool.json",
-		// "idl_files/lockup.json",
-		// "idl_files/misc.json",
-		// "idl_files/multisig.json",
-		// "idl_files/pyth.json",
-		// "idl_files/swap.json",
-		// "idl_files/swap_light.json",
-		// "idl_files/sysvars.json",
-		// "idl_files/typescript.json",
-		// "idl_files/zero_copy.json",
+		// "idl/registry.json",
+		// "idl/cashiers_check.json",
+		// "idl/chat.json",
+		// "idl/composite.json",
+		// "idl/counter_auth.json",
+		// "idl/counter.json",
+		// "idl/errors.json",
+		// "idl/escrow.json",
+		// "idl/events.json",
+		// "idl/ido_pool.json",
+		// "idl/lockup.json",
+		// "idl/misc.json",
+		// "idl/multisig.json",
+		// "idl/pyth.json",
+		// "idl/swap.json",
+		// "idl/swap_light.json",
+		// "idl/sysvars.json",
+		// "idl/typescript.json",
+		// "idl/zero_copy.json",
 	}
+	_ = filenamesExtra
 
 	var ts time.Time
 	if GetConfig().Debug {
@@ -530,7 +533,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			// Declare `Build` method on instruction:
 			code := Empty()
 
-			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Build").
+			code.Line().Line().Func().Params(Id("inst").Id(insExportedName)).Id("Build").
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -642,7 +645,13 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit("Params")).Dot("ParentFunc").Parens(Func().Parens(Id("paramsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(paramsBranchGroup *Group) {
 										for _, arg := range instruction.Args {
 											exportedArgName := ToCamel(arg.Name)
-											paramsBranchGroup.Id("paramsBranch").Dot("Child").Call(Qual(PkgFormat, "Param").Call(Lit(exportedArgName), Id("inst").Dot(exportedArgName)))
+											paramsBranchGroup.Id("paramsBranch").Dot("Child").
+												Call(
+													Qual(PkgFormat, "Param").Call(
+														Lit(exportedArgName+StringIf(arg.Type.IsIdlTypeOption(), " (OPTIONAL)")),
+														Add(CodeIf(!arg.Type.IsIdlTypeOption(), Op("*"))).Id("inst").Dot(exportedArgName),
+													),
+												)
 										}
 									}))
 
@@ -653,7 +662,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 											instruction.Accounts.Walk("", nil, nil, func(groupPath string, accountIndex int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
 												exportedAccountName := filepath.Join(groupPath, ia.Name)
-												accountsBranchGroup.Id("accountsBranch").Dot("Child").Call(Qual(PkgFormat, "Account").Call(Lit(exportedAccountName), Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex)).Dot("PublicKey")))
+												accountsBranchGroup.Id("accountsBranch").Dot("Child").Call(Qual(PkgFormat, "Meta").Call(Lit(exportedAccountName), Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex))))
 												return true
 											})
 										}))
@@ -714,7 +723,8 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							})
 						} else {
 							body.BlockFunc(func(argBody *Group) {
-								argBody.Err().Op(":=").Id("encoder").Dot("Encode").Call(Op("*").Id("inst").Dot(exportedArgName))
+								// TODO: check if is optional and nil
+								argBody.Err().Op(":=").Id("encoder").Dot("Encode").Call(Add(CodeIf(!arg.Type.IsIdlTypeOption(), Op("*"))).Id("inst").Dot(exportedArgName))
 
 								argBody.If(
 									Err().Op("!=").Nil(),
@@ -787,9 +797,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							})
 						} else {
 							body.BlockFunc(func(argBody *Group) {
-								argBody.List(Id("inst")).Dot(exportedArgName).Op("=").New(genTypeName(arg.Type))
-
-								argBody.Err().Op(":=").Id("decoder").Dot("Decode").Call(Id("inst").Dot(exportedArgName))
+								argBody.Err().Op(":=").Id("decoder").Dot("Decode").Call(Op("&").Id("inst").Dot(exportedArgName))
 
 								argBody.If(
 									Err().Op("!=").Nil(),
@@ -1013,14 +1021,26 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 	{
 		// ProgramID variable:
 		code := Empty()
-		var programID string
 
-		if idl.Metadata != nil && idl.Metadata.Address != "" {
-			programID = idl.Metadata.Address
-		} else {
-			programID = "TODO"
-		}
-		code.Var().Id("ProgramID").Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(programID))
+		hasAddress := idl.Metadata != nil && idl.Metadata.Address != ""
+		code.Var().Id("ProgramID").Qual(PkgSolanaGo, "PublicKey").
+			Add(
+				func() Code {
+					if hasAddress {
+						return Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(idl.Metadata.Address))
+					}
+					return nil
+				}(),
+			)
+		file.Add(code.Line())
+	}
+	{
+		// `SetProgramID` func:
+		code := Empty()
+		code.Func().Id("SetProgramID").Params(Id("pubkey").Qual(PkgSolanaGo, "PublicKey")).Block(
+			Id("ProgramID").Op("=").Id("pubkey"),
+			Qual(PkgSolanaGo, "RegisterInstructionDecoder").Call(Id("ProgramID"), Id("registryDecodeInstruction")),
+		)
 		file.Add(code.Line())
 	}
 	{
@@ -1034,7 +1054,11 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		// register decoder:
 		code := Empty()
 		code.Func().Id("init").Call().Block(
-			Qual(PkgSolanaGo, "RegisterInstructionDecoder").Call(Id("ProgramID"), Id("registryDecodeInstruction")),
+			If(
+				Op("!").Id("ProgramID").Dot("IsZero").Call(),
+			).Block(
+				Qual(PkgSolanaGo, "RegisterInstructionDecoder").Call(Id("ProgramID"), Id("registryDecodeInstruction")),
+			),
 		)
 		file.Add(code.Line())
 	}
@@ -1158,7 +1182,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		{
 			// `Data() ([]byte, error)` method:
 			code := Empty()
-			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("Data").
+			code.Func().Params(Id("inst").Id("Instruction")).Id("Data").
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:

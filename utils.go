@@ -96,3 +96,16 @@ func isSysVar(name string) bool {
 	_, ok := sysVars[name]
 	return ok
 }
+
+func StringIf(condition bool, s string) string {
+	if condition {
+		return s
+	}
+	return ""
+}
+func CodeIf(condition bool, code Code) Code {
+	if condition {
+		return code
+	}
+	return nil
+}
