@@ -1182,7 +1182,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		{
 			// `Data() ([]byte, error)` method:
 			code := Empty()
-			code.Func().Params(Id("inst").Id("Instruction")).Id("Data").
+			code.Func().Params(Id("inst").Op("*").Id("Instruction")).Id("Data").
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
