@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -15,81 +14,12 @@ import (
 	. "github.com/gagliardetto/utilz"
 )
 
-var conf = &Config{}
-
-type Config struct {
-	Encoding EncoderName
-	Debug    bool
-}
-
-func GetConfig() *Config {
-	return conf
-}
-
-// Validate validates
-func (cfg *Config) Validate() error {
-	if cfg == nil {
-		return errors.New("cfg is nil")
-	}
-	if !isValidEncoder(cfg.Encoding) {
-		return fmt.Errorf("Encoder is not valid: %q", cfg.Encoding)
-	}
-	return nil
-}
-
-func isValidEncoder(enc EncoderName) bool {
-	return SliceContains(
-		[]string{
-			string(EncodingBorsh),
-			string(EncodingBin),
-			string(EncodingCompactU16),
-		},
-		string(enc),
-	)
-}
-
-type EncoderName string
-
-const (
-	// github.com/gagliardetto/binary
-	EncodingBin EncoderName = "bin"
-	// github.com/gagliardetto/borsh-go
-	EncodingBorsh EncoderName = "borsh"
-	// https://docs.solana.com/developing/programming-model/transactions#compact-array-format
-	EncodingCompactU16 EncoderName = "compact-u16"
-)
-
-func (name EncoderName) _NewEncoder() string {
-	switch enc := GetConfig().Encoding; enc {
-	case EncodingBin:
-		return "NewBinEncoder"
-	case EncodingBorsh:
-		return "NewBorshEncoder"
-	case EncodingCompactU16:
-		return "NewCompact16Encoder"
-	default:
-		panic(enc)
-	}
-}
-
-func (name EncoderName) _NewDecoder() string {
-	switch enc := GetConfig().Encoding; enc {
-	case EncodingBin:
-		return "NewBinDecoder"
-	case EncodingBorsh:
-		return "NewBorshDecoder"
-	case EncodingCompactU16:
-		return "NewCompact16Decoder"
-	default:
-		panic(enc)
-	}
-}
-
 func main() {
 	// TODO: load config from flags, etc.
 	conf.Encoding = EncodingBorsh
 
 	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
+	flag.StringVar((*string)(&conf.Encoding), "codec", "borsh", "Choose codec")
 	filenames := FlagStringArray{}
 	flag.Var(&filenames, "src", "Path to source; can use multiple times.")
 	flag.Parse()
