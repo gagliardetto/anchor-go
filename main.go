@@ -478,11 +478,24 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				BlockFunc(func(body *Group) {
 					// Body:
 
+					var typeIDCode Code
+
+					GetConfig().Encoding.
+						OnEncodingBin(func() {
+							typeIDCode = Qual(PkgDfuseBinary, "TypeIDFromUint32").Call(Id("Instruction_"+insExportedName), Qual("encoding/binary", "LittleEndian"))
+						}).
+						OnEncodingBorsh(func() {
+							typeIDCode = Id("Instruction_" + insExportedName)
+						}).
+						OnEncodingCompactU16(func() {
+							typeIDCode = Qual(PkgDfuseBinary, "TypeIDFromUint32").Call(Id("Instruction_"+insExportedName), Qual("encoding/binary", "LittleEndian"))
+						})
+
 					body.Return().Op("&").Id("Instruction").Values(
 						Dict{
 							Id("BaseVariant"): Qual(PkgDfuseBinary, "BaseVariant").Values(
 								Dict{
-									Id("TypeID"): Id("Instruction_" + insExportedName),
+									Id("TypeID"): typeIDCode,
 									Id("Impl"):   Id("inst"),
 								},
 							),
@@ -789,7 +802,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				Params(
 					ListFunc(func(results *Group) {
 						// Results:
-						results.Op("*").Id("Instruction")
+						results.Op("*").Id(insExportedName)
 					}),
 				).
 				BlockFunc(func(body *Group) {
@@ -856,7 +869,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						})
 					}
 
-					builder.Op(".").Line().Id("Build").Call()
+					// builder.Op(".").Line().Id("Build").Call()
 				})
 
 			file.Add(code.Line())
@@ -1203,7 +1216,16 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 				).
 				BlockFunc(func(body *Group) {
 					// Body:
-					body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID"), Qual("encoding/binary", "LittleEndian"))
+					GetConfig().Encoding.
+						OnEncodingBin(func() {
+							body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("AsUint32").Call(), Qual("encoding/binary", "LittleEndian"))
+						}).
+						OnEncodingBorsh(func() {
+							body.Err().Op(":=").Id("encoder").Dot("WriteBytes").Call(Id("inst").Dot("TypeID").Dot("Bytes").Call())
+						}).
+						OnEncodingCompactU16(func() {
+							body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("AsUint32").Call(), Qual("encoding/binary", "LittleEndian"))
+						})
 
 					body.If(
 						Err().Op("!=").Nil(),
