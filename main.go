@@ -423,7 +423,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 									exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
 
 									def := Id("inst").Dot("AccountMetaSlice").Index(Lit(tpIndex)).
-										Op("=").Id(ToLowerCamel(builderStructName)).Dot("Get" + exportedAccountName + "Account").Call()
+										Op("=").Id(ToLowerCamel(builderStructName)).Dot(formatAccountAccessorName("Get", exportedAccountName)).Call()
 
 									gr.Add(def)
 								}
@@ -849,7 +849,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 																return Line().Line()
 															}
 															return Line()
-														}()).Id("Set" + exportedAccountName + "Account").Call(Id(accountName))
+														}()).Id(formatAccountAccessorName("Set", exportedAccountName)).Call(Id(accountName))
 
 														if subIndex == len(parentGroup.Accounts)-1 {
 															gr.Op(",").Line()
@@ -862,7 +862,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							}
 
 							if !hasNestedParent {
-								builder.Op(".").Line().Id("Set" + ToCamel(account.Name) + "Account").Call(Id(accountName))
+								builder.Op(".").Line().Id(formatAccountAccessorName("Set", ToCamel(account.Name))).Call(Id(accountName))
 							}
 
 							return true
@@ -905,7 +905,7 @@ func genAccountGettersSetters(
 		code.Comment(doc).Line()
 	}
 	// Create account setters:
-	code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id("Set" + exportedAccountName + "Account").
+	code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(formatAccountAccessorName("Set", exportedAccountName)).
 		Params(
 			ListFunc(func(params *Group) {
 				// Parameters:
@@ -935,7 +935,7 @@ func genAccountGettersSetters(
 		})
 
 	// Create account getters:
-	code.Line().Line().Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id("Get" + exportedAccountName + "Account").
+	code.Line().Line().Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(formatAccountAccessorName("Get", exportedAccountName)).
 		Params(
 			ListFunc(func(params *Group) {
 				// Parameters:
@@ -1323,4 +1323,18 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 	}
 
 	return file, nil
+}
+
+// formatAccountAccessorName formats a name for a function that
+// either gets or sets an account.
+// If the name already has a "Account" suffix, then another "Account" suffix
+// is NOT added.
+// E.g. ("Set", "Foo") => "SetFooAccount"
+// E.g. ("Set", "BarAccount") => "SetBarAccount"
+func formatAccountAccessorName(prefix, name string) string {
+	endsWithAccount := strings.HasSuffix(strings.ToLower(name), "account")
+	if endsWithAccount {
+		return prefix + name
+	}
+	return prefix + name + "Account"
 }
