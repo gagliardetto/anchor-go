@@ -1218,13 +1218,13 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 					// Body:
 					GetConfig().Encoding.
 						OnEncodingBin(func() {
-							body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("AsUint32").Call(), Qual("encoding/binary", "LittleEndian"))
+							body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("Uint32").Call(), Qual("encoding/binary", "LittleEndian"))
 						}).
 						OnEncodingBorsh(func() {
 							body.Err().Op(":=").Id("encoder").Dot("WriteBytes").Call(Id("inst").Dot("TypeID").Dot("Bytes").Call())
 						}).
 						OnEncodingCompactU16(func() {
-							body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("AsUint32").Call(), Qual("encoding/binary", "LittleEndian"))
+							body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("Uint32").Call(), Qual("encoding/binary", "LittleEndian"))
 						})
 
 					body.If(
