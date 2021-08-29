@@ -505,6 +505,42 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			file.Add(code.Line())
 		}
 		{
+			// Declare `ValidateAndBuild` method on instruction:
+			code := Empty()
+
+			code.Line().Line().
+				Comment("ValidateAndBuild validates the instruction parameters and accounts;").
+				Line().
+				Comment("if there is a validation error, it panics.").
+				Line().
+				Comment("Otherwise, it builds and returns the instruction.").
+				Line().
+				Func().Params(Id("inst").Id(insExportedName)).Id("ValidateAndBuild").
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Op("*").Id("Instruction")
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					body.If(
+						Err().Op(":=").Id("inst").Dot("Validate").Call(),
+						Err().Op("!=").Nil(),
+					).Block(
+						Panic(Err()),
+					)
+
+					body.Return(Id("inst").Dot("Build").Call())
+				})
+			file.Add(code.Line())
+		}
+		{
 			// Declare `Validate` method on instruction:
 			code := Empty()
 
