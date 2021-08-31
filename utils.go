@@ -103,6 +103,7 @@ func StringIf(condition bool, s string) string {
 	}
 	return ""
 }
+
 func CodeIf(condition bool, code Code) Code {
 	if condition {
 		return code

@@ -511,7 +511,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			code.Line().Line().
 				Comment("ValidateAndBuild validates the instruction parameters and accounts;").
 				Line().
-				Comment("if there is a validation error, it panics.").
+				Comment("if there is a validation error, it returns the error.").
 				Line().
 				Comment("Otherwise, it builds and returns the instruction.").
 				Line().
@@ -525,6 +525,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					ListFunc(func(results *Group) {
 						// Results:
 						results.Op("*").Id("Instruction")
+						results.Error()
 					}),
 				).
 				BlockFunc(func(body *Group) {
@@ -533,10 +534,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						Err().Op(":=").Id("inst").Dot("Validate").Call(),
 						Err().Op("!=").Nil(),
 					).Block(
-						Panic(Err()),
+						Return(Nil(), Err()),
 					)
 
-					body.Return(Id("inst").Dot("Build").Call())
+					body.Return(Id("inst").Dot("Build").Call(), Nil())
 				})
 			file.Add(code.Line())
 		}
@@ -796,12 +797,14 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		{
 			// Declare instruction initializer func:
 			code := Empty()
-			code.Func().Id("New" + insExportedName).
+			name := "New" + insExportedName + "Instruction"
+			code.Commentf("%s declares a new %s instruction with the provided parameters and accounts.", name, insExportedName)
+			code.Line()
+			code.Func().Id(name).
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
 						{
-
 							for argIndex, arg := range instruction.Args {
 								params.Add(func() Code {
 									if argIndex == 0 {
