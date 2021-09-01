@@ -582,7 +582,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						body.Line()
 					}
 
-					body.Comment("Check whether all required accounts are set:")
+					body.Comment("Check whether all (required) accounts are set:")
 					body.BlockFunc(func(accountValidationBlock *Group) {
 						instruction.Accounts.Walk("", nil, nil, func(groupPath string, accountIndex int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
 							exportedAccountName := filepath.Join(groupPath, ia.Name)
