@@ -108,5 +108,5 @@ func CodeIf(condition bool, code Code) Code {
 	if condition {
 		return code
 	}
-	return nil
+	return Null()
 }
