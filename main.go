@@ -582,12 +582,17 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						body.Line()
 					}
 
-					body.Comment("Check whether all accounts are set:")
-					body.For(List(Id("accIndex"), Id("acc")).Op(":=").Range().Id("inst").Dot("AccountMetaSlice")).Block(
-						If(Id("acc").Op("==").Nil()).Block(
-							Return(Qual("fmt", "Errorf").Call(List(Lit("ins.AccountMetaSlice[%v] is not set"), Id("accIndex")))),
-						),
-					)
+					body.Comment("Check whether all required accounts are set:")
+					body.BlockFunc(func(accountValidationBlock *Group) {
+						instruction.Accounts.Walk("", nil, nil, func(groupPath string, accountIndex int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
+							exportedAccountName := filepath.Join(groupPath, ia.Name)
+
+							accountValidationBlock.If(Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex)).Op("==").Nil()).Block(
+								Return(Qual("fmt", "Errorf").Call(List(Lit(Sf("accounts.%s is not set", exportedAccountName))))),
+							)
+							return true
+						})
+					})
 
 					body.Return(Nil())
 				})
@@ -1037,6 +1042,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		// register decoder:
 		code := Empty()
 		code.Func().Id("init").Call().Block(
+			// TODO: check for pointer instead.
 			If(
 				Op("!").Id("ProgramID").Dot("IsZero").Call(),
 			).Block(
@@ -1257,14 +1263,13 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 				BlockFunc(func(body *Group) {
 					// Body:
 					GetConfig().Encoding.
-						OnEncodingBin(func() {
-							body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("Uint32").Call(), Qual("encoding/binary", "LittleEndian"))
-						}).
+						On(
+							[]EncoderName{EncodingBin, EncodingCompactU16},
+							func() {
+								body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("Uint32").Call(), Qual("encoding/binary", "LittleEndian"))
+							}).
 						OnEncodingBorsh(func() {
 							body.Err().Op(":=").Id("encoder").Dot("WriteBytes").Call(Id("inst").Dot("TypeID").Dot("Bytes").Call())
-						}).
-						OnEncodingCompactU16(func() {
-							body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("Uint32").Call(), Qual("encoding/binary", "LittleEndian"))
 						})
 
 					body.If(

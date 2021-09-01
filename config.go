@@ -77,6 +77,26 @@ func (name EncoderName) _NewDecoder() string {
 	}
 }
 
+type EncoderNameSlice []EncoderName
+
+func (slice EncoderNameSlice) Has(v EncoderName) bool {
+	for _, enc := range slice {
+		if v == enc {
+			return true
+		}
+	}
+	return false
+}
+func (name EncoderName) On(
+	anyEncoding EncoderNameSlice,
+	fn func(),
+) EncoderName {
+	if anyEncoding.Has(GetConfig().Encoding) {
+		fn()
+	}
+	return name
+}
+
 func (name EncoderName) OnEncodingBin(fn func()) EncoderName {
 	if GetConfig().Encoding == EncodingBin {
 		fn()
