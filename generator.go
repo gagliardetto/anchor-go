@@ -136,9 +136,12 @@ func genTypeDef(def IdlTypeDef) Code {
 	case IdlTypeDefTyKindStruct:
 		code := Empty()
 		code.Type().Id(def.Name).StructFunc(func(fieldsGroup *Group) {
-			for _, field := range *def.Type.Fields {
+			for fieldIndex, field := range *def.Type.Fields {
 
-				for _, doc := range field.Docs {
+				for docIndex, doc := range field.Docs {
+					if docIndex == 0 && fieldIndex > 0 {
+						fieldsGroup.Line()
+					}
 					fieldsGroup.Comment(doc)
 				}
 				fieldsGroup.Add(genField(field, field.Type.IsIdlTypeOption())).
