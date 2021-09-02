@@ -73,7 +73,15 @@ func genField(field IdlField, pointer bool) Code {
 			}
 			return nil
 		}()).
-		Add(genTypeName(field.Type))
+		Add(genTypeName(field.Type)).
+		Add(func() Code {
+			if field.Type.IsIdlTypeOption() {
+				return Tag(map[string]string{
+					"bin": "optional",
+				})
+			}
+			return nil
+		}())
 	return st
 }
 
