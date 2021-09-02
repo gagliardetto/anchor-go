@@ -3,6 +3,7 @@ package main
 import (
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
+	bin "github.com/dfuse-io/binary"
 	. "github.com/gagliardetto/utilz"
 )
 
@@ -238,4 +239,241 @@ func formatInterfaceMethodName(enumTypeName string) string {
 
 func formatBuilderFuncName(insExportedName string) string {
 	return "New" + insExportedName + "InstructionBuilder"
+}
+
+func genMarshalWithEncoder_struct(
+	idl *IDL,
+	withDiscriminator bool,
+	receiverTypeName string,
+	discriminatorName string,
+	fields []IdlField,
+	checkNil bool,
+) Code {
+	code := Empty()
+	{
+		// Declare MarshalWithEncoder
+		code.Func().Params(Id("acc").Id(receiverTypeName)).Id("MarshalWithEncoder").
+			Params(
+				ListFunc(func(params *Group) {
+					// Parameters:
+					params.Id("encoder").Op("*").Qual(PkgDfuseBinary, "Encoder")
+				}),
+			).
+			Params(
+				ListFunc(func(results *Group) {
+					// Results:
+					results.Err().Error()
+				}),
+			).
+			BlockFunc(func(body *Group) {
+				// Body:
+				if withDiscriminator && discriminatorName != "" {
+					body.Comment("Write account discriminator:")
+					body.Err().Op("=").Id("encoder").Dot("WriteBytes").Call(Id(discriminatorName).Index(Op(":")), False())
+					body.If(Err().Op("!=").Nil()).Block(
+						Return(Err()),
+					)
+				}
+
+				for _, field := range fields {
+					exportedArgName := ToCamel(field.Name)
+					if field.Type.IsIdlTypeOption() {
+						body.Commentf("Serialize `%s` param (optional):", exportedArgName)
+					} else {
+						body.Commentf("Serialize `%s` param:", exportedArgName)
+					}
+
+					if isComplexEnum(field.Type) {
+						enumName := field.Type.GetIdlTypeDefined().Defined
+						body.BlockFunc(func(argBody *Group) {
+							argBody.List(Id("tmp")).Op(":=").Id(formatEnumContainerName(enumName)).Block()
+							argBody.Switch(Id("realvalue").Op(":=").Id("inst").Dot(exportedArgName).Op(".").Parens(Type())).
+								BlockFunc(func(switchGroup *Group) {
+									// TODO: maybe it's from idl.Accounts ???
+									interfaceType := idl.Types.GetByName(enumName)
+									for variantIndex, variant := range interfaceType.Type.Variants {
+										switchGroup.Case(Op("*").Id(ToCamel(variant.Name))).
+											BlockFunc(func(caseGroup *Group) {
+												caseGroup.Id("tmp").Dot("Enum").Op("=").Lit(variantIndex)
+												caseGroup.Id("tmp").Dot(ToCamel(variant.Name)).Op("=").Op("*").Id("realvalue")
+											})
+									}
+								})
+
+							argBody.Err().Op(":=").Id("encoder").Dot("Encode").Call(Id("tmp"))
+
+							argBody.If(
+								Err().Op("!=").Nil(),
+							).Block(
+								Return(Err()),
+							)
+
+						})
+					} else {
+
+						if field.Type.IsIdlTypeOption() {
+							if checkNil {
+								body.BlockFunc(func(optGroup *Group) {
+									// if nil:
+									optGroup.If(Id("acc").Dot(ToCamel(field.Name)).Op("==").Nil()).Block(
+										Err().Op("=").Id("encoder").Dot("WriteBool").Call(False()),
+										If(Err().Op("!=").Nil()).Block(
+											Return(Err()),
+										),
+									).Else().Block(
+										Err().Op("=").Id("encoder").Dot("WriteBool").Call(True()),
+										If(Err().Op("!=").Nil()).Block(
+											Return(Err()),
+										),
+										Err().Op("=").Id("encoder").Dot("Encode").Call(Id("acc").Dot(exportedArgName)),
+										If(Err().Op("!=").Nil()).Block(
+											Return(Err()),
+										),
+									)
+								})
+							} else {
+								body.BlockFunc(func(optGroup *Group) {
+									// TODO: make optional fields of accounts a pointer.
+									// Write as if not nil:
+									optGroup.Err().Op("=").Id("encoder").Dot("WriteBool").Call(True())
+									optGroup.If(Err().Op("!=").Nil()).Block(
+										Return(Err()),
+									)
+									optGroup.Err().Op("=").Id("encoder").Dot("Encode").Call(Id("acc").Dot(exportedArgName))
+									optGroup.If(Err().Op("!=").Nil()).Block(
+										Return(Err()),
+									)
+								})
+							}
+
+						} else {
+							body.Err().Op("=").Id("encoder").Dot("Encode").Call(Id("acc").Dot(exportedArgName))
+							body.If(Err().Op("!=").Nil()).Block(
+								Return(Err()),
+							)
+						}
+					}
+
+				}
+
+				body.Return(Nil())
+			})
+	}
+	return code
+}
+
+func genUnmarshalWithDecoder_struct(
+	idl *IDL,
+	withDiscriminator bool,
+	receiverTypeName string,
+	discriminatorName string,
+	fields []IdlField,
+	sighash bin.TypeID,
+) Code {
+	code := Empty()
+	{
+		// Declare MarshalWithEncoder
+		code.Func().Params(Id("acc").Op("*").Id(receiverTypeName)).Id("UnmarshalWithDecoder").
+			Params(
+				ListFunc(func(params *Group) {
+					// Parameters:
+					params.Id("decoder").Op("*").Qual(PkgDfuseBinary, "Decoder")
+				}),
+			).
+			Params(
+				ListFunc(func(results *Group) {
+					// Results:
+					results.Err().Error()
+				}),
+			).
+			BlockFunc(func(body *Group) {
+				// Body:
+				if withDiscriminator && discriminatorName != "" {
+					body.Comment("Read and check account discriminator:")
+					body.BlockFunc(func(discReadBody *Group) {
+						discReadBody.List(Id("discriminator"), Err()).Op(":=").Id("decoder").Dot("ReadTypeID").Call()
+						discReadBody.If(Err().Op("!=").Nil()).Block(
+							Return(Err()),
+						)
+						discReadBody.If(Op("!").Id("discriminator").Dot("Equal").Call(Id(discriminatorName).Index(Op(":")))).Block(
+							Return(
+								Qual("fmt", "Errorf").Call(
+									Line().Lit("wrong discriminator: wanted %s, got %s"),
+									Line().Lit(Sf("%v", sighash[:])),
+									Line().Qual("fmt", "Sprint").Call(Id("discriminator").Index(Op(":"))),
+								),
+							),
+						)
+					})
+				}
+
+				for _, field := range fields {
+					exportedArgName := ToCamel(field.Name)
+					if field.Type.IsIdlTypeOption() {
+						body.Commentf("Deserialize `%s` (optional):", exportedArgName)
+					} else {
+						body.Commentf("Deserialize `%s`:", exportedArgName)
+					}
+
+					if isComplexEnum(field.Type) {
+						// TODO:
+						enumName := field.Type.GetIdlTypeDefined().Defined
+						body.BlockFunc(func(argBody *Group) {
+
+							argBody.List(Id("tmp")).Op(":=").New(Id(formatEnumContainerName(enumName)))
+
+							argBody.Err().Op(":=").Id("decoder").Dot("Decode").Call(Id("tmp"))
+
+							argBody.If(
+								Err().Op("!=").Nil(),
+							).Block(
+								Return(Err()),
+							)
+
+							argBody.Switch(Id("tmp").Dot("Enum")).
+								BlockFunc(func(switchGroup *Group) {
+									interfaceType := idl.Types.GetByName(enumName)
+									for variantIndex, variant := range interfaceType.Type.Variants {
+										switchGroup.Case(Lit(variantIndex)).
+											BlockFunc(func(caseGroup *Group) {
+												caseGroup.Id("inst").Dot(exportedArgName).Op("=").Op("&").Id("tmp").Dot(ToCamel(variant.Name))
+											})
+									}
+									switchGroup.Default().
+										BlockFunc(func(caseGroup *Group) {
+											caseGroup.Return(Qual("fmt", "Errorf").Call(Lit("unknown enum index: %v"), Id("tmp").Dot("Enum")))
+										})
+								})
+
+						})
+					} else {
+
+						if field.Type.IsIdlTypeOption() {
+							body.BlockFunc(func(optGroup *Group) {
+								// if nil:
+								optGroup.List(Id("ok"), Err()).Op(":=").Id("decoder").Dot("ReadBool").Call()
+								optGroup.If(Err().Op("!=").Nil()).Block(
+									Return(Err()),
+								)
+								optGroup.If(Id("ok")).Block(
+									Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("acc").Dot(exportedArgName)),
+									If(Err().Op("!=").Nil()).Block(
+										Return(Err()),
+									),
+								)
+							})
+						} else {
+							body.Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("acc").Dot(exportedArgName))
+							body.If(Err().Op("!=").Nil()).Block(
+								Return(Err()),
+							)
+						}
+					}
+
+				}
+
+				body.Return(Nil())
+			})
+	}
+	return code
 }

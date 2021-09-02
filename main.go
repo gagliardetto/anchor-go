@@ -189,84 +189,34 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				if GetConfig().Debug {
 					code.Comment(Sf(`hash("%s:%s")`, bin.SIGHASH_ACCOUNT_NAMESPACE, toBeHashed)).Line()
 				}
-				ha := bin.SighashTypeID(bin.SIGHASH_ACCOUNT_NAMESPACE, toBeHashed)
+				sighash := bin.SighashTypeID(bin.SIGHASH_ACCOUNT_NAMESPACE, toBeHashed)
 				code.Var().Id(discriminatorName).Op("=").Index(Lit(8)).Byte().Op("{").ListFunc(func(byteGroup *Group) {
-					for _, byteVal := range ha[:] {
+					for _, byteVal := range sighash[:] {
 						byteGroup.Lit(int(byteVal))
 					}
 				}).Op("}")
 
-				code.Line().Line()
+				// Declare MarshalWithEncoder:
+				code.Line().Line().Add(
+					genMarshalWithEncoder_struct(
+						&idl,
+						true,
+						exportedAccountName,
+						discriminatorName,
+						*acc.Type.Fields,
+						false,
+					))
 
-				{
-					// Declare MarshalWithEncoder
-					code.Func().Params(Id("acc").Id(exportedAccountName)).Id("MarshalWithEncoder").
-						Params(
-							ListFunc(func(params *Group) {
-								// Parameters:
-								params.Id("encoder").Op("*").Qual(PkgDfuseBinary, "Encoder")
-							}),
-						).
-						Params(
-							ListFunc(func(results *Group) {
-								// Results:
-								results.Err().Error()
-							}),
-						).
-						BlockFunc(func(body *Group) {
-							// Body:
-							body.Err().Op("=").Id("encoder").Dot("WriteBytes").Call(Id(discriminatorName).Index(Op(":")), False())
-							body.If(Err().Op("!=").Nil()).Block(
-								Return(Err()),
-							)
-
-							body.Err().Op("=").Id("encoder").Dot("Encode").Call(Id("acc"))
-							body.If(Err().Op("!=").Nil()).Block(
-								Return(Err()),
-							)
-
-							body.Return(Nil())
-						})
-				}
-				{
-					// Declare UnmarshalWithDecoder
-					code.Line().Line()
-					code.Func().Params(Id("acc").Op("*").Id(exportedAccountName)).Id("UnmarshalWithDecoder").
-						Params(
-							ListFunc(func(params *Group) {
-								// Parameters:
-								params.Id("decoder").Op("*").Qual(PkgDfuseBinary, "Decoder")
-							}),
-						).
-						Params(
-							ListFunc(func(results *Group) {
-								// Results:
-								results.Err().Error()
-							}),
-						).
-						BlockFunc(func(body *Group) {
-							// Body:
-							body.Comment("Read and check account discriminator:")
-							body.BlockFunc(func(discReadBody *Group) {
-								discReadBody.List(Id("discriminator"), Err()).Op(":=").Id("decoder").Dot("ReadTypeID").Call()
-								discReadBody.If(Err().Op("!=").Nil()).Block(
-									Return(Err()),
-								)
-								discReadBody.If(Op("!").Id("discriminator").Dot("Equal").Call(Id(discriminatorName).Index(Op(":")))).Block(
-									Return(
-										Qual("fmt", "Errorf").Call(
-											Line().Lit("wrong discriminator: wanted %s, got %s"),
-											Line().Lit(Sf("%v", ha[:])),
-											Line().Qual("fmt", "Sprint").Call(Id("discriminator").Index(Op(":"))),
-										),
-									),
-								)
-							})
-
-							// TODO: decode field by field, also checking for optional fields:
-							body.Return(Id("decoder").Dot("Decode").Call(Id("acc")))
-						})
-				}
+				// Declare UnmarshalWithDecoder
+				code.Line().Line().Add(
+					genUnmarshalWithDecoder_struct(
+						&idl,
+						true,
+						exportedAccountName,
+						discriminatorName,
+						*acc.Type.Fields,
+						sighash,
+					))
 
 				file.Add(code.Line().Line())
 			}
@@ -767,144 +717,29 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 		{
 			// Declare `MarshalWithEncoder(encoder *bin.Encoder) error` method on instruction:
-			code := Empty()
-
-			code.Line().Line().Func().Params(Id("inst").Id(insExportedName)).Id("MarshalWithEncoder").
-				Params(
-					ListFunc(func(params *Group) {
-						// Parameters:
-						params.Id("encoder").Op("*").Qual(PkgDfuseBinary, "Encoder")
-					}),
-				).
-				Params(
-					ListFunc(func(results *Group) {
-						// Results:
-						results.Error()
-					}),
-				).
-				BlockFunc(func(body *Group) {
-					// Body:
-					for _, arg := range instruction.Args {
-						exportedArgName := ToCamel(arg.Name)
-						body.Commentf("Serialize `%s` param:", exportedArgName)
-
-						if isComplexEnum(arg.Type) {
-							enumName := arg.Type.GetIdlTypeDefined().Defined
-							body.BlockFunc(func(argBody *Group) {
-								argBody.List(Id("tmp")).Op(":=").Id(formatEnumContainerName(enumName)).Block()
-								argBody.Switch(Id("realvalue").Op(":=").Id("inst").Dot(exportedArgName).Op(".").Parens(Type())).
-									BlockFunc(func(switchGroup *Group) {
-										// TODO: maybe it's from idl.Accounts ???
-										interfaceType := idl.Types.GetByName(enumName)
-										for variantIndex, variant := range interfaceType.Type.Variants {
-											switchGroup.Case(Op("*").Id(ToCamel(variant.Name))).
-												BlockFunc(func(caseGroup *Group) {
-													caseGroup.Id("tmp").Dot("Enum").Op("=").Lit(variantIndex)
-													caseGroup.Id("tmp").Dot(ToCamel(variant.Name)).Op("=").Op("*").Id("realvalue")
-												})
-										}
-									})
-
-								argBody.Err().Op(":=").Id("encoder").Dot("Encode").Call(Id("tmp"))
-
-								argBody.If(
-									Err().Op("!=").Nil(),
-								).Block(
-									Return(Err()),
-								)
-
-							})
-						} else {
-							body.BlockFunc(func(argBody *Group) {
-								// TODO: check if is optional and nil
-								argBody.Err().Op(":=").Id("encoder").Dot("Encode").Call(Add(CodeIf(!arg.Type.IsIdlTypeOption(), Op("*"))).Id("inst").Dot(exportedArgName))
-
-								argBody.If(
-									Err().Op("!=").Nil(),
-								).Block(
-									Return(Err()),
-								)
-
-							})
-						}
-
-					}
-
-					body.Return(Nil())
-				})
-			file.Add(code.Line())
+			file.Add(
+				genMarshalWithEncoder_struct(
+					&idl,
+					false,
+					insExportedName,
+					"",
+					instruction.Args,
+					true,
+				),
+			)
 		}
 
 		{
 			// Declare `UnmarshalWithDecoder(decoder *bin.Decoder) error` method on instruction:
-			code := Empty()
-
-			code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("UnmarshalWithDecoder").
-				Params(
-					ListFunc(func(params *Group) {
-						// Parameters:
-						params.Id("decoder").Op("*").Qual(PkgDfuseBinary, "Decoder")
-					}),
-				).
-				Params(
-					ListFunc(func(results *Group) {
-						// Results:
-						results.Error()
-					}),
-				).
-				BlockFunc(func(body *Group) {
-					// Body:
-					for _, arg := range instruction.Args {
-						exportedArgName := ToCamel(arg.Name)
-						body.Commentf("Deserialize `%s` param:", exportedArgName)
-
-						if isComplexEnum(arg.Type) {
-							enumName := arg.Type.GetIdlTypeDefined().Defined
-							body.BlockFunc(func(argBody *Group) {
-
-								argBody.List(Id("tmp")).Op(":=").New(Id(formatEnumContainerName(enumName)))
-
-								argBody.Err().Op(":=").Id("decoder").Dot("Decode").Call(Id("tmp"))
-
-								argBody.If(
-									Err().Op("!=").Nil(),
-								).Block(
-									Return(Err()),
-								)
-
-								argBody.Switch(Id("tmp").Dot("Enum")).
-									BlockFunc(func(switchGroup *Group) {
-										interfaceType := idl.Types.GetByName(enumName)
-										for variantIndex, variant := range interfaceType.Type.Variants {
-											switchGroup.Case(Lit(variantIndex)).
-												BlockFunc(func(caseGroup *Group) {
-													caseGroup.Id("inst").Dot(exportedArgName).Op("=").Op("&").Id("tmp").Dot(ToCamel(variant.Name))
-												})
-										}
-										switchGroup.Default().
-											BlockFunc(func(caseGroup *Group) {
-												caseGroup.Return(Qual("fmt", "Errorf").Call(Lit("unknown enum index: %v"), Id("tmp").Dot("Enum")))
-											})
-									})
-
-							})
-						} else {
-							body.BlockFunc(func(argBody *Group) {
-								argBody.Err().Op(":=").Id("decoder").Dot("Decode").Call(Op("&").Id("inst").Dot(exportedArgName))
-
-								argBody.If(
-									Err().Op("!=").Nil(),
-								).Block(
-									Return(Err()),
-								)
-							})
-						}
-
-					}
-
-					body.Return(Nil())
-				})
-			file.Add(code.Line())
+			file.Add(
+				genUnmarshalWithDecoder_struct(
+					&idl,
+					true,
+					insExportedName,
+					"",
+					instruction.Args,
+					bin.TypeID{},
+				))
 		}
 
 		{
@@ -1205,8 +1040,8 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 
 						ins.Op("=").Qual(PkgDfuseBinary, "TypeID").Call(
 							Index(Lit(8)).Byte().Op("{").ListFunc(func(byteGroup *Group) {
-								ha := bin.SighashTypeID(bin.SIGHASH_GLOBAL_NAMESPACE, toBeHashed)
-								for _, byteVal := range ha[:] {
+								sighash := bin.SighashTypeID(bin.SIGHASH_GLOBAL_NAMESPACE, toBeHashed)
+								for _, byteVal := range sighash[:] {
 									byteGroup.Lit(int(byteVal))
 								}
 							}).Op("}"),
