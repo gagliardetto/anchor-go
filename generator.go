@@ -137,7 +137,7 @@ func genTypeDef(def IdlTypeDef) Code {
 		code := Empty()
 		code.Type().Id(def.Name).StructFunc(func(fieldsGroup *Group) {
 			for _, field := range *def.Type.Fields {
-				fieldsGroup.Add(genField(field, false)).
+				fieldsGroup.Add(genField(field, field.Type.IsIdlTypeOption())).
 					Add(func() Code {
 						if field.Type.IsIdlTypeOption() {
 							return Tag(map[string]string{

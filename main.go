@@ -204,7 +204,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						exportedAccountName,
 						discriminatorName,
 						*acc.Type.Fields,
-						false,
+						true,
 					))
 
 				// Declare UnmarshalWithDecoder
@@ -734,7 +734,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			file.Add(
 				genUnmarshalWithDecoder_struct(
 					&idl,
-					true,
+					false,
 					insExportedName,
 					"",
 					instruction.Args,
