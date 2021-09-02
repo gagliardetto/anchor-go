@@ -263,6 +263,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 								)
 							})
 
+							// TODO: decode field by field, also checking for optional fields:
 							body.Return(Id("decoder").Dot("Decode").Call(Id("acc")))
 						})
 				}
@@ -308,14 +309,15 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							fieldsGroup.Comment(doc)
 						}
 					}
-					fieldsGroup.Add(genField(arg, true)).Add(func() Code {
-						if arg.Type.IsIdlTypeOption() {
-							return Tag(map[string]string{
-								"bin": "optional",
-							}).Comment("OPTIONAL")
-						}
-						return nil
-					}())
+					fieldsGroup.Add(genField(arg, true)).
+						Add(func() Code {
+							if arg.Type.IsIdlTypeOption() {
+								return Tag(map[string]string{
+									"bin": "optional",
+								})
+							}
+							return nil
+						}())
 				}
 
 				fieldsGroup.Line()

@@ -73,15 +73,7 @@ func genField(field IdlField, pointer bool) Code {
 			}
 			return nil
 		}()).
-		Add(genTypeName(field.Type)).
-		Add(func() Code {
-			if field.Type.IsIdlTypeOption() {
-				return Tag(map[string]string{
-					"bin": "optional",
-				})
-			}
-			return nil
-		}())
+		Add(genTypeName(field.Type))
 	return st
 }
 
@@ -144,7 +136,15 @@ func genTypeDef(def IdlTypeDef) Code {
 		code := Empty()
 		code.Type().Id(def.Name).StructFunc(func(fieldsGroup *Group) {
 			for _, field := range *def.Type.Fields {
-				fieldsGroup.Add(genField(field, false))
+				fieldsGroup.Add(genField(field, false)).
+					Add(func() Code {
+						if field.Type.IsIdlTypeOption() {
+							return Tag(map[string]string{
+								"bin": "optional",
+							})
+						}
+						return nil
+					}())
 			}
 		})
 
