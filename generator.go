@@ -252,7 +252,7 @@ func genMarshalWithEncoder_struct(
 	code := Empty()
 	{
 		// Declare MarshalWithEncoder
-		code.Func().Params(Id("acc").Id(receiverTypeName)).Id("MarshalWithEncoder").
+		code.Func().Params(Id("obj").Id(receiverTypeName)).Id("MarshalWithEncoder").
 			Params(
 				ListFunc(func(params *Group) {
 					// Parameters:
@@ -315,7 +315,7 @@ func genMarshalWithEncoder_struct(
 							if checkNil {
 								body.BlockFunc(func(optGroup *Group) {
 									// if nil:
-									optGroup.If(Id("acc").Dot(ToCamel(field.Name)).Op("==").Nil()).Block(
+									optGroup.If(Id("obj").Dot(ToCamel(field.Name)).Op("==").Nil()).Block(
 										Err().Op("=").Id("encoder").Dot("WriteBool").Call(False()),
 										If(Err().Op("!=").Nil()).Block(
 											Return(Err()),
@@ -325,7 +325,7 @@ func genMarshalWithEncoder_struct(
 										If(Err().Op("!=").Nil()).Block(
 											Return(Err()),
 										),
-										Err().Op("=").Id("encoder").Dot("Encode").Call(Id("acc").Dot(exportedArgName)),
+										Err().Op("=").Id("encoder").Dot("Encode").Call(Id("obj").Dot(exportedArgName)),
 										If(Err().Op("!=").Nil()).Block(
 											Return(Err()),
 										),
@@ -339,7 +339,7 @@ func genMarshalWithEncoder_struct(
 									optGroup.If(Err().Op("!=").Nil()).Block(
 										Return(Err()),
 									)
-									optGroup.Err().Op("=").Id("encoder").Dot("Encode").Call(Id("acc").Dot(exportedArgName))
+									optGroup.Err().Op("=").Id("encoder").Dot("Encode").Call(Id("obj").Dot(exportedArgName))
 									optGroup.If(Err().Op("!=").Nil()).Block(
 										Return(Err()),
 									)
@@ -347,7 +347,7 @@ func genMarshalWithEncoder_struct(
 							}
 
 						} else {
-							body.Err().Op("=").Id("encoder").Dot("Encode").Call(Id("acc").Dot(exportedArgName))
+							body.Err().Op("=").Id("encoder").Dot("Encode").Call(Id("obj").Dot(exportedArgName))
 							body.If(Err().Op("!=").Nil()).Block(
 								Return(Err()),
 							)
@@ -373,7 +373,7 @@ func genUnmarshalWithDecoder_struct(
 	code := Empty()
 	{
 		// Declare MarshalWithEncoder
-		code.Func().Params(Id("acc").Op("*").Id(receiverTypeName)).Id("UnmarshalWithDecoder").
+		code.Func().Params(Id("obj").Op("*").Id(receiverTypeName)).Id("UnmarshalWithDecoder").
 			Params(
 				ListFunc(func(params *Group) {
 					// Parameters:
@@ -456,14 +456,14 @@ func genUnmarshalWithDecoder_struct(
 									Return(Err()),
 								)
 								optGroup.If(Id("ok")).Block(
-									Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("acc").Dot(exportedArgName)),
+									Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(exportedArgName)),
 									If(Err().Op("!=").Nil()).Block(
 										Return(Err()),
 									),
 								)
 							})
 						} else {
-							body.Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("acc").Dot(exportedArgName))
+							body.Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(exportedArgName))
 							body.If(Err().Op("!=").Nil()).Block(
 								Return(Err()),
 							)
