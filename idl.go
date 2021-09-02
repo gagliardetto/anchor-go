@@ -391,6 +391,7 @@ type IdlTypeDefStruct = []IdlField
 
 type IdlEnumVariant struct {
 	Name   string         `json:"name"`
+	Docs   []string       `json:"docs"` // @custom
 	Fields *IdlEnumFields `json:"fields,omitempty"`
 }
 

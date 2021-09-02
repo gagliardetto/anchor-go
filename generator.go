@@ -137,6 +137,10 @@ func genTypeDef(def IdlTypeDef) Code {
 		code := Empty()
 		code.Type().Id(def.Name).StructFunc(func(fieldsGroup *Group) {
 			for _, field := range *def.Type.Fields {
+
+				for _, doc := range field.Docs {
+					fieldsGroup.Comment(doc)
+				}
 				fieldsGroup.Add(genField(field, field.Type.IsIdlTypeOption())).
 					Add(func() Code {
 						if field.Type.IsIdlTypeOption() {
@@ -158,6 +162,13 @@ func genTypeDef(def IdlTypeDef) Code {
 			code.Type().Id(enumTypeName).Qual(PkgDfuseBinary, "BorshEnum")
 			code.Line().Const().Parens(DoGroup(func(gr *Group) {
 				for variantIndex, variant := range def.Type.Variants {
+
+					for docIndex, doc := range variant.Docs {
+						if docIndex == 0 {
+							gr.Line()
+						}
+						gr.Comment(doc).Line()
+					}
 
 					gr.Id(variant.Name).Add(func() Code {
 						if variantIndex == 0 {
