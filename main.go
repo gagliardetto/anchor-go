@@ -384,11 +384,13 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				exportedArgName := ToCamel(arg.Name)
 
 				code.Line().Line()
+				name := "Set" + exportedArgName
+				code.Commentf("%s sets the %q parameter.", name, arg.Name).Line()
 				for _, doc := range arg.Docs {
 					code.Comment(doc).Line()
 				}
 
-				code.Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Set" + exportedArgName).
+				code.Func().Params(Id("inst").Op("*").Id(insExportedName)).Id(name).
 					Params(
 						ListFunc(func(params *Group) {
 							// Parameters:
@@ -886,58 +888,70 @@ func genAccountGettersSetters(
 	exportedAccountName string,
 	lowerAccountName string,
 ) Code {
-	code := Empty().Line().Line()
+	code := Empty()
 
-	for _, doc := range account.Docs {
-		code.Comment(doc).Line()
+	{
+		code.Line().Line()
+		name := formatAccountAccessorName("Set", exportedAccountName)
+		code.Commentf("%s sets the %q account.", name, account.Name).Line()
+		for _, doc := range account.Docs {
+			code.Comment(doc).Line()
+		}
+		// Create account setters:
+		code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(name).
+			Params(
+				ListFunc(func(params *Group) {
+					// Parameters:
+					params.Id(lowerAccountName).Qual(PkgSolanaGo, "PublicKey")
+				}),
+			).
+			Params(
+				ListFunc(func(results *Group) {
+					// Results:
+					results.Op("*").Id(receiverTypeName)
+				}),
+			).
+			BlockFunc(func(body *Group) {
+				// Body:
+				def := Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).
+					Op("=").Qual(PkgSolanaGo, "Meta").Call(Id(lowerAccountName))
+				if account.IsMut {
+					def.Dot("WRITE").Call()
+				}
+				if account.IsSigner {
+					def.Dot("SIGNER").Call()
+				}
+
+				body.Add(def)
+
+				body.Return().Id("inst")
+			})
 	}
-	// Create account setters:
-	code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(formatAccountAccessorName("Set", exportedAccountName)).
-		Params(
-			ListFunc(func(params *Group) {
-				// Parameters:
-				params.Id(lowerAccountName).Qual(PkgSolanaGo, "PublicKey")
-			}),
-		).
-		Params(
-			ListFunc(func(results *Group) {
-				// Results:
-				results.Op("*").Id(receiverTypeName)
-			}),
-		).
-		BlockFunc(func(body *Group) {
-			// Body:
-			def := Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).
-				Op("=").Qual(PkgSolanaGo, "Meta").Call(Id(lowerAccountName))
-			if account.IsMut {
-				def.Dot("WRITE").Call()
-			}
-			if account.IsSigner {
-				def.Dot("SIGNER").Call()
-			}
 
-			body.Add(def)
-
-			body.Return().Id("inst")
-		})
-
-	// Create account getters:
-	code.Line().Line().Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(formatAccountAccessorName("Get", exportedAccountName)).
-		Params(
-			ListFunc(func(params *Group) {
-				// Parameters:
-			}),
-		).
-		Params(
-			ListFunc(func(results *Group) {
-				// Results:
-				results.Op("*").Qual(PkgSolanaGo, "AccountMeta")
-			}),
-		).
-		BlockFunc(func(body *Group) {
-			// Body:
-			body.Return(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)))
-		})
+	{ // Create account getters:
+		code.Line().Line()
+		name := formatAccountAccessorName("Get", exportedAccountName)
+		code.Commentf("%s gets the %q account.", name, account.Name).Line()
+		for _, doc := range account.Docs {
+			code.Comment(doc).Line()
+		}
+		code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(name).
+			Params(
+				ListFunc(func(params *Group) {
+					// Parameters:
+				}),
+			).
+			Params(
+				ListFunc(func(results *Group) {
+					// Results:
+					results.Op("*").Qual(PkgSolanaGo, "AccountMeta")
+				}),
+			).
+			BlockFunc(func(body *Group) {
+				// Body:
+				body.Return(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)))
+			})
+	}
 
 	return code
 }
