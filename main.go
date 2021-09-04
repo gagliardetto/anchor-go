@@ -12,7 +12,7 @@ import (
 	"time"
 
 	. "github.com/dave/jennifer/jen"
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 	. "github.com/gagliardetto/utilz"
 )
 
@@ -647,7 +647,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							exportedAccountName := ToCamel(filepath.Join(groupPath, ia.Name))
 
 							accountValidationBlock.If(Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex)).Op("==").Nil()).Block(
-								Return(Qual("fmt", "Errorf").Call(List(Lit(Sf("accounts.%s is not set", exportedAccountName))))),
+								Return(Qual("errors", "New").Call(Lit(Sf("accounts.%s is not set", exportedAccountName)))),
 							)
 							return true
 						})
