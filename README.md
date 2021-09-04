@@ -1,3 +1,14 @@
+# usage
+
+```bash
+go run --codec=borsh --debug --src=/path/to/idl.json
+```
+
+Code will be generated and saved to a timestamped folder inside `./generated/`.
+
+---
+
+
 sh -c "$(curl -sSfL https://release.solana.com/v1.7.4/install)"
 
 Adding export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH" to $HOME/.profile
