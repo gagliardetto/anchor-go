@@ -3,17 +3,17 @@ package main
 import (
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 	. "github.com/gagliardetto/utilz"
 )
 
 const (
 	PkgSolanaGo       = "github.com/gagliardetto/solana-go"
 	PkgSolanaGoText   = "github.com/gagliardetto/solana-go/text"
-	PkgDfuseBinary    = "github.com/dfuse-io/binary"
+	PkgDfuseBinary    = "github.com/gagliardetto/binary"
 	PkgTreeout        = "github.com/gagliardetto/treeout"
 	PkgFormat         = "github.com/gagliardetto/solana-go/text/format"
-	PkgGoFuzz         = "github.com/google/gofuzz"
+	PkgGoFuzz         = "github.com/gagliardetto/gofuzz"
 	PkgTestifyRequire = "github.com/stretchr/testify/require"
 )
 
@@ -32,7 +32,7 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 	case IdlTypeI8:
 		stat.Int8()
 	case IdlTypeU16:
-		// TODO: some types have their implementation in github.com/dfuse-io/binary
+		// TODO: some types have their implementation in github.com/gagliardetto/binary
 		stat.Uint16()
 	case IdlTypeI16:
 		stat.Int16()
