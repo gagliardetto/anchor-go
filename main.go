@@ -687,7 +687,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 									instructionBranchGroup.Line().Comment("Parameters of the instruction:")
 
-									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit("Params")).Dot("ParentFunc").Parens(Func().Parens(Id("paramsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(paramsBranchGroup *Group) {
+									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit(Sf("Params[len=%v]", len(instruction.Args)))).Dot("ParentFunc").Parens(Func().Parens(Id("paramsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(paramsBranchGroup *Group) {
 										longest := treeFindLongestNameFromFields(instruction.Args)
 										for _, arg := range instruction.Args {
 											exportedArgName := ToCamel(arg.Name)
@@ -703,7 +703,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 									instructionBranchGroup.Line().Comment("Accounts of the instruction:")
 
-									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit("Accounts")).Dot("ParentFunc").Parens(
+									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit(Sf("Accounts[len=%v]", instruction.Accounts.NumAccounts()))).Dot("ParentFunc").Parens(
 										Func().Parens(Id("accountsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(accountsBranchGroup *Group) {
 
 											longest := treeFindLongestNameFromAccounts(instruction.Accounts)
