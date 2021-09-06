@@ -6,9 +6,9 @@ require (
 	github.com/dave/jennifer v1.4.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gagliardetto/binary v0.4.1
-	github.com/gagliardetto/gofuzz v1.2.2 // indirect
+	github.com/gagliardetto/gofuzz v1.2.2
 	github.com/gagliardetto/solana-go v0.4.3
-	github.com/gagliardetto/treeout v0.1.2 // indirect
-	github.com/gagliardetto/utilz v0.1.0
+	github.com/gagliardetto/treeout v0.1.2
+	github.com/gagliardetto/utilz v0.1.1
 	github.com/stretchr/testify v1.6.1
 )
