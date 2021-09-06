@@ -86,7 +86,7 @@ func isVar(name string) bool {
 	return strings.HasPrefix(name, "$(") && strings.HasSuffix(name, ")")
 }
 
-func getVarName(variable string) string {
+func getSysVarName(variable string) string {
 	variable = strings.TrimPrefix(variable, "$(")
 	variable = strings.TrimSuffix(variable, ")")
 	return variable

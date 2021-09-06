@@ -349,7 +349,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					// Set sysvar accounts:
 					instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
 						if isVar(account.Name) {
-							pureVarName := getVarName(account.Name)
+							pureVarName := getSysVarName(account.Name)
 							is := isSysVar(pureVarName)
 							if is {
 								_, ok := sysVars[pureVarName]
@@ -688,12 +688,13 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 									instructionBranchGroup.Line().Comment("Parameters of the instruction:")
 
 									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit("Params")).Dot("ParentFunc").Parens(Func().Parens(Id("paramsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(paramsBranchGroup *Group) {
+										longest := treeFindLongestNameFromFields(instruction.Args)
 										for _, arg := range instruction.Args {
 											exportedArgName := ToCamel(arg.Name)
 											paramsBranchGroup.Id("paramsBranch").Dot("Child").
 												Call(
 													Qual(PkgFormat, "Param").Call(
-														Lit(exportedArgName+StringIf(arg.Type.IsIdlTypeOption(), " (OPTIONAL)")),
+														Lit(strings.Repeat(" ", longest-len(exportedArgName))+exportedArgName+StringIf(arg.Type.IsIdlTypeOption(), " (OPT)")),
 														Add(CodeIf(!arg.Type.IsIdlTypeOption(), Op("*"))).Id("inst").Dot(exportedArgName),
 													),
 												)
@@ -705,9 +706,14 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit("Accounts")).Dot("ParentFunc").Parens(
 										Func().Parens(Id("accountsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(accountsBranchGroup *Group) {
 
+											longest := treeFindLongestNameFromAccounts(instruction.Accounts)
 											instruction.Accounts.Walk("", nil, nil, func(groupPath string, accountIndex int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
-												exportedAccountName := filepath.Join(groupPath, ia.Name)
-												accountsBranchGroup.Id("accountsBranch").Dot("Child").Call(Qual(PkgFormat, "Meta").Call(Lit(exportedAccountName), Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex))))
+
+												cleanedName := treeFormatAccountName(ia.Name)
+
+												exportedAccountName := filepath.Join(groupPath, cleanedName)
+
+												accountsBranchGroup.Id("accountsBranch").Dot("Child").Call(Qual(PkgFormat, "Meta").Call(Lit(strings.Repeat(" ", longest-len(exportedAccountName))+exportedAccountName), Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex))))
 												return true
 											})
 										}))
@@ -1423,4 +1429,43 @@ func formatAccountAccessorName(prefix, name string) string {
 		return prefix + name
 	}
 	return prefix + name + "Account"
+}
+
+func treeFindLongestNameFromFields(fields []IdlField) (ln int) {
+	for _, v := range fields {
+		if len(v.Name) > ln {
+			ln = len(v.Name)
+		}
+	}
+	return
+}
+
+func treeFindLongestNameFromAccounts(accounts IdlAccountItemSlice) (ln int) {
+	accounts.Walk("", nil, nil, func(groupPath string, accountIndex int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
+
+		cleanedName := treeFormatAccountName(ia.Name)
+
+		exportedAccountName := filepath.Join(groupPath, cleanedName)
+		if len(exportedAccountName) > ln {
+			ln = len(exportedAccountName)
+		}
+
+		return true
+	})
+	return
+}
+
+func treeFormatAccountName(name string) string {
+	cleanedName := name
+	if isSysVar(name) {
+		cleanedName = strings.TrimSuffix(getSysVarName(name), "Pubkey")
+	}
+	if len(cleanedName) > len("account") {
+		if strings.HasSuffix(cleanedName, "account") {
+			cleanedName = strings.TrimSuffix(cleanedName, "account")
+		} else if strings.HasSuffix(cleanedName, "Account") {
+			cleanedName = strings.TrimSuffix(cleanedName, "Account")
+		}
+	}
+	return cleanedName
 }
