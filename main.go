@@ -149,7 +149,7 @@ func main() {
 
 			mdf.AddNewRequire("github.com/gagliardetto/binary", "v0.4.1", false)
 			mdf.AddNewRequire("github.com/gagliardetto/gofuzz", "v1.2.2", false)
-			mdf.AddNewRequire("github.com/gagliardetto/solana-go", "v0.4.4", false)
+			mdf.AddNewRequire("github.com/gagliardetto/solana-go", "v0.4.5", false)
 			mdf.AddNewRequire("github.com/gagliardetto/treeout", "v0.1.4", false)
 			mdf.AddNewRequire("github.com/stretchr/testify", "v1.6.1", false)
 			mdf.AddNewRequire("github.com/davecgh/go-spew", "v1.1.1", false)
