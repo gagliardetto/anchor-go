@@ -11,4 +11,5 @@ require (
 	github.com/gagliardetto/treeout v0.1.4
 	github.com/gagliardetto/utilz v0.1.1
 	github.com/stretchr/testify v1.6.1
+	golang.org/x/mod v0.2.0
 )

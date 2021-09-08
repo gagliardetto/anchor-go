@@ -13,6 +13,7 @@ type Config struct {
 	Encoding EncoderName
 	Debug    bool
 	DstDir   string
+	ModPath  string
 }
 
 func GetConfig() *Config {

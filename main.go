@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 	. "github.com/dave/jennifer/jen"
 	bin "github.com/gagliardetto/binary"
 	. "github.com/gagliardetto/utilz"
+	"golang.org/x/mod/modfile"
 )
 
 const generatedDir = "generated"
@@ -21,11 +23,13 @@ const generatedDir = "generated"
 func main() {
 	conf.Encoding = EncodingBorsh
 
-	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
-	flag.StringVar((*string)(&conf.Encoding), "codec", "borsh", "Choose codec")
-	flag.StringVar(&conf.DstDir, "dst", generatedDir, "Destination folder")
 	filenames := FlagStringArray{}
 	flag.Var(&filenames, "src", "Path to source; can use multiple times.")
+	flag.StringVar(&conf.DstDir, "dst", generatedDir, "Destination folder")
+	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
+
+	flag.StringVar((*string)(&conf.Encoding), "codec", "borsh", "Choose codec")
+	flag.StringVar(&conf.ModPath, "mod", "", "Generate a go.mod file with the necessary dependencies, and this module")
 	flag.Parse()
 
 	if err := conf.Validate(); err != nil {
@@ -38,6 +42,38 @@ func main() {
 	} else {
 		ts = time.Now()
 	}
+	if len(filenames) == 0 {
+		Sfln(
+			"[%s] No IDL files provided",
+			Red(XMark),
+		)
+		os.Exit(1)
+	}
+	{
+		exists, err := DirExists(GetConfig().DstDir)
+		if err != nil {
+			panic(err)
+		}
+		if !exists {
+			if GetConfig().DstDir == generatedDir {
+				MustCreateFolderIfNotExists(generatedDir, os.ModePerm)
+			} else {
+				Sfln(
+					"[%s] destination dir doesn't exist: %s",
+					Red(XMark),
+					GetConfig().DstDir,
+				)
+				os.Exit(1)
+			}
+		}
+	}
+
+	callbacks := make([]func(), 0)
+	defer func() {
+		for _, cb := range callbacks {
+			cb()
+		}
+	}()
 
 	for _, idlFilepath := range filenames {
 		Sfln(
@@ -82,18 +118,74 @@ func main() {
 		// spew.Dump(idl)
 
 		// Create subfolder for package for generated assets:
-		packageAssetFolderName := ToLowerCamel(idl.Name)
-		packageAssetFolderPath := path.Join(GetConfig().DstDir, packageAssetFolderName)
-		MustCreateFolderIfNotExists(packageAssetFolderPath, os.ModePerm)
-		// Create folder for assets generated during this run:
-		thisRunAssetFolderName := ToLowerCamel(idl.Name) + "_" + ts.Format(FilenameTimeFormat)
-		thisRunAssetFolderPath := path.Join(packageAssetFolderPath, thisRunAssetFolderName)
-		// Create a new assets folder inside the main assets folder:
-		MustCreateFolderIfNotExists(thisRunAssetFolderPath, os.ModePerm)
+		packageAssetFolderName := ToSnake(idl.Name)
+		var dstDirForFiles string
+		if GetConfig().Debug {
+			packageAssetFolderPath := path.Join(GetConfig().DstDir, packageAssetFolderName)
+			MustCreateFolderIfNotExists(packageAssetFolderPath, os.ModePerm)
+			// Create folder for assets generated during this run:
+			thisRunAssetFolderName := ToLowerCamel(idl.Name) + "_" + ts.Format(FilenameTimeFormat)
+			thisRunAssetFolderPath := path.Join(packageAssetFolderPath, thisRunAssetFolderName)
+			// Create a new assets folder inside the main assets folder:
+			MustCreateFolderIfNotExists(thisRunAssetFolderPath, os.ModePerm)
+			dstDirForFiles = thisRunAssetFolderPath
+		} else {
+			if GetConfig().DstDir == generatedDir {
+				dstDirForFiles = filepath.Join(GetConfig().DstDir, packageAssetFolderName)
+			} else {
+				dstDirForFiles = GetConfig().DstDir
+			}
+		}
+		MustCreateFolderIfNotExists(dstDirForFiles, os.ModePerm)
 
 		files, err := GenerateClientFromProgramIDL(idl)
 		if err != nil {
 			panic(err)
+		}
+
+		{
+			mdf := &modfile.File{}
+			mdf.AddModuleStmt(GetConfig().ModPath)
+
+			mdf.AddNewRequire("github.com/gagliardetto/binary", "v0.4.1", false)
+			mdf.AddNewRequire("github.com/gagliardetto/gofuzz", "v1.2.2", false)
+			mdf.AddNewRequire("github.com/gagliardetto/solana-go", "v0.4.4", false)
+			mdf.AddNewRequire("github.com/gagliardetto/treeout", "v0.1.4", false)
+			mdf.AddNewRequire("github.com/stretchr/testify", "v1.6.1", false)
+			mdf.AddNewRequire("github.com/davecgh/go-spew", "v1.1.1", false)
+			mdf.Cleanup()
+
+			callbacks = append(callbacks, func() {
+				Ln()
+				Ln(Bold("Don't forget to import the necessary dependencies!"))
+				Ln()
+				for _, v := range mdf.Require {
+					Sfln(
+						"	go get %s@%s",
+						v.Mod.Path,
+						v.Mod.Version,
+					)
+				}
+				Ln()
+			})
+
+			if GetConfig().ModPath != "" {
+				mfBytes, err := mdf.Format()
+				if err != nil {
+					panic(err)
+				}
+				gomodFilepath := filepath.Join(dstDirForFiles, "go.mod")
+				Sfln(
+					"[%s] %s",
+					Lime(Checkmark),
+					MustAbs(gomodFilepath),
+				)
+				// Write `go.mod` file:
+				err = ioutil.WriteFile(gomodFilepath, mfBytes, 0666)
+				if err != nil {
+					panic(err)
+				}
+			}
 		}
 
 		for _, file := range files {
@@ -106,7 +198,7 @@ func main() {
 			{
 				// Save assets:
 				assetFileName := file.Name + ".go"
-				assetFilepath := path.Join(thisRunAssetFolderPath, assetFileName)
+				assetFilepath := path.Join(dstDirForFiles, assetFileName)
 
 				// Create file:
 				goFile, err := os.Create(assetFilepath)
