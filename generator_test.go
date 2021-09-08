@@ -68,7 +68,7 @@ func Test_genTypeName(t *testing.T) {
 		{
 			// TODO: is this also OK as []byte ???
 			`{"type": "bytes"}`,
-			"var thing binary.HexBytes",
+			"var thing []byte",
 		},
 		{
 			`{"type": "string"}`,

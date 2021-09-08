@@ -50,7 +50,7 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 		stat.Qual(PkgDfuseBinary, "Int128")
 	case IdlTypeBytes:
 		// TODO:
-		stat.Qual(PkgDfuseBinary, "HexBytes")
+		stat.Index().Byte()
 	case IdlTypeString:
 		stat.String()
 	case IdlTypePublicKey:
