@@ -1,6 +1,7 @@
 {
     "version": "0.0.0",
     "name": "system",
+    "ref": "https://github.com/solana-labs/solana/blob/d3aa9bce26fad697fa6c825933a46137e949adbc/sdk/program/src/system_instruction.rs",
     "docs": [
         "Create new accounts, allocate account data, assign accounts to owning programs,",
         "transfer lamports from System Program owned accounts and pay transacation fees."
@@ -517,7 +518,8 @@
     "types": [],
     "events": [],
     "errors": [],
-    "metadata": {
-      "address": "11111111111111111111111111111111"
+    "metadata":
+    {
+        "address": "11111111111111111111111111111111"
     }
 }
