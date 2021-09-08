@@ -11,7 +11,6 @@ Generated Code will be generated and saved to `./generated/`.
 - [x] instructions
 - [x] accounts
 - [x] types
-- [ ] state
 - [ ] events
 - [ ] errors
 - [ ] handle tuple types
