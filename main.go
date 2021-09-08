@@ -73,7 +73,7 @@ func main() {
 	outDir := "generated"
 
 	for _, idlFilepath := range filenames {
-		Ln("Generating client for", LimeBG(idlFilepath))
+		Ln("Generating client from IDL:", Shakespeare(idlFilepath))
 		idlFile, err := os.Open(idlFilepath)
 		if err != nil {
 			panic(err)
@@ -86,6 +86,26 @@ func main() {
 		err = dec.Decode(&idl)
 		if err != nil {
 			panic(err)
+		}
+		{
+			if idl.State != nil {
+				Sfln(
+					"%s idl.State is defined, but handler is not implemented yet.",
+					OrangeBG("[?]"),
+				)
+			}
+			if len(idl.Events) > 0 {
+				Sfln(
+					"%s idl.Events is defined, but handler is not implemented yet.",
+					OrangeBG("[?]"),
+				)
+			}
+			if len(idl.Errors) > 0 {
+				Sfln(
+					"%s idl.Errors is defined, but handler is not implemented yet.",
+					OrangeBG("[?]"),
+				)
+			}
 		}
 
 		// spew.Dump(idl)
@@ -125,7 +145,11 @@ func main() {
 				defer goFile.Close()
 
 				// Write generated code file:
-				Infof("Saving assets to %q", MustAbs(assetFilepath))
+				Sfln(
+					"[%s] %s",
+					Lime(Checkmark),
+					MustAbs(assetFilepath),
+				)
 				err = file.File.Render(goFile)
 				if err != nil {
 					panic(err)
@@ -179,7 +203,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		file := NewGoFile(idl.Name, true)
 		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
+			// generate type definition:
 			file.Add(genTypeDef(acc))
+
+			// generate encoder and decoder methods (for borsh):
 			if GetConfig().Encoding == EncodingBorsh {
 				code := Empty()
 				exportedAccountName := ToCamel(acc.Name)
