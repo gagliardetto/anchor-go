@@ -19,7 +19,7 @@ Generated Code will be generated and saved to `./generated/`.
 
 ## what is anchor-go?
 
-`anchor-go` generates Go clients for Solana programs (smart contracts) written using the [anchor](https://github.com/project-serum/anchor) framework.
+`anchor-go` generates Go clients for [Solana](https://solana.com/) programs (smart contracts) written using the [anchor](https://github.com/project-serum/anchor) framework.
 
 ## what is anchor?
 
