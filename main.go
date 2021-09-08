@@ -16,17 +16,14 @@ import (
 	. "github.com/gagliardetto/utilz"
 )
 
+const generatedDir = "generated"
+
 func main() {
-	// fmt.Println(fmt.Sprint(bin.Sighash(bin.SIGHASH_ACCOUNT_NAMESPACE, "candy_machine")))
-	// fmt.Println(FormatByteSlice(bin.Sighash(bin.SIGHASH_ACCOUNT_NAMESPACE, "candy_machine")))
-	// fmt.Println(FormatByteSlice(bin.Sighash(bin.SIGHASH_ACCOUNT_NAMESPACE, "candyMachine")))
-	// fmt.Println(FormatByteSlice(bin.Sighash(bin.SIGHASH_ACCOUNT_NAMESPACE, "CandyMachine")))
-	// return
-	// TODO: load config from flags, etc.
 	conf.Encoding = EncodingBorsh
 
 	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
 	flag.StringVar((*string)(&conf.Encoding), "codec", "borsh", "Choose codec")
+	flag.StringVar(&conf.DstDir, "dst", generatedDir, "Destination folder")
 	filenames := FlagStringArray{}
 	flag.Var(&filenames, "src", "Path to source; can use multiple times.")
 	flag.Parse()
@@ -41,7 +38,6 @@ func main() {
 	} else {
 		ts = time.Now()
 	}
-	outDir := "generated"
 
 	for _, idlFilepath := range filenames {
 		Sfln(
@@ -87,7 +83,7 @@ func main() {
 
 		// Create subfolder for package for generated assets:
 		packageAssetFolderName := ToLowerCamel(idl.Name)
-		packageAssetFolderPath := path.Join(outDir, packageAssetFolderName)
+		packageAssetFolderPath := path.Join(GetConfig().DstDir, packageAssetFolderName)
 		MustCreateFolderIfNotExists(packageAssetFolderPath, os.ModePerm)
 		// Create folder for assets generated during this run:
 		thisRunAssetFolderName := ToLowerCamel(idl.Name) + "_" + ts.Format(FilenameTimeFormat)

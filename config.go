@@ -12,6 +12,7 @@ var conf = &Config{}
 type Config struct {
 	Encoding EncoderName
 	Debug    bool
+	DstDir   string
 }
 
 func GetConfig() *Config {
