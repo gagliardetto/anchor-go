@@ -14,3 +14,4 @@ Code will be generated and saved to a timestamped folder inside `./generated/`.
 - [ ] state
 - [ ] events
 - [ ] errors
+- [ ] handle tuple types
