@@ -128,15 +128,15 @@ func Test_genTypeName(t *testing.T) {
 		// "option":
 		{
 			`{"type": {"option": "string"}}`,
-			"var thing *string",
+			"var thing string",
 		},
 		{
 			`{"type": {"option": {"vec": {"array":[{"array":[{"defined":"Message"},123]},33607]}}}}`,
-			"var thing *[][33607][123]Message",
+			"var thing [][33607][123]Message",
 		},
 		{
 			`{"type": {"option": {"defined": "TransactionAccount"}}}`,
-			"var thing *TransactionAccount",
+			"var thing TransactionAccount",
 		},
 	}
 	{
@@ -166,7 +166,7 @@ func Test_genField(t *testing.T) {
 		},
 		{
 			`{"name":"space","type": {"option": {"vec": {"array":[{"array":[{"defined":"Message"},123]},33607]}}}}`,
-			"var thing struct {\n	Space *[][33607][123]Message\n}",
+			"var thing struct {\n	Space [][33607][123]Message\n}",
 		},
 	}
 	{

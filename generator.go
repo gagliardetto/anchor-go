@@ -301,7 +301,7 @@ func genMarshalWithEncoder_struct(
 						enumName := field.Type.GetIdlTypeDefined().Defined
 						body.BlockFunc(func(argBody *Group) {
 							argBody.List(Id("tmp")).Op(":=").Id(formatEnumContainerName(enumName)).Block()
-							argBody.Switch(Id("realvalue").Op(":=").Id("inst").Dot(exportedArgName).Op(".").Parens(Type())).
+							argBody.Switch(Id("realvalue").Op(":=").Id("obj").Dot(exportedArgName).Op(".").Parens(Type())).
 								BlockFunc(func(switchGroup *Group) {
 									// TODO: maybe it's from idl.Accounts ???
 									interfaceType := idl.Types.GetByName(enumName)
@@ -450,7 +450,7 @@ func genUnmarshalWithDecoder_struct(
 									for variantIndex, variant := range interfaceType.Type.Variants {
 										switchGroup.Case(Lit(variantIndex)).
 											BlockFunc(func(caseGroup *Group) {
-												caseGroup.Id("inst").Dot(exportedArgName).Op("=").Op("&").Id("tmp").Dot(ToCamel(variant.Name))
+												caseGroup.Id("obj").Dot(exportedArgName).Op("=").Op("&").Id("tmp").Dot(ToCamel(variant.Name))
 											})
 									}
 									switchGroup.Default().

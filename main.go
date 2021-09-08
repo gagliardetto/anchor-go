@@ -35,35 +35,6 @@ func main() {
 		panic(fmt.Errorf("error while validating config: %w", err))
 	}
 
-	filenamesExtra := []string{
-		// "idl/swap_light.json",
-		// "solana/native/system.json",
-		//
-		"idl/testing/enum.json",
-		// "idl/testing/deeply-nested-accounts.json",
-
-		// "idl/registry.json",
-		// "idl/cashiers_check.json",
-		// "idl/chat.json",
-		// "idl/composite.json",
-		// "idl/counter_auth.json",
-		// "idl/counter.json",
-		// "idl/errors.json",
-		// "idl/escrow.json",
-		// "idl/events.json",
-		// "idl/ido_pool.json",
-		// "idl/lockup.json",
-		// "idl/misc.json",
-		// "idl/multisig.json",
-		// "idl/pyth.json",
-		// "idl/swap.json",
-		// "idl/swap_light.json",
-		// "idl/sysvars.json",
-		// "idl/typescript.json",
-		// "idl/zero_copy.json",
-	}
-	_ = filenamesExtra
-
 	var ts time.Time
 	if GetConfig().Debug {
 		ts = time.Unix(0, 0)
@@ -73,7 +44,11 @@ func main() {
 	outDir := "generated"
 
 	for _, idlFilepath := range filenames {
-		Ln("Generating client from IDL:", Shakespeare(idlFilepath))
+		Sfln(
+			"[%s] Generating client from IDL: %s",
+			Shakespeare("+"),
+			Shakespeare(idlFilepath),
+		)
 		idlFile, err := os.Open(idlFilepath)
 		if err != nil {
 			panic(err)
@@ -722,7 +697,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 												Call(
 													Qual(PkgFormat, "Param").Call(
 														Lit(strings.Repeat(" ", longest-len(exportedArgName))+exportedArgName+StringIf(arg.Type.IsIdlTypeOption(), " (OPT)")),
-														Add(CodeIf(!arg.Type.IsIdlTypeOption(), Op("*"))).Id("inst").Dot(exportedArgName),
+														Add(CodeIf(!arg.Type.IsIdlTypeOption() && !isComplexEnum(arg.Type), Op("*"))).Id("inst").Dot(exportedArgName),
 													),
 												)
 										}
@@ -779,6 +754,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 		{
 			// Declare instruction initializer func:
+			paramNames := []string{}
+			for _, arg := range instruction.Args {
+				paramNames = append(paramNames, arg.Name)
+			}
 			code := Empty()
 			name := "New" + insExportedName + "Instruction"
 			code.Commentf("%s declares a new %s instruction with the provided parameters and accounts.", name, insExportedName)
@@ -789,6 +768,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						// Parameters:
 						{
 							for argIndex, arg := range instruction.Args {
+								paramNames = append(paramNames, arg.Name)
 								params.Add(func() Code {
 									if argIndex == 0 {
 										return Line().Comment("Parameters:")
@@ -808,6 +788,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 									accountName = ToLowerCamel(account.Name)
 								} else {
 									accountName = ToLowerCamel(parentGroupPath + "/" + ToLowerCamel(account.Name))
+								}
+
+								if SliceContains(paramNames, accountName) {
+									accountName = accountName + "Account"
 								}
 
 								params.Add(func() Code {
@@ -848,6 +832,11 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 							if parentGroupPath == "" {
 								accountName = ToLowerCamel(account.Name)
 							} else {
+								// TODO
+							}
+
+							if SliceContains(paramNames, accountName) {
+								accountName = accountName + "Account"
 							}
 
 							builderStructName := insExportedName + ToCamel(parentGroupPath) + "AccountsBuilder"
@@ -1171,7 +1160,6 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		}
 		{
 			// variant definitions for the decoder:
-			// InstructionIDToName
 			GetConfig().Encoding.On(
 				[]EncoderName{EncodingBin, EncodingCompactU16},
 				func() {
