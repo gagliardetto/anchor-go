@@ -764,7 +764,104 @@
                 }
 
             ]
+        },
+        {
+            "name": "CreateMasterEdition",
+            "docs": [
+                "Register a Metadata as a Master Edition V2, which means Edition V2s can be minted.",
+                "Henceforth, no further tokens will be mintable from this primary mint. Will throw an error if more than one",
+                "token exists, and will throw an error if less than one token exists in this primary mint."
+            ],
+            "accounts": [
+                {
+                    "name": "editionV2",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Unallocated edition V2 account with address as pda of ['metadata', program id, mint, 'edition']"
+                    ]
+                },
+                {
+                    "name": "metadataMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata mint"
+                    ]
+                },
+                {
+                    "name": "updateAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Update authority"
+                    ]
+                },
+                {
+                    "name": "mintAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Mint authority on the metadata's mint - THIS WILL TRANSFER AUTHORITY AWAY FROM THIS KEY"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "payer"
+                    ]
+                },
+                {
+                    "name": "metadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata account"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System program"
+                    ]
+                },
+                {
+                    "name": "rentInfo",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent info"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "CreateMasterEditionArgs"
+                    },
+                    "docs": [
+                        ""
+                    ]
+                }
+
+            ]
         }
+
 
 
 
@@ -1042,6 +1139,26 @@
                         "type": "u64",
                         "docs": [
                             ""
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "CreateMasterEditionArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "max_supply",
+                        "type":
+                        {
+                            "option": "u64"
+                        },
+                        "docs": [
+                            "If set, means that no more than this number of editions can ever be minted. This is immutable."
                         ]
                     }
 
