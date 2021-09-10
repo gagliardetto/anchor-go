@@ -432,7 +432,65 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "DeprecatedSetReservationList",
+            "docs": [
+                "Reserve up to 200 editions in sequence for up to 200 addresses in an existing reservation PDA, which can then be used later by",
+                "redeemers who have printing tokens as a reservation to get a specific edition number",
+                "as opposed to whatever one is currently listed on the master edition. Used by Auction Manager",
+                "to guarantee printing order on bid redemption. AM will call whenever the first person redeems a",
+                "printing bid to reserve the whole block",
+                "of winners in order and then each winner when they get their token submits their mint and account",
+                "with the pda that was created by that first bidder - the token metadata can then cross reference",
+                "these people with the list and see that bidder A gets edition #2, so on and so forth.",
+                "",
+                "NOTE: If you have more than 20 addresses in a reservation list, this may be called multiple times to build up the list,",
+                "otherwise, it simply wont fit in one transaction. Only provide a total_reservation argument on the first call, which will",
+                "allocate the edition space, and in follow up calls this will specifically be unnecessary (and indeed will error.)"
+            ],
+            "accounts": [
+                {
+                    "name": "masterEditionV1",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Master Edition V1 key (pda of ['metadata', program id, mint id, 'edition'])"
+                    ]
+                },
+                {
+                    "name": "reservationList",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "PDA for ReservationList of ['metadata', program id, master edition key, 'reservation', resource-key]"
+                    ]
+                },
+                {
+                    "name": "resource",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "The resource you tied the reservation list too"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "SetReservationListArgs"
+                    },
+                    "docs": [
+                        ""
+                    ]
+                }
+
+            ]
         }
+
 
 
 
@@ -619,6 +677,87 @@
                 ]
             }
         },
+        {
+            "name": "SetReservationListArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "reservations",
+                        "type":
+                        {
+                            "vec":
+                            {
+                                "defined": "Reservation"
+                            }
+                        },
+                        "docs": [
+                            "If set, means that no more than this number of editions can ever be minted. This is immutable."
+                        ]
+                    },
+                    {
+                        "name": "total_reservation_spots",
+                        "type":
+                        {
+                            "option": "u64"
+                        },
+                        "docs": [
+                            "should only be present on the very first call to set reservation list."
+                        ]
+                    },
+                    {
+                        "name": "offset",
+                        "type": "u64",
+                        "docs": [
+                            "Where in the reservation list you want to insert this slice of reservations"
+                        ]
+                    },
+                    {
+                        "name": "total_spot_offset",
+                        "type": "u64",
+                        "docs": [
+                            "What the total spot offset is in the reservation list from the beginning to your slice of reservations.",
+                            "So if is going to be 4 total editions eventually reserved between your slice and the beginning of the array,",
+                            "split between 2 reservation entries, the offset variable above would be \"2\" since you start at entry 2 in 0 indexed array",
+                            "(first 2 taking 0 and 1) and because they each have 2 spots taken, this variable would be 4."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "Reservation",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "address",
+                        "type": "publicKey",
+                        "docs": [
+                            ""
+                        ]
+                    },
+                    {
+                        "name": "spots_remaining",
+                        "type": "u64",
+                        "docs": [
+                            ""
+                        ]
+                    },
+                    {
+                        "name": "total_spots",
+                        "type": "u64",
+                        "docs": [
+                            ""
+                        ]
+                    }
+
+                ]
+            }
+        }
 
     ],
     "events": [],
