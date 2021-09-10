@@ -860,7 +860,144 @@
                 }
 
             ]
+        },
+        {
+            "name": "MintNewEditionFromMasterEditionViaToken",
+            "docs": [
+                "Given a token account containing the master edition token to prove authority, and a brand new non-metadata-ed mint with one token",
+                "make a new Metadata + Edition that is a child of the master edition denoted by this authority token."
+            ],
+            "accounts": [
+                {
+                    "name": "newMetadata",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "New Metadata key (pda of ['metadata', program id, mint id])"
+                    ]
+                },
+                {
+                    "name": "newEdition",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "New Edition (pda of ['metadata', program id, mint id, 'edition'])"
+                    ]
+                },
+                {
+                    "name": "masterRecordEditionV2",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Master Record Edition V2 (pda of ['metadata', program id, master metadata mint id, 'edition'])"
+                    ]
+                },
+                {
+                    "name": "mint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Mint of new token - THIS WILL TRANSFER AUTHORITY AWAY FROM THIS KEY"
+                    ]
+                },
+                {
+                    "name": "edition",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Edition pda to mark creation - will be checked for pre-existence. (pda of ['metadata', program id, master metadata mint id, 'edition', edition_number])",
+                        "where edition_number is NOT the edition number you pass in args but actually edition_number = floor(edition/EDITION_MARKER_BIT_SIZE)."
+                    ]
+                },
+                {
+                    "name": "mintAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Mint authority of new mint"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "payer"
+                    ]
+                },
+                {
+                    "name": "owner",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "owner of token account containing master token (#8)"
+                    ]
+                },
+                {
+                    "name": "token",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "token account containing token from master metadata mint"
+                    ]
+                },
+                {
+                    "name": "updateAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Update authority info for new metadata"
+                    ]
+                },
+                {
+                    "name": "masterRecordMetadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Master record metadata account"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System program"
+                    ]
+                },
+                {
+                    "name": "rentInfo",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent info"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "MintNewEditionFromMasterEditionViaTokenArgs"
+                    },
+                    "docs": [
+                        ""
+                    ]
+                }
+
+            ]
         }
+
 
 
 
@@ -1159,6 +1296,23 @@
                         },
                         "docs": [
                             "If set, means that no more than this number of editions can ever be minted. This is immutable."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "MintNewEditionFromMasterEditionViaTokenArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "edition",
+                        "type": "u64",
+                        "docs": [
+                            ""
                         ]
                     }
 
