@@ -85,7 +85,46 @@
                 }
 
             ]
+        },
+        {
+            "name": "UpdateMetadataAccount",
+            "docs": [
+                "Update a Metadata"
+            ],
+            "accounts": [
+                {
+                    "name": "metadataAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata account"
+                    ]
+                },
+                {
+                    "name": "updateAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Update authority key"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "UpdateMetadataAccountArgs"
+                    },
+                    "docs": [
+                        "Args for update call"
+                    ]
+                }
+
+            ]
         }
+
 
 
     ],
@@ -199,6 +238,49 @@
                         "type": "u8",
                         "docs": [
                             "In percentages, NOT basis points ;) Watch out!"
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "UpdateMetadataAccountArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "data",
+                        "type":
+                        {
+                            "option":
+                            {
+                                "defined": "Data"
+                            }
+                        },
+                        "docs": [
+                            ""
+                        ]
+                    },
+                    {
+                        "name": "update_authority",
+                        "type":
+                        {
+                            "option": "publicKey"
+                        },
+                        "docs": [
+                            ""
+                        ]
+                    },
+                    {
+                        "name": "primary_sale_happened",
+                        "type":
+                        {
+                            "option": "bool"
+                        },
+                        "docs": [
+                            ""
                         ]
                     }
 
