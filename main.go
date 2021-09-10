@@ -736,9 +736,18 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 						instruction.Accounts.Walk("", nil, nil, func(groupPath string, accountIndex int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
 							exportedAccountName := ToCamel(filepath.Join(groupPath, ia.Name))
 
-							accountValidationBlock.If(Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex)).Op("==").Nil()).Block(
-								Return(Qual("errors", "New").Call(Lit(Sf("accounts.%s is not set", exportedAccountName)))),
-							)
+							if ia.Optional {
+								accountValidationBlock.Line().Commentf(
+									"[%v] = %s is optional",
+									accountIndex,
+									exportedAccountName,
+								).Line()
+							} else {
+								accountValidationBlock.If(Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex)).Op("==").Nil()).Block(
+									Return(Qual("errors", "New").Call(Lit(Sf("accounts.%s is not set", exportedAccountName)))),
+								)
+							}
+
 							return true
 						})
 					})
