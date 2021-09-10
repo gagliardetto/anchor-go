@@ -1032,7 +1032,167 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "MintNewEditionFromMasterEditionViaVaultProxy",
+            "docs": [
+                "Proxy Call to Mint Edition using a Store Token Account as a Vault Authority."
+            ],
+            "accounts": [
+                {
+                    "name": "newMetadata",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "New Metadata key (pda of ['metadata', program id, mint id])"
+                    ]
+                },
+                {
+                    "name": "newEdition",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "New Edition (pda of ['metadata', program id, mint id, 'edition'])"
+                    ]
+                },
+                {
+                    "name": "masterRecordEditionV2",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Master Record Edition V2 (pda of ['metadata', program id, master metadata mint id, 'edition']"
+                    ]
+                },
+                {
+                    "name": "mint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Mint of new token - THIS WILL TRANSFER AUTHORITY AWAY FROM THIS KEY"
+                    ]
+                },
+                {
+                    "name": "editionPDA",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Edition pda to mark creation - will be checked for pre-existence. (pda of ['metadata', program id, master metadata mint id, 'edition', edition_number])",
+                        "where edition_number is NOT the edition number you pass in args but actually edition_number = floor(edition/EDITION_MARKER_BIT_SIZE)."
+                    ]
+                },
+                {
+                    "name": "mintAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Mint authority of new mint"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "payer"
+                    ]
+                },
+                {
+                    "name": "vaultAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Vault authority"
+                    ]
+                },
+                {
+                    "name": "safetyDepositTokenStore",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit token store account"
+                    ]
+                },
+                {
+                    "name": "safetyDepositBox",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit box"
+                    ]
+                },
+                {
+                    "name": "vault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Vault"
+                    ]
+                },
+                {
+                    "name": "updateAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Update authority info for new metadata"
+                    ]
+                },
+                {
+                    "name": "masterRecordMetadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Master record metadata account"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "tokenVaultProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token vault program"
+                    ]
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System program"
+                    ]
+                },
+                {
+                    "name": "rentInfo",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent info"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "MintNewEditionFromMasterEditionViaTokenArgs"
+                    },
+                    "docs": [
+                        ""
+                    ]
+                }
+
+            ]
         }
+
 
 
 
