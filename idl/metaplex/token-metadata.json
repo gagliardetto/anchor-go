@@ -591,12 +591,102 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "DeprecatedMintPrintingTokensViaToken",
+            "docs": [
+                "Using a one time authorization token from a master edition v1, print any number of printing tokens from the printing_mint",
+                "one time, burning the one time authorization token."
+            ],
+            "accounts": [
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Destination account"
+                    ]
+                },
+                {
+                    "name": "token",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Token account containing one time authorization token"
+                    ]
+                },
+                {
+                    "name": "oneTimeAuthMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "One time authorization mint"
+                    ]
+                },
+                {
+                    "name": "printingMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Printing mint"
+                    ]
+                },
+                {
+                    "name": "burnAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Burn authority"
+                    ]
+                },
+                {
+                    "name": "metadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata key (pda of ['metadata', program id, mint id])"
+                    ]
+                },
+                {
+                    "name": "masterEditionV1",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Master Edition V1 key (pda of ['metadata', program id, mint id, 'edition'])"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "MintPrintingTokensViaTokenArgs"
+                    },
+                    "docs": [
+                        ""
+                    ]
+                }
+
+            ]
         }
-
-
-
-
-
 
 
 
@@ -853,6 +943,23 @@
                     },
                     {
                         "name": "total_spots",
+                        "type": "u64",
+                        "docs": [
+                            ""
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "MintPrintingTokensViaTokenArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "supply",
                         "type": "u64",
                         "docs": [
                             ""
