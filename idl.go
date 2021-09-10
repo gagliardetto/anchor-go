@@ -186,7 +186,7 @@ type IdlAccount struct {
 	Name     string   `json:"name"`
 	IsMut    bool     `json:"isMut"`
 	IsSigner bool     `json:"isSigner"`
-	Optional bool     `json:"optional"`
+	Optional bool     `json:"optional"` // @custom
 }
 
 // A nested/recursive version of IdlAccount.
