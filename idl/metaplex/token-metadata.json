@@ -1191,15 +1191,26 @@
                 }
 
             ]
+        },
+        {
+            "name": "PuffMetadata",
+            "docs": [
+                "Puff a Metadata - make all of it's variable length fields (name/uri/symbol) a fixed length using a null character",
+                "so that it can be found using offset searches by the RPC to make client lookups cheaper."
+            ],
+            "accounts": [
+                {
+                    "name": "metadata",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata account"
+                    ]
+                }
+
+            ],
+            "args": []
         }
-
-
-
-
-
-
-
-
 
     ],
     "accounts": [],
