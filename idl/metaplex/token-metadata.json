@@ -996,7 +996,44 @@
                 }
 
             ]
+        },
+        {
+            "name": "ConvertMasterEditionV1ToV2",
+            "docs": [
+                "Converts the Master Edition V1 to a Master Edition V2, draining lamports from the two printing mints",
+                "to the owner of the token account holding the master edition token. Permissionless.",
+                "Can only be called if there are currenly no printing tokens or one time authorization tokens in circulation."
+            ],
+            "accounts": [
+                {
+                    "name": "masterRecordEditionV1",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Master Record Edition V1 (pda of ['metadata', program id, master metadata mint id, 'edition'])"
+                    ]
+                },
+                {
+                    "name": "oneTimeAuthMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "One time authorization mint"
+                    ]
+                },
+                {
+                    "name": "printingMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Printing mint"
+                    ]
+                }
+
+            ],
+            "args": []
         }
+
 
 
 
