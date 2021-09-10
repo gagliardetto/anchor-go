@@ -79,9 +79,7 @@
                     {
                         "defined": "CreateMetadataAccountArgs"
                     },
-                    "docs": [
-                        ""
-                    ]
+                    "docs": []
                 }
 
             ]
@@ -247,9 +245,7 @@
                     {
                         "defined": "CreateMasterEditionArgs"
                     },
-                    "docs": [
-                        ""
-                    ]
+                    "docs": []
                 }
 
             ]
@@ -483,9 +479,7 @@
                     {
                         "defined": "SetReservationListArgs"
                     },
-                    "docs": [
-                        ""
-                    ]
+                    "docs": []
                 }
 
             ]
@@ -680,9 +674,7 @@
                     {
                         "defined": "MintPrintingTokensViaTokenArgs"
                     },
-                    "docs": [
-                        ""
-                    ]
+                    "docs": []
                 }
 
             ]
@@ -758,9 +750,7 @@
                     {
                         "defined": "MintPrintingTokensViaTokenArgs"
                     },
-                    "docs": [
-                        ""
-                    ]
+                    "docs": []
                 }
 
             ]
@@ -854,9 +844,7 @@
                     {
                         "defined": "CreateMasterEditionArgs"
                     },
-                    "docs": [
-                        ""
-                    ]
+                    "docs": []
                 }
 
             ]
@@ -990,9 +978,7 @@
                     {
                         "defined": "MintNewEditionFromMasterEditionViaTokenArgs"
                     },
-                    "docs": [
-                        ""
-                    ]
+                    "docs": []
                 }
 
             ]
@@ -1185,9 +1171,7 @@
                     {
                         "defined": "MintNewEditionFromMasterEditionViaTokenArgs"
                     },
-                    "docs": [
-                        ""
-                    ]
+                    "docs": []
                 }
 
             ]
@@ -1214,8 +1198,6 @@
 
     ],
     "accounts": [],
-    "state":
-    {},
     "types": [
         {
             "name": "CreateMetadataAccountArgs",
@@ -1307,16 +1289,12 @@
                     {
                         "name": "address",
                         "type": "publicKey",
-                        "docs": [
-                            ""
-                        ]
+                        "docs": []
                     },
                     {
                         "name": "verified",
                         "type": "bool",
-                        "docs": [
-                            ""
-                        ]
+                        "docs": []
                     },
                     {
                         "name": "share",
@@ -1344,9 +1322,7 @@
                                 "defined": "Data"
                             }
                         },
-                        "docs": [
-                            ""
-                        ]
+                        "docs": []
                     },
                     {
                         "name": "update_authority",
@@ -1354,9 +1330,7 @@
                         {
                             "option": "publicKey"
                         },
-                        "docs": [
-                            ""
-                        ]
+                        "docs": []
                     },
                     {
                         "name": "primary_sale_happened",
@@ -1364,9 +1338,7 @@
                         {
                             "option": "bool"
                         },
-                        "docs": [
-                            ""
-                        ]
+                        "docs": []
                     }
 
                 ]
@@ -1451,23 +1423,17 @@
                     {
                         "name": "address",
                         "type": "publicKey",
-                        "docs": [
-                            ""
-                        ]
+                        "docs": []
                     },
                     {
                         "name": "spots_remaining",
                         "type": "u64",
-                        "docs": [
-                            ""
-                        ]
+                        "docs": []
                     },
                     {
                         "name": "total_spots",
                         "type": "u64",
-                        "docs": [
-                            ""
-                        ]
+                        "docs": []
                     }
 
                 ]
@@ -1482,29 +1448,7 @@
                     {
                         "name": "supply",
                         "type": "u64",
-                        "docs": [
-                            ""
-                        ]
-                    }
-
-                ]
-            }
-        },
-        {
-            "name": "CreateMasterEditionArgs",
-            "type":
-            {
-                "kind": "struct",
-                "fields": [
-                    {
-                        "name": "max_supply",
-                        "type":
-                        {
-                            "option": "u64"
-                        },
-                        "docs": [
-                            "If set, means that no more than this number of editions can ever be minted. This is immutable."
-                        ]
+                        "docs": []
                     }
 
                 ]
@@ -1519,9 +1463,7 @@
                     {
                         "name": "edition",
                         "type": "u64",
-                        "docs": [
-                            ""
-                        ]
+                        "docs": []
                     }
 
                 ]
