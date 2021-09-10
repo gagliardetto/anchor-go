@@ -686,7 +686,86 @@
                 }
 
             ]
+        },
+        {
+            "name": "DeprecatedMintPrintingTokens",
+            "docs": [
+                "Using your update authority, mint printing tokens for your master edition."
+            ],
+            "accounts": [
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Destination account"
+                    ]
+                },
+                {
+                    "name": "printingMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Printing mint"
+                    ]
+                },
+                {
+                    "name": "updateAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Update authority"
+                    ]
+                },
+                {
+                    "name": "metadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata key (pda of ['metadata', program id, mint id])"
+                    ]
+                },
+                {
+                    "name": "masterEditionV1",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Master Edition V1 key (pda of ['metadata', program id, mint id, 'edition'])"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "MintPrintingTokensViaTokenArgs"
+                    },
+                    "docs": [
+                        ""
+                    ]
+                }
+
+            ]
         }
+
 
 
 
