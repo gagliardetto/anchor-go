@@ -253,7 +253,150 @@
                 }
 
             ]
+        },
+        {
+            "name": "DeprecatedMintNewEditionFromMasterEditionViaPrintingToken",
+            "docs": [
+                "Given an authority token minted by the Printing mint of a master edition, and a brand new non-metadata-ed mint with one token",
+                "make a new Metadata + Edition that is a child of the master edition denoted by this authority token."
+            ],
+            "accounts": [
+                {
+                    "name": "newMetadata",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "New Metadata key (pda of ['metadata', program id, mint id])"
+                    ]
+                },
+                {
+                    "name": "newEditionV1",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "New Edition V1 (pda of ['metadata', program id, mint id, 'edition'])"
+                    ]
+                },
+                {
+                    "name": "masterRecordEditionV1",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Master Record Edition V1 (pda of ['metadata', program id, master metadata mint id, 'edition'])"
+                    ]
+                },
+                {
+                    "name": "mint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Mint of new token - THIS WILL TRANSFER AUTHORITY AWAY FROM THIS KEY"
+                    ]
+                },
+                {
+                    "name": "mintAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Mint authority of new mint"
+                    ]
+                },
+                {
+                    "name": "printingMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Printing Mint of master record edition"
+                    ]
+                },
+                {
+                    "name": "tokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Token account containing Printing mint token to be transferred"
+                    ]
+                },
+                {
+                    "name": "editionPDA",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Edition pda to mark creation - will be checked for pre-existence.",
+                        "(pda of ['metadata', program id, master mint id, edition_number])"
+                    ]
+                },
+                {
+                    "name": "burnAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Burn authority for this token"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "payer"
+                    ]
+                },
+                {
+                    "name": "updateAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "update authority info for new metadata account"
+                    ]
+                },
+                {
+                    "name": "masterRecordMetadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Master record metadata account"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System program"
+                    ]
+                },
+                {
+                    "name": "rentInfo",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent info"
+                    ]
+                },
+                {
+                    "name": "reservationList",
+                    "isMut": true,
+                    "isSigner": false,
+                    "optional": true,
+                    "docs": [
+                        "Reservation List - If present, and you are on this list, you can get",
+                        "an edition number given by your position on the list."
+                    ]
+                }
+
+            ],
+            "args": []
         }
+
 
 
 
