@@ -395,7 +395,45 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "UpdatePrimarySaleHappenedViaToken",
+            "docs": [
+                "Allows updating the primary sale boolean on Metadata solely through owning an account",
+                "containing a token from the metadata's mint and being a signer on this transaction.",
+                "A sort of limited authority for limited update capability that is required for things like",
+                "Metaplex to work without needing full authority passing."
+            ],
+            "accounts": [
+                {
+                    "name": "metadata",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata key (pda of ['metadata', program id, mint id])"
+                    ]
+                },
+                {
+                    "name": "owner",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Owner on the token account"
+                    ]
+                },
+                {
+                    "name": "container",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Account containing tokens from the metadata's mint"
+                    ]
+                }
+
+            ],
+            "args": []
         }
+
 
 
 
