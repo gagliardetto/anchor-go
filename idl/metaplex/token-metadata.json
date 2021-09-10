@@ -565,7 +565,34 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "SignMetadata",
+            "docs": [
+                "Sign a piece of metadata that has you as an unverified creator so that it is now verified."
+            ],
+            "accounts": [
+                {
+                    "name": "metadata",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata (pda of ['metadata', program id, mint id])"
+                    ]
+                },
+                {
+                    "name": "creator",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Creator"
+                    ]
+                }
+
+            ],
+            "args": []
         }
+
 
 
 
