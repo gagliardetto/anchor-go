@@ -1,0 +1,216 @@
+{
+    "version": "0.0.0",
+    "name": "token_metadata",
+    "docs": [
+        "This is a very simple program designed to allow metadata tagging to a given mint,",
+        "with an update authority that can change that metadata going forward. ",
+        "Read more: https://github.com/metaplex-foundation/metaplex/tree/master/rust/token-metadata/program"
+    ],
+    "ref": "https://github.com/metaplex-foundation/metaplex/blob/4a1b7d2f674013bc8bd3149294c66b03b27120d0/rust/token-metadata/program/src/instruction.rs",
+    "instructions": [
+        {
+            "name": "CreateMetadataAccount",
+            "docs": [
+                "Create Metadata object."
+            ],
+            "accounts": [
+                {
+                    "name": "key",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata key (pda of ['metadata', program id, mint id])"
+                    ]
+                },
+                {
+                    "name": "mint",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Mint of token asset"
+                    ]
+                },
+                {
+                    "name": "mintAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Mint authority"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "payer"
+                    ]
+                },
+                {
+                    "name": "updateAuthorityInfo",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "update authority info"
+                    ]
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System program"
+                    ]
+                },
+                {
+                    "name": "rentInfo",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent info"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "CreateMetadataAccountArgs"
+                    },
+                    "docs": [
+                        ""
+                    ]
+                }
+
+            ]
+        }
+
+
+    ],
+    "accounts": [],
+    "state":
+    {},
+    "types": [
+        {
+            "name": "CreateMetadataAccountArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "data",
+                        "type":
+                        {
+                            "defined": "Data"
+                        },
+                        "docs": [
+                            "Note that unique metadatas are disabled for now."
+                        ]
+                    },
+                    {
+                        "name": "is_mutable",
+                        "type": "bool",
+                        "docs": [
+                            "Whether you want your metadata to be updateable in the future."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "Data",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "docs": [
+                            "The name of the asset"
+                        ]
+                    },
+                    {
+                        "name": "symbol",
+                        "type": "string",
+                        "docs": [
+                            "The symbol for the asset"
+                        ]
+                    },
+                    {
+                        "name": "uri",
+                        "type": "string",
+                        "docs": [
+                            "URI pointing to JSON representing the asset"
+                        ]
+                    },
+                    {
+                        "name": "seller_fee_basis_points",
+                        "type": "u16",
+                        "docs": [
+                            "Royalty basis points that goes to creators in secondary sales (0-10000)"
+                        ]
+                    },
+                    {
+                        "name": "creators",
+                        "type":
+                        {
+                            "option":
+                            {
+                                "vec":
+                                {
+                                    "defined": "Creator"
+                                }
+                            }
+                        },
+                        "docs": [
+                            "Array of creators, optional"
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "Creator",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "address",
+                        "type": "publicKey",
+                        "docs": [
+                            ""
+                        ]
+                    },
+                    {
+                        "name": "verified",
+                        "type": "bool",
+                        "docs": [
+                            ""
+                        ]
+                    },
+                    {
+                        "name": "share",
+                        "type": "u8",
+                        "docs": [
+                            "In percentages, NOT basis points ;) Watch out!"
+                        ]
+                    }
+
+                ]
+            }
+        }
+
+    ],
+    "events": [],
+    "errors": [],
+    "metadata":
+    {
+        "address": ""
+    }
+}
