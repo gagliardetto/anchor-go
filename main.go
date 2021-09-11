@@ -254,7 +254,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		file := NewGoFile(idl.Name, true)
 		// Declare types from IDL:
 		for _, typ := range idl.Types {
-			file.Add(genTypeDef(typ))
+			file.Add(genTypeDef(&idl, false, typ))
 		}
 		files = append(files, &FileWrapper{
 			Name: "types",
@@ -267,49 +267,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
 			// generate type definition:
-			file.Add(genTypeDef(acc))
-
-			// generate encoder and decoder methods (for borsh):
-			if GetConfig().Encoding == EncodingBorsh {
-				code := Empty()
-				exportedAccountName := ToCamel(acc.Name)
-
-				toBeHashed := ToCamel(acc.Name)
-				discriminatorName := exportedAccountName + "Discriminator"
-				if GetConfig().Debug {
-					code.Comment(Sf(`hash("%s:%s")`, bin.SIGHASH_ACCOUNT_NAMESPACE, toBeHashed)).Line()
-				}
-				sighash := bin.SighashTypeID(bin.SIGHASH_ACCOUNT_NAMESPACE, toBeHashed)
-				code.Var().Id(discriminatorName).Op("=").Index(Lit(8)).Byte().Op("{").ListFunc(func(byteGroup *Group) {
-					for _, byteVal := range sighash[:] {
-						byteGroup.Lit(int(byteVal))
-					}
-				}).Op("}")
-
-				// Declare MarshalWithEncoder:
-				code.Line().Line().Add(
-					genMarshalWithEncoder_struct(
-						&idl,
-						true,
-						exportedAccountName,
-						discriminatorName,
-						*acc.Type.Fields,
-						true,
-					))
-
-				// Declare UnmarshalWithDecoder
-				code.Line().Line().Add(
-					genUnmarshalWithDecoder_struct(
-						&idl,
-						true,
-						exportedAccountName,
-						discriminatorName,
-						*acc.Type.Fields,
-						sighash,
-					))
-
-				file.Add(code.Line().Line())
-			}
+			file.Add(genTypeDef(&idl, true, acc))
 		}
 		files = append(files, &FileWrapper{
 			Name: "accounts",
