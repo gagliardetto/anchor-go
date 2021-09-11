@@ -1468,6 +1468,253 @@
 
                 ]
             }
+        },
+        {
+            "name": "Key",
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Uninitialized",
+                        "docs": []
+                    },
+                    {
+                        "name": "EditionV1",
+                        "docs": []
+                    },
+                    {
+                        "name": "MasterEditionV1",
+                        "fields": [
+                            {
+                                "name": "key",
+                                "type":
+                                {
+                                    "defined": "Key"
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "supply",
+                                "type": "u64",
+                                "docs": []
+                            },
+                            {
+                                "name": "max_supply",
+                                "type":
+                                {
+                                    "option": "u64"
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "printing_mint",
+                                "type": "publicKey",
+                                "docs": [
+                                    "Can be used to mint tokens that give one-time permission to mint a single limited edition."
+                                ]
+                            },
+                            {
+                                "name": "one_time_printing_authorization_mint",
+                                "type": "publicKey",
+                                "docs": [
+                                    "If you don't know how many printing tokens you are going to need, but you do know",
+                                    "you are going to need some amount in the future, you can use a token from this mint.",
+                                    "Coming back to token metadata with one of these tokens allows you to mint (one time)",
+                                    "any number of printing tokens you want. This is used for instance by Auction Manager",
+                                    "with participation NFTs, where we dont know how many people will bid and need participation",
+                                    "printing tokens to redeem, so we give it ONE of these tokens to use after the auction is over,",
+                                    "because when the auction begins we just dont know how many printing tokens we will need,",
+                                    "but at the end we will. At the end it then burns this token with token-metadata to",
+                                    "get the printing tokens it needs to give to bidders. Each bidder then redeems a printing token",
+                                    "to get their limited editions."
+                                ]
+                            }
+
+                        ]
+                    },
+                    {
+                        "name": "ReservationListV1",
+                        "fields": [
+                            {
+                                "name": "key",
+                                "type":
+                                {
+                                    "defined": "Key"
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "master_edition",
+                                "type": "publicKey",
+                                "docs": [
+                                    "Present for reverse lookups"
+                                ]
+                            },
+                            {
+                                "name": "supply_snapshot",
+                                "type":
+                                {
+                                    "option": "u64"
+                                },
+                                "docs": [
+                                    "What supply counter was on master_edition when this reservation was created."
+                                ]
+                            },
+                            {
+                                "name": "reservations",
+                                "type":
+                                {
+                                    "vec":
+                                    {
+                                        "defined": "ReservationV1"
+                                    }
+                                },
+                                "docs": []
+                            }
+
+                        ]
+                    },
+                    {
+                        "name": "MetadataV1",
+                        "docs": []
+                    },
+                    {
+                        "name": "ReservationListV2",
+                        "fields": [
+                            {
+                                "name": "key",
+                                "type":
+                                {
+                                    "defined": "Key"
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "master_edition",
+                                "type": "publicKey",
+                                "docs": [
+                                    "Present for reverse lookups"
+                                ]
+                            },
+                            {
+                                "name": "supply_snapshot",
+                                "type":
+                                {
+                                    "option": "u64"
+                                },
+                                "docs": [
+                                    "What supply counter was on master_edition when this reservation was created."
+                                ]
+                            },
+                            {
+                                "name": "reservations",
+                                "type":
+                                {
+                                    "vec":
+                                    {
+                                        "defined": "Reservation"
+                                    }
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "total_reservation_spots",
+                                "type": "u64",
+                                "docs": [
+                                    "How many reservations there are going to be, given on first set_reservation call"
+                                ]
+                            },
+                            {
+                                "name": "current_reservation_spots",
+                                "type": "u64",
+                                "docs": [
+                                    "Cached count of reservation spots in the reservation vec to save on CPU."
+                                ]
+                            }
+
+                        ]
+                    },
+                    {
+                        "name": "MasterEditionV2",
+                        "fields": [
+                            {
+                                "name": "key",
+                                "type":
+                                {
+                                    "defined": "Key"
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "supply",
+                                "type": "u64",
+                                "docs": []
+                            },
+                            {
+                                "name": "max_supply",
+                                "type":
+                                {
+                                    "option": "u64"
+                                },
+                                "docs": []
+                            }
+
+                        ]
+                    },
+                    {
+                        "name": "EditionMarker",
+                        "fields": [
+                            {
+                                "name": "key",
+                                "type":
+                                {
+                                    "defined": "Key"
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "ledger",
+                                "type":
+                                {
+                                    "array": [
+                                        "u8",
+                                        31
+                                    ]
+                                },
+                                "docs": []
+                            }
+
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "ReservationV1",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "address",
+                        "type": "publicKey",
+                        "docs": []
+                    },
+                    {
+                        "name": "spots_remaining",
+                        "type": "u8",
+                        "docs": []
+                    },
+                    {
+                        "name": "total_spots",
+                        "type": "u8",
+                        "docs": []
+                    }
+
+                ]
+            }
         }
 
     ],
@@ -1475,6 +1722,6 @@
     "errors": [],
     "metadata":
     {
-        "address": ""
+        "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
     }
 }
