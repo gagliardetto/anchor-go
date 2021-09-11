@@ -1715,6 +1715,66 @@
 
                 ]
             }
+        },
+        {
+            "name": "Metadata",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type":
+                        {
+                            "defined": "Key"
+                        },
+                        "docs": []
+                    },
+                    {
+                        "name": "update_authority",
+                        "type": "publicKey",
+                        "docs": []
+                    },
+                    {
+                        "name": "mint",
+                        "type": "publicKey",
+                        "docs": []
+                    },
+                    {
+                        "name": "data",
+                        "type":
+                        {
+                            "defined": "Data"
+                        },
+                        "docs": []
+                    },
+                    {
+                        "name": "primary_sale_happened",
+                        "type": "bool",
+                        "docs": [
+                            "Immutable, once flipped, all sales of this metadata are considered secondary."
+                        ]
+                    },
+                    {
+                        "name": "is_mutable",
+                        "type": "bool",
+                        "docs": [
+                            "Whether or not the data struct is mutable, default is not"
+                        ]
+                    },
+                    {
+                        "name": "edition_nonce",
+                        "type":
+                        {
+                            "option": "u8"
+                        },
+                        "docs": [
+                            "nonce for easy calculation of editions, if present"
+                        ]
+                    }
+
+                ]
+            }
         }
 
     ],
