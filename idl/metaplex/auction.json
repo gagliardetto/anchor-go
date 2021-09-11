@@ -792,9 +792,164 @@
 
     ],
     "events": [],
-    "errors": [],
+    "errors": [
+    {
+        "msg": "Account does not have correct owner",
+        "name": "IncorrectOwner",
+        "code": 0
+    },
+    {
+        "msg": "Lamport balance below rent-exempt threshold",
+        "name": "NotRentExempt",
+        "code": 1
+    },
+    {
+        "msg": "Bid account provided does not match the derived address.",
+        "name": "InvalidBidAccount",
+        "code": 2
+    },
+    {
+        "msg": "Auction account specified is invalid.",
+        "name": "InvalidAuctionAccount",
+        "code": 3
+    },
+    {
+        "msg": "Balance too low to make bid.",
+        "name": "BalanceTooLow",
+        "code": 4
+    },
+    {
+        "msg": "Auction is not currently running.",
+        "name": "InvalidState",
+        "code": 5
+    },
+    {
+        "msg": "Bid is too small.",
+        "name": "BidTooSmall",
+        "code": 6
+    },
+    {
+        "msg": "Invalid auction state transition.",
+        "name": "AuctionTransitionInvalid",
+        "code": 7
+    },
+    {
+        "msg": "Failed to derive an account from seeds.",
+        "name": "DerivedKeyInvalid",
+        "code": 8
+    },
+    {
+        "msg": "Token transfer failed",
+        "name": "TokenTransferFailed",
+        "code": 9
+    },
+    {
+        "msg": "Token mint to failed",
+        "name": "TokenMintToFailed",
+        "code": 10
+    },
+    {
+        "msg": "Token burn failed",
+        "name": "TokenBurnFailed",
+        "code": 11
+    },
+    {
+        "msg": "Invalid authority",
+        "name": "InvalidAuthority",
+        "code": 12
+    },
+    {
+        "msg": "Authority not signer",
+        "name": "AuthorityNotSigner",
+        "code": 13
+    },
+    {
+        "msg": "Numerical overflow",
+        "name": "NumericalOverflowError",
+        "code": 14
+    },
+    {
+        "msg": "Bidder pot token account does not match",
+        "name": "BidderPotTokenAccountOwnerMismatch",
+        "code": 15
+    },
+    {
+        "msg": "Uninitialized",
+        "name": "Uninitialized",
+        "code": 16
+    },
+    {
+        "msg": "Metadata account is missing or invalid.",
+        "name": "MetadataInvalid",
+        "code": 17
+    },
+    {
+        "msg": "Bidder pot is missing, and required for SPL trades.",
+        "name": "BidderPotDoesNotExist",
+        "code": 18
+    },
+    {
+        "msg": "Existing Bid is already active.",
+        "name": "BidAlreadyActive",
+        "code": 19
+    },
+    {
+        "msg": "Incorrect mint specified, must match auction.",
+        "name": "IncorrectMint",
+        "code": 20
+    },
+    {
+        "msg": "Must reveal price when ending a blinded auction.",
+        "name": "MustReveal",
+        "code": 21
+    },
+    {
+        "msg": "The revealing hash is invalid.",
+        "name": "InvalidReveal",
+        "code": 22
+    },
+    {
+        "msg": "The pot for this bid is already empty.",
+        "name": "BidderPotEmpty",
+        "code": 23
+    },
+    {
+        "msg": " This is not a valid token program",
+        "name": "InvalidTokenProgram",
+        "code": 24
+    },
+    {
+        "msg": "Accept payment delegate should be none",
+        "name": "DelegateShouldBeNone",
+        "code": 25
+    },
+    {
+        "msg": "Accept payment close authority should be none",
+        "name": "CloseAuthorityShouldBeNone",
+        "code": 26
+    },
+    {
+        "msg": "Data type mismatch",
+        "name": "DataTypeMismatch",
+        "code": 27
+    },
+    {
+        "msg": "Bid must be multiple of tick size",
+        "name": "BidMustBeMultipleOfTickSize",
+        "code": 28
+    },
+    {
+        "msg": "During the gap window, gap between next lowest bid must be of a certain percentage",
+        "name": "GapBetweenBidsTooSmall",
+        "code": 29
+    },
+    {
+        "msg": "Gap tick size percentage must be between 0 and 100",
+        "name": "InvalidGapTickSizePercentage",
+        "code": 30
+    }],
     "metadata":
     {
-        "address": ""
+        "address": "auctxRXPeJoc4817jDhf4HbjnhEcr1cCXenosMhK5R8"
     }
 }
