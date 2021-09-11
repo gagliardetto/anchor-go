@@ -11,6 +11,7 @@ var conf = &Config{}
 
 type Config struct {
 	Encoding EncoderName
+	TypeID   TypeIDName
 	Debug    bool
 	DstDir   string
 	ModPath  string
@@ -26,7 +27,10 @@ func (cfg *Config) Validate() error {
 		return errors.New("cfg is nil")
 	}
 	if !isValidEncoder(cfg.Encoding) {
-		return fmt.Errorf("Encoder is not valid: %q", cfg.Encoding)
+		return fmt.Errorf("Encoder kind is not valid: %q", cfg.Encoding)
+	}
+	if !isValidTypeIDName(cfg.TypeID) {
+		return fmt.Errorf("TypeID kind is not valid: %q", cfg.TypeID)
 	}
 	return nil
 }
@@ -40,6 +44,49 @@ func isValidEncoder(enc EncoderName) bool {
 		},
 		string(enc),
 	)
+}
+
+type TypeIDName string
+
+const (
+	TypeIDUvarint32 TypeIDName = "uvarint32"
+	TypeIDUint32    TypeIDName = "uint32"
+	TypeIDUint8     TypeIDName = "uint8"
+	TypeIDAnchor    TypeIDName = "anchor"
+	TypeIDNoType    TypeIDName = "notype"
+)
+
+func isValidTypeIDName(typeID TypeIDName) bool {
+	return SliceContains(
+		[]string{
+			string(TypeIDUvarint32),
+			string(TypeIDUint32),
+			string(TypeIDUint8),
+			string(TypeIDAnchor),
+			string(TypeIDNoType),
+		},
+		string(typeID),
+	)
+}
+
+type TypeIDNameSlice []TypeIDName
+
+func (slice TypeIDNameSlice) Has(v TypeIDName) bool {
+	for _, enc := range slice {
+		if v == enc {
+			return true
+		}
+	}
+	return false
+}
+func (name TypeIDName) On(
+	candidates TypeIDNameSlice,
+	fn func(),
+) TypeIDName {
+	if candidates.Has(GetConfig().TypeID) {
+		fn()
+	}
+	return name
 }
 
 type EncoderName string

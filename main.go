@@ -22,13 +22,15 @@ const generatedDir = "generated"
 
 func main() {
 	conf.Encoding = EncodingBorsh
+	conf.TypeID = TypeIDAnchor
 
 	filenames := FlagStringArray{}
 	flag.Var(&filenames, "src", "Path to source; can use multiple times.")
 	flag.StringVar(&conf.DstDir, "dst", generatedDir, "Destination folder")
 	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
 
-	flag.StringVar((*string)(&conf.Encoding), "codec", "borsh", "Choose codec")
+	flag.StringVar((*string)(&conf.Encoding), "codec", string(EncodingBorsh), "Choose codec")
+	flag.StringVar((*string)(&conf.TypeID), "type-id", string(TypeIDAnchor), "Choose typeID kind")
 	flag.StringVar(&conf.ModPath, "mod", "", "Generate a go.mod file with the necessary dependencies, and this module")
 	flag.Parse()
 
@@ -267,7 +269,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
 			// generate type definition:
-			file.Add(genTypeDef(&idl, true, acc))
+			file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc))
 		}
 		files = append(files, &FileWrapper{
 			Name: "accounts",
@@ -588,16 +590,47 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 					var typeIDCode Code
 
-					GetConfig().Encoding.
-						OnEncodingBin(func() {
-							typeIDCode = Qual(PkgDfuseBinary, "TypeIDFromUint32").Call(Id("Instruction_"+insExportedName), Qual("encoding/binary", "LittleEndian"))
-						}).
-						OnEncodingBorsh(func() {
-							typeIDCode = Id("Instruction_" + insExportedName)
-						}).
-						OnEncodingCompactU16(func() {
-							typeIDCode = Qual(PkgDfuseBinary, "TypeIDFromUint32").Call(Id("Instruction_"+insExportedName), Qual("encoding/binary", "LittleEndian"))
-						})
+					GetConfig().TypeID.
+						On(
+							TypeIDNameSlice{
+								TypeIDUvarint32,
+							},
+							func() {
+								typeIDCode = Qual(PkgDfuseBinary, "TypeIDFromUvarint32").Call(Id("Instruction_" + insExportedName))
+							},
+						).
+						On(
+							TypeIDNameSlice{
+								TypeIDUint32,
+							},
+							func() {
+								typeIDCode = Qual(PkgDfuseBinary, "TypeIDFromUint32").Call(Id("Instruction_"+insExportedName), Qual("encoding/binary", "LittleEndian"))
+							},
+						).
+						On(
+							TypeIDNameSlice{
+								TypeIDUint8,
+							},
+							func() {
+								typeIDCode = Qual(PkgDfuseBinary, "TypeIDFromUint8").Call(Id("Instruction_" + insExportedName))
+							},
+						).
+						On(
+							TypeIDNameSlice{
+								TypeIDAnchor,
+							},
+							func() {
+								typeIDCode = Id("Instruction_" + insExportedName)
+							},
+						).
+						On(
+							TypeIDNameSlice{
+								TypeIDNoType,
+							},
+							func() {
+								// TODO
+							},
+						)
 
 					body.Return().Op("&").Id("Instruction").Values(
 						Dict{
@@ -1087,103 +1120,158 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 
 	{
 		// Instruction ID enum:
-		// InstructionIDToName
-		GetConfig().Encoding.On(
-			[]EncoderName{EncodingBin, EncodingCompactU16},
-			func() {
-				code := Empty()
-				code.Const().Parens(
-					DoGroup(func(gr *Group) {
-						for instructionIndex, instruction := range idl.Instructions {
-							insExportedName := ToCamel(instruction.Name)
+		GetConfig().TypeID.
+			On(
+				TypeIDNameSlice{
+					TypeIDUvarint32,
+					TypeIDUint32,
+					TypeIDUint8,
+				},
+				func() {
 
-							ins := Empty().Line()
-							for _, doc := range instruction.Docs {
-								ins.Comment(doc).Line()
-							}
-							ins.Id("Instruction_" + insExportedName)
+					code := Empty()
+					code.Const().Parens(
+						DoGroup(func(gr *Group) {
+							for instructionIndex, instruction := range idl.Instructions {
+								insExportedName := ToCamel(instruction.Name)
 
-							if instructionIndex == 0 {
-								ins.Uint32().Op("=").Iota().Line()
-							}
-							gr.Add(ins.Line().Line())
-						}
-					}),
-				)
-				file.Add(code.Line())
-			},
-		).OnEncodingBorsh(func() {
-			code := Empty()
-			code.Var().Parens(
-				DoGroup(func(gr *Group) {
-					for _, instruction := range idl.Instructions {
-						insExportedName := ToCamel(instruction.Name)
-
-						ins := Empty().Line()
-						for _, doc := range instruction.Docs {
-							ins.Comment(doc).Line()
-						}
-						toBeHashed := ToSnake(instruction.Name)
-						if GetConfig().Debug {
-							ins.Comment(Sf(`hash("%s:%s")`, bin.SIGHASH_GLOBAL_NAMESPACE, toBeHashed)).Line()
-						}
-						ins.Id("Instruction_" + insExportedName)
-
-						ins.Op("=").Qual(PkgDfuseBinary, "TypeID").Call(
-							Index(Lit(8)).Byte().Op("{").ListFunc(func(byteGroup *Group) {
-								sighash := bin.SighashTypeID(bin.SIGHASH_GLOBAL_NAMESPACE, toBeHashed)
-								for _, byteVal := range sighash[:] {
-									byteGroup.Lit(int(byteVal))
+								ins := Empty().Line()
+								for _, doc := range instruction.Docs {
+									ins.Comment(doc).Line()
 								}
-							}).Op("}"),
-						)
-						gr.Add(ins.Line().Line())
-					}
-				}),
-			)
-			file.Add(code.Line())
-		})
-	}
-	{
-		// InstructionIDToName
-		GetConfig().Encoding.On(
-			[]EncoderName{EncodingBin, EncodingCompactU16},
-			func() {
-				code := Empty()
-				code.Comment("InstructionIDToName returns the name of the instruction given its ID.").Line()
-				code.Func().Id("InstructionIDToName").
-					Params(Id("id").Uint32()).
-					Params(String()).
-					BlockFunc(func(body *Group) {
-						body.Switch(Id("id")).BlockFunc(func(switchBlock *Group) {
+								ins.Id("Instruction_" + insExportedName)
+
+								if instructionIndex == 0 {
+									switch GetConfig().TypeID {
+									case TypeIDUvarint32, TypeIDUint32:
+										ins.Uint32().Op("=").Iota().Line()
+									case TypeIDUint8:
+										ins.Uint8().Op("=").Iota().Line()
+									}
+								}
+								gr.Add(ins.Line().Line())
+							}
+						}),
+					)
+					file.Add(code.Line())
+
+				},
+			).
+			On(
+				TypeIDNameSlice{
+					TypeIDAnchor,
+				},
+				func() {
+					code := Empty()
+					code.Var().Parens(
+						DoGroup(func(gr *Group) {
 							for _, instruction := range idl.Instructions {
 								insExportedName := ToCamel(instruction.Name)
-								switchBlock.Case(Id("Instruction_" + insExportedName)).Line().Return(Lit(insExportedName))
+
+								ins := Empty().Line()
+								for _, doc := range instruction.Docs {
+									ins.Comment(doc).Line()
+								}
+								toBeHashed := ToSnake(instruction.Name)
+								if GetConfig().Debug {
+									ins.Comment(Sf(`hash("%s:%s")`, bin.SIGHASH_GLOBAL_NAMESPACE, toBeHashed)).Line()
+								}
+								ins.Id("Instruction_" + insExportedName)
+
+								ins.Op("=").Qual(PkgDfuseBinary, "TypeID").Call(
+									Index(Lit(8)).Byte().Op("{").ListFunc(func(byteGroup *Group) {
+										sighash := bin.SighashTypeID(bin.SIGHASH_GLOBAL_NAMESPACE, toBeHashed)
+										for _, byteVal := range sighash[:] {
+											byteGroup.Lit(int(byteVal))
+										}
+									}).Op("}"),
+								)
+								gr.Add(ins.Line().Line())
 							}
-							switchBlock.Default().Line().Return(Lit(""))
+						}),
+					)
+					file.Add(code.Line())
+				},
+			).
+			On(
+				TypeIDNameSlice{
+					TypeIDNoType,
+				},
+				func() {
+					// TODO
+				},
+			)
+	}
+	{
+		// Declare `InstructionIDToName` function:
+		GetConfig().TypeID.
+			On(
+				TypeIDNameSlice{
+					TypeIDUvarint32,
+					TypeIDUint32,
+					TypeIDUint8,
+				},
+				func() {
+					code := Empty()
+					code.Comment("InstructionIDToName returns the name of the instruction given its ID.").Line()
+					code.Func().Id("InstructionIDToName").
+						Params(
+							func() Code {
+								switch GetConfig().TypeID {
+								case TypeIDUvarint32, TypeIDUint32:
+									return Id("id").Uint32()
+								case TypeIDUint8:
+									return Id("id").Uint32()
+								}
+								return nil
+							}(),
+						).
+						Params(String()).
+						BlockFunc(func(body *Group) {
+							body.Switch(Id("id")).BlockFunc(func(switchBlock *Group) {
+								for _, instruction := range idl.Instructions {
+									insExportedName := ToCamel(instruction.Name)
+									switchBlock.Case(Id("Instruction_" + insExportedName)).Line().Return(Lit(insExportedName))
+								}
+								switchBlock.Default().Line().Return(Lit(""))
+							})
+
 						})
 
-					})
-				file.Add(code.Line())
-			},
-		).OnEncodingBorsh(func() {
-			code := Empty()
-			code.Comment("InstructionIDToName returns the name of the instruction given its ID.").Line()
-			code.Func().Id("InstructionIDToName").
-				Params(Id("id").Qual(PkgDfuseBinary, "TypeID")).
-				Params(String()).
-				BlockFunc(func(body *Group) {
-					body.Switch(Id("id")).BlockFunc(func(switchBlock *Group) {
-						for _, instruction := range idl.Instructions {
-							insExportedName := ToCamel(instruction.Name)
-							switchBlock.Case(Id("Instruction_" + insExportedName)).Line().Return(Lit(insExportedName))
-						}
-						switchBlock.Default().Line().Return(Lit(""))
-					})
+					file.Add(code.Line())
+				},
+			).
+			On(
+				TypeIDNameSlice{
+					TypeIDAnchor,
+				},
+				func() {
+					code := Empty()
+					code.Comment("InstructionIDToName returns the name of the instruction given its ID.").Line()
+					code.Func().Id("InstructionIDToName").
+						Params(Id("id").Qual(PkgDfuseBinary, "TypeID")).
+						Params(String()).
+						BlockFunc(func(body *Group) {
+							body.Switch(Id("id")).BlockFunc(func(switchBlock *Group) {
+								for _, instruction := range idl.Instructions {
+									insExportedName := ToCamel(instruction.Name)
+									switchBlock.Case(Id("Instruction_" + insExportedName)).Line().Return(Lit(insExportedName))
+								}
+								switchBlock.Default().Line().Return(Lit(""))
+							})
 
-				})
-			file.Add(code.Line())
-		})
+						})
+					file.Add(code.Line())
+				},
+			).
+			On(
+				TypeIDNameSlice{
+					TypeIDNoType,
+				},
+				func() {
+					// TODO
+				},
+			)
 	}
 
 	{
@@ -1215,50 +1303,79 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		}
 		{
 			// variant definitions for the decoder:
-			GetConfig().Encoding.On(
-				[]EncoderName{EncodingBin, EncodingCompactU16},
-				func() {
-					code := Empty()
-					code.Var().Id("InstructionImplDef").Op("=").Qual(PkgDfuseBinary, "NewVariantDefinition").
-						Parens(DoGroup(func(call *Group) {
-							call.Line()
-							// TODO: make this configurable?
-							call.Qual(PkgDfuseBinary, "Uint32TypeIDEncoding").Op(",").Line()
+			GetConfig().TypeID.
+				On(
+					TypeIDNameSlice{
+						TypeIDUvarint32,
+						TypeIDUint32,
+						TypeIDUint8,
+					},
+					func() {
 
-							call.Index().Qual(PkgDfuseBinary, "VariantType").
-								BlockFunc(func(variantBlock *Group) {
-									for _, instruction := range idl.Instructions {
-										insName := ToCamel(instruction.Name)
-										insExportedName := ToCamel(instruction.Name)
-										variantBlock.Block(
-											List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
-										).Op(",")
-									}
-								}).Op(",").Line()
-						}))
-					file.Add(code.Line())
-				},
-			).OnEncodingBorsh(func() {
-				code := Empty()
-				code.Var().Id("InstructionImplDef").Op("=").Qual(PkgDfuseBinary, "NewVariantDefinition").
-					Parens(DoGroup(func(call *Group) {
-						call.Line()
-						// TODO: make this configurable?
-						call.Qual(PkgDfuseBinary, "AnchorTypeIDEncoding").Op(",").Line()
+						code := Empty()
+						code.Var().Id("InstructionImplDef").Op("=").Qual(PkgDfuseBinary, "NewVariantDefinition").
+							Parens(DoGroup(func(call *Group) {
+								call.Line()
 
-						call.Index().Qual(PkgDfuseBinary, "VariantType").
-							BlockFunc(func(variantBlock *Group) {
-								for _, instruction := range idl.Instructions {
-									insName := ToSnake(instruction.Name)
-									insExportedName := ToCamel(instruction.Name)
-									variantBlock.Block(
-										List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
-									).Op(",")
+								switch GetConfig().TypeID {
+								case TypeIDUvarint32:
+									call.Qual(PkgDfuseBinary, "Uvarint32TypeIDEncoding").Op(",").Line()
+								case TypeIDUint32:
+									call.Qual(PkgDfuseBinary, "Uint32TypeIDEncoding").Op(",").Line()
+								case TypeIDUint8:
+									call.Qual(PkgDfuseBinary, "Uint8TypeIDEncoding").Op(",").Line()
 								}
-							}).Op(",").Line()
-					}))
-				file.Add(code.Line())
-			})
+
+								call.Index().Qual(PkgDfuseBinary, "VariantType").
+									BlockFunc(func(variantBlock *Group) {
+										for _, instruction := range idl.Instructions {
+											// NOTE: using `ToCamel` here:
+											insName := ToCamel(instruction.Name)
+											insExportedName := ToCamel(instruction.Name)
+											variantBlock.Block(
+												List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
+											).Op(",")
+										}
+									}).Op(",").Line()
+							}))
+						file.Add(code.Line())
+
+					},
+				).
+				On(
+					TypeIDNameSlice{
+						TypeIDAnchor,
+					},
+					func() {
+						code := Empty()
+						code.Var().Id("InstructionImplDef").Op("=").Qual(PkgDfuseBinary, "NewVariantDefinition").
+							Parens(DoGroup(func(call *Group) {
+								call.Line()
+								call.Qual(PkgDfuseBinary, "AnchorTypeIDEncoding").Op(",").Line()
+
+								call.Index().Qual(PkgDfuseBinary, "VariantType").
+									BlockFunc(func(variantBlock *Group) {
+										for _, instruction := range idl.Instructions {
+											// NOTE: using `ToSnake` here (necessary for sighash computing from instruction name)
+											insName := ToSnake(instruction.Name)
+											insExportedName := ToCamel(instruction.Name)
+											variantBlock.Block(
+												List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
+											).Op(",")
+										}
+									}).Op(",").Line()
+							}))
+						file.Add(code.Line())
+					},
+				).
+				On(
+					TypeIDNameSlice{
+						TypeIDNoType,
+					},
+					func() {
+						// TODO
+					},
+				)
 
 		}
 		{
@@ -1379,15 +1496,43 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 				).
 				BlockFunc(func(body *Group) {
 					// Body:
-					GetConfig().Encoding.
+
+					GetConfig().TypeID.
 						On(
-							[]EncoderName{EncodingBin, EncodingCompactU16},
+							TypeIDNameSlice{
+								TypeIDUvarint32,
+								TypeIDUint32,
+								TypeIDUint8,
+							},
 							func() {
-								body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("Uint32").Call(), Qual("encoding/binary", "LittleEndian"))
-							}).
-						OnEncodingBorsh(func() {
-							body.Err().Op(":=").Id("encoder").Dot("WriteBytes").Call(Id("inst").Dot("TypeID").Dot("Bytes").Call(), False())
-						})
+
+								switch GetConfig().TypeID {
+								case TypeIDUvarint32:
+									body.Err().Op(":=").Id("encoder").Dot("WriteUVarInt").Call(Id("inst").Dot("TypeID").Dot("Uvarint32").Call())
+								case TypeIDUint32:
+									body.Err().Op(":=").Id("encoder").Dot("WriteUint32").Call(Id("inst").Dot("TypeID").Dot("Uint32").Call(), Qual("encoding/binary", "LittleEndian"))
+								case TypeIDUint8:
+									body.Err().Op(":=").Id("encoder").Dot("WriteUint8").Call(Id("inst").Dot("TypeID").Dot("Uint8").Call())
+								}
+
+							},
+						).
+						On(
+							TypeIDNameSlice{
+								TypeIDAnchor,
+							},
+							func() {
+								body.Err().Op(":=").Id("encoder").Dot("WriteBytes").Call(Id("inst").Dot("TypeID").Dot("Bytes").Call(), False())
+							},
+						).
+						On(
+							TypeIDNameSlice{
+								TypeIDNoType,
+							},
+							func() {
+								// TODO
+							},
+						)
 
 					body.If(
 						Err().Op("!=").Nil(),
