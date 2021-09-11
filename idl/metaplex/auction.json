@@ -274,7 +274,53 @@
                 }
 
             ]
+        },
+        {
+            "name": "StartAuction",
+            "docs": [
+                "Start an inactive auction."
+            ],
+            "accounts": [
+                {
+                    "name": "creator",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "The creator/authorised account."
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized auction account."
+                    ]
+                },
+                {
+                    "name": "clock",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Clock sysvar"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "StartAuctionArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
+
 
 
 
@@ -543,6 +589,23 @@
                         "name": "Salt",
                         "type": "u64",
                         "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "StartAuctionArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "resource",
+                        "type": "publicKey",
+                        "docs": [
+                            "The resource being auctioned. See AuctionData."
+                        ]
                     }
 
                 ]
