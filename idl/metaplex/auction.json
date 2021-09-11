@@ -164,7 +164,101 @@
                 }
 
             ]
+        },
+        {
+            "name": "ClaimBid",
+            "docs": [
+                "Move SPL tokens from winning bid to the destination account."
+            ],
+            "accounts": [
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The destination account"
+                    ]
+                },
+                {
+                    "name": "bidderPotToken",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The bidder pot token account"
+                    ]
+                },
+                {
+                    "name": "bidderPotPDA",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The bidder pot pda account [seed of ['auction', program_id, auction key, bidder key]]"
+                    ]
+                },
+                {
+                    "name": "auctionAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "The authority on the auction"
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The auction"
+                    ]
+                },
+                {
+                    "name": "bidderWallet",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The bidder wallet"
+                    ]
+                },
+                {
+                    "name": "tokenMint",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token mint of the auction"
+                    ]
+                },
+                {
+                    "name": "clock",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Clock sysvar"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "ClaimBidArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
+
 
 
 
@@ -363,6 +457,21 @@
                                 "Hidden minimum price, revealed at the end of the auction."
                             ]
                         }]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "ClaimBidArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "resource",
+                        "type": "publicKey",
+                        "docs": []
                     }
 
                 ]
