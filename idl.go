@@ -219,6 +219,10 @@ const (
 	IdlTypeBytes     IdlTypeAsString = "bytes"
 	IdlTypeString    IdlTypeAsString = "string"
 	IdlTypePublicKey IdlTypeAsString = "publicKey"
+
+	// Custom additions:
+	IdlTypeUnixTimestamp IdlTypeAsString = "unixTimestamp"
+	IdlTypeHash          IdlTypeAsString = "hash"
 	// | IdlTypeVec
 	// | IdlTypeOption
 	// | IdlTypeDefined;

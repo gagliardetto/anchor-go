@@ -49,12 +49,18 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 	case IdlTypeI128:
 		stat.Qual(PkgDfuseBinary, "Int128")
 	case IdlTypeBytes:
-		// TODO:
 		stat.Index().Byte()
 	case IdlTypeString:
 		stat.String()
 	case IdlTypePublicKey:
 		stat.Qual(PkgSolanaGo, "PublicKey")
+
+	// Custom:
+	case IdlTypeUnixTimestamp:
+		stat.Qual(PkgSolanaGo, "UnixTimeSeconds")
+	case IdlTypeHash:
+		stat.Qual(PkgSolanaGo, "Hash")
+
 	default:
 		panic(Sf("unknown type string: %s", ts))
 	}
