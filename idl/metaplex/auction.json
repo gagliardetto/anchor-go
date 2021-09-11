@@ -322,7 +322,8 @@
         {
             "name": "SetAuthority",
             "docs": [
-                "Update the authority for an auction account."
+                "Update the authority for an auction account.",
+                "https://github.com/metaplex-foundation/metaplex/blob/4a1b7d2f674013bc8bd3149294c66b03b27120d0/rust/auction/program/src/instruction.rs#L115"
             ],
             "accounts": [
                 {
@@ -346,7 +347,133 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "PlaceBid",
+            "docs": [
+                "Place a bid on a running auction."
+            ],
+            "accounts": [
+                {
+                    "name": "bidderPrimaryAccount",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "The bidders primary account, for PDA calculation/transit auth."
+                    ]
+                },
+                {
+                    "name": "bidderTokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The bidders token account they'll pay with"
+                    ]
+                },
+                {
+                    "name": "pot",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The pot, containing a reference to the stored SPL token account."
+                    ]
+                },
+                {
+                    "name": "potSPL",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The pot SPL account, where the tokens will be deposited."
+                    ]
+                },
+                {
+                    "name": "metadata",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The metadata account, storing information about the bidders actions."
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction account, containing data about the auction and item being bid on."
+                    ]
+                },
+                {
+                    "name": "tokenMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Token mint, for transfer instructions and verification."
+                    ]
+                },
+                {
+                    "name": "transferAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Transfer authority, for moving tokens into the bid pot."
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Payer"
+                    ]
+                },
+                {
+                    "name": "clock",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Clock sysvar"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System program"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "SPL Token Program"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "PlaceBidArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
+
 
 
 
@@ -630,6 +757,30 @@
                         "type": "publicKey",
                         "docs": [
                             "The resource being auctioned. See AuctionData."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "PlaceBidArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "amount",
+                        "type": "u64",
+                        "docs": [
+                            "Size of the bid being placed. The user must have enough SOL to satisfy this amount."
+                        ]
+                    },
+                    {
+                        "name": "resource",
+                        "type": "publicKey",
+                        "docs": [
+                            "Resource being bid on."
                         ]
                     }
 
