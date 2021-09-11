@@ -1815,7 +1815,372 @@
 
     ],
     "events": [],
-    "errors": [],
+    "errors": [
+    {
+        "msg": "Failed to unpack instruction data",
+        "name": "InstructionUnpackError",
+        "code": 0
+    },
+    {
+        "msg": "Failed to pack instruction data",
+        "name": "InstructionPackError",
+        "code": 1
+    },
+    {
+        "msg": "Lamport balance below rent-exempt threshold",
+        "name": "NotRentExempt",
+        "code": 2
+    },
+    {
+        "msg": "Already initialized",
+        "name": "AlreadyInitialized",
+        "code": 3
+    },
+    {
+        "msg": "Uninitialized",
+        "name": "Uninitialized",
+        "code": 4
+    },
+    {
+        "msg": "Metadata's key must match seed of ['metadata', program id, mint] provided",
+        "name": "InvalidMetadataKey",
+        "code": 5
+    },
+    {
+        "msg": "Edition's key must match seed of ['metadata', program id, name, 'edition'] provided",
+        "name": "InvalidEditionKey",
+        "code": 6
+    },
+    {
+        "msg": "Update Authority given does not match",
+        "name": "UpdateAuthorityIncorrect",
+        "code": 7
+    },
+    {
+        "msg": "Update Authority needs to be signer to update metadata",
+        "name": "UpdateAuthorityIsNotSigner",
+        "code": 8
+    },
+    {
+        "msg": "You must be the mint authority and signer on this transaction",
+        "name": "NotMintAuthority",
+        "code": 9
+    },
+    {
+        "msg": "Mint authority provided does not match the authority on the mint",
+        "name": "InvalidMintAuthority",
+        "code": 10
+    },
+    {
+        "msg": "Name too long",
+        "name": "NameTooLong",
+        "code": 11
+    },
+    {
+        "msg": "Symbol too long",
+        "name": "SymbolTooLong",
+        "code": 12
+    },
+    {
+        "msg": "URI too long",
+        "name": "UriTooLong",
+        "code": 13
+    },
+    {
+        "msg": "Update authority must be equivalent to the metadata's authority and also signer of this transaction",
+        "name": "UpdateAuthorityMustBeEqualToMetadataAuthorityAndSigner",
+        "code": 14
+    },
+    {
+        "msg": "Mint given does not match mint on Metadata",
+        "name": "MintMismatch",
+        "code": 15
+    },
+    {
+        "msg": "Editions must have exactly one token",
+        "name": "EditionsMustHaveExactlyOneToken",
+        "code": 16
+    },
+    {
+        "msg": "Maximum editions printed already",
+        "name": "MaxEditionsMintedAlready",
+        "code": 17
+    },
+    {
+        "msg": "Token mint to failed",
+        "name": "TokenMintToFailed",
+        "code": 18
+    },
+    {
+        "msg": "The master edition record passed must match the master record on the edition given",
+        "name": "MasterRecordMismatch",
+        "code": 19
+    },
+    {
+        "msg": "The destination account does not have the right mint",
+        "name": "DestinationMintMismatch",
+        "code": 20
+    },
+    {
+        "msg": "An edition can only mint one of its kind!",
+        "name": "EditionAlreadyMinted",
+        "code": 21
+    },
+    {
+        "msg": "Printing mint decimals should be zero",
+        "name": "PrintingMintDecimalsShouldBeZero",
+        "code": 22
+    },
+    {
+        "msg": "OneTimePrintingAuthorization mint decimals should be zero",
+        "name": "OneTimePrintingAuthorizationMintDecimalsShouldBeZero",
+        "code": 23
+    },
+    {
+        "msg": "EditionMintDecimalsShouldBeZero",
+        "name": "EditionMintDecimalsShouldBeZero",
+        "code": 24
+    },
+    {
+        "msg": "Token burn failed",
+        "name": "TokenBurnFailed",
+        "code": 25
+    },
+    {
+        "msg": "The One Time authorization mint does not match that on the token account!",
+        "name": "TokenAccountOneTimeAuthMintMismatch",
+        "code": 26
+    },
+    {
+        "msg": "Derived key invalid",
+        "name": "DerivedKeyInvalid",
+        "code": 27
+    },
+    {
+        "msg": "The Printing mint does not match that on the master edition!",
+        "name": "PrintingMintMismatch",
+        "code": 28
+    },
+    {
+        "msg": "The One Time Printing Auth mint does not match that on the master edition!",
+        "name": "OneTimePrintingAuthMintMismatch",
+        "code": 29
+    },
+    {
+        "msg": "The mint of the token account does not match the Printing mint!",
+        "name": "TokenAccountMintMismatch",
+        "code": 30
+    },
+    {
+        "msg": "The mint of the token account does not match the master metadata mint!",
+        "name": "TokenAccountMintMismatchV2",
+        "code": 31
+    },
+    {
+        "msg": "Not enough tokens to mint a limited edition",
+        "name": "NotEnoughTokens",
+        "code": 32
+    },
+    {
+        "msg": "The mint on your authorization token holding account does not match your Printing mint!",
+        "name": "PrintingMintAuthorizationAccountMismatch",
+        "code": 33
+    },
+    {
+        "msg": "The authorization token account has a different owner than the update authority for the master edition!",
+        "name": "AuthorizationTokenAccountOwnerMismatch",
+        "code": 34
+    },
+    {
+        "msg": "This feature is currently disabled.",
+        "name": "Disabled",
+        "code": 35
+    },
+    {
+        "msg": "Creators list too long",
+        "name": "CreatorsTooLong",
+        "code": 36
+    },
+    {
+        "msg": "Creators must be at least one if set",
+        "name": "CreatorsMustBeAtleastOne",
+        "code": 37
+    },
+    {
+        "msg": "If using a creators array, you must be one of the creators listed",
+        "name": "MustBeOneOfCreators",
+        "code": 38
+    },
+    {
+        "msg": "This metadata does not have creators",
+        "name": "NoCreatorsPresentOnMetadata",
+        "code": 39
+    },
+    {
+        "msg": "This creator address was not found",
+        "name": "CreatorNotFound",
+        "code": 40
+    },
+    {
+        "msg": "Basis points cannot be more than 10000",
+        "name": "InvalidBasisPoints",
+        "code": 41
+    },
+    {
+        "msg": "Primary sale can only be flipped to true and is immutable",
+        "name": "PrimarySaleCanOnlyBeFlippedToTrue",
+        "code": 42
+    },
+    {
+        "msg": "Owner does not match that on the account given",
+        "name": "OwnerMismatch",
+        "code": 43
+    },
+    {
+        "msg": "This account has no tokens to be used for authorization",
+        "name": "NoBalanceInAccountForAuthorization",
+        "code": 44
+    },
+    {
+        "msg": "Share total must equal 100 for creator array",
+        "name": "ShareTotalMustBe100",
+        "code": 45
+    },
+    {
+        "msg": "This reservation list already exists!",
+        "name": "ReservationExists",
+        "code": 46
+    },
+    {
+        "msg": "This reservation list does not exist!",
+        "name": "ReservationDoesNotExist",
+        "code": 47
+    },
+    {
+        "msg": "This reservation list exists but was never set with reservations",
+        "name": "ReservationNotSet",
+        "code": 48
+    },
+    {
+        "msg": "This reservation list has already been set!",
+        "name": "ReservationAlreadyMade",
+        "code": 49
+    },
+    {
+        "msg": "Provided more addresses than max allowed in single reservation",
+        "name": "BeyondMaxAddressSize",
+        "code": 50
+    },
+    {
+        "msg": "NumericalOverflowError",
+        "name": "NumericalOverflowError",
+        "code": 51
+    },
+    {
+        "msg": "This reservation would go beyond the maximum supply of the master edition!",
+        "name": "ReservationBreachesMaximumSupply",
+        "code": 52
+    },
+    {
+        "msg": "Address not in reservation!",
+        "name": "AddressNotInReservation",
+        "code": 53
+    },
+    {
+        "msg": "You cannot unilaterally verify another creator, they must sign",
+        "name": "CannotVerifyAnotherCreator",
+        "code": 54
+    },
+    {
+        "msg": "You cannot unilaterally unverify another creator",
+        "name": "CannotUnverifyAnotherCreator",
+        "code": 55
+    },
+    {
+        "msg": "In initial reservation setting, spots remaining should equal total spots",
+        "name": "SpotMismatch",
+        "code": 56
+    },
+    {
+        "msg": "Incorrect account owner",
+        "name": "IncorrectOwner",
+        "code": 57
+    },
+    {
+        "msg": "printing these tokens would breach the maximum supply limit of the master edition",
+        "name": "PrintingWouldBreachMaximumSupply",
+        "code": 58
+    },
+    {
+        "msg": "Data is immutable",
+        "name": "DataIsImmutable",
+        "code": 59
+    },
+    {
+        "msg": "No duplicate creator addresses",
+        "name": "DuplicateCreatorAddress",
+        "code": 60
+    },
+    {
+        "msg": "Reservation spots remaining should match total spots when first being created",
+        "name": "ReservationSpotsRemainingShouldMatchTotalSpotsAtStart",
+        "code": 61
+    },
+    {
+        "msg": "Invalid token program",
+        "name": "InvalidTokenProgram",
+        "code": 62
+    },
+    {
+        "msg": "Data type mismatch",
+        "name": "DataTypeMismatch",
+        "code": 63
+    },
+    {
+        "msg": "Beyond alotted address size in reservation!",
+        "name": "BeyondAlottedAddressSize",
+        "code": 64
+    },
+    {
+        "msg": "The reservation has only been partially alotted",
+        "name": "ReservationNotComplete",
+        "code": 65
+    },
+    {
+        "msg": "You cannot splice over an existing reservation!",
+        "name": "TriedToReplaceAnExistingReservation",
+        "code": 66
+    },
+    {
+        "msg": "Invalid operation",
+        "name": "InvalidOperation",
+        "code": 67
+    },
+    {
+        "msg": "Invalid Owner",
+        "name": "InvalidOwner",
+        "code": 68
+    },
+    {
+        "msg": "Printing mint supply must be zero for conversion",
+        "name": "PrintingMintSupplyMustBeZeroForConversion",
+        "code": 69
+    },
+    {
+        "msg": "One Time Auth mint supply must be zero for conversion",
+        "name": "OneTimeAuthMintSupplyMustBeZeroForConversion",
+        "code": 70
+    },
+    {
+        "msg": "You tried to insert one edition too many into an edition mark pda",
+        "name": "InvalidEditionIndex",
+        "code": 71
+    },
+    {
+        "msg": "In the legacy system the reservation needs to be of size one for cpu limit reasons",
+        "name": "ReservationArrayShouldBeSizeOne",
+        "code": 72
+    }],
     "metadata":
     {
         "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
