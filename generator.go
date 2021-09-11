@@ -218,8 +218,15 @@ func genTypeDef(def IdlTypeDef) Code {
 							switch {
 							case variant.Fields.IdlEnumFieldsNamed != nil:
 								for _, variantField := range *variant.Fields.IdlEnumFieldsNamed {
-									// TODO: pointer, or not?
-									structGroup.Add(genField(variantField, true))
+									structGroup.Add(genField(variantField, variantField.Type.IsIdlTypeOption())).
+										Add(func() Code {
+											if variantField.Type.IsIdlTypeOption() {
+												return Tag(map[string]string{
+													"bin": "optional",
+												})
+											}
+											return nil
+										}())
 								}
 							default:
 								// TODO: handle tuples
