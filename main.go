@@ -1221,7 +1221,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 								case TypeIDUvarint32, TypeIDUint32:
 									return Id("id").Uint32()
 								case TypeIDUint8:
-									return Id("id").Uint32()
+									return Id("id").Uint8()
 								}
 								return nil
 							}(),
