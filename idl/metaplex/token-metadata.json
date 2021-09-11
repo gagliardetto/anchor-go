@@ -1775,7 +1775,43 @@
 
                 ]
             }
+        },
+        {
+            "name": "Edition",
+            "docs": [
+                "All Editions should never have a supply greater than 1.",
+                "To enforce this, a transfer mint authority instruction will happen when",
+                "a normal token is turned into an Edition, and in order for a Metadata update authority",
+                "to do this transaction they will also need to sign the transaction as the Mint authority."
+            ],
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type": "publicKey",
+                        "docs": []
+                    },
+                    {
+                        "name": "parent",
+                        "type": "publicKey",
+                        "docs": [
+                            "Points at MasterEdition struct"
+                        ]
+                    },
+                    {
+                        "name": "edition",
+                        "type": "u64",
+                        "docs": [
+                            "Starting at 0 for master record, this is incremented for each edition minted."
+                        ]
+                    }
+
+                ]
+            }
         }
+
 
     ],
     "events": [],
