@@ -256,7 +256,27 @@
                 }
 
             ]
+        },
+        {
+            "name": "EndAuction",
+            "docs": [
+                "Ends an auction, regardless of end timing conditions"
+            ],
+            "accounts": [],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "EndAuctionArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
+
 
 
 
@@ -471,6 +491,57 @@
                     {
                         "name": "resource",
                         "type": "publicKey",
+                        "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "EndAuctionArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "resource",
+                        "type": "publicKey",
+                        "docs": [
+                            "The resource being auctioned. See AuctionData."
+                        ]
+                    },
+                    {
+                        "name": "reveal",
+                        "type":
+                        {
+                            "option":
+                            {
+                                "defined": "Revealer"
+                            }
+                        },
+                        "docs": [
+                            "If the auction was blinded, a revealing price must be specified to release the auction",
+                            "winnings."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "Revealer",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "Price",
+                        "type": "u64",
+                        "docs": []
+                    },
+                    {
+                        "name": "Salt",
+                        "type": "u64",
                         "docs": []
                     }
 
