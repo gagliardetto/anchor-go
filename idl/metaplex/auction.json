@@ -318,10 +318,35 @@
                 }
 
             ]
+        },
+        {
+            "name": "SetAuthority",
+            "docs": [
+                "Update the authority for an auction account."
+            ],
+            "accounts": [
+                {
+                    "name": "auction",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": []
+                },
+                {
+                    "name": "authority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": []
+                },
+                {
+                    "name": "newAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": []
+                }
+
+            ],
+            "args": []
         }
-
-
-
 
 
 
