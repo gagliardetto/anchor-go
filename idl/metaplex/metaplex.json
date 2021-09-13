@@ -1,0 +1,354 @@
+{
+    "version": "0.0.0",
+    "name": "metaplex",
+    "docs": [],
+    "ref": "https://github.com/metaplex-foundation/metaplex/blob/397bf8dbdc652d1341c19934e8ddaa97d8edc64f/rust/metaplex/program/src/instruction.rs",
+    "instructions": [
+        {
+            "name": "InitAuctionManager",
+            "docs": [
+                "Initializes an Auction Manager"
+            ],
+            "accounts": [
+                {
+                    "name": "auctionManagerAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Uninitialized, unallocated auction manager account with pda of ['metaplex', auction_key from auction referenced below]"
+                    ]
+                },
+                {
+                    "name": "combinedVaultAccount",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Combined vault account with authority set to auction manager account (this will be checked)",
+                        "Note in addition that this vault account should have authority set to this program's pda of ['metaplex', auction_key]"
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction with auctioned item being set to the vault given and authority set to this program's pda of ['metaplex', auction_key]"
+                    ]
+                },
+                {
+                    "name": "authority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Authority for the Auction Manager"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Payer"
+                    ]
+                },
+                {
+                    "name": "paymentAccount",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Accept payment account of same token mint as the auction for taking payment for open editions, owner should be auction manager key"
+                    ]
+                },
+                {
+                    "name": "store",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Store that this auction manager will belong to"
+                    ]
+                },
+                {
+                    "name": "system",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System sysvar"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "AuctionManagerSettings"
+                    },
+                    "docs": []
+                }
+
+            ]
+        }
+
+
+    ],
+    "accounts": [],
+    "types": [
+        {
+            "name": "AuctionManagerSettings",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "winning_configs",
+                        "type":
+                        {
+                            "vec":
+                            {
+                                "defined": "WinningConfig"
+                            }
+                        },
+                        "docs": [
+                            "The safety deposit box index in the vault containing the winning items, in order of place",
+                            "The same index can appear multiple times if that index contains n tokens for n appearances (this will be checked)"
+                        ]
+                    },
+                    {
+                        "name": "participation_config",
+                        "type":
+                        {
+                            "option":
+                            {
+                                "defined": "ParticipationConfig"
+                            }
+                        },
+                        "docs": [
+                            "The participation config is separated because it is structurally a bit different,",
+                            "having different options and also because it has no real \"winning place\" in the array."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "WinningConfig",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "items",
+                        "type":
+                        {
+                            "vec":
+                            {
+                                "defined": "WinningConfigItem"
+                            }
+                        },
+                        "docs": [
+                            "For now these are just array-of-array proxies but wanted to make them first class",
+                            "structs in case we want to attach other top level metadata someday."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "WinningConfigItem",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "safety_deposit_box_index",
+                        "type": "u8",
+                        "docs": []
+                    },
+                    {
+                        "name": "amount",
+                        "type": "u8",
+                        "docs": []
+                    },
+                    {
+                        "name": "winning_config_type",
+                        "type":
+                        {
+                            "defined": "WinningConfigType"
+                        },
+                        "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "WinningConfigType",
+            "docs": [],
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "TokenOnlyTransfer",
+                        "docs": [
+                            "You may be selling your one-of-a-kind NFT for the first time, but not it's accompanying Metadata,",
+                            "of which you would like to retain ownership. You get 100% of the payment the first sale, then",
+                            "royalties forever after.",
+                            "",
+                            "You may be re-selling something like a Limited/Open Edition print from another auction,",
+                            "a master edition record token by itself (Without accompanying metadata/printing ownership), etc.",
+                            "This means artists will get royalty fees according to the top level royalty % on the metadata",
+                            "split according to their percentages of contribution.",
+                            "",
+                            "No metadata ownership is transferred in this instruction, which means while you may be transferring",
+                            "the token for a limited/open edition away, you would still be (nominally) the owner of the limited edition",
+                            "metadata, though it confers no rights or privileges of any kind."
+                        ]
+                    },
+                    {
+                        "name": "FullRightsTransfer",
+                        "docs": [
+                            "Means you are auctioning off the master edition record and it's metadata ownership as well as the",
+                            "token itself. The other person will be able to mint authorization tokens and make changes to the",
+                            "artwork."
+                        ]
+                    },
+                    {
+                        "name": "PrintingV1",
+                        "docs": [
+                            "Means you are using authorization tokens to print off editions during the auction using",
+                            "from a MasterEditionV1"
+                        ]
+                    },
+                    {
+                        "name": "PrintingV2",
+                        "docs": [
+                            "Means you are using the MasterEditionV2 to print off editions"
+                        ]
+                    },
+                    {
+                        "name": "Participation",
+                        "docs": [
+                            "Means you are using a MasterEditionV2 as a participation prize."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "ParticipationConfig",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "winner_constraint",
+                        "type":
+                        {
+                            "defined": "WinningConstraint"
+                        },
+                        "docs": [
+                            "Setups:",
+                            "1. Winners get participation + not charged extra",
+                            "2. Winners dont get participation prize"
+                        ]
+                    },
+                    {
+                        "name": "non_winning_constraint",
+                        "type":
+                        {
+                            "defined": "NonWinningConstraint"
+                        },
+                        "docs": [
+                            "Setups:",
+                            "1. Losers get prize for free",
+                            "2. Losers get prize but pay fixed price",
+                            "3. Losers get prize but pay bid price"
+                        ]
+                    },
+                    {
+                        "name": "safety_deposit_box_index",
+                        "type": "u8",
+                        "docs": [
+                            "The safety deposit box index in the vault containing the template for the participation prize"
+                        ]
+                    },
+                    {
+                        "name": "fixed_price",
+                        "type":
+                        {
+                            "option": "u64"
+                        },
+                        "docs": [
+                            "Setting this field disconnects the participation prizes price from the bid. Any bid you submit, regardless",
+                            "of amount, charges you the same fixed price."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "WinningConstraint",
+            "docs": [],
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "NoParticipationPrize",
+                        "docs": []
+                    },
+                    {
+                        "name": "ParticipationPrizeGiven",
+                        "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "NonWinningConstraint",
+            "docs": [],
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "NoParticipationPrize",
+                        "docs": []
+                    },
+                    {
+                        "name": "GivenForFixedPrice",
+                        "docs": []
+                    },
+                    {
+                        "name": "GivenForBidPrice",
+                        "docs": []
+                    }
+
+                ]
+            }
+        }
+
+
+    ],
+    "events": [],
+    "errors": [],
+    "metadata":
+    {
+        "address": ""
+    }
+}
