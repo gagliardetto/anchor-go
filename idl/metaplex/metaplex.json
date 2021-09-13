@@ -994,7 +994,158 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "EmptyPaymentAccount",
+            "docs": [
+                "At any time, the auction manager authority may empty whatever funds are in the accept payment account",
+                "on the auction manager. Funds come here from fixed price payments for partipation nfts, and from draining bid payments",
+                "from the auction.",
+                "",
+                "This action specifically takes a given safety deposit box, winning config, and creator on a metadata for the token inside that safety deposit box",
+                "and pumps the requisite monies out to that creator as required by the royalties formula.",
+                "",
+                "It's up to the UI to iterate through all winning configs, all safety deposit boxes in a given winning config tier, and all creators for",
+                "each metadata attached to each safety deposit box, to get all the money. Note that one safety deposit box can be used in multiple different winning configs,",
+                "but this shouldn't make any difference to this function.",
+                "",
+                "We designed this function to be called in this loop-like manner because there is a limit to the number of accounts that can",
+                "be passed up at once (32) and there may be many more than that easily in a given auction, so it's easier for the implementer to just",
+                "loop through and call it, and there is an incentive for them to do so (to get paid.) It's permissionless as well as it",
+                "will empty into any destination account owned by the creator that has the proper mint, so anybody can call it.",
+                "",
+                "For the participation NFT, there is no winning config, but the total is figured by summing the winning bids and subtracting",
+                "from the total escrow amount present."
+            ],
+            "accounts": [
+                {
+                    "name": "acceptPaymentAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The accept payment account on the auction manager"
+                    ]
+                },
+                {
+                    "name": "destinationAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The destination account of same mint type as the accept payment account. Must be an Associated Token Account."
+                    ]
+                },
+                {
+                    "name": "auctionManager",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction manager"
+                    ]
+                },
+                {
+                    "name": "payoutTicketInfo",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Payout ticket info to keep track of this artist or auctioneer's payment, pda of [metaplex, auction manager, winning config index OR 'participation', safety deposit key]"
+                    ]
+                },
+                {
+                    "name": "signer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "payer"
+                    ]
+                },
+                {
+                    "name": "metadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The metadata"
+                    ]
+                },
+                {
+                    "name": "masterEditionOfMetadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The master edition of the metadata (optional if exists)",
+                        "(pda of ['metadata', program id, metadata mint id, 'edition']) - remember PDA is relative to token metadata program"
+                    ]
+                },
+                {
+                    "name": "safetyDepositBox",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit box account"
+                    ]
+                },
+                {
+                    "name": "auctionManagerStore",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The store of the auction manager"
+                    ]
+                },
+                {
+                    "name": "vault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The vault"
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System program"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "EmptyPaymentAccountArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
 
 
 
@@ -1239,6 +1390,47 @@
                     {
                         "name": "GivenForBidPrice",
                         "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "EmptyPaymentAccountArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "winning_config_index",
+                        "type":
+                        {
+                            "option": "u8"
+                        },
+                        "docs": [
+                            "If not redeeming a participation NFT's contributions, need to provide",
+                            "the winning config index your redeeming for. For participation, just pass None."
+                        ]
+                    },
+                    {
+                        "name": "winning_config_item_index",
+                        "type":
+                        {
+                            "option": "u8"
+                        },
+                        "docs": [
+                            "If not redeeming a participation NFT, you also need to index into the winning config item's list."
+                        ]
+                    },
+                    {
+                        "name": "creator_index",
+                        "type":
+                        {
+                            "option": "u8"
+                        },
+                        "docs": [
+                            "index in the metadata creator list, can be None if metadata has no creator list."
+                        ]
                     }
 
                 ]
