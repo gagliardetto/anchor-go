@@ -1602,6 +1602,82 @@
                 }
 
             ]
+        },
+        {
+            "name": "DecommissionAuctionManager",
+            "docs": [
+                "If you have an auction manager in an Initialized state and for some reason you can't validate it, you want to retrieve",
+                "The items inside of it. This will allow you to move it straight to Disbursing, and then you can, as Auctioneer,",
+                "Redeem those items using the RedeemUnusedWinningConfigItemsAsAuctioneer endpoint.",
+                "",
+                "Be WARNED: Because the boxes have not been validated, the logic for redemptions may not work quite right. For instance,",
+                "if your validation step failed because you provided an empty box but said there was a token in it, when you go",
+                "and try to redeem it, you yourself will experience quite the explosion. It will be up to you to tactfully",
+                "request the bids that can be properly redeemed from the ones that cannot.",
+                "",
+                "If you had a FullRightsTransfer token, and you never validated (and thus transferred) ownership, when the redemption happens",
+                "it will skip trying to transfer it to you, so that should work fine."
+            ],
+            "accounts": [
+                {
+                    "name": "auctionManager",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction Manager"
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction"
+                    ]
+                },
+                {
+                    "name": "authority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority of the Auction Manager"
+                    ]
+                },
+                {
+                    "name": "vault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Vault"
+                    ]
+                },
+                {
+                    "name": "store",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Store"
+                    ]
+                },
+                {
+                    "name": "auctionProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction program"
+                    ]
+                },
+                {
+                    "name": "clock",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Clock sysvar"
+                    ]
+                }
+
+            ],
+            "args": []
         }
 
 
