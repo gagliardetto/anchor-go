@@ -1908,6 +1908,130 @@
                 }
 
             ]
+        },
+        {
+            "name": "WithdrawMasterEdition",
+            "docs": [
+                "Permissionless call to redeem the master edition in a given safety deposit for a PrintingV2 winning config to the",
+                "ATA of the Auctioneer. Can only be called once all redemptions have been met."
+            ],
+            "accounts": [
+                {
+                    "name": "auctionManager",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction manager"
+                    ]
+                },
+                {
+                    "name": "safetyDepositTokenStorage",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit token storage account"
+                    ]
+                },
+                {
+                    "name": "associatedTokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Associated token account owned by auction manager authority of same mint as token storage account"
+                    ]
+                },
+                {
+                    "name": "safetyDepositBox",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit box account"
+                    ]
+                },
+                {
+                    "name": "vault",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Vault account"
+                    ]
+                },
+                {
+                    "name": "fractionMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction mint of the vault"
+                    ]
+                },
+                {
+                    "name": "prizeTrackingTicket",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Prize tracking ticket (pda of ['metaplex', program id, auction manager key, metadata mint id])"
+                    ]
+                },
+                {
+                    "name": "vaultTransferAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "PDA-based Vault transfer authority ['vault', program_id, vault key]",
+                        "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction"
+                    ]
+                },
+                {
+                    "name": "auctionDataExtended",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction data extended (pda relative to auction of ['auction', program id, vault key, 'extended'])"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "tokenVaultProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token Vault program"
+                    ]
+                },
+                {
+                    "name": "store",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Store"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                }
+
+            ],
+            "args": []
         }
 
 
