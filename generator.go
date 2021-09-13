@@ -249,7 +249,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 						gr.Comment(doc).Line()
 					}
 
-					gr.Id(variant.Name).Add(func() Code {
+					gr.Id(variant.Name + "_" + enumTypeName).Add(func() Code {
 						if variantIndex == 0 {
 							return Id(enumTypeName).Op("=").Iota()
 						}
