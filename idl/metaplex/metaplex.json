@@ -1314,6 +1314,100 @@
                 }
 
             ]
+        },
+        {
+            "name": "DeprecatedValidateParticipation",
+            "docs": [
+                "Validates an participation nft (if present) on the Auction Manager. Because of the differing mechanics of an open",
+                "edition (required for participation nft), it needs to be validated at a different endpoint than a normal safety deposit box."
+            ],
+            "accounts": [
+                {
+                    "name": "openEditionMetadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Open edition metadata"
+                    ]
+                },
+                {
+                    "name": "openEditionMasterEdition",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Open edition MasterEdition account"
+                    ]
+                },
+                {
+                    "name": "printingAuthTokenHoldingAccount",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Printing authorization token holding account - must be of the printing_mint type on the master_edition, used by",
+                        "the auction manager to hold printing authorization tokens for all eligible winners of the participation nft when auction ends. Must",
+                        "be owned by auction manager account."
+                    ]
+                },
+                {
+                    "name": "authority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority for the Auction Manager"
+                    ]
+                },
+                {
+                    "name": "whitelistedCreator",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "A whitelisted creator entry for this store for the open edition",
+                        "pda of ['metaplex', store key, creator key] where creator key comes from creator list of metadata"
+                    ]
+                },
+                {
+                    "name": "auctionManagerStore",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The auction manager's store"
+                    ]
+                },
+                {
+                    "name": "safetyDepositBox",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit box"
+                    ]
+                },
+                {
+                    "name": "safetyDepositTokenStore",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit token store"
+                    ]
+                },
+                {
+                    "name": "vault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Vault"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                }
+
+            ],
+            "args": []
         }
 
 
