@@ -1144,7 +1144,101 @@
                 }
 
             ]
+        },
+        {
+            "name": "SetStore",
+            "docs": [
+                "Given a signer wallet, create a store with pda ['metaplex', wallet] (if it does not exist) and/or update it",
+                "(if it already exists). Stores can be set to open (anybody can publish) or closed (publish only via whitelist)."
+            ],
+            "accounts": [
+                {
+                    "name": "storeKey",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The store key, seed of ['metaplex', admin wallet]"
+                    ]
+                },
+                {
+                    "name": "adminWallet",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "The admin wallet"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Payer"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "tokenVaultProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token vault program"
+                    ]
+                },
+                {
+                    "name": "tokenMetadataProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token metadata program"
+                    ]
+                },
+                {
+                    "name": "auctionProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction program"
+                    ]
+                },
+                {
+                    "name": "system",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "SetStoreArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
 
 
 
@@ -1431,6 +1525,21 @@
                         "docs": [
                             "index in the metadata creator list, can be None if metadata has no creator list."
                         ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "SetStoreArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "public",
+                        "type": "bool",
+                        "docs": []
                     }
 
                 ]
