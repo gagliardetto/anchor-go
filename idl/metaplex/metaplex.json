@@ -96,7 +96,177 @@
                 }
 
             ]
+        },
+        {
+            "name": "ValidateSafetyDepositBox",
+            "docs": [
+                "Validates that a given safety deposit box has in it contents that match the expected WinningConfig in the auction manager.",
+                "A stateful call, this will error out if you call it a second time after validation has occurred."
+            ],
+            "accounts": [
+                {
+                    "name": "safetyDepositTicket",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Uninitialized Safety deposit validation ticket, pda of seed ['metaplex', program id, auction manager key, safety deposit key]"
+                    ]
+                },
+                {
+                    "name": "auctionManager",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction manager"
+                    ]
+                },
+                {
+                    "name": "metadata",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Metadata account"
+                    ]
+                },
+                {
+                    "name": "originalAuthorityLockup",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Original authority lookup - unallocated uninitialized pda account with seed ['metaplex', auction key, metadata key]",
+                        "We will store original authority here to return it later."
+                    ]
+                },
+                {
+                    "name": "whitelistedCreator",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "A whitelisted creator entry for the store of this auction manager pda of ['metaplex', store key, creator key]",
+                        "where creator key comes from creator list of metadata, any will do"
+                    ]
+                },
+                {
+                    "name": "auctionManagerStoreKey",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The auction manager's store key"
+                    ]
+                },
+                {
+                    "name": "safetyDepositBox",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit box account"
+                    ]
+                },
+                {
+                    "name": "safetyDepositBoxStorage",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit box storage account where the actual nft token is stored"
+                    ]
+                },
+                {
+                    "name": "mintAccount",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Mint account of the token in the safety deposit box"
+                    ]
+                },
+                {
+                    "name": "edition",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Edition OR MasterEdition record key",
+                        "Remember this does not need to be an existing account (may not be depending on token), just is a pda with seed",
+                        "of ['metadata', program id, Printing mint id, 'edition']. - remember PDA is relative to token metadata program."
+                    ]
+                },
+                {
+                    "name": "vault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Vault account"
+                    ]
+                },
+                {
+                    "name": "authority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority"
+                    ]
+                },
+                {
+                    "name": "authority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "optional": true,
+                    "docs": [
+                        "[optional] Metadata Authority - Signer only required if doing a full ownership txfer"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Payer"
+                    ]
+                },
+                {
+                    "name": "tokenMetadataProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token metadata program"
+                    ]
+                },
+                {
+                    "name": "system",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                },
+                {
+                    "name": "limitedEditionPrintingMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Limited edition Printing mint account (optional - only if using sending Limited Edition)"
+                    ]
+                },
+                {
+                    "name": "limitedEditionPrintingMintAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Limited edition Printing mint Authority account, this will TEMPORARILY TRANSFER MINTING AUTHORITY to the auction manager",
+                        "until all limited editions have been redeemed for authority tokens."
+                    ]
+                }
+
+            ],
+            "args": []
         }
+
 
 
     ],
