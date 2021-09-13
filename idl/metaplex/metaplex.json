@@ -1237,6 +1237,83 @@
                 }
 
             ]
+        },
+        {
+            "name": "SetWhitelistedCreator",
+            "docs": [
+                "Given an existing store, add or update an existing whitelisted creator for the store. This creates",
+                "a PDA with seed ['metaplex', store key, creator key] if it does not already exist to store attributes there."
+            ],
+            "accounts": [
+                {
+                    "name": "whitelistedCreatorPDAKey",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The whitelisted creator pda key, seed of ['metaplex', store key, creator key]"
+                    ]
+                },
+                {
+                    "name": "adminWallet",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "The admin wallet"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Payer"
+                    ]
+                },
+                {
+                    "name": "creatorKey",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The creator key"
+                    ]
+                },
+                {
+                    "name": "storeKey",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The store key, seed of ['metaplex', admin wallet]"
+                    ]
+                },
+                {
+                    "name": "system",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "SetWhitelistedCreatorArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
 
 
@@ -1538,6 +1615,21 @@
                 "fields": [
                     {
                         "name": "public",
+                        "type": "bool",
+                        "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "SetStoreArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "activated",
                         "type": "bool",
                         "docs": []
                     }
