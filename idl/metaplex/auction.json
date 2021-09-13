@@ -473,16 +473,104 @@
             ]
         }
 
+    ],
+    "accounts": [
+        {
+            "name": "AuctionData",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "authority",
+                        "type": "publicKey",
+                        "docs": [
+                            "Pubkey of the authority with permission to modify this auction."
+                        ]
+                    },
+                    {
+                        "name": "token_mint",
+                        "type": "publicKey",
+                        "docs": [
+                            "Token mint for the SPL token being used to bid"
+                        ]
+                    },
+                    {
+                        "name": "last_bid",
+                        "type":
+                        {
+                            "option": "unixTimestamp"
+                        },
+                        "docs": [
+                            "The time the last bid was placed, used to keep track of auction timing."
+                        ]
+                    },
+                    {
+                        "name": "ended_at",
+                        "type":
+                        {
+                            "option": "unixTimestamp"
+                        },
+                        "docs": [
+                            "Slot time the auction was officially ended by."
+                        ]
+                    },
+                    {
+                        "name": "end_auction_at",
+                        "type":
+                        {
+                            "option": "unixTimestamp"
+                        },
+                        "docs": [
+                            "End time is the cut-off point that the auction is forced to end by."
+                        ]
+                    },
+                    {
+                        "name": "end_auction_gap",
+                        "type":
+                        {
+                            "option": "unixTimestamp"
+                        },
+                        "docs": [
+                            "Gap time is the amount of time in slots after the previous bid at which the auction ends."
+                        ]
+                    },
+                    {
+                        "name": "price_floor",
+                        "type":
+                        {
+                            "defined": "PriceFloor"
+                        },
+                        "docs": [
+                            "Minimum price for any bid to meet."
+                        ]
+                    },
+                    {
+                        "name": "state",
+                        "type":
+                        {
+                            "defined": "AuctionState"
+                        },
+                        "docs": [
+                            "The state the auction is in, whether it has started or ended."
+                        ]
+                    },
+                    {
+                        "name": "bid_state",
+                        "type":
+                        {
+                            "defined": "BidState"
+                        },
+                        "docs": [
+                            "Auction Bids, each user may have one bid open at a time."
+                        ]
+                    }
 
-
-
-
-
-
-
+                ]
+            }
+        }
 
     ],
-    "accounts": [],
     "types": [
         {
             "name": "CancelBidArgs",
@@ -782,6 +870,109 @@
                         "docs": [
                             "Resource being bid on."
                         ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "AuctionState",
+            "docs": [
+                "Define valid auction state transitions."
+            ],
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Created"
+                    },
+                    {
+                        "name": "Started"
+                    },
+                    {
+                        "name": "Ended"
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "BidState",
+            "docs": [
+                "BidState tracks the running state of an auction, each variant represents a different kind of",
+                "auction being run."
+            ],
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "EnglishAuction",
+                        "fields": [
+                            {
+                                "name": "bids",
+                                "type":
+                                {
+                                    "vec":
+                                    {
+                                        "defined": "Bid"
+                                    }
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "max",
+                                "type": "u8",
+                                "docs": []
+                            }
+
+                        ]
+                    },
+                    {
+                        "name": "OpenEdition",
+                        "fields": [
+                            {
+                                "name": "bids",
+                                "type":
+                                {
+                                    "vec":
+                                    {
+                                        "defined": "Bid"
+                                    }
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "max",
+                                "type": "u8",
+                                "docs": []
+                            }
+
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "Bid",
+            "docs": [
+                "Bids associate a bidding key with an amount bid."
+            ],
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type": "publicKey",
+                        "docs": []
+                    },
+                    {
+                        "name": "amount",
+                        "type": "u64",
+                        "docs": []
                     }
 
                 ]
