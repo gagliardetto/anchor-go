@@ -384,7 +384,7 @@
                     "isSigner": false,
                     "optional": true,
                     "docs": [
-                        "Reservation List - If present, and you are on this list, you can get",
+                        "[optional] Reservation List - If present, and you are on this list, you can get",
                         "an edition number given by your position on the list."
                     ]
                 }
