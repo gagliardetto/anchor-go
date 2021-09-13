@@ -205,7 +205,7 @@
                     ]
                 },
                 {
-                    "name": "authority",
+                    "name": "metadataAuthority",
                     "isMut": false,
                     "isSigner": true,
                     "optional": true,
@@ -1623,7 +1623,7 @@
             }
         },
         {
-            "name": "SetStoreArgs",
+            "name": "SetWhitelistedCreatorArgs",
             "type":
             {
                 "kind": "struct",
