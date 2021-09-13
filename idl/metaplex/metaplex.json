@@ -2049,7 +2049,7 @@
                 "that comes as a 'token of appreciation' for bidding. They are not mutually exclusive unless explicitly set to be that way.",
                 "",
                 "NOTE: If you are redeeming a newly minted Open Edition, you must actually supply a destination account containing a token from a brand new",
-                "mint. We do not provide the token to you. Our job with this action is to christen this mint + token combo as an official Open Edition.",
+                "mint. We do not provide the token to you. Our job with this action is to christen this mint + token combo as an official Open Edition."
             ],
             "accounts": [
                 {
