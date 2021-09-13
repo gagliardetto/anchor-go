@@ -880,6 +880,120 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "ClaimBid",
+            "docs": [
+                "If the auction manager is in a Disbursing or Finished state, then this means Auction must be in Ended state.",
+                "Then this end point can be used as a signed proxy to use auction manager's authority over the auction to claim bid funds",
+                "into the accept payment account on the auction manager for a given bid. Auction has no opinions on how bids are redeemed,",
+                "only that they exist, have been paid, and have a winning place. It is up to the implementer of the auction to determine redemption,",
+                "and auction manager does this via bid redemption tickets and the vault contract which ensure the user always",
+                "can get their NFT once they have paid. Therefore, once they have paid, and the auction is over, the artist can claim",
+                "funds at any time without any danger to the user of losing out on their NFT, because the AM will honor their bid with an NFT",
+                "at ANY time."
+            ],
+            "accounts": [
+                {
+                    "name": "acceptPaymentAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The accept payment account on the auction manager"
+                    ]
+                },
+                {
+                    "name": "bidderPotToken",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The bidder pot token account"
+                    ]
+                },
+                {
+                    "name": "bidderPotPDA",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The bidder pot pda account [seed of ['auction', program_id, auction key, bidder key] -",
+                        "relative to the auction program, not auction manager"
+                    ]
+                },
+                {
+                    "name": "auctionManager",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction manager"
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The auction"
+                    ]
+                },
+                {
+                    "name": "bidderWallet",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The bidder wallet"
+                    ]
+                },
+                {
+                    "name": "tokenMint",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token mint of the auction"
+                    ]
+                },
+                {
+                    "name": "vault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Vault"
+                    ]
+                },
+                {
+                    "name": "store",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Store"
+                    ]
+                },
+                {
+                    "name": "auctionProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction program"
+                    ]
+                },
+                {
+                    "name": "clock",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Clock sysvar"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                }
+
+            ],
+            "args": []
         }
 
 
