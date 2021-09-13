@@ -448,7 +448,191 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "RedeemFullRightsTransferBid",
+            "docs": [
+                "Note: This requires that auction manager be in a Running state.",
+                "",
+                "If an auction is complete, you can redeem your bid for the actual Master Edition itself if it's for that prize here.",
+                "If you are the first to do this, the auction manager will switch from Running state to Disbursing state.",
+                "If you are the last, this may change the auction manager state to Finished provided that no authorities remain to be delegated for Master Edition tokens.",
+                "",
+                "NOTE: Please note that it is totally possible to redeem a bid 2x - once for a prize you won and once at the RedeemParticipationBid point for an open edition",
+                "that comes as a 'token of appreciation' for bidding. They are not mutually exclusive unless explicitly set to be that way."
+            ],
+            "accounts": [
+                {
+                    "name": "auctionManager",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction manager"
+                    ]
+                },
+                {
+                    "name": "safetyDepositTokenStorage",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit token storage account"
+                    ]
+                },
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Destination account."
+                    ]
+                },
+                {
+                    "name": "bidRedemptionKey",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Bid redemption key -",
+                        "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
+                    ]
+                },
+                {
+                    "name": "safetyDepositBox",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit box account"
+                    ]
+                },
+                {
+                    "name": "vaultAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Vault account"
+                    ]
+                },
+                {
+                    "name": "fractionMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction mint of the vault"
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction"
+                    ]
+                },
+                {
+                    "name": "bidderMetadata",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Your BidderMetadata account"
+                    ]
+                },
+                {
+                    "name": "bidder",
+                    "isMut": false,
+                    "isSigner": true,
+                    "optional": true,
+                    "docs": [
+                        "Your Bidder account - Only needs to be signer if payer does not own"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Payer"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "tokenVaultProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token Vault program"
+                    ]
+                },
+                {
+                    "name": "tokenMetadataProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token metadata program"
+                    ]
+                },
+                {
+                    "name": "store",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Store"
+                    ]
+                },
+                {
+                    "name": "system",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System"
+                    ]
+                },
+                {
+                    "name": "rentSysvar",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                },
+                {
+                    "name": "masterMetadataAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Master Metadata account (pda of ['metadata', program id, Printing mint id]) - remember PDA is relative to token metadata program",
+                        "(This account is optional, and will only be used if metadata is unique, otherwise this account key will be ignored no matter it's value)"
+                    ]
+                },
+                {
+                    "name": "newAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "New authority for Master Metadata - If you are taking ownership of a Master Edition in and of itself, or a Limited Edition that isn't newly minted for you during this auction",
+                        "ie someone else had it minted for themselves in a prior auction or through some other means, this is the account the metadata for these tokens will be delegated to",
+                        "after this transaction. Otherwise this account will be ignored."
+                    ]
+                },
+                {
+                    "name": "transferAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "PDA-based Transfer authority to move the tokens from the store to the destination seed ['vault', program_id, vault key]",
+                        "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
+                    ]
+                }
+
+            ],
+            "args": []
         }
+
 
 
 
