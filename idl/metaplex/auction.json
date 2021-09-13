@@ -618,6 +618,45 @@
 
                 ]
             }
+        },
+        {
+            "name": "BidderPot",
+            "docs": [],
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "bidder_pot",
+                        "type": "publicKey",
+                        "docs": [
+                            "Points at actual pot that is a token account"
+                        ]
+                    },
+                    {
+                        "name": "bidder_act",
+                        "type": "publicKey",
+                        "docs": [
+                            "Originating bidder account"
+                        ]
+                    },
+                    {
+                        "name": "auction_act",
+                        "type": "publicKey",
+                        "docs": [
+                            "Auction account"
+                        ]
+                    },
+                    {
+                        "name": "emptied",
+                        "type": "bool",
+                        "docs": [
+                            "emptied or not"
+                        ]
+                    }
+
+                ]
+            }
         }
 
     ],
