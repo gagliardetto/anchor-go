@@ -1408,7 +1408,164 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "DeprecatedPopulateParticipationPrintingAccount",
+            "docs": [
+                "Needs to be called by someone at the end of the auction - will use the one time authorization token",
+                "to fire up a bunch of printing tokens for use in participation redemptions."
+            ],
+            "accounts": [
+                {
+                    "name": "safetyDepositTokenStore",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit token store"
+                    ]
+                },
+                {
+                    "name": "transientAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Transient account with mint of one time authorization account on master edition - you can delete after this txn"
+                    ]
+                },
+                {
+                    "name": "printingTokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The printing token account on the participation state of the auction manager"
+                    ]
+                },
+                {
+                    "name": "oneTimePrintingAuthMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "One time printing authorization mint"
+                    ]
+                },
+                {
+                    "name": "printingMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Printing mint"
+                    ]
+                },
+                {
+                    "name": "participationPrizeSafetyDeposit",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Safety deposit of the participation prize"
+                    ]
+                },
+                {
+                    "name": "vault",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Vault info"
+                    ]
+                },
+                {
+                    "name": "fractionMint",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction mint"
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction info"
+                    ]
+                },
+                {
+                    "name": "auctionManager",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction manager info"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "tokenVaultProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token vault program"
+                    ]
+                },
+                {
+                    "name": "tokenMetadataProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token metadata program"
+                    ]
+                },
+                {
+                    "name": "auctionManagerStore",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction manager store"
+                    ]
+                },
+                {
+                    "name": "masterEdition",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Master edition"
+                    ]
+                },
+                {
+                    "name": "transferAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "PDA-based Transfer authority to move the tokens from the store to the destination seed ['vault', program_id]",
+                        "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Payer who wishes to receive refund for closing of one time transient account once we're done here"
+                    ]
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent"
+                    ]
+                }
+
+            ],
+            "args": []
         }
+
 
 
 
