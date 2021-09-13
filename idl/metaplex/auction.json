@@ -977,6 +977,48 @@
 
                 ]
             }
+        },
+        {
+            "name": "AuctionDataExtended",
+            "docs": [
+                "Further storage for more fields. Would like to store more on the main data but due",
+                "to a borsh issue that causes more added fields to inflict \"Access violation\" errors",
+                "during redemption in main Metaplex app for no reason, we had to add this nasty PDA."
+            ],
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "total_uncancelled_bids",
+                        "type": "u64",
+                        "docs": [
+                            "Total uncancelled bids"
+                        ]
+                    },
+                    {
+                        "name": "tick_size",
+                        "type":
+                        {
+                            "option": "u64"
+                        },
+                        "docs": [
+                            "Tick size"
+                        ]
+                    },
+                    {
+                        "name": "gap_tick_size_percentage",
+                        "type":
+                        {
+                            "option": "u8"
+                        },
+                        "docs": [
+                            "gap_tick_size_percentage - two decimal points"
+                        ]
+                    }
+
+                ]
+            }
         }
 
 
