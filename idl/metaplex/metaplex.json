@@ -822,6 +822,64 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "StartAuction",
+            "docs": [
+                "If the auction manager is in Validated state, it can invoke the start command via calling this command here."
+            ],
+            "accounts": [
+                {
+                    "name": "auctionManager",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction manager"
+                    ]
+                },
+                {
+                    "name": "auction",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction"
+                    ]
+                },
+                {
+                    "name": "auctionManagerAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Auction manager authority"
+                    ]
+                },
+                {
+                    "name": "storeKey",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Store key"
+                    ]
+                },
+                {
+                    "name": "auctionProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Auction program"
+                    ]
+                },
+                {
+                    "name": "clock",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Clock sysvar"
+                    ]
+                }
+
+            ],
+            "args": []
         }
 
 
