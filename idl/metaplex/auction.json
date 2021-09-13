@@ -568,6 +568,56 @@
 
                 ]
             }
+        },
+        {
+            "name": "BidderMetadata",
+            "docs": [
+                "Models a set of metadata for a bidder, meant to be stored in a PDA. This allows looking up",
+                "information about a bidder regardless of if they have won, lost or cancelled."
+            ],
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "bidder_pubkey",
+                        "type": "publicKey",
+                        "docs": [
+                            "Relationship with the bidder who's metadata this covers."
+                        ]
+                    },
+                    {
+                        "name": "auction_pubkey",
+                        "type": "publicKey",
+                        "docs": [
+                            "Relationship with the auction this bid was placed on."
+                        ]
+                    },
+                    {
+                        "name": "last_bid",
+                        "type": "u64",
+                        "docs": [
+                            "Amount that the user bid."
+                        ]
+                    },
+                    {
+                        "name": "last_bid_timestamp",
+                        "type": "unixTimestamp",
+                        "docs": [
+                            "Tracks the last time this user bid."
+                        ]
+                    },
+                    {
+                        "name": "cancelled",
+                        "type": "bool",
+                        "docs": [
+                            "Whether the last bid the user made was cancelled. This should also be enough to know if the",
+                            "user is a winner, as if cancelled it implies previous bids were also cancelled."
+                        ]
+                    }
+
+                ]
+            }
         }
 
     ],
