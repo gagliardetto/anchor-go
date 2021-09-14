@@ -85,26 +85,145 @@
                 }
 
             ]
-        }
-
-    ],
-    "accounts": [],
-    "types": [
-    {
-        "name": "InitVaultArgs",
-        "type":
+        },
         {
-            "kind": "struct",
-            "fields": [
+            "name": "AddTokenToInactiveVault",
+            "docs": [
+                "Add a token to a inactive token vault"
+            ],
+            "accounts": [
                 {
-                    "name": "allow_further_share_creation",
-                    "type": "bool",
+                    "name": "uninitializedSafetyDepositBoxAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Uninitialized safety deposit box account address (will be created and allocated by this endpoint)",
+                        "Address should be pda with seed of [PREFIX, vault_address, token_mint_address]"
+                    ]
+                },
+                {
+                    "name": "initializedTokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized Token account"
+                    ]
+                },
+                {
+                    "name": "initializedTokenStoreAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized Token store account with authority of this program, this will get set on the safety deposit box"
+                    ]
+                },
+                {
+                    "name": "initializedInactiveFractionalizedTokenVault",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized inactive fractionalized token vault"
+                    ]
+                },
+                {
+                    "name": "vaultAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority on the vault"
+                    ]
+                },
+                {
+                    "name": "payer",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Payer"
+                    ]
+                },
+                {
+                    "name": "transferAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Transfer Authority to move desired token amount from token account to safety deposit"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "rentSysvar",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                },
+                {
+                    "name": "systemAccountSysvar",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "System account sysvar"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "AmountArgs"
+                    },
                     "docs": []
                 }
 
             ]
         }
-    }],
+
+
+    ],
+    "accounts": [],
+    "types": [
+        {
+            "name": "InitVaultArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "allow_further_share_creation",
+                        "type": "bool",
+                        "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "AmountArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "amount",
+                        "type": "u64",
+                        "docs": []
+                    }
+
+                ]
+            }
+        }
+
+    ],
     "events": [],
     "errors": [],
     "metadata":
