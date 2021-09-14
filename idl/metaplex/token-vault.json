@@ -757,9 +757,38 @@
                 }
 
             ]
+        },
+        {
+            "name": "UpdateExternalPriceAccount",
+            "docs": [
+                "Helpful method that isn't necessary to use for main users of the app, but allows one to create/update",
+                "existing external price account fields if they are signers of this account.",
+                "Useful for testing purposes, and the CLI makes use of it as well so that you can verify logic."
+            ],
+            "accounts": [
+                {
+                    "name": "externalPriceAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "External price account"
+                    ]
+                }
+
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "ExternalPriceAccount"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
-
-
 
 
 
@@ -808,6 +837,71 @@
                     {
                         "name": "number_of_shares",
                         "type": "u64",
+                        "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "ExternalPriceAccount",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type":
+                        {
+                            "defined": "Key"
+                        },
+                        "docs": []
+                    },
+                    {
+                        "name": "price_per_share",
+                        "type": "u64",
+                        "docs": []
+                    },
+                    {
+                        "name": "price_mint",
+                        "type": "publicKey",
+                        "docs": [
+                            "Mint of the currency we are pricing the shares against, should be same as redeem_treasury.",
+                            "Most likely will be USDC mint most of the time."
+                        ]
+                    },
+                    {
+                        "name": "allowed_to_combine",
+                        "type": "bool",
+                        "docs": [
+                            "Whether or not combination has been allowed for this vault."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "Key",
+            "docs": [],
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Uninitialized",
+                        "docs": []
+                    },
+                    {
+                        "name": "SafetyDepositBoxV1",
+                        "docs": []
+                    },
+                    {
+                        "name": "ExternalAccountKeyV1",
+                        "docs": []
+                    },
+                    {
+                        "name": "VaultV1",
                         "docs": []
                     }
 
