@@ -255,6 +255,115 @@
                 }
 
             ]
+        },
+        {
+            "name": "CombineVault",
+            "docs": [
+                "This act checks the external pricing oracle for permission to combine and the price of the circulating market cap to do so.",
+                "If you can afford it, this amount is charged and placed into the redeem treasury for shareholders to redeem at a later time.",
+                "The treasury then unlocks into Combine state and you can remove the tokens."
+            ],
+            "accounts": [
+                {
+                    "name": "initializedActivatedTokenVault",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized activated token vault"
+                    ]
+                },
+                {
+                    "name": "tokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Token account containing your portion of the outstanding fraction shares"
+                    ]
+                },
+                {
+                    "name": "redeemTreasuryMintTypeTokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Token account of the redeem_treasury mint type that you will pay with"
+                    ]
+                },
+                {
+                    "name": "fractionMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction mint"
+                    ]
+                },
+                {
+                    "name": "fractionTreasuryAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction treasury account"
+                    ]
+                },
+                {
+                    "name": "redeemTreasuryAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Redeem treasury account"
+                    ]
+                },
+                {
+                    "name": "newAuthorityOnTheVault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "New authority on the vault going forward - can be same authority if you want"
+                    ]
+                },
+                {
+                    "name": "authorityOnTheVault",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority on the vault"
+                    ]
+                },
+                {
+                    "name": "transferAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Transfer authority for the token account and outstanding fractional shares account you're transferring from"
+                    ]
+                },
+                {
+                    "name": "pDABasedBurnAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "PDA-based Burn authority for the fraction treasury account containing the uncirculated shares seed [PREFIX, program_id]"
+                    ]
+                },
+                {
+                    "name": "externalPricingLookupAddress",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "External pricing lookup address"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                }
+
+
+            ],
+            "args": []
         }
 
 
