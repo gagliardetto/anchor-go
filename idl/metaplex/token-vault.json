@@ -337,7 +337,7 @@
                     ]
                 },
                 {
-                    "name": "pDABasedBurnAuthority",
+                    "name": "pdaBasedBurnAuthority",
                     "isMut": false,
                     "isSigner": false,
                     "docs": [
@@ -358,6 +358,90 @@
                     "isSigner": false,
                     "docs": [
                         "Token program"
+                    ]
+                }
+
+
+            ],
+            "args": []
+        },
+        {
+            "name": "RedeemShares",
+            "docs": [
+                "If in the combine state, shareholders can hit this endpoint to burn shares in exchange for monies from the treasury.",
+                "Once fractional supply is zero and all tokens have been removed this action will take vault to Deactivated"
+            ],
+            "accounts": [
+                {
+                    "name": "initializedTokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized Token account containing your fractional shares"
+                    ]
+                },
+                {
+                    "name": "initializedDestinationTokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized Destination token account where you wish your proceeds to arrive"
+                    ]
+                },
+                {
+                    "name": "fractionMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction mint"
+                    ]
+                },
+                {
+                    "name": "redeemTreasuryAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Redeem treasury account"
+                    ]
+                },
+                {
+                    "name": "pdaBasedTransferAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "PDA-based Transfer authority for the transfer of proceeds from redeem treasury to destination seed [PREFIX, program_id]"
+                    ]
+                },
+                {
+                    "name": "burnAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Burn authority for the burning of your shares"
+                    ]
+                },
+                {
+                    "name": "combinedTokenVault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Combined token vault"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "rentSysvar",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
                     ]
                 }
 
