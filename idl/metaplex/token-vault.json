@@ -186,7 +186,78 @@
                 }
 
             ]
+        },
+        {
+            "name": "ActivateVault",
+            "docs": [
+                "Activates the vault, distributing initial shares into the fraction treasury.",
+                "Tokens can no longer be removed in this state until Combination."
+            ],
+            "accounts": [
+                {
+                    "name": "initializedInactivatedFractionalizedTokenVault",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized inactivated fractionalized token vault"
+                    ]
+                },
+                {
+                    "name": "fractionMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction mint"
+                    ]
+                },
+                {
+                    "name": "fractionTreasury",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction treasury"
+                    ]
+                },
+                {
+                    "name": "fractionMintAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction mint authority for the program - seed of [PREFIX, program_id]"
+                    ]
+                },
+                {
+                    "name": "authorityOnTheVault",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority on the vault"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                }
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "NumberOfShareArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
+
 
 
     ],
@@ -215,6 +286,21 @@
                 "fields": [
                     {
                         "name": "amount",
+                        "type": "u64",
+                        "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "NumberOfShareArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "number_of_shares",
                         "type": "u64",
                         "docs": []
                     }
