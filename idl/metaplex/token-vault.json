@@ -611,7 +611,85 @@
                 }
 
             ]
+        },
+        {
+            "name": "WithdrawSharesFromTreasury",
+            "docs": [
+                "Withdraws shares from the treasury to a desired account."
+            ],
+            "accounts": [
+                {
+                    "name": "initializedDestinationAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized Destination account for the shares being withdrawn"
+                    ]
+                },
+                {
+                    "name": "fractionTreasury",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction treasury"
+                    ]
+                },
+                {
+                    "name": "initializedActiveTokenVault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The initialized active token vault"
+                    ]
+                },
+                {
+                    "name": "pDABasedTransferAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "PDA-based Transfer authority to move tokens from treasury to your destination[PREFIX, program_id]"
+                    ]
+                },
+                {
+                    "name": "authorityOfVault",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority of vault"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "rentSysvar",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                }
+
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "NumberOfShareArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
 
 
 
