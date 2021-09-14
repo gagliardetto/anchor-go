@@ -1,0 +1,114 @@
+{
+    "version": "0.0.0",
+    "name": "token-vault",
+    "docs": [],
+    "ref": "https://github.com/metaplex-foundation/metaplex/blob/e9841d4bb121fbea784ff60c83ddd3bb1a26d220/rust/token-vault/program/src/instruction.rs",
+    "instructions": [
+        {
+            "name": "InitVault",
+            "docs": [
+                "Initialize a token vault, starts inactivate. Add tokens in subsequent instructions, then activate."
+            ],
+            "accounts": [
+            {
+                "name": "fractionalShareMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized fractional share mint with 0 tokens in supply, authority on mint must be pda of program with seed [prefix, programid]"
+                ]
+            },
+            {
+                "name": "redeemTreasuryTokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized redeem treasury token account with 0 tokens in supply, owner of account must be pda of program like above"
+                ]
+            },
+            {
+                "name": "fractionTreasuryTokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized fraction treasury token account with 0 tokens in supply, owner of account must be pda of program like above"
+                ]
+            },
+            {
+                "name": "uninitializedVaultAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Uninitialized vault account"
+                ]
+            },
+            {
+                "name": "vaultAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Authority on the vault"
+                ]
+            },
+            {
+                "name": "pricingLookupAddress",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Pricing Lookup Address"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "InitVaultArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
+        }
+
+    ],
+    "accounts": [],
+    "types": [
+    {
+        "name": "InitVaultArgs",
+        "type":
+        {
+            "kind": "struct",
+            "fields": [
+                {
+                    "name": "allow_further_share_creation",
+                    "type": "bool",
+                    "docs": []
+                }
+
+            ]
+        }
+    }],
+    "events": [],
+    "errors": [],
+    "metadata":
+    {
+        "address": ""
+    }
+}
