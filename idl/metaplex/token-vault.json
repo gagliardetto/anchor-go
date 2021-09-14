@@ -542,7 +542,77 @@
                 }
 
             ]
+        },
+        {
+            "name": "MintFractionalShares",
+            "docs": [
+                "Self explanatory - mint more fractional shares if the vault is configured to allow such."
+            ],
+            "accounts": [
+                {
+                    "name": "fractionTreasury",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction treasury"
+                    ]
+                },
+                {
+                    "name": "fractionMint",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction mint"
+                    ]
+                },
+                {
+                    "name": "initializedActiveTokenVault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The initialized active token vault"
+                    ]
+                },
+                {
+                    "name": "pDABasedMintAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "PDA-based Mint authority to mint tokens to treasury[PREFIX, program_id]"
+                    ]
+                },
+                {
+                    "name": "authorityOfVault",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority of vault"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                }
+
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "NumberOfShareArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
 
 
 
