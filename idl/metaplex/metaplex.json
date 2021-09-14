@@ -2680,7 +2680,512 @@
 
     ],
     "events": [],
-    "errors": [],
+    "errors": [
+    {
+        "msg": "Failed to unpack instruction data",
+        "name": "InstructionUnpackError",
+        "code": 0
+    },
+    {
+        "msg": "Lamport balance below rent-exempt threshold",
+        "name": "NotRentExempt",
+        "code": 1
+    },
+    {
+        "msg": "Already initialized",
+        "name": "AlreadyInitialized",
+        "code": 2
+    },
+    {
+        "msg": "Uninitialized",
+        "name": "Uninitialized",
+        "code": 3
+    },
+    {
+        "msg": "Account does not have correct owner",
+        "name": "IncorrectOwner",
+        "code": 4
+    },
+    {
+        "msg": "NumericalOverflowError",
+        "name": "NumericalOverflowError",
+        "code": 5
+    },
+    {
+        "msg": "Token transfer failed",
+        "name": "TokenTransferFailed",
+        "code": 6
+    },
+    {
+        "msg": "Invalid transfer authority provided",
+        "name": "InvalidTransferAuthority",
+        "code": 7
+    },
+    {
+        "msg": "Vault's authority does not match the expected ['metaplex', auction_key]",
+        "name": "VaultAuthorityMismatch",
+        "code": 8
+    },
+    {
+        "msg": "Auction's authority does not match the expected pda with seed ['metaplex', auction_key]",
+        "name": "AuctionAuthorityMismatch",
+        "code": 9
+    },
+    {
+        "msg": "The authority passed to the call does not match the authority on the auction manager!",
+        "name": "AuctionManagerAuthorityMismatch",
+        "code": 10
+    },
+    {
+        "msg": "Vault given does not match that on given auction manager!",
+        "name": "AuctionManagerVaultMismatch",
+        "code": 11
+    },
+    {
+        "msg": "The safety deposit box given does not belong to the given vault!",
+        "name": "SafetyDepositBoxVaultMismatch",
+        "code": 12
+    },
+    {
+        "msg": "The store given does not belong to the safety deposit box given!",
+        "name": "SafetyDepositBoxStoreMismatch",
+        "code": 13
+    },
+    {
+        "msg": "The metadata given does not match the mint on the safety deposit box given!",
+        "name": "SafetyDepositBoxMetadataMismatch",
+        "code": 14
+    },
+    {
+        "msg": "The Safety Deposit Box mint does not match the one time auth mint on the master edition!",
+        "name": "SafetyDepositBoxMasterEditionOneTimeAuthMintMismatch",
+        "code": 15
+    },
+    {
+        "msg": "The mint given does not match the mint on the given safety deposit box!",
+        "name": "SafetyDepositBoxMintMismatch",
+        "code": 16
+    },
+    {
+        "msg": "The token metadata program given does not match the token metadata program on this auction manager!",
+        "name": "AuctionManagerTokenMetadataProgramMismatch",
+        "code": 17
+    },
+    {
+        "msg": "The mint is owned by a different token program than the one used by this auction manager!",
+        "name": "TokenProgramMismatch",
+        "code": 18
+    },
+    {
+        "msg": "The auction given does not match the auction on the auction manager!",
+        "name": "AuctionManagerAuctionMismatch",
+        "code": 19
+    },
+    {
+        "msg": "The auction program given does not match the auction program on the auction manager!",
+        "name": "AuctionManagerAuctionProgramMismatch",
+        "code": 20
+    },
+    {
+        "msg": "The token program given does not match the token program on the auction manager!",
+        "name": "AuctionManagerTokenProgramMismatch",
+        "code": 21
+    },
+    {
+        "msg": "The token vault program given does not match the token vault program on the auction manager!",
+        "name": "AuctionManagerTokenVaultProgramMismatch",
+        "code": 22
+    },
+    {
+        "msg": "Only combined vaults may be used in auction managers!",
+        "name": "VaultNotCombined",
+        "code": 23
+    },
+    {
+        "msg": "Cannot auction off an empty vault!",
+        "name": "VaultCannotEmpty",
+        "code": 24
+    },
+    {
+        "msg": "Listed a safety deposit box index that does not exist in this vault",
+        "name": "InvalidSafetyDepositBox",
+        "code": 25
+    },
+    {
+        "msg": "Cant use a limited supply edition for an open edition as you may run out of editions to print",
+        "name": "CantUseLimitedSupplyEditionsWithOpenEditionAuction",
+        "code": 26
+    },
+    {
+        "msg": "This safety deposit box is not listed as a prize in this auction manager!",
+        "name": "SafetyDepositBoxNotUsedInAuction",
+        "code": 27
+    },
+    {
+        "msg": "Either you have given a non-existent edition address or you have given the address to a different token-metadata program than was used to make this edition!",
+        "name": "InvalidEditionAddress",
+        "code": 28
+    },
+    {
+        "msg": "There are not enough editions available for this auction!",
+        "name": "NotEnoughEditionsAvailableForAuction",
+        "code": 29
+    },
+    {
+        "msg": "The store in the safety deposit is empty, so you have nothing to auction!",
+        "name": "StoreIsEmpty",
+        "code": 30
+    },
+    {
+        "msg": "Not enough tokens to supply winners!",
+        "name": "NotEnoughTokensToSupplyWinners",
+        "code": 31
+    },
+    {
+        "msg": "The auction manager must own the payoff account!",
+        "name": "AuctionManagerMustOwnPayoffAccount",
+        "code": 32
+    },
+    {
+        "msg": "The auction manager must own the oustanding shares account!",
+        "name": "AuctionManagerMustOwnOutstandingSharesAccount",
+        "code": 33
+    },
+    {
+        "msg": "The safety deposit box for your winning bid or participation placement does not match the safety deposit box you provided!",
+        "name": "SafetyDepositIndexMismatch",
+        "code": 34
+    },
+    {
+        "msg": "This prize has already been claimed!",
+        "name": "PrizeAlreadyClaimed",
+        "code": 35
+    },
+    {
+        "msg": "The bid redemption key does not match the expected PDA with seed ['metaplex', auction key, bidder metadata key]",
+        "name": "BidRedemptionMismatch",
+        "code": 36
+    },
+    {
+        "msg": "This bid has already been redeemed!",
+        "name": "BidAlreadyRedeemed",
+        "code": 37
+    },
+    {
+        "msg": "Auction has not ended yet!",
+        "name": "AuctionHasNotEnded",
+        "code": 38
+    },
+    {
+        "msg": "The original authority lookup does not match the expected PDA of ['metaplex', auction key, metadata key]",
+        "name": "OriginalAuthorityLookupKeyMismatch",
+        "code": 39
+    },
+    {
+        "msg": "The original authority given does not match that on the original authority lookup account!",
+        "name": "OriginalAuthorityMismatch",
+        "code": 40
+    },
+    {
+        "msg": "The prize you are attempting to claim needs to be claimed from a different endpoint than this one.",
+        "name": "WrongBidEndpointForPrize",
+        "code": 41
+    },
+    {
+        "msg": "The bidder given is not the bidder on the bidder metadata!",
+        "name": "BidderMetadataBidderMismatch",
+        "code": 42
+    },
+    {
+        "msg": "Printing mint given does not match the mint on master edition!",
+        "name": "MasterEditionMintMismatch",
+        "code": 43
+    },
+    {
+        "msg": "One Time Auth mint given does not match the mint on master edition!",
+        "name": "MasterEditionOneTimeAuthMintMismatch",
+        "code": 44
+    },
+    {
+        "msg": "The printing token account must be of the printing mint type to hold authorization tokens after auction end",
+        "name": "PrintingTokenAccountMintMismatch",
+        "code": 45
+    },
+    {
+        "msg": "Destination does not have the proper mint!",
+        "name": "DestinationMintMismatch",
+        "code": 46
+    },
+    {
+        "msg": "Invalid edition key",
+        "name": "InvalidEditionKey",
+        "code": 47
+    },
+    {
+        "msg": "Token mint to failed",
+        "name": "TokenMintToFailed",
+        "code": 48
+    },
+    {
+        "msg": "The Printing mint authority provided does not match that on the mint",
+        "name": "MasterMintAuthorityMismatch",
+        "code": 49
+    },
+    {
+        "msg": "The safety deposit box is not using the one time authorization mint of the master edition",
+        "name": "MasterEditionOneTimeAuthorizationMintMismatch",
+        "code": 50
+    },
+    {
+        "msg": "The accept payment account for this auction manager must match the auction's token mint!",
+        "name": "AuctionAcceptPaymentMintMismatch",
+        "code": 51
+    },
+    {
+        "msg": "The accept payment owner must be the auction manager!",
+        "name": "AcceptPaymentOwnerMismatch",
+        "code": 52
+    },
+    {
+        "msg": "The accept payment given does not match the accept payment account on the auction manager!",
+        "name": "AcceptPaymentMismatch",
+        "code": 53
+    },
+    {
+        "msg": "You are not eligible for a participation NFT!",
+        "name": "NotEligibleForParticipation",
+        "code": 54
+    },
+    {
+        "msg": "Auction manager must be validated to start auction!",
+        "name": "AuctionManagerMustBeValidated",
+        "code": 55
+    },
+    {
+        "msg": "The safety deposit mint type must be the Printing mint of the limited edition!",
+        "name": "SafetyDepositBoxMasterMintMismatch",
+        "code": 56
+    },
+    {
+        "msg": "The mints between the accept payment and account provided do not match",
+        "name": "AcceptPaymentMintMismatch",
+        "code": 57
+    },
+    {
+        "msg": "You do not have enough to buy this participation NFT!",
+        "name": "NotEnoughBalanceForParticipation",
+        "code": 58
+    },
+    {
+        "msg": "Derived key invalid",
+        "name": "DerivedKeyInvalid",
+        "code": 59
+    },
+    {
+        "msg": "Creator is not active on this store!",
+        "name": "WhitelistedCreatorInactive",
+        "code": 60
+    },
+    {
+        "msg": "This creator is not whitelisted",
+        "name": "InvalidWhitelistedCreator",
+        "code": 61
+    },
+    {
+        "msg": "Store given does not match store on auction manager!",
+        "name": "AuctionManagerStoreMismatch",
+        "code": 62
+    },
+    {
+        "msg": "Supplied an invalid creator index to empty payment account",
+        "name": "InvalidCreatorIndex",
+        "code": 63
+    },
+    {
+        "msg": "Supplied an invalid winning config index",
+        "name": "InvalidWinningConfigIndex",
+        "code": 64
+    },
+    {
+        "msg": "Metadata has creators and no creator index was supplied!",
+        "name": "CreatorIndexExpected",
+        "code": 65
+    },
+    {
+        "msg": "This winning config does not contain this safety deposit box as one of it's prizes",
+        "name": "WinningConfigSafetyDepositMismatch",
+        "code": 66
+    },
+    {
+        "msg": "The participation prize does not match the safety deposit given",
+        "name": "ParticipationSafetyDepositMismatch",
+        "code": 67
+    },
+    {
+        "msg": "Participation NFT not present on this auction, so cannot collect money for it",
+        "name": "ParticipationNotPresent",
+        "code": 68
+    },
+    {
+        "msg": "Not possible to settle until all bids have been claimed",
+        "name": "NotAllBidsClaimed",
+        "code": 69
+    },
+    {
+        "msg": "Invalid winning config item index provided",
+        "name": "InvalidWinningConfigItemIndex",
+        "code": 70
+    },
+    {
+        "msg": "When using a one time authorization token in a winning config item, you can never have amount > 1",
+        "name": "OneTimeAuthorizationTokenMustBeOne",
+        "code": 71
+    },
+    {
+        "msg": "Adding a reservation list failed",
+        "name": "AddReservationListFailed",
+        "code": 72
+    },
+    {
+        "msg": "Close account command failed",
+        "name": "CloseAccountFailed",
+        "code": 73
+    },
+    {
+        "msg": "A creator on this metadata has not verified it",
+        "name": "CreatorHasNotVerifiedMetadata",
+        "code": 74
+    },
+    {
+        "msg": "Duplicate winning config item detected",
+        "name": "DuplicateWinningConfigItemDetected",
+        "code": 75
+    },
+    {
+        "msg": "The authorization account provided does not match that on the participation state",
+        "name": "PrintingAuthorizationTokenAccountMismatch",
+        "code": 76
+    },
+    {
+        "msg": "The transient account provided does not have the correct mint",
+        "name": "TransientAuthAccountMintMismatch",
+        "code": 77
+    },
+    {
+        "msg": "The participation printing authorization token account is empty. One person needs to call populate on it!",
+        "name": "ParticipationPrintingEmpty",
+        "code": 78
+    },
+    {
+        "msg": "The printing authorization token command failed",
+        "name": "PrintingAuthorizationTokensFailed",
+        "code": 79
+    },
+    {
+        "msg": "Invalid token program",
+        "name": "InvalidTokenProgram",
+        "code": 80
+    },
+    {
+        "msg": "Token metadata program does not match",
+        "name": "AuctionManagerTokenMetadataMismatch",
+        "code": 81
+    },
+    {
+        "msg": "This safety deposit box has already been validated",
+        "name": "AlreadyValidated",
+        "code": 82
+    },
+    {
+        "msg": "Auction must be created",
+        "name": "AuctionMustBeCreated",
+        "code": 83
+    },
+    {
+        "msg": "Accept payment delegate should be none",
+        "name": "DelegateShouldBeNone",
+        "code": 84
+    },
+    {
+        "msg": "Accept payment close authority should be none",
+        "name": "CloseAuthorityShouldBeNone",
+        "code": 85
+    },
+    {
+        "msg": "Data type mismatch",
+        "name": "DataTypeMismatch",
+        "code": 86
+    },
+    {
+        "msg": "Auctioneer can't claim a won prize",
+        "name": "AuctioneerCantClaimWonPrize",
+        "code": 87
+    },
+    {
+        "msg": "Auctioneer is the only one who can override win indices",
+        "name": "MustBeAuctioneer",
+        "code": 88
+    },
+    {
+        "msg": "The auction provided has a different amount of winners set than does the auction manager settings",
+        "name": "WinnerAmountMismatch",
+        "code": 89
+    },
+    {
+        "msg": "Invalid Auction Manager Status",
+        "name": "InvalidStatus",
+        "code": 90
+    },
+    {
+        "msg": "You are not eligible for this edition offset",
+        "name": "InvalidEditionNumber",
+        "code": 91
+    },
+    {
+        "msg": "Invalid operation",
+        "name": "InvalidOperation",
+        "code": 92
+    },
+    {
+        "msg": "The provided account needs to contain one token of this mint type",
+        "name": "ProvidedAccountDoesNotContainOneToken",
+        "code": 93
+    },
+    {
+        "msg": "You are not the winner at this index",
+        "name": "WinnerIndexMismatch",
+        "code": 94
+    },
+    {
+        "msg": "You supplied a safety deposit index in a winning configuration that does not exist",
+        "name": "InvalidWinningConfigSafetyDepositIndex",
+        "code": 95
+    },
+    {
+        "msg": "The order provided on the safety deposit config does not match that on the safety deposit box!",
+        "name": "SafetyDepositConfigOrderMismatch",
+        "code": 96
+    },
+    {
+        "msg": "Winner index not found in safety deposit config ranges",
+        "name": "WinnerIndexNotFound",
+        "code": 97
+    },
+    {
+        "msg": "Currently metaplex auctions are limited to a single participation prize",
+        "name": "AlreadyHasOneParticipationPrize",
+        "code": 98
+    },
+    {
+        "msg": "This winner was not found in any ranges in the unique token type list, this should never happen",
+        "name": "NoTokensForThisWinner",
+        "code": 99
+    },
+    {
+        "msg": "Not allowed to use Master Edition V1 printing with Auction Manager v2",
+        "name": "PrintingV1NotAllowedWithAuctionManagerV2",
+        "code": 100
+    }],
     "metadata":
     {
         "address": ""
