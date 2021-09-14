@@ -448,7 +448,102 @@
 
             ],
             "args": []
+        },
+        {
+            "name": "WithdrawTokenFromSafetyDepositBox",
+            "docs": [
+                "If in combine state, authority on vault can hit this to withdrawal some of a token type from a safety deposit box.",
+                "Once fractional supply is zero and all tokens have been removed this action will take vault to Deactivated"
+            ],
+            "accounts": [
+                {
+                    "name": "initializedDestinationAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized Destination account for the tokens being withdrawn"
+                    ]
+                },
+                {
+                    "name": "safetyDepositBoxAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The safety deposit box account key for the tokens"
+                    ]
+                },
+                {
+                    "name": "storeKey",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The store key on the safety deposit box account"
+                    ]
+                },
+                {
+                    "name": "initializedCombinedTokenVault",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "The initialized combined token vault"
+                    ]
+                },
+                {
+                    "name": "fractionMint",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction mint"
+                    ]
+                },
+                {
+                    "name": "authorityOfVault",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority of vault"
+                    ]
+                },
+                {
+                    "name": "pdaBasedTransferAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "PDA-based Transfer authority to move the tokens from the store to the destination seed [PREFIX, program_id]"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                },
+                {
+                    "name": "rentSysvar",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Rent sysvar"
+                    ]
+                }
+
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "AmountArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
 
 
 
