@@ -947,7 +947,282 @@
 
     ],
     "events": [],
-    "errors": [],
+    "errors": [
+    {
+        "msg": "Failed to unpack instruction data",
+        "name": "InstructionUnpackError",
+        "code": 0
+    },
+    {
+        "msg": "Lamport balance below rent-exempt threshold",
+        "name": "NotRentExempt",
+        "code": 1
+    },
+    {
+        "msg": "Already initialized",
+        "name": "AlreadyInitialized",
+        "code": 2
+    },
+    {
+        "msg": "Uninitialized",
+        "name": "Uninitialized",
+        "code": 3
+    },
+    {
+        "msg": "Account does not have correct owner",
+        "name": "IncorrectOwner",
+        "code": 4
+    },
+    {
+        "msg": "NumericalOverflowError",
+        "name": "NumericalOverflowError",
+        "code": 5
+    },
+    {
+        "msg": "Provided token account contains no tokens",
+        "name": "TokenAccountContainsNoTokens",
+        "code": 6
+    },
+    {
+        "msg": "Provided token account cannot provide amount specified",
+        "name": "TokenAccountAmountLessThanAmountSpecified",
+        "code": 7
+    },
+    {
+        "msg": "Provided vault account contains is not empty",
+        "name": "VaultAccountIsNotEmpty",
+        "code": 8
+    },
+    {
+        "msg": "Provided vault account is not owned by program derived address with seed of prefix and program id",
+        "name": "VaultAccountIsNotOwnedByProgram",
+        "code": 9
+    },
+    {
+        "msg": "The provided safety deposit account address does not match the expected program derived address",
+        "name": "SafetyDepositAddressInvalid",
+        "code": 10
+    },
+    {
+        "msg": "Token transfer failed",
+        "name": "TokenTransferFailed",
+        "code": 11
+    },
+    {
+        "msg": "Token mint to failed",
+        "name": "TokenMintToFailed",
+        "code": 12
+    },
+    {
+        "msg": "Token burn failed",
+        "name": "TokenBurnFailed",
+        "code": 13
+    },
+    {
+        "msg": "Vault mint not empty on init",
+        "name": "VaultMintNotEmpty",
+        "code": 14
+    },
+    {
+        "msg": "Vault mint's authority not set to program PDA with seed of prefix and program id",
+        "name": "VaultAuthorityNotProgram",
+        "code": 15
+    },
+    {
+        "msg": "Vault treasury not empty on init",
+        "name": "TreasuryNotEmpty",
+        "code": 16
+    },
+    {
+        "msg": "Vault treasury's owner not set to program pda with seed of prefix and program id",
+        "name": "TreasuryOwnerNotProgram",
+        "code": 17
+    },
+    {
+        "msg": "Vault should be inactive",
+        "name": "VaultShouldBeInactive",
+        "code": 18
+    },
+    {
+        "msg": "Vault should be active",
+        "name": "VaultShouldBeActive",
+        "code": 19
+    },
+    {
+        "msg": "Vault should be combined",
+        "name": "VaultShouldBeCombined",
+        "code": 20
+    },
+    {
+        "msg": "Vault treasury needs to match fraction mint",
+        "name": "VaultTreasuryMintDoesNotMatchVaultMint",
+        "code": 21
+    },
+    {
+        "msg": "Redeem Treasury cannot be same mint as fraction",
+        "name": "RedeemTreasuryCantShareSameMintAsFraction",
+        "code": 22
+    },
+    {
+        "msg": "Invalid program authority provided",
+        "name": "InvalidAuthority",
+        "code": 23
+    },
+    {
+        "msg": "Redeem treasury mint must match lookup mint",
+        "name": "RedeemTreasuryMintMustMatchLookupMint",
+        "code": 24
+    },
+    {
+        "msg": "You must pay with the same mint as the external pricing oracle",
+        "name": "PaymentMintShouldMatchPricingMint",
+        "code": 25
+    },
+    {
+        "msg": "Your share account should match the mint of the fractional mint",
+        "name": "ShareMintShouldMatchFractionalMint",
+        "code": 26
+    },
+    {
+        "msg": "Vault mint provided does not match that on the token vault",
+        "name": "VaultMintNeedsToMatchVault",
+        "code": 27
+    },
+    {
+        "msg": "Redeem treasury provided does not match that on the token vault",
+        "name": "RedeemTreasuryNeedsToMatchVault",
+        "code": 28
+    },
+    {
+        "msg": "Fraction treasury provided does not match that on the token vault",
+        "name": "FractionTreasuryNeedsToMatchVault",
+        "code": 29
+    },
+    {
+        "msg": "Not allowed to combine at this time",
+        "name": "NotAllowedToCombine",
+        "code": 30
+    },
+    {
+        "msg": "You cannot afford to combine this vault",
+        "name": "CannotAffordToCombineThisVault",
+        "code": 31
+    },
+    {
+        "msg": "You have no shares to redeem",
+        "name": "NoShares",
+        "code": 32
+    },
+    {
+        "msg": "Your outstanding share account is the incorrect mint",
+        "name": "OutstandingShareAccountNeedsToMatchFractionalMint",
+        "code": 33
+    },
+    {
+        "msg": "Your destination account is the incorrect mint",
+        "name": "DestinationAccountNeedsToMatchRedeemMint",
+        "code": 34
+    },
+    {
+        "msg": "Fractional mint is empty",
+        "name": "FractionSupplyEmpty",
+        "code": 35
+    },
+    {
+        "msg": "Token Program Provided Needs To Match Vault",
+        "name": "TokenProgramProvidedDoesNotMatchVault",
+        "code": 36
+    },
+    {
+        "msg": "Authority of vault needs to be signer for this action",
+        "name": "AuthorityIsNotSigner",
+        "code": 37
+    },
+    {
+        "msg": "Authority of vault does not match authority provided",
+        "name": "AuthorityDoesNotMatch",
+        "code": 38
+    },
+    {
+        "msg": "This safety deposit box does not belong to this vault!",
+        "name": "SafetyDepositBoxVaultMismatch",
+        "code": 39
+    },
+    {
+        "msg": "The store provided does not match the store key on the safety deposit box!",
+        "name": "StoreDoesNotMatchSafetyDepositBox",
+        "code": 40
+    },
+    {
+        "msg": "This safety deposit box is empty!",
+        "name": "StoreEmpty",
+        "code": 41
+    },
+    {
+        "msg": "The destination account to receive your token needs to be the same mint as the token's mint",
+        "name": "DestinationAccountNeedsToMatchTokenMint",
+        "code": 42
+    },
+    {
+        "msg": "The destination account to receive your shares needs to be the same mint as the vault's fraction mint",
+        "name": "DestinationAccountNeedsToMatchFractionMint",
+        "code": 43
+    },
+    {
+        "msg": "The source account to send your shares from needs to be the same mint as the vault's fraction mint",
+        "name": "SourceAccountNeedsToMatchFractionMint",
+        "code": 44
+    },
+    {
+        "msg": "This vault does not allow the minting of new shares!",
+        "name": "VaultDoesNotAllowNewShareMinting",
+        "code": 45
+    },
+    {
+        "msg": "There are not enough shares",
+        "name": "NotEnoughShares",
+        "code": 46
+    },
+    {
+        "msg": "External price account must be signer",
+        "name": "ExternalPriceAccountMustBeSigner",
+        "code": 47
+    },
+    {
+        "msg": "Very bad, someone changed external account's price mint after vault creation!",
+        "name": "RedeemTreasuryMintShouldMatchPricingMint",
+        "code": 48
+    },
+    {
+        "msg": "Store has less than amount desired",
+        "name": "StoreLessThanAmount",
+        "code": 49
+    },
+    {
+        "msg": "Invalid token program",
+        "name": "InvalidTokenProgram",
+        "code": 50
+    },
+    {
+        "msg": "Data type mismatch",
+        "name": "DataTypeMismatch",
+        "code": 51
+    },
+    {
+        "msg": "Accept payment delegate should be none",
+        "name": "DelegateShouldBeNone",
+        "code": 52
+    },
+    {
+        "msg": "Accept payment close authority should be none",
+        "name": "CloseAuthorityShouldBeNone",
+        "code": 53
+    },
+    {
+        "msg": "Derived key invalid",
+        "name": "DerivedKeyInvalid",
+        "code": 54
+    }],
     "metadata":
     {
         "address": ""
