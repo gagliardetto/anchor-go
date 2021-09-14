@@ -688,7 +688,77 @@
                 }
 
             ]
+        },
+        {
+            "name": "AddSharesToTreasury",
+            "docs": [
+                "Returns shares to the vault if you wish to remove them from circulation."
+            ],
+            "accounts": [
+                {
+                    "name": "sourceInitializedAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Initialized account from which shares will be withdrawn"
+                    ]
+                },
+                {
+                    "name": "fractionTreasury",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Fraction treasury"
+                    ]
+                },
+                {
+                    "name": "initializedActiveTokenVault",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "The initialized active token vault"
+                    ]
+                },
+                {
+                    "name": "transferAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Transfer authority to move tokens from your account to treasury"
+                    ]
+                },
+                {
+                    "name": "authorityOfVault",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Authority of vault"
+                    ]
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "Token program"
+                    ]
+                }
+
+
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type":
+                    {
+                        "defined": "NumberOfShareArgs"
+                    },
+                    "docs": []
+                }
+
+            ]
         }
+
 
 
 
