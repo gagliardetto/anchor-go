@@ -788,7 +788,43 @@
                 }
 
             ]
+        },
+        {
+            "name": "SetAuthority",
+            "docs": [
+                "Sets the authority of the vault to a new authority."
+            ],
+            "accounts": [
+                {
+                    "name": "vault",
+                    "isMut": true,
+                    "isSigner": false,
+                    "docs": [
+                        "Vault"
+                    ]
+                },
+                {
+                    "name": "vaultAuthority",
+                    "isMut": false,
+                    "isSigner": true,
+                    "docs": [
+                        "Vault authority"
+                    ]
+                },
+                {
+                    "name": "newAuthority",
+                    "isMut": false,
+                    "isSigner": false,
+                    "docs": [
+                        "New authority"
+                    ]
+                }
+
+
+            ],
+            "args": []
         }
+
 
 
 
