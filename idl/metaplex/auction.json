@@ -655,6 +655,21 @@
             }
         },
         {
+            "name": "ClaimBidArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "resource",
+                        "type": "publicKey",
+                        "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
             "name": "CreateAuctionArgs",
             "type":
             {
@@ -739,6 +754,78 @@
                         },
                         "docs": [
                             "Add a minimum percentage increase each bid must meet."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "EndAuctionArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "resource",
+                        "type": "publicKey",
+                        "docs": [
+                            "The resource being auctioned. See AuctionData."
+                        ]
+                    },
+                    {
+                        "name": "reveal",
+                        "type":
+                        {
+                            "option":
+                            {
+                                "defined": "Revealer"
+                            }
+                        },
+                        "docs": [
+                            "If the auction was blinded, a revealing price must be specified to release the auction",
+                            "winnings."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "PlaceBidArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "amount",
+                        "type": "u64",
+                        "docs": [
+                            "Size of the bid being placed. The user must have enough SOL to satisfy this amount."
+                        ]
+                    },
+                    {
+                        "name": "resource",
+                        "type": "publicKey",
+                        "docs": [
+                            "Resource being bid on."
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "StartAuctionArgs",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "resource",
+                        "type": "publicKey",
+                        "docs": [
+                            "The resource being auctioned. See AuctionData."
                         ]
                     }
 
@@ -836,52 +923,6 @@
             }
         },
         {
-            "name": "ClaimBidArgs",
-            "type":
-            {
-                "kind": "struct",
-                "fields": [
-                    {
-                        "name": "resource",
-                        "type": "publicKey",
-                        "docs": []
-                    }
-
-                ]
-            }
-        },
-        {
-            "name": "EndAuctionArgs",
-            "type":
-            {
-                "kind": "struct",
-                "fields": [
-                    {
-                        "name": "resource",
-                        "type": "publicKey",
-                        "docs": [
-                            "The resource being auctioned. See AuctionData."
-                        ]
-                    },
-                    {
-                        "name": "reveal",
-                        "type":
-                        {
-                            "option":
-                            {
-                                "defined": "Revealer"
-                            }
-                        },
-                        "docs": [
-                            "If the auction was blinded, a revealing price must be specified to release the auction",
-                            "winnings."
-                        ]
-                    }
-
-                ]
-            }
-        },
-        {
             "name": "Revealer",
             "type":
             {
@@ -896,47 +937,6 @@
                         "name": "Salt",
                         "type": "u64",
                         "docs": []
-                    }
-
-                ]
-            }
-        },
-        {
-            "name": "StartAuctionArgs",
-            "type":
-            {
-                "kind": "struct",
-                "fields": [
-                    {
-                        "name": "resource",
-                        "type": "publicKey",
-                        "docs": [
-                            "The resource being auctioned. See AuctionData."
-                        ]
-                    }
-
-                ]
-            }
-        },
-        {
-            "name": "PlaceBidArgs",
-            "type":
-            {
-                "kind": "struct",
-                "fields": [
-                    {
-                        "name": "amount",
-                        "type": "u64",
-                        "docs": [
-                            "Size of the bid being placed. The user must have enough SOL to satisfy this amount."
-                        ]
-                    },
-                    {
-                        "name": "resource",
-                        "type": "publicKey",
-                        "docs": [
-                            "Resource being bid on."
-                        ]
                     }
 
                 ]
