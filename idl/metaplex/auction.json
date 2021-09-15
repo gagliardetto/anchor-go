@@ -10,108 +10,103 @@
                 "Cancel a bid on a running auction."
             ],
             "accounts": [
-                {
-                    "name": "bidderPrimaryAccount",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "The bidders primary account, for PDA calculation/transit auth."
-                    ]
-                },
-                {
-                    "name": "bidderTokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The bidders token account they'll receive refund with"
-                    ]
-                },
-                {
-                    "name": "pot",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The pot, containing a reference to the stored SPL token account."
-                    ]
-                },
-                {
-                    "name": "potSPL",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The pot SPL account, where the tokens will be deposited."
-                    ]
-                },
-                {
-                    "name": "metadata",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The metadata account, storing information about the bidders actions."
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction account, containing data about the auction and item being bid on."
-                    ]
-                },
-                {
-                    "name": "tokenMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Token mint, for transfer instructions and verification."
-                    ]
-                },
-                {
-                    "name": "clock",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Clock sysvar"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "systemProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System program"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "SPL Token Program"
-                    ]
-                }
-
-
-            ],
+            {
+                "name": "biddersPrimaryAccount",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "The bidders primary account, for PDA calculation/transit auth."
+                ]
+            },
+            {
+                "name": "biddersTokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The bidders token account they'll receive refund with"
+                ]
+            },
+            {
+                "name": "pot",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The pot, containing a reference to the stored SPL token account."
+                ]
+            },
+            {
+                "name": "potSPLAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The pot SPL account, where the tokens will be deposited."
+                ]
+            },
+            {
+                "name": "metadataAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The metadata account, storing information about the bidders actions."
+                ]
+            },
+            {
+                "name": "auctionAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction account, containing data about the auction and item being bid on."
+                ]
+            },
+            {
+                "name": "tokenMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Token mint, for transfer instructions and verification."
+                ]
+            },
+            {
+                "name": "clockSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Clock sysvar"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "systemProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System program"
+                ]
+            },
+            {
+                "name": "splTokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "SPL Token Program"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "CancelBidArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "CancelBidArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "CreateAuction",
@@ -119,51 +114,47 @@
                 "Create a new auction account bound to a resource, initially in a pending state."
             ],
             "accounts": [
-                {
-                    "name": "creator",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "The account creating the auction, which is authorised to make changes."
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Uninitialized auction account."
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "systemProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System program"
-                    ]
-                }
-
-            ],
+            {
+                "name": "creator",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "The account creating the auction, which is authorised to make changes."
+                ]
+            },
+            {
+                "name": "uninitializedAuctionAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Uninitialized auction account."
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "systemAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System account"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "CreateAuctionArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "CreateAuctionArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "ClaimBid",
@@ -171,91 +162,87 @@
                 "Move SPL tokens from winning bid to the destination account."
             ],
             "accounts": [
-                {
-                    "name": "destination",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The destination account"
-                    ]
-                },
-                {
-                    "name": "bidderPotToken",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The bidder pot token account"
-                    ]
-                },
-                {
-                    "name": "bidderPotPDA",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The bidder pot pda account [seed of ['auction', program_id, auction key, bidder key]]"
-                    ]
-                },
-                {
-                    "name": "auctionAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "The authority on the auction"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The auction"
-                    ]
-                },
-                {
-                    "name": "bidderWallet",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The bidder wallet"
-                    ]
-                },
-                {
-                    "name": "tokenMint",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token mint of the auction"
-                    ]
-                },
-                {
-                    "name": "clock",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Clock sysvar"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                }
-
-            ],
+            {
+                "name": "destinationAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The destination account"
+                ]
+            },
+            {
+                "name": "bidderPotTokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The bidder pot token account"
+                ]
+            },
+            {
+                "name": "bidderPotPDAAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The bidder pot pda account [seed of ['auction', program_id, auction key, bidder key]]"
+                ]
+            },
+            {
+                "name": "authorityOnTheAuction",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "The authority on the auction"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The auction"
+                ]
+            },
+            {
+                "name": "bidderWallet",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The bidder wallet"
+                ]
+            },
+            {
+                "name": "tokenMintOfTheAuction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token mint of the auction"
+                ]
+            },
+            {
+                "name": "clockSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Clock sysvar"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "ClaimBidArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "ClaimBidArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "EndAuction",
@@ -264,16 +251,14 @@
             ],
             "accounts": [],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "EndAuctionArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "EndAuctionArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "StartAuction",
@@ -281,43 +266,39 @@
                 "Start an inactive auction."
             ],
             "accounts": [
-                {
-                    "name": "creator",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "The creator/authorised account."
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized auction account."
-                    ]
-                },
-                {
-                    "name": "clock",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Clock sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "creatorAccount",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "The creator/authorised account."
+                ]
+            },
+            {
+                "name": "initializedAuctionAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized auction account."
+                ]
+            },
+            {
+                "name": "clockSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Clock sysvar"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "StartAuctionArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "StartAuctionArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "SetAuthority",
@@ -354,124 +335,121 @@
                 "Place a bid on a running auction."
             ],
             "accounts": [
-                {
-                    "name": "bidderPrimaryAccount",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "The bidders primary account, for PDA calculation/transit auth."
-                    ]
-                },
-                {
-                    "name": "bidderTokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The bidders token account they'll pay with"
-                    ]
-                },
-                {
-                    "name": "pot",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The pot, containing a reference to the stored SPL token account."
-                    ]
-                },
-                {
-                    "name": "potSPL",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The pot SPL account, where the tokens will be deposited."
-                    ]
-                },
-                {
-                    "name": "metadata",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The metadata account, storing information about the bidders actions."
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction account, containing data about the auction and item being bid on."
-                    ]
-                },
-                {
-                    "name": "tokenMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Token mint, for transfer instructions and verification."
-                    ]
-                },
-                {
-                    "name": "transferAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Transfer authority, for moving tokens into the bid pot."
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "clock",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Clock sysvar"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "systemProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System program"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "SPL Token Program"
-                    ]
-                }
-
-            ],
+            {
+                "name": "biddersPrimaryAccount",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "The bidders primary account, for PDA calculation/transit auth."
+                ]
+            },
+            {
+                "name": "biddersTokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The bidders token account they'll pay with"
+                ]
+            },
+            {
+                "name": "pot",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The pot, containing a reference to the stored SPL token account."
+                ]
+            },
+            {
+                "name": "potSPLAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The pot SPL account, where the tokens will be deposited."
+                ]
+            },
+            {
+                "name": "metadataAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The metadata account, storing information about the bidders actions."
+                ]
+            },
+            {
+                "name": "auctionAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction account, containing data about the auction and item being bid on."
+                ]
+            },
+            {
+                "name": "tokenMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Token mint, for transfer instructions and verification."
+                ]
+            },
+            {
+                "name": "transferAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Transfer authority, for moving tokens into the bid pot."
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "clockSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Clock sysvar"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "systemProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System program"
+                ]
+            },
+            {
+                "name": "splTokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "SPL Token Program"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "PlaceBidArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "PlaceBidArgs"
+                },
+                "docs": []
+            }]
         }
+
 
     ],
     "accounts": [
