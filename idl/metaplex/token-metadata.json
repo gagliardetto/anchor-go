@@ -1740,7 +1740,10 @@
                 "fields": [
                     {
                         "name": "key",
-                        "type": "publicKey",
+                        "type":
+                        {
+                            "defined": "Key"
+                        },
                         "docs": []
                     },
                     {
