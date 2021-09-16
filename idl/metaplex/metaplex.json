@@ -5,270 +5,265 @@
     "ref": "https://github.com/metaplex-foundation/metaplex/blob/397bf8dbdc652d1341c19934e8ddaa97d8edc64f/rust/metaplex/program/src/instruction.rs",
     "instructions": [
         {
-            "name": "InitAuctionManager",
+            "name": "DeprecatedInitAuctionManagerV1",
             "docs": [
-                "Initializes an Auction Manager"
+                "Initializes an Auction Manager V1"
             ],
             "accounts": [
-                {
-                    "name": "auctionManagerAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Uninitialized, unallocated auction manager account with pda of ['metaplex', auction_key from auction referenced below]"
-                    ]
-                },
-                {
-                    "name": "combinedVaultAccount",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Combined vault account with authority set to auction manager account (this will be checked)",
-                        "Note in addition that this vault account should have authority set to this program's pda of ['metaplex', auction_key]"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction with auctioned item being set to the vault given and authority set to this program's pda of ['metaplex', auction_key]"
-                    ]
-                },
-                {
-                    "name": "authority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Authority for the Auction Manager"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "paymentAccount",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Accept payment account of same token mint as the auction for taking payment for open editions, owner should be auction manager key"
-                    ]
-                },
-                {
-                    "name": "store",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store that this auction manager will belong to"
-                    ]
-                },
-                {
-                    "name": "system",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System sysvar"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "uninitializedUnallocatedAuctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Uninitialized, unallocated auction manager account with pda of ['metaplex', auction_key from auction referenced below]"
+                ]
+            },
+            {
+                "name": "combinedVault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Combined vault account with authority set to auction manager account (this will be checked)",
+                    "Note in addition that this vault account should have authority set to this program's pda of ['metaplex', auction_key]"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction with auctioned item being set to the vault given and authority set to this program's pda of ['metaplex', auction_key]"
+                ]
+            },
+            {
+                "name": "authority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Authority for the Auction Manager"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "acceptPayment",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Accept payment account of same token mint as the auction for taking payment for open editions, owner should be auction manager key"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store that this auction manager will belong to"
+                ]
+            },
+            {
+                "name": "systemSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System sysvar    "
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "AuctionManagerSettings"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "AuctionManagerSettingsV1"
+                },
+                "docs": []
+            }]
         },
         {
-            "name": "ValidateSafetyDepositBox",
+            "name": "DeprecatedValidateSafetyDepositBoxV1",
             "docs": [
                 "Validates that a given safety deposit box has in it contents that match the expected WinningConfig in the auction manager.",
                 "A stateful call, this will error out if you call it a second time after validation has occurred."
             ],
             "accounts": [
-                {
-                    "name": "safetyDepositTicket",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Uninitialized Safety deposit validation ticket, pda of seed ['metaplex', program id, auction manager key, safety deposit key]"
-                    ]
-                },
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "metadata",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Metadata account"
-                    ]
-                },
-                {
-                    "name": "originalAuthorityLockup",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Original authority lookup - unallocated uninitialized pda account with seed ['metaplex', auction key, metadata key]",
-                        "We will store original authority here to return it later."
-                    ]
-                },
-                {
-                    "name": "whitelistedCreator",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "A whitelisted creator entry for the store of this auction manager pda of ['metaplex', store key, creator key]",
-                        "where creator key comes from creator list of metadata, any will do"
-                    ]
-                },
-                {
-                    "name": "auctionManagerStoreKey",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The auction manager's store key"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBox",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box account"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBoxStorage",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box storage account where the actual nft token is stored"
-                    ]
-                },
-                {
-                    "name": "mintAccount",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Mint account of the token in the safety deposit box"
-                    ]
-                },
-                {
-                    "name": "edition",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Edition OR MasterEdition record key",
-                        "Remember this does not need to be an existing account (may not be depending on token), just is a pda with seed",
-                        "of ['metadata', program id, Printing mint id, 'edition']. - remember PDA is relative to token metadata program."
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault account"
-                    ]
-                },
-                {
-                    "name": "authority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority"
-                    ]
-                },
-                {
-                    "name": "metadataAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "optional": true,
-                    "docs": [
-                        "[optional] Metadata Authority - Signer only required if doing a full ownership txfer"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "tokenMetadataProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token metadata program"
-                    ]
-                },
-                {
-                    "name": "system",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "limitedEditionPrintingMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Limited edition Printing mint account (optional - only if using sending Limited Edition)"
-                    ]
-                },
-                {
-                    "name": "limitedEditionPrintingMintAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Limited edition Printing mint Authority account, this will TEMPORARILY TRANSFER MINTING AUTHORITY to the auction manager",
-                        "until all limited editions have been redeemed for authority tokens."
-                    ]
-                }
-
-            ],
+            {
+                "name": "uninitializedSafetyDepositValidationTicket",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Uninitialized Safety deposit validation ticket, pda of seed ['metaplex', program id, auction manager key, safety deposit key]"
+                ]
+            },
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "metadataAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Metadata account"
+                ]
+            },
+            {
+                "name": "originalAuthorityLookup",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Original authority lookup - unallocated uninitialized pda account with seed ['metaplex', auction key, metadata key]",
+                    "We will store original authority here to return it later."
+                ]
+            },
+            {
+                "name": "whitelistedCreatorEntry",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "A whitelisted creator entry for the store of this auction manager pda of ['metaplex', store key, creator key]",
+                    "where creator key comes from creator list of metadata, any will do"
+                ]
+            },
+            {
+                "name": "auctionManagerStoreKey",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The auction manager's store key"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "safetyDepositBoxStorage",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box storage account where the actual nft token is stored"
+                ]
+            },
+            {
+                "name": "mintAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Mint account of the token in the safety deposit box"
+                ]
+            },
+            {
+                "name": "editionOrMasterEditionRecordKey",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Edition OR MasterEdition record key",
+                    "Remember this does not need to be an existing account (may not be depending on token), just is a pda with seed",
+                    "of ['metadata', program id, Printing mint id, 'edition']. - remember PDA is relative to token metadata program."
+                ]
+            },
+            {
+                "name": "vaultAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Vault account"
+                ]
+            },
+            {
+                "name": "authority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority"
+                ]
+            },
+            {
+                "name": "metadataAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "optional": true,
+                "docs": [
+                    "[optional] Metadata Authority - Signer only required if doing a full ownership txfer"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "limitedEditionPrintingMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Limited edition Printing mint account (optional - only if using sending Limited Edition)"
+                ]
+            },
+            {
+                "name": "limitedEditionPrintingMintAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Limited edition Printing mint Authority account, this will TEMPORARILY TRANSFER MINTING AUTHORITY to the auction manager",
+                    "until all limited editions have been redeemed for authority tokens."
+                ]
+            }],
             "args": []
         },
         {
-            "name": "DeprecatedRedeemBid",
+            "name": "RedeemBid",
             "docs": [
+                "NOTE: Requires an AuctionManagerV1.",
                 "Note: This requires that auction manager be in a Running state.",
                 "",
                 "If an auction is complete, you can redeem your bid for a specific item here. If you are the first to do this,",
@@ -279,174 +274,181 @@
                 "that comes as a 'token of appreciation' for bidding. They are not mutually exclusive unless explicitly set to be that way."
             ],
             "accounts": [
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "safetyDepositTokenStorage",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit token storage account"
-                    ]
-                },
-                {
-                    "name": "destination",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Destination account."
-                    ]
-                },
-                {
-                    "name": "bidRedemptionKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Bid redemption key -",
-                        "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBox",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box account"
-                    ]
-                },
-                {
-                    "name": "vaultAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault account"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint of the vault"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction"
-                    ]
-                },
-                {
-                    "name": "bidderMetadata",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Your BidderMetadata account"
-                    ]
-                },
-                {
-                    "name": "bidder",
-                    "isMut": false,
-                    "isSigner": true,
-                    "optional": true,
-                    "docs": [
-                        "[optional] Your Bidder account - Only needs to be signer if payer does not own"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "tokenVaultProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token Vault program"
-                    ]
-                },
-                {
-                    "name": "tokenMetadataProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token metadata program"
-                    ]
-                },
-                {
-                    "name": "store",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store"
-                    ]
-                },
-                {
-                    "name": "system",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System"
-                    ]
-                },
-                {
-                    "name": "rentSysvar",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "transferAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "PDA-based Transfer authority to move the tokens from the store to the destination seed ['vault', program_id, vault key]",
-                        "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
-                    ]
-                },
-                {
-                    "name": "masterEdition",
-                    "isMut": true,
-                    "isSigner": false,
-                    "optional": true,
-                    "docs": [
-                        "[optional] Master edition (if Printing type of WinningConfig)"
-                    ]
-                },
-                {
-                    "name": "reservationList",
-                    "isMut": true,
-                    "isSigner": false,
-                    "optional": true,
-                    "docs": [
-                        "[optional] Reservation list PDA ['metadata', program id, master edition key, 'reservation', auction manager key]",
-                        "relative to token metadata program (if Printing type of WinningConfig)"
-                    ]
-                }
-
-            ],
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "safetyDepositTokenStorage",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit token storage account"
+                ]
+            },
+            {
+                "name": "destinationAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Destination account."
+                ]
+            },
+            {
+                "name": "bidRedemptionKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Bid redemption key -",
+                    "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "vaultAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Vault account"
+                ]
+            },
+            {
+                "name": "fractionMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint of the vault"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "bidderMetadata",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Your BidderMetadata account"
+                ]
+            },
+            {
+                "name": "bidder",
+                "isMut": false,
+                "isSigner": true,
+                "optional": true,
+                "docs": [
+                    "[optional] Your Bidder account - Only needs to be signer if payer does not own"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "tokenVaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token Vault program"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "pdaBasedTransferAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "PDA-based Transfer authority to move the tokens from the store to the destination seed ['vault', program_id, vault key]",
+                    "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
+                ]
+            },
+            {
+                "name": "masterEdition",
+                "isMut": true,
+                "isSigner": false,
+                "optional": true,
+                "docs": [
+                    "Master edition (if Printing type of WinningConfig)"
+                ]
+            },
+            {
+                "name": "reservationListPDA",
+                "isMut": true,
+                "isSigner": false,
+                "optional": true,
+                "docs": [
+                    "Reservation list PDA ['metadata', program id, master edition key, 'reservation', auction manager key]",
+                    "relative to token metadata program (if Printing type of WinningConfig)"
+                ]
+            },
+            {
+                "name": "safetyDepositConfig",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit config pda of ['metaplex', program id, auction manager, safety deposit]",
+                    "This account will only get used AND BE REQUIRED in the event this is an AuctionManagerV2"
+                ]
+            }],
             "args": []
         },
         {
@@ -462,174 +464,181 @@
                 "that comes as a 'token of appreciation' for bidding. They are not mutually exclusive unless explicitly set to be that way."
             ],
             "accounts": [
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "safetyDepositTokenStorage",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit token storage account"
-                    ]
-                },
-                {
-                    "name": "destination",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Destination account."
-                    ]
-                },
-                {
-                    "name": "bidRedemptionKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Bid redemption key -",
-                        "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBox",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box account"
-                    ]
-                },
-                {
-                    "name": "vaultAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault account"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint of the vault"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction"
-                    ]
-                },
-                {
-                    "name": "bidderMetadata",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Your BidderMetadata account"
-                    ]
-                },
-                {
-                    "name": "bidder",
-                    "isMut": false,
-                    "isSigner": true,
-                    "optional": true,
-                    "docs": [
-                        "Your Bidder account - Only needs to be signer if payer does not own"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "tokenVaultProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token Vault program"
-                    ]
-                },
-                {
-                    "name": "tokenMetadataProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token metadata program"
-                    ]
-                },
-                {
-                    "name": "store",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store"
-                    ]
-                },
-                {
-                    "name": "system",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System"
-                    ]
-                },
-                {
-                    "name": "rentSysvar",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "masterMetadataAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Master Metadata account (pda of ['metadata', program id, Printing mint id]) - remember PDA is relative to token metadata program",
-                        "(This account is optional, and will only be used if metadata is unique, otherwise this account key will be ignored no matter it's value)"
-                    ]
-                },
-                {
-                    "name": "newAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "New authority for Master Metadata - If you are taking ownership of a Master Edition in and of itself, or a Limited Edition that isn't newly minted for you during this auction",
-                        "ie someone else had it minted for themselves in a prior auction or through some other means, this is the account the metadata for these tokens will be delegated to",
-                        "after this transaction. Otherwise this account will be ignored."
-                    ]
-                },
-                {
-                    "name": "transferAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "PDA-based Transfer authority to move the tokens from the store to the destination seed ['vault', program_id, vault key]",
-                        "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
-                    ]
-                }
-
-            ],
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "safetyDepositTokenStorage",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit token storage account"
+                ]
+            },
+            {
+                "name": "destinationAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Destination account."
+                ]
+            },
+            {
+                "name": "bidRedemptionKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Bid redemption key -",
+                    "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "vaultAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Vault account"
+                ]
+            },
+            {
+                "name": "fractionMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint of the vault"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "bidderMetadata",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Your BidderMetadata account"
+                ]
+            },
+            {
+                "name": "bidder",
+                "isMut": false,
+                "isSigner": true,
+                "optional": true,
+                "docs": [
+                    "Your Bidder account - Only needs to be signer if payer does not own"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "tokenVaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token Vault program"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "masterMetadata",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Master Metadata account (pda of ['metadata', program id, Printing mint id]) - remember PDA is relative to token metadata program",
+                    "(This account is optional, and will only be used if metadata is unique, otherwise this account key will be ignored no matter it's value)"
+                ]
+            },
+            {
+                "name": "newAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "New authority for Master Metadata - If you are taking ownership of a Master Edition in and of itself, or a Limited Edition that isn't newly minted for you during this auction",
+                    "ie someone else had it minted for themselves in a prior auction or through some other means, this is the account the metadata for these tokens will be delegated to",
+                    "after this transaction. Otherwise this account will be ignored."
+                ]
+            },
+            {
+                "name": "pdaBasedTransferAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "PDA-based Transfer authority to move the tokens from the store to the destination seed ['vault', program_id, vault key]",
+                    "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
+                ]
+            },
+            {
+                "name": "safetyDepositConfig",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit config pda of ['metaplex', program id, auction manager, safety deposit]",
+                    "This account will only get used AND BE REQUIRED in the event this is an AuctionManagerV2"
+                ]
+            }],
             "args": []
         },
         {
@@ -648,179 +657,178 @@
                 "mint. We do not provide the token to you. Our job with this action is to christen this mint + token combo as an official Open Edition."
             ],
             "accounts": [
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "safetyDepositTokenStorage",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit token storage account"
-                    ]
-                },
-                {
-                    "name": "destination",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Destination account for limited edition authority token. Must be same mint as master edition Printing mint."
-                    ]
-                },
-                {
-                    "name": "bidRedemptionKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Bid redemption key -",
-                        "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBox",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box account"
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault account"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint of the vault"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction"
-                    ]
-                },
-                {
-                    "name": "bidderMetadata",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Your BidderMetadata account"
-                    ]
-                },
-                {
-                    "name": "bidder",
-                    "isMut": true,
-                    "isSigner": true,
-                    "optional": true,
-                    "docs": [
-                        "[optional] Your Bidder account - Only needs to be signer if payer does not own"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "tokenVaultProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token Vault program"
-                    ]
-                },
-                {
-                    "name": "tokenMetadataProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token metadata program"
-                    ]
-                },
-                {
-                    "name": "store",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store"
-                    ]
-                },
-                {
-                    "name": "system",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System"
-                    ]
-                },
-                {
-                    "name": "rentSysvar",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "transferAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Transfer authority to move the payment in the auction's token_mint coin from the bidder account for the participation_fixed_price",
-                        "on the auction manager to the auction manager account itself."
-                    ]
-                },
-                {
-                    "name": "acceptPaymentAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The accept payment account for the auction manager"
-                    ]
-                },
-                {
-                    "name": "tokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The token account you will potentially pay for the open edition bid with if necessary"
-                    ]
-                },
-                {
-                    "name": "participationNFTPrintingHoldingAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Participation NFT printing holding account (present on participation_state)"
-                    ]
-                }
-
-            ],
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "safetyDepositTokenStorage",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit token storage account"
+                ]
+            },
+            {
+                "name": "destinationAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Destination account for limited edition authority token. Must be same mint as master edition Printing mint."
+                ]
+            },
+            {
+                "name": "bidRedemptionKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Bid redemption key -",
+                    "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "vaultAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Vault account"
+                ]
+            },
+            {
+                "name": "safetyDepositConfig",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit config pda of ['metaplex', program id, auction manager, safety deposit]",
+                    "This account will only get used in the event this is an AuctionManagerV2"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "bidderMetadata",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Your BidderMetadata account"
+                ]
+            },
+            {
+                "name": "bidder",
+                "isMut": true,
+                "isSigner": true,
+                "optional": true,
+                "docs": [
+                    "Your Bidder account - Only needs to be signer if payer does not own"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "tokenVaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token Vault program"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "transferAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Transfer authority to move the payment in the auction's token_mint coin from the bidder account for the participation_fixed_price",
+                    "on the auction manager to the auction manager account itself."
+                ]
+            },
+            {
+                "name": "acceptPayment",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The accept payment account for the auction manager"
+                ]
+            },
+            {
+                "name": "tokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The token account you will potentially pay for the open edition bid with if necessary"
+                ]
+            },
+            {
+                "name": "participationNFTPrintingHoldingAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Participation NFT printing holding account (present on participation_state)"
+                ]
+            }],
             "args": []
         },
         {
@@ -829,56 +837,54 @@
                 "If the auction manager is in Validated state, it can invoke the start command via calling this command here."
             ],
             "accounts": [
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction"
-                    ]
-                },
-                {
-                    "name": "auctionManagerAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Auction manager authority"
-                    ]
-                },
-                {
-                    "name": "storeKey",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store key"
-                    ]
-                },
-                {
-                    "name": "auctionProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction program"
-                    ]
-                },
-                {
-                    "name": "clock",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Clock sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "auctionManagerAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Auction manager authority"
+                ]
+            },
+            {
+                "name": "storeKey",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store key"
+                ]
+            },
+            {
+                "name": "auctionProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction program"
+                ]
+            },
+            {
+                "name": "clockSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Clock sysvar"
+                ]
+            }],
             "args": []
         },
         {
@@ -894,105 +900,103 @@
                 "at ANY time."
             ],
             "accounts": [
-                {
-                    "name": "acceptPaymentAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The accept payment account on the auction manager"
-                    ]
-                },
-                {
-                    "name": "bidderPotToken",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The bidder pot token account"
-                    ]
-                },
-                {
-                    "name": "bidderPotPDA",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The bidder pot pda account [seed of ['auction', program_id, auction key, bidder key] -",
-                        "relative to the auction program, not auction manager"
-                    ]
-                },
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The auction"
-                    ]
-                },
-                {
-                    "name": "bidderWallet",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The bidder wallet"
-                    ]
-                },
-                {
-                    "name": "tokenMint",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token mint of the auction"
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault"
-                    ]
-                },
-                {
-                    "name": "store",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store"
-                    ]
-                },
-                {
-                    "name": "auctionProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction program"
-                    ]
-                },
-                {
-                    "name": "clock",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Clock sysvar"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                }
-
-            ],
+            {
+                "name": "acceptPayment",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The accept payment account on the auction manager"
+                ]
+            },
+            {
+                "name": "bidderPotToken",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The bidder pot token account"
+                ]
+            },
+            {
+                "name": "bidderPotPDA",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The bidder pot pda account [seed of ['auction', program_id, auction key, bidder key] -",
+                    "relative to the auction program, not auction manager"
+                ]
+            },
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The auction"
+                ]
+            },
+            {
+                "name": "bidderWallet",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The bidder wallet"
+                ]
+            },
+            {
+                "name": "tokenMint",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token mint of the auction"
+                ]
+            },
+            {
+                "name": "vault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Vault"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store"
+                ]
+            },
+            {
+                "name": "auctionProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction program"
+                ]
+            },
+            {
+                "name": "clockSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Clock sysvar"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            }],
             "args": []
         },
         {
@@ -1018,132 +1022,144 @@
                 "from the total escrow amount present."
             ],
             "accounts": [
-                {
-                    "name": "acceptPaymentAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The accept payment account on the auction manager"
-                    ]
-                },
-                {
-                    "name": "destinationAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The destination account of same mint type as the accept payment account. Must be an Associated Token Account."
-                    ]
-                },
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "payoutTicketInfo",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Payout ticket info to keep track of this artist or auctioneer's payment, pda of [metaplex, auction manager, winning config index OR 'participation', safety deposit key]"
-                    ]
-                },
-                {
-                    "name": "signer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "payer"
-                    ]
-                },
-                {
-                    "name": "metadata",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The metadata"
-                    ]
-                },
-                {
-                    "name": "masterEditionOfMetadata",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The master edition of the metadata (optional if exists)",
-                        "(pda of ['metadata', program id, metadata mint id, 'edition']) - remember PDA is relative to token metadata program"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBox",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box account"
-                    ]
-                },
-                {
-                    "name": "auctionManagerStore",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The store of the auction manager"
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The vault"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "systemProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System program"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "acceptPayment",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The accept payment account on the auction manager"
+                ]
+            },
+            {
+                "name": "destinationAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The destination account of same mint type as the accept payment account. Must be an Associated Token Account."
+                ]
+            },
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "payoutTicketInfo",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Payout ticket info to keep track of this artist or auctioneer's payment, pda of [metaplex, auction manager, winning config index OR 'participation', safety deposit key]"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "payer"
+                ]
+            },
+            {
+                "name": "metadata",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The metadata"
+                ]
+            },
+            {
+                "name": "masterEdition",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The master edition of the metadata (optional if exists)",
+                    "(pda of ['metadata', program id, metadata mint id, 'edition']) - remember PDA is relative to token metadata program"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "auctionManagerStore",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The store of the auction manager"
+                ]
+            },
+            {
+                "name": "vault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The vault"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "systemProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System program"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "auctionWinnerTokenTypeTracker",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "AuctionWinnerTokenTypeTracker, pda of seed ['metaplex', program id, auction manager key, 'totals']"
+                ]
+            },
+            {
+                "name": "safetyDepositConfig",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit config pda of ['metaplex', program id, auction manager, safety deposit]"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "EmptyPaymentAccountArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "EmptyPaymentAccountArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "SetStore",
@@ -1152,91 +1168,87 @@
                 "(if it already exists). Stores can be set to open (anybody can publish) or closed (publish only via whitelist)."
             ],
             "accounts": [
-                {
-                    "name": "storeKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The store key, seed of ['metaplex', admin wallet]"
-                    ]
-                },
-                {
-                    "name": "adminWallet",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "The admin wallet"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "tokenVaultProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token vault program"
-                    ]
-                },
-                {
-                    "name": "tokenMetadataProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token metadata program"
-                    ]
-                },
-                {
-                    "name": "auctionProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction program"
-                    ]
-                },
-                {
-                    "name": "system",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "storeKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The store key, seed of ['metaplex', admin wallet]"
+                ]
+            },
+            {
+                "name": "adminWallet",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "The admin wallet"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "tokenVaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token vault program"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "auctionProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction program"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "SetStoreArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "SetStoreArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "SetWhitelistedCreator",
@@ -1245,324 +1257,326 @@
                 "a PDA with seed ['metaplex', store key, creator key] if it does not already exist to store attributes there."
             ],
             "accounts": [
-                {
-                    "name": "whitelistedCreatorPDAKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The whitelisted creator pda key, seed of ['metaplex', store key, creator key]"
-                    ]
-                },
-                {
-                    "name": "adminWallet",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "The admin wallet"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "creatorKey",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The creator key"
-                    ]
-                },
-                {
-                    "name": "storeKey",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The store key, seed of ['metaplex', admin wallet]"
-                    ]
-                },
-                {
-                    "name": "system",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "whitelistedCreatorPDAKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The whitelisted creator pda key, seed of ['metaplex', store key, creator key]"
+                ]
+            },
+            {
+                "name": "adminWallet",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "The admin wallet"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "creatorKey",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The creator key"
+                ]
+            },
+            {
+                "name": "storeKey",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The store key, seed of ['metaplex', admin wallet]"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "SetWhitelistedCreatorArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "SetWhitelistedCreatorArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "DeprecatedValidateParticipation",
             "docs": [
+                "NOTE: Requires an AuctionManagerV1.",
                 "Validates an participation nft (if present) on the Auction Manager. Because of the differing mechanics of an open",
                 "edition (required for participation nft), it needs to be validated at a different endpoint than a normal safety deposit box."
             ],
             "accounts": [
-                {
-                    "name": "openEditionMetadata",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Open edition metadata"
-                    ]
-                },
-                {
-                    "name": "openEditionMasterEdition",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Open edition MasterEdition account"
-                    ]
-                },
-                {
-                    "name": "printingAuthTokenHoldingAccount",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Printing authorization token holding account - must be of the printing_mint type on the master_edition, used by",
-                        "the auction manager to hold printing authorization tokens for all eligible winners of the participation nft when auction ends. Must",
-                        "be owned by auction manager account."
-                    ]
-                },
-                {
-                    "name": "authority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority for the Auction Manager"
-                    ]
-                },
-                {
-                    "name": "whitelistedCreator",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "A whitelisted creator entry for this store for the open edition",
-                        "pda of ['metaplex', store key, creator key] where creator key comes from creator list of metadata"
-                    ]
-                },
-                {
-                    "name": "auctionManagerStore",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The auction manager's store"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBox",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box"
-                    ]
-                },
-                {
-                    "name": "safetyDepositTokenStore",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit token store"
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "openEditionMetadata",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Open edition metadata"
+                ]
+            },
+            {
+                "name": "openEditionMasterEdition",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Open edition MasterEdition account"
+                ]
+            },
+            {
+                "name": "printingAuthorizationTokenHoldingAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Printing authorization token holding account - must be of the printing_mint type on the master_edition, used by",
+                    "the auction manager to hold printing authorization tokens for all eligible winners of the participation nft when auction ends. Must",
+                    "be owned by auction manager account."
+                ]
+            },
+            {
+                "name": "auctionManagerAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority for the Auction Manager"
+                ]
+            },
+            {
+                "name": "whitelistedCreatorEntry",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "A whitelisted creator entry for this store for the open edition",
+                    "pda of ['metaplex', store key, creator key] where creator key comes from creator list of metadata"
+                ]
+            },
+            {
+                "name": "auctionManagerStore",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The auction manager's store"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box"
+                ]
+            },
+            {
+                "name": "safetyDepositTokenStorage",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit token store"
+                ]
+            },
+            {
+                "name": "vault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Vault"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
             "args": []
         },
         {
             "name": "DeprecatedPopulateParticipationPrintingAccount",
             "docs": [
+                "NOTE: Requires an AuctionManagerV1.",
                 "Needs to be called by someone at the end of the auction - will use the one time authorization token",
                 "to fire up a bunch of printing tokens for use in participation redemptions."
             ],
             "accounts": [
-                {
-                    "name": "safetyDepositTokenStore",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit token store"
-                    ]
-                },
-                {
-                    "name": "transientAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Transient account with mint of one time authorization account on master edition - you can delete after this txn"
-                    ]
-                },
-                {
-                    "name": "printingTokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The printing token account on the participation state of the auction manager"
-                    ]
-                },
-                {
-                    "name": "oneTimePrintingAuthMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "One time printing authorization mint"
-                    ]
-                },
-                {
-                    "name": "printingMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Printing mint"
-                    ]
-                },
-                {
-                    "name": "participationPrizeSafetyDeposit",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit of the participation prize"
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault info"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction info"
-                    ]
-                },
-                {
-                    "name": "auctionManager",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager info"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "tokenVaultProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token vault program"
-                    ]
-                },
-                {
-                    "name": "tokenMetadataProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token metadata program"
-                    ]
-                },
-                {
-                    "name": "auctionManagerStore",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager store"
-                    ]
-                },
-                {
-                    "name": "masterEdition",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Master edition"
-                    ]
-                },
-                {
-                    "name": "transferAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "PDA-based Transfer authority to move the tokens from the store to the destination seed ['vault', program_id]",
-                        "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Payer who wishes to receive refund for closing of one time transient account once we're done here"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent"
-                    ]
-                }
-
-            ],
+            {
+                "name": "safetyDepositTokenStorage",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit token store"
+                ]
+            },
+            {
+                "name": "transientAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Transient account with mint of one time authorization account on master edition - you can delete after this txn"
+                ]
+            },
+            {
+                "name": "printingToken",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The printing token account on the participation state of the auction manager"
+                ]
+            },
+            {
+                "name": "oneTimePrintingAuthorizationMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "One time printing authorization mint"
+                ]
+            },
+            {
+                "name": "printingMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Printing mint"
+                ]
+            },
+            {
+                "name": "participationPrizeSafetyDeposit",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit of the participation prize"
+                ]
+            },
+            {
+                "name": "vaultInfo",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Vault info"
+                ]
+            },
+            {
+                "name": "fractionMint",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint"
+                ]
+            },
+            {
+                "name": "auctionInfo",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction info"
+                ]
+            },
+            {
+                "name": "auctionManagerInfo",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager info"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "tokenVaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token vault program"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "auctionManagerStore",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager store"
+                ]
+            },
+            {
+                "name": "masterEdition",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Master edition"
+                ]
+            },
+            {
+                "name": "pdaBasedTransferAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "PDA-based Transfer authority to move the tokens from the store to the destination seed ['vault', program_id]",
+                    "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
+                ]
+            },
+            {
+                "name": "payerWithRefund",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Payer who wishes to receive refund for closing of one time transient account once we're done here"
+                ]
+            },
+            {
+                "name": "rent",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent"
+                ]
+            }],
             "args": []
         },
         {
@@ -1580,28 +1594,16 @@
                 "An auctioneer should never be in the position where the auction can never work the same for them simply because they are an auctioneer.",
                 "This special endpoint exists to give them the \"out\" to unload items via a proxy call once the auction is over."
             ],
-            "accounts": [
-                {
-                    "name": "foo",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        ""
-                    ]
-                }
-
-            ],
+            "accounts": [],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "RedeemUnusedWinningConfigItemsAsAuctioneerArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "RedeemUnusedWinningConfigItemsAsAuctioneerArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "DecommissionAuctionManager",
@@ -1609,6 +1611,9 @@
                 "If you have an auction manager in an Initialized state and for some reason you can't validate it, you want to retrieve",
                 "The items inside of it. This will allow you to move it straight to Disbursing, and then you can, as Auctioneer,",
                 "Redeem those items using the RedeemUnusedWinningConfigItemsAsAuctioneer endpoint.",
+                "",
+                "If you pass the vault program account, authority over the vault will be returned to you, so you can unwind the vault",
+                "to get your items back that way instead.",
                 "",
                 "Be WARNED: Because the boxes have not been validated, the logic for redemptions may not work quite right. For instance,",
                 "if your validation step failed because you provided an empty box but said there was a token in it, when you go",
@@ -1619,70 +1624,77 @@
                 "it will skip trying to transfer it to you, so that should work fine."
             ],
             "accounts": [
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction Manager"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction"
-                    ]
-                },
-                {
-                    "name": "authority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority of the Auction Manager"
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault"
-                    ]
-                },
-                {
-                    "name": "store",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store"
-                    ]
-                },
-                {
-                    "name": "auctionProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction program"
-                    ]
-                },
-                {
-                    "name": "clock",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Clock sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction Manager"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "auctionManagerAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority of the Auction Manager"
+                ]
+            },
+            {
+                "name": "vault",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Vault"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store"
+                ]
+            },
+            {
+                "name": "auctionProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction program"
+                ]
+            },
+            {
+                "name": "clockSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Clock sysvar"
+                ]
+            },
+            {
+                "name": "vaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "optionali": true,
+                "docs": [
+                    "Vault program (Optional)"
+                ]
+            }],
             "args": []
         },
         {
             "name": "RedeemPrintingV2Bid",
             "docs": [
-                "Note: This requires that auction manager be in a Running state.",
+                "Note: This requires that auction manager be in a Running state and that be of the V1 type.",
                 "",
                 "If an auction is complete, you can redeem your printing v2 bid for a specific item here. If you are the first to do this,",
                 "The auction manager will switch from Running state to Disbursing state. If you are the last, this may change",
@@ -1692,222 +1704,219 @@
                 "that comes as a 'token of appreciation' for bidding. They are not mutually exclusive unless explicitly set to be that way."
             ],
             "accounts": [
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "safetyDepositTokenStorage",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit token storage account"
-                    ]
-                },
-                {
-                    "name": "singleItemAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Account containing 1 token of your new mint type.",
-                        "MUST be an associated token account of pda [wallet, token program, mint] relative to ata program."
-                    ]
-                },
-                {
-                    "name": "bidRedemptionKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Bid redemption key -",
-                        "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBox",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box account"
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault account"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint of the vault"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction"
-                    ]
-                },
-                {
-                    "name": "bidderMetadata",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Your BidderMetadata account"
-                    ]
-                },
-                {
-                    "name": "bidder",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Your Bidder account - Only needs to be signer if payer does not own"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "tokenVaultProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token Vault program"
-                    ]
-                },
-                {
-                    "name": "tokenMetadataProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token metadata program"
-                    ]
-                },
-                {
-                    "name": "store",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store"
-                    ]
-                },
-                {
-                    "name": "system",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "prizeTrackingTicket",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Prize tracking ticket (pda of ['metaplex', program id, auction manager key, metadata mint id])"
-                    ]
-                },
-                {
-                    "name": "newMetadataKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "New Metadata key (pda of ['metadata', program id, mint id])"
-                    ]
-                },
-                {
-                    "name": "newEdition",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "New Edition (pda of ['metadata', program id, mint id, 'edition'])"
-                    ]
-                },
-                {
-                    "name": "masterEdition",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Master Edition of token in vault V2 (pda of ['metadata', program id, master metadata mint id, 'edition']) PDA is relative to token metadata."
-                    ]
-                },
-                {
-                    "name": "newTokenMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Mint of new token"
-                    ]
-                },
-                {
-                    "name": "editionPDA",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Edition pda to mark creation - will be checked for pre-existence. (pda of ['metadata', program id, master metadata mint id, 'edition', edition_number])",
-                        "where edition_number is NOT the edition number you pass in args but actually edition_number = floor(edition/EDITION_MARKER_BIT_SIZE). PDA is relative to token metadata."
-                    ]
-                },
-                {
-                    "name": "mintAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Mint authority of new mint - THIS WILL TRANSFER AUTHORITY AWAY FROM THIS KEY"
-                    ]
-                },
-                {
-                    "name": "metadata",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Metadata account of token in vault"
-                    ]
-                }
-
-            ],
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "safetyDepositTokenStorage",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit token storage account"
+                ]
+            },
+            {
+                "name": "singleItemAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Account containing 1 token of your new mint type.",
+                    "MUST be an associated token account of pda [wallet, token program, mint] relative to ata program."
+                ]
+            },
+            {
+                "name": "bidRedemptionKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Bid redemption key -",
+                    "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "vaultAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Vault account"
+                ]
+            },
+            {
+                "name": "safetyDepositConfig",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit config pda of ['metaplex', program id, auction manager, safety deposit]",
+                    "This account will only get used in the event this is an AuctionManagerV2"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "bidderMetadata",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Your BidderMetadata account"
+                ]
+            },
+            {
+                "name": "bidder",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Your Bidder account - Only needs to be signer if payer does not own"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "tokenVaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token Vault program"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "prizeTrackingTicket",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Prize tracking ticket (pda of ['metaplex', program id, auction manager key, metadata mint id])"
+                ]
+            },
+            {
+                "name": "newMetadataKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "New Metadata key (pda of ['metadata', program id, mint id])"
+                ]
+            },
+            {
+                "name": "newEditionPDA",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "New Edition (pda of ['metadata', program id, mint id, 'edition'])"
+                ]
+            },
+            {
+                "name": "masterEdition",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Master Edition of token in vault V2 (pda of ['metadata', program id, master metadata mint id, 'edition']) PDA is relative to token metadata."
+                ]
+            },
+            {
+                "name": "newTokenMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Mint of new token"
+                ]
+            },
+            {
+                "name": "editionPDA",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Edition pda to mark creation - will be checked for pre-existence. (pda of ['metadata', program id, master metadata mint id, 'edition', edition_number])",
+                    "where edition_number is NOT the edition number you pass in args but actually edition_number = floor(edition/EDITION_MARKER_BIT_SIZE). PDA is relative to token metadata."
+                ]
+            },
+            {
+                "name": "mintAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Mint authority of new mint - THIS WILL TRANSFER AUTHORITY AWAY FROM THIS KEY"
+                ]
+            },
+            {
+                "name": "metadataAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Metadata account of token in vault"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "RedeemPrintingV2BidArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "RedeemPrintingV2BidArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "WithdrawMasterEdition",
@@ -1916,125 +1925,132 @@
                 "ATA of the Auctioneer. Can only be called once all redemptions have been met."
             ],
             "accounts": [
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "safetyDepositTokenStorage",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit token storage account"
-                    ]
-                },
-                {
-                    "name": "associatedTokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Associated token account owned by auction manager authority of same mint as token storage account"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBox",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box account"
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault account"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint of the vault"
-                    ]
-                },
-                {
-                    "name": "prizeTrackingTicket",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Prize tracking ticket (pda of ['metaplex', program id, auction manager key, metadata mint id])"
-                    ]
-                },
-                {
-                    "name": "vaultTransferAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "PDA-based Vault transfer authority ['vault', program_id, vault key]",
-                        "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction"
-                    ]
-                },
-                {
-                    "name": "auctionDataExtended",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction data extended (pda relative to auction of ['auction', program id, vault key, 'extended'])"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "tokenVaultProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token Vault program"
-                    ]
-                },
-                {
-                    "name": "store",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "safetyDepositTokenStorage",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit token storage account"
+                ]
+            },
+            {
+                "name": "associatedTokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Associated token account owned by auction manager authority of same mint as token storage account"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "vaultAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Vault account"
+                ]
+            },
+            {
+                "name": "fractionMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint of the vault"
+                ]
+            },
+            {
+                "name": "prizeTrackingTicket",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Prize tracking ticket (pda of ['metaplex', program id, auction manager key, metadata mint id])"
+                ]
+            },
+            {
+                "name": "pdaBasedVaultTransferAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "PDA-based Vault transfer authority ['vault', program_id, vault key]",
+                    "but please note that this is a PDA relative to the Token Vault program, with the 'vault' prefix"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "auctionDataExtended",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction data extended (pda relative to auction of ['auction', program id, vault key, 'extended'])"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "tokenVaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token Vault program"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "safetyDepositConfig",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit config pda of ['metaplex', program id, auction manager, safety deposit]",
+                    "This account will only get used in the event this is an AuctionManagerV2"
+                ]
+            }],
             "args": []
         },
         {
-            "name": "RedeemParticipationBidV2",
+            "name": "DeprecatedRedeemParticipationBidV2",
             "docs": [
                 "Note: This requires that auction manager be in a Running state.",
                 "",
@@ -2052,252 +2068,763 @@
                 "mint. We do not provide the token to you. Our job with this action is to christen this mint + token combo as an official Open Edition."
             ],
             "accounts": [
-                {
-                    "name": "auctionManager",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction manager"
-                    ]
-                },
-                {
-                    "name": "safetyDepositTokenStorage",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit token storage account"
-                    ]
-                },
-                {
-                    "name": "singleItemAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Account containing 1 token of your new mint type.",
-                        "MUST be an associated token account of pda [wallet, token program, mint] relative to ata program."
-                    ]
-                },
-                {
-                    "name": "bidRedemptionKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Bid redemption key -",
-                        "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBox",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Safety deposit box account"
-                    ]
-                },
-                {
-                    "name": "vault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault account"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint of the vault"
-                    ]
-                },
-                {
-                    "name": "auction",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction"
-                    ]
-                },
-                {
-                    "name": "bidderMetadata",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Your BidderMetadata account"
-                    ]
-                },
-                {
-                    "name": "bidder",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Your Bidder account"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "tokenVaultProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token Vault program"
-                    ]
-                },
-                {
-                    "name": "tokenMetadataProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token metadata program"
-                    ]
-                },
-                {
-                    "name": "store",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Store"
-                    ]
-                },
-                {
-                    "name": "system",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System"
-                    ]
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "transferAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Transfer authority to move the payment in the auction's token_mint coin from the bidder account for the participation_fixed_price",
-                        "on the auction manager to the auction manager account itself."
-                    ]
-                },
-                {
-                    "name": "acceptPaymentAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The accept payment account for the auction manager"
-                    ]
-                },
-                {
-                    "name": "tokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The token account you will potentially pay for the open edition bid with if necessary."
-                    ]
-                },
-                {
-                    "name": "prizeTrackingTicket",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Prize tracking ticket (pda of ['metaplex', program id, auction manager key, metadata mint id])"
-                    ]
-                },
-                {
-                    "name": "newMetadataKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "New Metadata key (pda of ['metadata', program id, mint id])"
-                    ]
-                },
-                {
-                    "name": "newEdition",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "New Edition (pda of ['metadata', program id, mint id, 'edition'])"
-                    ]
-                },
-                {
-                    "name": "tokenMasterEdition",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Master Edition of token in vault V2 (pda of ['metadata', program id, master metadata mint id, 'edition']) PDA is relative to token metadata."
-                    ]
-                },
-                {
-                    "name": "mint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Mint of new token"
-                    ]
-                },
-                {
-                    "name": "editionPDA",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Edition pda to mark creation - will be checked for pre-existence. (pda of ['metadata', program id, master metadata mint id, 'edition', edition_number])",
-                        "where edition_number is NOT the edition number you pass in args but actually edition_number = floor(edition/EDITION_MARKER_BIT_SIZE). PDA is relative to token metadata."
-                    ]
-                },
-                {
-                    "name": "mintAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Mint authority of new mint - THIS WILL TRANSFER AUTHORITY AWAY FROM THIS KEY"
-                    ]
-                },
-                {
-                    "name": "metadataAccount",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Metadata account of token in vault"
-                    ]
-                },
-                {
-                    "name": "auctionDataExtended",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Auction data extended - pda of ['auction', auction program id, vault key, 'extended'] relative to auction program"
-                    ]
-                }
-
-            ],
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "safetyDepositTokenStorage",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit token storage account"
+                ]
+            },
+            {
+                "name": "singleItemAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Account containing 1 token of your new mint type.",
+                    "MUST be an associated token account of pda [wallet, token program, mint] relative to ata program."
+                ]
+            },
+            {
+                "name": "bidRedemptionKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Bid redemption key -",
+                    "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "vaultAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Vault account"
+                ]
+            },
+            {
+                "name": "safetyDepositConfig",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit config pda of ['metaplex', program id, auction manager, safety deposit]",
+                    "This account will only get used in the event this is an AuctionManagerV2"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "bidderMetadata",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Your BidderMetadata account"
+                ]
+            },
+            {
+                "name": "bidder",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Your Bidder account"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "tokenVaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token Vault program"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "transferAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Transfer authority to move the payment in the auction's token_mint coin from the bidder account for the participation_fixed_price",
+                    "on the auction manager to the auction manager account itself."
+                ]
+            },
+            {
+                "name": "acceptPayment",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The accept payment account for the auction manager"
+                ]
+            },
+            {
+                "name": "tokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The token account you will potentially pay for the open edition bid with if necessary."
+                ]
+            },
+            {
+                "name": "prizeTrackingTicket",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Prize tracking ticket (pda of ['metaplex', program id, auction manager key, metadata mint id])"
+                ]
+            },
+            {
+                "name": "newMetadataKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "New Metadata key (pda of ['metadata', program id, mint id])"
+                ]
+            },
+            {
+                "name": "newEditionPDA",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "New Edition (pda of ['metadata', program id, mint id, 'edition'])"
+                ]
+            },
+            {
+                "name": "masterEdition",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Master Edition of token in vault V2 (pda of ['metadata', program id, master metadata mint id, 'edition']) PDA is relative to token metadata."
+                ]
+            },
+            {
+                "name": "newTokenMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Mint of new token"
+                ]
+            },
+            {
+                "name": "editionPDA",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Edition pda to mark creation - will be checked for pre-existence. (pda of ['metadata', program id, master metadata mint id, 'edition', edition_number])",
+                    "where edition_number is NOT the edition number you pass in args but actually edition_number = floor(edition/EDITION_MARKER_BIT_SIZE). PDA is relative to token metadata."
+                ]
+            },
+            {
+                "name": "mintAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Mint authority of new mint - THIS WILL TRANSFER AUTHORITY AWAY FROM THIS KEY"
+                ]
+            },
+            {
+                "name": "metadataAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Metadata account of token in vault"
+                ]
+            }],
             "args": []
+        },
+        {
+            "name": "InitAuctionManagerV2",
+            "docs": [
+                "Initializes an Auction Manager V2",
+                "",
+                "NOTE: It is not possible to use MasterEditionV1s for participation nfts with these managers."
+            ],
+            "accounts": [
+            {
+                "name": "uninitializedUnallocatedAuctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Uninitialized, unallocated auction manager account with pda of ['metaplex', auction_key from auction referenced below]"
+                ]
+            },
+            {
+                "name": "auctionWinnerTokenTypeTracker",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "AuctionWinnerTokenTypeTracker, pda of seed ['metaplex', program id, auction manager key, 'totals']"
+                ]
+            },
+            {
+                "name": "combinedVault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Combined vault account with authority set to auction manager account (this will be checked)",
+                    "Note in addition that this vault account should have authority set to this program's pda of ['metaplex', auction_key]"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction with auctioned item being set to the vault given and authority set to this program's pda of ['metaplex', auction_key]"
+                ]
+            },
+            {
+                "name": "auctionManagerAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Authority for the Auction Manager"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "acceptPayment",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Accept payment account of same token mint as the auction for taking payment for open editions, owner should be auction manager key"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store that this auction manager will belong to"
+                ]
+            },
+            {
+                "name": "systemSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System sysvar    "
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
+            "args": [
+            {
+                "name": "args",
+                "type":
+                {
+                    "defined": "InitAuctionManagerV2Args"
+                },
+                "docs": []
+            }]
+        },
+        {
+            "name": "ValidateSafetyDepositBoxV2",
+            "docs": [
+                "NOTE: Requires an AuctionManagerV2.",
+                "",
+                "Validates that a given safety deposit box has in it contents that match the given SafetyDepositConfig, and creates said config.",
+                "A stateful call, this will error out if you call it a second time after validation has occurred."
+            ],
+            "accounts": [
+            {
+                "name": "uninitializedSafetyDeposit",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Uninitialized Safety deposit config, pda of seed ['metaplex', program id, auction manager key, safety deposit key]"
+                ]
+            },
+            {
+                "name": "auctionWinnerTokenTypeTracker",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "AuctionWinnerTokenTypeTracker, pda of seed ['metaplex', program id, auction manager key, 'totals']"
+                ]
+            },
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "metadataAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Metadata account"
+                ]
+            },
+            {
+                "name": "originalAuthorityLookup",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Original authority lookup - unallocated uninitialized pda account with seed ['metaplex', auction key, metadata key]",
+                    "We will store original authority here to return it later."
+                ]
+            },
+            {
+                "name": "whitelistedCreatorEntry",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "A whitelisted creator entry for the store of this auction manager pda of ['metaplex', store key, creator key]",
+                    "where creator key comes from creator list of metadata, any will do"
+                ]
+            },
+            {
+                "name": "auctionManagerStore",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The auction manager's store key"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "safetyDepositBoxStorage",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box storage account where the actual nft token is stored"
+                ]
+            },
+            {
+                "name": "mintAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Mint account of the token in the safety deposit box"
+                ]
+            },
+            {
+                "name": "editionOrMasteredition",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Edition OR MasterEdition record key",
+                    "Remember this does not need to be an existing account (may not be depending on token), just is a pda with seed",
+                    "of ['metadata', program id, Printing mint id, 'edition']. - remember PDA is relative to token metadata program."
+                ]
+            },
+            {
+                "name": "vaultAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Vault account"
+                ]
+            },
+            {
+                "name": "authority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority"
+                ]
+            },
+            {
+                "name": "metadataAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "optional": true,
+                "docs": [
+                    "Metadata Authority - Signer only required if doing a full ownership txfer"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
+            "args": [
+            {
+                "name": "args",
+                "type":
+                {
+                    "defined": "SafetyDepositConfig"
+                },
+                "docs": []
+            }]
+        },
+        {
+            "name": "RedeemParticipationBidV3",
+            "docs": [
+                "Note: This requires that auction manager be in a Running state.",
+                "",
+                "Second note: V3 is the same as V2, but it requires an additional argument because it is intended to be used with AuctionManagerV2s,",
+                "not V1s, which use BidRedemptionTicketV2s, which require this additional argument (the user_provided_win_index).",
+                "You can in theory pay for someone else's participation NFT and gift it to them.",
+                "",
+                "If an auction is complete, you can redeem your bid for an Open Edition token if it is eligible. If you are the first to do this,",
+                "The auction manager will switch from Running state to Disbursing state. If you are the last, this may change",
+                "the auction manager state to Finished provided that no authorities remain to be delegated for Master Edition tokens.",
+                "",
+                "NOTE: Please note that it is totally possible to redeem a bid 2x - once for a prize you won and once at this end point for a open edition",
+                "that comes as a 'token of appreciation' for bidding. They are not mutually exclusive unless explicitly set to be that way.",
+                "",
+                "NOTE: If you are redeeming a newly minted Open Edition, you must actually supply a destination account containing a token from a brand new",
+                "mint. We do not provide the token to you. Our job with this action is to christen this mint + token combo as an official Open Edition."
+            ],
+            "accounts": [
+            {
+                "name": "auctionManager",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction manager"
+                ]
+            },
+            {
+                "name": "safetyDepositTokenStorage",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit token storage account"
+                ]
+            },
+            {
+                "name": "singleItemAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Account containing 1 token of your new mint type.",
+                    "MUST be an associated token account of pda [wallet, token program, mint] relative to ata program."
+                ]
+            },
+            {
+                "name": "bidRedemptionKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Bid redemption key -",
+                    "Just a PDA with seed ['metaplex', auction_key, bidder_metadata_key] that we will allocate to mark that you redeemed your bid"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit box account"
+                ]
+            },
+            {
+                "name": "vaultAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Vault account"
+                ]
+            },
+            {
+                "name": "safetyDepositConfig",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Safety deposit config pda of ['metaplex', program id, auction manager, safety deposit]",
+                    "This account will only get used in the event this is an AuctionManagerV2"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "bidderMetadata",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Your BidderMetadata account"
+                ]
+            },
+            {
+                "name": "bidder",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Your Bidder account"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "tokenVaultProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token Vault program"
+                ]
+            },
+            {
+                "name": "tokenMetadataProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token metadata program"
+                ]
+            },
+            {
+                "name": "store",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Store"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "transferAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Transfer authority to move the payment in the auction's token_mint coin from the bidder account for the participation_fixed_price",
+                    "on the auction manager to the auction manager account itself."
+                ]
+            },
+            {
+                "name": "acceptPayment",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The accept payment account for the auction manager"
+                ]
+            },
+            {
+                "name": "tokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The token account you will potentially pay for the open edition bid with if necessary."
+                ]
+            },
+            {
+                "name": "prizeTrackingTicket",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Prize tracking ticket (pda of ['metaplex', program id, auction manager key, metadata mint id])"
+                ]
+            },
+            {
+                "name": "newMetadataKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "New Metadata key (pda of ['metadata', program id, mint id])"
+                ]
+            },
+            {
+                "name": "newEditionPDA",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "New Edition (pda of ['metadata', program id, mint id, 'edition'])"
+                ]
+            },
+            {
+                "name": "masterEdition",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Master Edition of token in vault V2 (pda of ['metadata', program id, master metadata mint id, 'edition']) PDA is relative to token metadata."
+                ]
+            },
+            {
+                "name": "newTokenMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Mint of new token"
+                ]
+            },
+            {
+                "name": "editionPDA",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Edition pda to mark creation - will be checked for pre-existence. (pda of ['metadata', program id, master metadata mint id, 'edition', edition_number])",
+                    "where edition_number is NOT the edition number you pass in args but actually edition_number = floor(edition/EDITION_MARKER_BIT_SIZE). PDA is relative to token metadata."
+                ]
+            },
+            {
+                "name": "mintAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Mint authority of new mint - THIS WILL TRANSFER AUTHORITY AWAY FROM THIS KEY"
+                ]
+            },
+            {
+                "name": "metadataAccount",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Metadata account of token in vault"
+                ]
+            }],
+            "args": [
+            {
+                "name": "args",
+                "type":
+                {
+                    "defined": "RedeemParticipationBidV3Args"
+                },
+                "docs": []
+            }]
         }
-
-
-
-
-
-
 
 
     ],
