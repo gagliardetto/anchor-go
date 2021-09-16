@@ -2828,8 +2828,1050 @@
 
 
     ],
-    "accounts": [],
+    "accounts": [
+        {
+            "name": "AuctionManagerV1",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "store",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "authority",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "auction",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "vault",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "accept_payment",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "state",
+                    "type":
+                    {
+                        "defined": "AuctionManagerStateV1"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "settings",
+                    "type":
+                    {
+                        "defined": "AuctionManagerSettingsV1"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "straight_shot_optimization",
+                    "type": "bool",
+                    "docs": [
+                        "True if this is only winning configs of one item each, used for optimization in saving."
+                    ]
+                }]
+            },
+            "docs": []
+        }
+
+
+    ],
     "types": [
+        {
+            "name": "TupleNumericType",
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                {
+                    "name": "Padding0"
+                },
+                {
+                    "name": "U8"
+                },
+                {
+                    "name": "U16"
+                },
+                {
+                    "name": "Padding1"
+                },
+                {
+                    "name": "U32"
+                },
+                {
+                    "name": "Padding2"
+                },
+                {
+                    "name": "Padding3"
+                },
+                {
+                    "name": "Padding4"
+                },
+                {
+                    "name": "U64"
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "AuctionManagerStatus",
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                {
+                    "name": "Initialized"
+                },
+                {
+                    "name": "Validated"
+                },
+                {
+                    "name": "Running"
+                },
+                {
+                    "name": "Disbursing"
+                },
+                {
+                    "name": "Finished"
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "Key",
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                {
+                    "name": "Uninitialized"
+                },
+                {
+                    "name": "OriginalAuthorityLookupV1"
+                },
+                {
+                    "name": "BidRedemptionTicketV1"
+                },
+                {
+                    "name": "StoreV1"
+                },
+                {
+                    "name": "WhitelistedCreatorV1"
+                },
+                {
+                    "name": "PayoutTicketV1"
+                },
+                {
+                    "name": "SafetyDepositValidationTicketV1"
+                },
+                {
+                    "name": "AuctionManagerV1"
+                },
+                {
+                    "name": "PrizeTrackingTicketV1"
+                },
+                {
+                    "name": "SafetyDepositConfigV1"
+                },
+                {
+                    "name": "AuctionManagerV2"
+                },
+                {
+                    "name": "BidRedemptionTicketV2"
+                },
+                {
+                    "name": "AuctionWinnerTokenTypeTrackerV1"
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "AmountCumulativeReturn",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "amount",
+                    "type": "u64",
+                    "docs": []
+                },
+                {
+                    "name": "cumulative_amount",
+                    "type": "u64",
+                    "docs": []
+                },
+                {
+                    "name": "total_amount",
+                    "type": "u64",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "AuctionWinnerTokenTypeTracker",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "amount_type",
+                    "type":
+                    {
+                        "defined": "TupleNumericType"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "length_type",
+                    "type":
+                    {
+                        "defined": "TupleNumericType"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "amount_ranges",
+                    "type":
+                    {
+                        "vec":
+                        {
+                            "defined": "AmountRange"
+                        }
+                    },
+                    "docs": [
+                        "Tuple is (amount of editions or tokens given to people in this range, length of range)"
+                    ]
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "BidRedemptionTicket",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "SafetyDepositConfig",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "auction_manager",
+                    "type": "publicKey",
+                    "docs": [
+                        "reverse lookup"
+                    ]
+                },
+                {
+                    "name": "order",
+                    "type": "u64",
+                    "docs": [
+                        "safety deposit order"
+                    ]
+                },
+                {
+                    "name": "winning_config_type",
+                    "type":
+                    {
+                        "defined": "WinningConfigType"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "amount_type",
+                    "type":
+                    {
+                        "defined": "TupleNumericType"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "length_type",
+                    "type":
+                    {
+                        "defined": "TupleNumericType"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "amount_ranges",
+                    "type":
+                    {
+                        "vec":
+                        {
+                            "defined": "AmountRange"
+                        }
+                    },
+                    "docs": [
+                        "Tuple is (amount of editions or tokens given to people in this range, length of range)"
+                    ]
+                },
+                {
+                    "name": "participation_config",
+                    "type":
+                    {
+                        "option":
+                        {
+                            "defined": "ParticipationConfigV2"
+                        }
+                    },
+                    "docs": [
+                        "if winning config type is \"Participation\" then you use this to parameterize it."
+                    ]
+                },
+                {
+                    "name": "participation_state",
+                    "type":
+                    {
+                        "option":
+                        {
+                            "defined": "ParticipationStateV2"
+                        }
+                    },
+                    "docs": [
+                        "if winning config type is \"Participation\" then you use this to keep track of it."
+                    ]
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "AmountRange",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "F0",
+                    "type": "u64",
+                    "docs": []
+                },
+                {
+                    "name": "F1",
+                    "type": "u64",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "PrizeTrackingTicket",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "metadata",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "supply_snapshot",
+                    "type": "u64",
+                    "docs": []
+                },
+                {
+                    "name": "expected_redemptions",
+                    "type": "u64",
+                    "docs": []
+                },
+                {
+                    "name": "redemptions",
+                    "type": "u64",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "PayoutTicket",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "recipient",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "amount_paid",
+                    "type": "u64",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "Store",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "public",
+                    "type": "bool",
+                    "docs": []
+                },
+                {
+                    "name": "auction_program",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "token_vault_program",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "token_metadata_program",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "token_program",
+                    "type": "publicKey",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "WhitelistedCreator",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "address",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "activated",
+                    "type": "bool",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "ParticipationStateV2",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "collected_to_accept_payment",
+                    "type": "u64",
+                    "docs": [
+                        "We have this variable below to keep track in the case of the participation NFTs, whose",
+                        "income will trickle in over time, how much the artists have in the escrow account and",
+                        "how much would/should be owed to them if they try to claim it relative to the winning bids.",
+                        "It's  abit tougher than a straightforward bid which has a price attached to it, because",
+                        "there are many bids of differing amounts (in the case of GivenForBidPrice) and they dont all",
+                        "come in at one time, so this little ledger here keeps track."
+                    ]
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "ParticipationConfigV2",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "winner_constraint",
+                    "type":
+                    {
+                        "defined": "WinningConstraint"
+                    },
+                    "docs": [
+                        "Setups:",
+                        "1. Winners get participation + not charged extra",
+                        "2. Winners dont get participation prize"
+                    ]
+                },
+                {
+                    "name": "non_winning_constraint",
+                    "type":
+                    {
+                        "defined": "NonWinningConstraint"
+                    },
+                    "docs": [
+                        "Setups:",
+                        "1. Losers get prize for free",
+                        "2. Losers get prize but pay fixed price",
+                        "3. Losers get prize but pay bid price"
+                    ]
+                },
+                {
+                    "name": "fixed_price",
+                    "type":
+                    {
+                        "option": "u64"
+                    },
+                    "docs": [
+                        "Setting this field disconnects the participation prizes price from the bid. Any bid you submit, regardless",
+                        "of amount, charges you the same fixed price."
+                    ]
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "OriginalAuthorityLookup",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "original_authority",
+                    "type": "publicKey",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "PrintingV2CalculationCheckReturn",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "expected_redemptions",
+                    "type": "u64",
+                    "docs": []
+                },
+                {
+                    "name": "winning_config_type",
+                    "type":
+                    {
+                        "defined": "WinningConfigType"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "winning_config_item_index",
+                    "type":
+                    {
+                        "option": "u8"
+                    },
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "AuctionManagerV2",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "store",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "authority",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "auction",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "vault",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "accept_payment",
+                    "type": "publicKey",
+                    "docs": []
+                },
+                {
+                    "name": "state",
+                    "type":
+                    {
+                        "defined": "AuctionManagerStateV2"
+                    },
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "AuctionManagerStateV2",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "status",
+                    "type":
+                    {
+                        "defined": "AuctionManagerStatus"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "safety_config_items_validated",
+                    "type": "u64",
+                    "docs": [
+                        "When all configs are validated the auction is started and auction manager moves to Running"
+                    ]
+                },
+                {
+                    "name": "bids_pushed_to_accept_payment",
+                    "type": "u64",
+                    "docs": [
+                        "how many bids have been pushed to accept payment"
+                    ]
+                },
+                {
+                    "name": "has_participation",
+                    "type": "bool",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "CommonWinningIndexReturn",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "amount",
+                    "type": "u64",
+                    "docs": []
+                },
+                {
+                    "name": "winning_config_type",
+                    "type":
+                    {
+                        "defined": "WinningConfigType"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "winning_config_item_index",
+                    "type":
+                    {
+                        "option": "u8"
+                    },
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "InitAuctionManagerV2Args",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "amount_type",
+                    "type":
+                    {
+                        "defined": "TupleNumericType"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "length_type",
+                    "type":
+                    {
+                        "defined": "TupleNumericType"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "max_ranges",
+                    "type": "u64",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "RedeemParticipationBidV3Args",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "win_index",
+                    "type":
+                    {
+                        "option": "u64"
+                    },
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "SafetyDepositValidationTicket",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "key",
+                    "type":
+                    {
+                        "defined": "Key"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "address",
+                    "type": "publicKey",
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "WinningConfigStateItem",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "primary_sale_happened",
+                    "type": "bool",
+                    "docs": [
+                        "Record of primary sale or not at time of auction creation, set during validation step"
+                    ]
+                },
+                {
+                    "name": "claimed",
+                    "type": "bool",
+                    "docs": [
+                        "Ticked to true when a prize is claimed by person who won it"
+                    ]
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "WinningConfigState",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "items",
+                    "type":
+                    {
+                        "vec":
+                        {
+                            "defined": "WinningConfigStateItem"
+                        }
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "money_pushed_to_accept_payment",
+                    "type": "bool",
+                    "docs": [
+                        "Ticked to true when money is pushed to accept_payment account from auction bidding pot"
+                    ]
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "ParticipationStateV1",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "collected_to_accept_payment",
+                    "type": "u64",
+                    "docs": [
+                        "We have this variable below to keep track in the case of the participation NFTs, whose",
+                        "income will trickle in over time, how much the artists have in the escrow account and",
+                        "how much would/should be owed to them if they try to claim it relative to the winning bids.",
+                        "It's  abit tougher than a straightforward bid which has a price attached to it, because",
+                        "there are many bids of differing amounts (in the case of GivenForBidPrice) and they dont all",
+                        "come in at one time, so this little ledger here keeps track."
+                    ]
+                },
+                {
+                    "name": "primary_sale_happened",
+                    "type": "bool",
+                    "docs": [
+                        "Record of primary sale or not at time of auction creation, set during validation step"
+                    ]
+                },
+                {
+                    "name": "validated",
+                    "type": "bool",
+                    "docs": []
+                },
+                {
+                    "name": "printing_authorization_token_account",
+                    "type":
+                    {
+                        "option": "publicKey"
+                    },
+                    "docs": [
+                        "NOTE: DEPRECATED.",
+                        "An account for printing authorization tokens that are made with the one time use token",
+                        "after the auction ends. Provided during validation step."
+                    ]
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "ParticipationConfigV1",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "winner_constraint",
+                    "type":
+                    {
+                        "defined": "WinningConstraint"
+                    },
+                    "docs": [
+                        "Setups:",
+                        "1. Winners get participation + not charged extra",
+                        "2. Winners dont get participation prize"
+                    ]
+                },
+                {
+                    "name": "non_winning_constraint",
+                    "type":
+                    {
+                        "defined": "NonWinningConstraint"
+                    },
+                    "docs": [
+                        "Setups:",
+                        "1. Losers get prize for free",
+                        "2. Losers get prize but pay fixed price",
+                        "3. Losers get prize but pay bid price"
+                    ]
+                },
+                {
+                    "name": "safety_deposit_box_index",
+                    "type": "u8",
+                    "docs": [
+                        "The safety deposit box index in the vault containing the template for the participation prize"
+                    ]
+                },
+                {
+                    "name": "fixed_price",
+                    "type":
+                    {
+                        "option": "u64"
+                    },
+                    "docs": [
+                        "Setting this field disconnects the participation prizes price from the bid. Any bid you submit, regardless",
+                        "of amount, charges you the same fixed price."
+                    ]
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "AuctionManagerStateV1",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "status",
+                    "type":
+                    {
+                        "defined": "AuctionManagerStatus"
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "winning_config_items_validated",
+                    "type": "u8",
+                    "docs": [
+                        "When all configs are validated the auction is started and auction manager moves to Running"
+                    ]
+                },
+                {
+                    "name": "winning_config_states",
+                    "type":
+                    {
+                        "vec":
+                        {
+                            "defined": "WinningConfigState"
+                        }
+                    },
+                    "docs": []
+                },
+                {
+                    "name": "participation_state",
+                    "type":
+                    {
+                        "option":
+                        {
+                            "defined": "ParticipationStateV1"
+                        }
+                    },
+                    "docs": []
+                }]
+            },
+            "docs": []
+        },
+        {
+            "name": "AuctionManagerSettingsV1",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "winning_configs",
+                    "type":
+                    {
+                        "vec":
+                        {
+                            "defined": "WinningConfig"
+                        }
+                    },
+                    "docs": [
+                        "The safety deposit box index in the vault containing the winning items, in order of place",
+                        "The same index can appear multiple times if that index contains n tokens for n appearances (this will be checked)"
+                    ]
+                },
+                {
+                    "name": "participation_config",
+                    "type":
+                    {
+                        "option":
+                        {
+                            "defined": "ParticipationConfigV1"
+                        }
+                    },
+                    "docs": [
+                        "The participation config is separated because it is structurally a bit different,",
+                        "having different options and also because it has no real \"winning place\" in the array."
+                    ]
+                }]
+            },
+            "docs": []
+        },
         {
             "name": "AuctionManagerSettings",
             "type":
@@ -2922,58 +3964,56 @@
         },
         {
             "name": "WinningConfigType",
-            "docs": [],
             "type":
             {
                 "kind": "enum",
                 "variants": [
-                    {
-                        "name": "TokenOnlyTransfer",
-                        "docs": [
-                            "You may be selling your one-of-a-kind NFT for the first time, but not it's accompanying Metadata,",
-                            "of which you would like to retain ownership. You get 100% of the payment the first sale, then",
-                            "royalties forever after.",
-                            "",
-                            "You may be re-selling something like a Limited/Open Edition print from another auction,",
-                            "a master edition record token by itself (Without accompanying metadata/printing ownership), etc.",
-                            "This means artists will get royalty fees according to the top level royalty % on the metadata",
-                            "split according to their percentages of contribution.",
-                            "",
-                            "No metadata ownership is transferred in this instruction, which means while you may be transferring",
-                            "the token for a limited/open edition away, you would still be (nominally) the owner of the limited edition",
-                            "metadata, though it confers no rights or privileges of any kind."
-                        ]
-                    },
-                    {
-                        "name": "FullRightsTransfer",
-                        "docs": [
-                            "Means you are auctioning off the master edition record and it's metadata ownership as well as the",
-                            "token itself. The other person will be able to mint authorization tokens and make changes to the",
-                            "artwork."
-                        ]
-                    },
-                    {
-                        "name": "PrintingV1",
-                        "docs": [
-                            "Means you are using authorization tokens to print off editions during the auction using",
-                            "from a MasterEditionV1"
-                        ]
-                    },
-                    {
-                        "name": "PrintingV2",
-                        "docs": [
-                            "Means you are using the MasterEditionV2 to print off editions"
-                        ]
-                    },
-                    {
-                        "name": "Participation",
-                        "docs": [
-                            "Means you are using a MasterEditionV2 as a participation prize."
-                        ]
-                    }
-
-                ]
-            }
+                {
+                    "name": "TokenOnlyTransfer",
+                    "docs": [
+                        "You may be selling your one-of-a-kind NFT for the first time, but not it's accompanying Metadata,",
+                        "of which you would like to retain ownership. You get 100% of the payment the first sale, then",
+                        "royalties forever after.",
+                        "",
+                        "You may be re-selling something like a Limited/Open Edition print from another auction,",
+                        "a master edition record token by itself (Without accompanying metadata/printing ownership), etc.",
+                        "This means artists will get royalty fees according to the top level royalty % on the metadata",
+                        "split according to their percentages of contribution.",
+                        "",
+                        "No metadata ownership is transferred in this instruction, which means while you may be transferring",
+                        "the token for a limited/open edition away, you would still be (nominally) the owner of the limited edition",
+                        "metadata, though it confers no rights or privileges of any kind."
+                    ]
+                },
+                {
+                    "name": "FullRightsTransfer",
+                    "docs": [
+                        "Means you are auctioning off the master edition record and it's metadata ownership as well as the",
+                        "token itself. The other person will be able to mint authorization tokens and make changes to the",
+                        "artwork."
+                    ]
+                },
+                {
+                    "name": "PrintingV1",
+                    "docs": [
+                        "Means you are using authorization tokens to print off editions during the auction using",
+                        "from a MasterEditionV1"
+                    ]
+                },
+                {
+                    "name": "PrintingV2",
+                    "docs": [
+                        "Means you are using the MasterEditionV2 to print off editions"
+                    ]
+                },
+                {
+                    "name": "Participation",
+                    "docs": [
+                        "Means you are using a MasterEditionV2 as a participation prize."
+                    ]
+                }]
+            },
+            "docs": []
         },
         {
             "name": "ParticipationConfig",
