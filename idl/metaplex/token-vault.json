@@ -11,7 +11,7 @@
             ],
             "accounts": [
             {
-                "name": "fractionalShareMint",
+                "name": "initializedFractionalShareMint",
                 "isMut": true,
                 "isSigner": false,
                 "docs": [
@@ -19,7 +19,7 @@
                 ]
             },
             {
-                "name": "redeemTreasuryTokenAccount",
+                "name": "initializedRedeemTreasuryTokenAccount",
                 "isMut": true,
                 "isSigner": false,
                 "docs": [
@@ -27,7 +27,7 @@
                 ]
             },
             {
-                "name": "fractionTreasuryTokenAccount",
+                "name": "initializedFractionTreasuryTokenAccount",
                 "isMut": true,
                 "isSigner": false,
                 "docs": [
@@ -35,7 +35,7 @@
                 ]
             },
             {
-                "name": "uninitializedVaultAccount",
+                "name": "uninitializedVault",
                 "isMut": true,
                 "isSigner": false,
                 "docs": [
@@ -75,16 +75,14 @@
                 ]
             }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "InitVaultArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "InitVaultArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "AddTokenToInactiveVault",
@@ -92,100 +90,96 @@
                 "Add a token to a inactive token vault"
             ],
             "accounts": [
-                {
-                    "name": "uninitializedSafetyDepositBoxAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Uninitialized safety deposit box account address (will be created and allocated by this endpoint)",
-                        "Address should be pda with seed of [PREFIX, vault_address, token_mint_address]"
-                    ]
-                },
-                {
-                    "name": "initializedTokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized Token account"
-                    ]
-                },
-                {
-                    "name": "initializedTokenStoreAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized Token store account with authority of this program, this will get set on the safety deposit box"
-                    ]
-                },
-                {
-                    "name": "initializedInactiveFractionalizedTokenVault",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized inactive fractionalized token vault"
-                    ]
-                },
-                {
-                    "name": "vaultAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority on the vault"
-                    ]
-                },
-                {
-                    "name": "payer",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Payer"
-                    ]
-                },
-                {
-                    "name": "transferAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Transfer Authority to move desired token amount from token account to safety deposit"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "rentSysvar",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                },
-                {
-                    "name": "systemAccountSysvar",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "System account sysvar"
-                    ]
-                }
-
-            ],
+            {
+                "name": "uninitializedSafetyDepositBoxAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Uninitialized safety deposit box account address (will be created and allocated by this endpoint)",
+                    "Address should be pda with seed of [PREFIX, vault_address, token_mint_address]"
+                ]
+            },
+            {
+                "name": "initializedToken",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized Token account"
+                ]
+            },
+            {
+                "name": "initializedTokenStore",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized Token store account with authority of this program, this will get set on the safety deposit box"
+                ]
+            },
+            {
+                "name": "initializedInactiveFractionalizedTokenVault",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized inactive fractionalized token vault"
+                ]
+            },
+            {
+                "name": "vaultAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority on the vault"
+                ]
+            },
+            {
+                "name": "payer",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Payer"
+                ]
+            },
+            {
+                "name": "transferAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Transfer Authority to move desired token amount from token account to safety deposit"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "systemAccountSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System account sysvar"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "AmountArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "AmountArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "ActivateVault",
@@ -194,67 +188,63 @@
                 "Tokens can no longer be removed in this state until Combination."
             ],
             "accounts": [
-                {
-                    "name": "initializedInactivatedFractionalizedTokenVault",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized inactivated fractionalized token vault"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint"
-                    ]
-                },
-                {
-                    "name": "fractionTreasury",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction treasury"
-                    ]
-                },
-                {
-                    "name": "fractionMintAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint authority for the program - seed of [PREFIX, program_id]"
-                    ]
-                },
-                {
-                    "name": "authorityOnTheVault",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority on the vault"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                }
-
-            ],
+            {
+                "name": "initializedInactivatedFractionalizedTokenVault",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized inactivated fractionalized token vault"
+                ]
+            },
+            {
+                "name": "fractionMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint"
+                ]
+            },
+            {
+                "name": "fractionTreasury",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction treasury"
+                ]
+            },
+            {
+                "name": "fractionMintAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint authority for the program - seed of [PREFIX, program_id]"
+                ]
+            },
+            {
+                "name": "vaultAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority on the vault"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "NumberOfShareArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "NumberOfShareArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "CombineVault",
@@ -264,105 +254,102 @@
                 "The treasury then unlocks into Combine state and you can remove the tokens."
             ],
             "accounts": [
-                {
-                    "name": "initializedActivatedTokenVault",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized activated token vault"
-                    ]
-                },
-                {
-                    "name": "tokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Token account containing your portion of the outstanding fraction shares"
-                    ]
-                },
-                {
-                    "name": "redeemTreasuryMintTypeTokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Token account of the redeem_treasury mint type that you will pay with"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint"
-                    ]
-                },
-                {
-                    "name": "fractionTreasuryAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction treasury account"
-                    ]
-                },
-                {
-                    "name": "redeemTreasuryAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Redeem treasury account"
-                    ]
-                },
-                {
-                    "name": "newAuthorityOnTheVault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "New authority on the vault going forward - can be same authority if you want"
-                    ]
-                },
-                {
-                    "name": "authorityOnTheVault",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority on the vault"
-                    ]
-                },
-                {
-                    "name": "transferAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Transfer authority for the token account and outstanding fractional shares account you're transferring from"
-                    ]
-                },
-                {
-                    "name": "pdaBasedBurnAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "PDA-based Burn authority for the fraction treasury account containing the uncirculated shares seed [PREFIX, program_id]"
-                    ]
-                },
-                {
-                    "name": "externalPricingLookupAddress",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "External pricing lookup address"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                }
-
-
-            ],
+            {
+                "name": "initializedActivatedTokenVault",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized activated token vault"
+                ]
+            },
+            {
+                "name": "tokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Token account containing your portion of the outstanding fraction shares"
+                ]
+            },
+            {
+                "name": "redeemTreasuryMintTypeTokenAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Token account of the redeem_treasury mint type that you will pay with"
+                ]
+            },
+            {
+                "name": "fractionMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint"
+                ]
+            },
+            {
+                "name": "fractionTreasury",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction treasury account"
+                ]
+            },
+            {
+                "name": "redeemTreasury",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Redeem treasury account"
+                ]
+            },
+            {
+                "name": "newAuthorityOnTheVault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "New authority on the vault going forward - can be same authority if you want"
+                ]
+            },
+            {
+                "name": "vaultAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority on the vault"
+                ]
+            },
+            {
+                "name": "transferAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Transfer authority for the token account and outstanding fractional shares account you're transferring from"
+                ]
+            },
+            {
+                "name": "pdaBasedBurnAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "PDA-based Burn authority for the fraction treasury account containing the uncirculated shares seed [PREFIX, program_id]"
+                ]
+            },
+            {
+                "name": "externalPricingLookupAddress",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "External pricing lookup address"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            }],
             "args": []
         },
         {
@@ -372,81 +359,78 @@
                 "Once fractional supply is zero and all tokens have been removed this action will take vault to Deactivated"
             ],
             "accounts": [
-                {
-                    "name": "initializedTokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized Token account containing your fractional shares"
-                    ]
-                },
-                {
-                    "name": "initializedDestinationTokenAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized Destination token account where you wish your proceeds to arrive"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint"
-                    ]
-                },
-                {
-                    "name": "redeemTreasuryAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Redeem treasury account"
-                    ]
-                },
-                {
-                    "name": "pdaBasedTransferAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "PDA-based Transfer authority for the transfer of proceeds from redeem treasury to destination seed [PREFIX, program_id]"
-                    ]
-                },
-                {
-                    "name": "burnAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Burn authority for the burning of your shares"
-                    ]
-                },
-                {
-                    "name": "combinedTokenVault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Combined token vault"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "rentSysvar",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                }
-
-
-            ],
+            {
+                "name": "initializedToken",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized Token account containing your fractional shares"
+                ]
+            },
+            {
+                "name": "initializedDestinationToken",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized Destination token account where you wish your proceeds to arrive"
+                ]
+            },
+            {
+                "name": "fractionMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint"
+                ]
+            },
+            {
+                "name": "redeemTreasury",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Redeem treasury account"
+                ]
+            },
+            {
+                "name": "pdaBasedTransferAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "PDA-based Transfer authority for the transfer of proceeds from redeem treasury to destination seed [PREFIX, program_id]"
+                ]
+            },
+            {
+                "name": "burnAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Burn authority for the burning of your shares"
+                ]
+            },
+            {
+                "name": "combinedTokenVault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Combined token vault"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
             "args": []
         },
         {
@@ -456,92 +440,87 @@
                 "Once fractional supply is zero and all tokens have been removed this action will take vault to Deactivated"
             ],
             "accounts": [
-                {
-                    "name": "initializedDestinationAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized Destination account for the tokens being withdrawn"
-                    ]
-                },
-                {
-                    "name": "safetyDepositBoxAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The safety deposit box account key for the tokens"
-                    ]
-                },
-                {
-                    "name": "storeKey",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The store key on the safety deposit box account"
-                    ]
-                },
-                {
-                    "name": "initializedCombinedTokenVault",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "The initialized combined token vault"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint"
-                    ]
-                },
-                {
-                    "name": "authorityOfVault",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority of vault"
-                    ]
-                },
-                {
-                    "name": "pdaBasedTransferAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "PDA-based Transfer authority to move the tokens from the store to the destination seed [PREFIX, program_id]"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "rentSysvar",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                }
-
-
-            ],
+            {
+                "name": "initializedDestination",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized Destination account for the tokens being withdrawn"
+                ]
+            },
+            {
+                "name": "safetyDepositBox",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The safety deposit box account key for the tokens"
+                ]
+            },
+            {
+                "name": "storeKey",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The store key on the safety deposit box account"
+                ]
+            },
+            {
+                "name": "initializedCombinedTokenVault",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "The initialized combined token vault"
+                ]
+            },
+            {
+                "name": "fractionMint",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint"
+                ]
+            },
+            {
+                "name": "vaultAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority of vault"
+                ]
+            },
+            {
+                "name": "pdaBasedTransferAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "PDA-based Transfer authority to move the tokens from the store to the destination seed [PREFIX, program_id]"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "AmountArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "AmountArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "MintFractionalShares",
@@ -549,68 +528,63 @@
                 "Self explanatory - mint more fractional shares if the vault is configured to allow such."
             ],
             "accounts": [
-                {
-                    "name": "fractionTreasury",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction treasury"
-                    ]
-                },
-                {
-                    "name": "fractionMint",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction mint"
-                    ]
-                },
-                {
-                    "name": "initializedActiveTokenVault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The initialized active token vault"
-                    ]
-                },
-                {
-                    "name": "pdaBasedMintAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "PDA-based Mint authority to mint tokens to treasury[PREFIX, program_id]"
-                    ]
-                },
-                {
-                    "name": "authorityOfVault",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority of vault"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                }
-
-
-            ],
+            {
+                "name": "fractionTreasury",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction treasury"
+                ]
+            },
+            {
+                "name": "fractionMint",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction mint"
+                ]
+            },
+            {
+                "name": "initializedActiveTokenVault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The initialized active token vault"
+                ]
+            },
+            {
+                "name": "pdaBasedMintAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "PDA-based Mint authority to mint tokens to treasury[PREFIX, program_id]"
+                ]
+            },
+            {
+                "name": "vaultAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority of vault"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "NumberOfShareArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "NumberOfShareArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "WithdrawSharesFromTreasury",
@@ -618,76 +592,71 @@
                 "Withdraws shares from the treasury to a desired account."
             ],
             "accounts": [
-                {
-                    "name": "initializedDestinationAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized Destination account for the shares being withdrawn"
-                    ]
-                },
-                {
-                    "name": "fractionTreasury",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction treasury"
-                    ]
-                },
-                {
-                    "name": "initializedActiveTokenVault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The initialized active token vault"
-                    ]
-                },
-                {
-                    "name": "pdaBasedTransferAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "PDA-based Transfer authority to move tokens from treasury to your destination[PREFIX, program_id]"
-                    ]
-                },
-                {
-                    "name": "authorityOfVault",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority of vault"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                },
-                {
-                    "name": "rentSysvar",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Rent sysvar"
-                    ]
-                }
-
-
-            ],
+            {
+                "name": "initializedDestination",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized Destination account for the shares being withdrawn"
+                ]
+            },
+            {
+                "name": "fractionTreasury",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction treasury"
+                ]
+            },
+            {
+                "name": "initializedActiveTokenVault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The initialized active token vault"
+                ]
+            },
+            {
+                "name": "pdaBasedTransferAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "PDA-based Transfer authority to move tokens from treasury to your destination[PREFIX, program_id]"
+                ]
+            },
+            {
+                "name": "vaultAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority of vault"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "NumberOfShareArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "NumberOfShareArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "AddSharesToTreasury",
@@ -695,68 +664,63 @@
                 "Returns shares to the vault if you wish to remove them from circulation."
             ],
             "accounts": [
-                {
-                    "name": "sourceInitializedAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Initialized account from which shares will be withdrawn"
-                    ]
-                },
-                {
-                    "name": "fractionTreasury",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Fraction treasury"
-                    ]
-                },
-                {
-                    "name": "initializedActiveTokenVault",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "The initialized active token vault"
-                    ]
-                },
-                {
-                    "name": "transferAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Transfer authority to move tokens from your account to treasury"
-                    ]
-                },
-                {
-                    "name": "authorityOfVault",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Authority of vault"
-                    ]
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "Token program"
-                    ]
-                }
-
-
-            ],
+            {
+                "name": "initializedSourceAccount",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Initialized account from which shares will be withdrawn"
+                ]
+            },
+            {
+                "name": "fractionTreasury",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Fraction treasury"
+                ]
+            },
+            {
+                "name": "initializedActiveTokenVault",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "The initialized active token vault"
+                ]
+            },
+            {
+                "name": "transferAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Transfer authority to move tokens from your account to treasury"
+                ]
+            },
+            {
+                "name": "vaultAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Authority of vault"
+                ]
+            },
+            {
+                "name": "tokenProgram",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Token program"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "NumberOfShareArgs"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "NumberOfShareArgs"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "UpdateExternalPriceAccount",
@@ -766,28 +730,23 @@
                 "Useful for testing purposes, and the CLI makes use of it as well so that you can verify logic."
             ],
             "accounts": [
-                {
-                    "name": "externalPriceAccount",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "External price account"
-                    ]
-                }
-
-
-            ],
+            {
+                "name": "externalPrice",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "External price account"
+                ]
+            }],
             "args": [
+            {
+                "name": "args",
+                "type":
                 {
-                    "name": "args",
-                    "type":
-                    {
-                        "defined": "ExternalPriceAccount"
-                    },
-                    "docs": []
-                }
-
-            ]
+                    "defined": "ExternalPriceAccount"
+                },
+                "docs": []
+            }]
         },
         {
             "name": "SetAuthority",
@@ -795,40 +754,32 @@
                 "Sets the authority of the vault to a new authority."
             ],
             "accounts": [
-                {
-                    "name": "vault",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": [
-                        "Vault"
-                    ]
-                },
-                {
-                    "name": "vaultAuthority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": [
-                        "Vault authority"
-                    ]
-                },
-                {
-                    "name": "newAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": [
-                        "New authority"
-                    ]
-                }
-
-
-            ],
+            {
+                "name": "vault",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Vault"
+                ]
+            },
+            {
+                "name": "vaultAuthority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "Vault authority"
+                ]
+            },
+            {
+                "name": "newAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "New authority"
+                ]
+            }],
             "args": []
         }
-
-
-
-
-
 
 
     ],
