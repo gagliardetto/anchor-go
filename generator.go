@@ -286,11 +286,12 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 				variantTypeName := ToCamel(variant.Name)
 
 				// Declare the enum variant types:
-				code.Type().Id(variantTypeName).StructFunc(
-					func(structGroup *Group) {
-						if variant.IsUint8() {
-							structGroup.Id(variantTypeName).Op("*").Uint8()
-						} else {
+				if variant.IsUint8() {
+					// TODO: make the name {variantTypeName}_{interface_name} ???
+					code.Type().Id(variantTypeName).Uint8().Line().Line()
+				} else {
+					code.Type().Id(variantTypeName).StructFunc(
+						func(structGroup *Group) {
 							switch {
 							case variant.Fields.IdlEnumFieldsNamed != nil:
 								for _, variantField := range *variant.Fields.IdlEnumFieldsNamed {
@@ -308,33 +309,73 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 								// TODO: handle tuples
 								panic("not handled")
 							}
-						}
-					},
-				).Line().Line()
+						},
+					).Line().Line()
+				}
 
-				if variant.Fields != nil && variant.Fields.IdlEnumFieldsNamed != nil {
-					// Declare MarshalWithEncoder:
-					code.Line().Line().Add(
-						genMarshalWithEncoder_struct(
-							idl,
-							false,
-							variantTypeName,
-							"",
-							*variant.Fields.IdlEnumFieldsNamed,
-							true,
-						))
+				if variant.IsUint8() {
+					// Declare MarshalWithEncoder
+					code.Line().Line().Func().Params(Id("obj").Id(variantTypeName)).Id("MarshalWithEncoder").
+						Params(
+							ListFunc(func(params *Group) {
+								// Parameters:
+								params.Id("encoder").Op("*").Qual(PkgDfuseBinary, "Encoder")
+							}),
+						).
+						Params(
+							ListFunc(func(results *Group) {
+								// Results:
+								results.Err().Error()
+							}),
+						).
+						BlockFunc(func(body *Group) {
+							body.Return(Nil())
+						})
+					code.Line().Line()
 
 					// Declare UnmarshalWithDecoder
-					code.Line().Line().Add(
-						genUnmarshalWithDecoder_struct(
-							idl,
-							false,
-							variantTypeName,
-							"",
-							*variant.Fields.IdlEnumFieldsNamed,
-							bin.TypeID{},
-						))
+					code.Func().Params(Id("obj").Op("*").Id(variantTypeName)).Id("UnmarshalWithDecoder").
+						Params(
+							ListFunc(func(params *Group) {
+								// Parameters:
+								params.Id("decoder").Op("*").Qual(PkgDfuseBinary, "Decoder")
+							}),
+						).
+						Params(
+							ListFunc(func(results *Group) {
+								// Results:
+								results.Err().Error()
+							}),
+						).
+						BlockFunc(func(body *Group) {
+							body.Return(Nil())
+						})
 					code.Line().Line()
+				} else {
+					if variant.Fields != nil && variant.Fields.IdlEnumFieldsNamed != nil {
+						// Declare MarshalWithEncoder:
+						code.Line().Line().Add(
+							genMarshalWithEncoder_struct(
+								idl,
+								false,
+								variantTypeName,
+								"",
+								*variant.Fields.IdlEnumFieldsNamed,
+								true,
+							))
+
+						// Declare UnmarshalWithDecoder
+						code.Line().Line().Add(
+							genUnmarshalWithDecoder_struct(
+								idl,
+								false,
+								variantTypeName,
+								"",
+								*variant.Fields.IdlEnumFieldsNamed,
+								bin.TypeID{},
+							))
+						code.Line().Line()
+					}
 				}
 
 				// Declare the method to implement the parent enum interface:
@@ -494,7 +535,7 @@ func genUnmarshalWithDecoder_struct(
 ) Code {
 	code := Empty()
 	{
-		// Declare MarshalWithEncoder
+		// Declare UnmarshalWithDecoder
 		code.Func().Params(Id("obj").Op("*").Id(receiverTypeName)).Id("UnmarshalWithDecoder").
 			Params(
 				ListFunc(func(params *Group) {
@@ -556,10 +597,20 @@ func genUnmarshalWithDecoder_struct(
 								BlockFunc(func(switchGroup *Group) {
 									interfaceType := idl.Types.GetByName(enumName)
 									for variantIndex, variant := range interfaceType.Type.Variants {
-										switchGroup.Case(Lit(variantIndex)).
-											BlockFunc(func(caseGroup *Group) {
-												caseGroup.Id("obj").Dot(exportedArgName).Op("=").Op("&").Id("tmp").Dot(ToCamel(variant.Name))
-											})
+
+										if variant.IsUint8() {
+											switchGroup.Case(Lit(variantIndex)).
+												BlockFunc(func(caseGroup *Group) {
+													caseGroup.Id("obj").Dot(exportedArgName).Op("=").
+														Parens(Op("*").Id(ToCamel(variant.Name))).
+														Parens(Op("&").Id("tmp").Dot("Enum"))
+												})
+										} else {
+											switchGroup.Case(Lit(variantIndex)).
+												BlockFunc(func(caseGroup *Group) {
+													caseGroup.Id("obj").Dot(exportedArgName).Op("=").Op("&").Id("tmp").Dot(ToCamel(variant.Name))
+												})
+										}
 									}
 									switchGroup.Default().
 										BlockFunc(func(caseGroup *Group) {
