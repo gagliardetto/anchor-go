@@ -599,6 +599,8 @@ func genUnmarshalWithDecoder_struct(
 									for variantIndex, variant := range interfaceType.Type.Variants {
 
 										if variant.IsUint8() {
+											// TODO: the actual value is not important;
+											//  what's important is the type.
 											switchGroup.Case(Lit(variantIndex)).
 												BlockFunc(func(caseGroup *Group) {
 													caseGroup.Id("obj").Dot(exportedArgName).Op("=").
