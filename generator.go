@@ -258,6 +258,20 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 				}
 				// TODO: check for fields, etc.
 			}))
+
+			// Generate stringer for the uint8 enum values:
+			code.Line().Line().Func().Params(Id("value").Id(enumTypeName)).Id("String").
+				Params().
+				Params(String()).
+				BlockFunc(func(body *Group) {
+					body.Switch(Id("value")).BlockFunc(func(switchBlock *Group) {
+						for _, variant := range def.Type.Variants {
+							switchBlock.Case(Id(variant.Name + "_" + enumTypeName)).Line().Return(Lit(variant.Name))
+						}
+						switchBlock.Default().Line().Return(Lit(""))
+					})
+
+				})
 			st.Add(code.Line())
 		} else {
 			addTypeNameIsComplexEnum(enumTypeName)
