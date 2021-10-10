@@ -149,7 +149,7 @@ func main() {
 			mdf := &modfile.File{}
 			mdf.AddModuleStmt(GetConfig().ModPath)
 
-			mdf.AddNewRequire("github.com/gagliardetto/solana-go", "v0.5.1", false)
+			mdf.AddNewRequire("github.com/gagliardetto/solana-go", "v1.0.1", false)
 			mdf.AddNewRequire("github.com/gagliardetto/binary", "v0.5.0", false)
 			mdf.AddNewRequire("github.com/gagliardetto/treeout", "v0.1.4", false)
 			mdf.AddNewRequire("github.com/gagliardetto/gofuzz", "v1.2.2", false)
