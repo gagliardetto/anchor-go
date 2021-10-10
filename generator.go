@@ -60,6 +60,8 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 		stat.Qual(PkgSolanaGo, "UnixTimeSeconds")
 	case IdlTypeHash:
 		stat.Qual(PkgSolanaGo, "Hash")
+	case IdlTypeDuration:
+		stat.Qual(PkgSolanaGo, "DurationSeconds")
 
 	default:
 		panic(Sf("unknown type string: %s", ts))
@@ -136,6 +138,38 @@ func addTypeNameIsComplexEnum(name string) {
 	typeRegistryComplexEnum[name] = struct{}{}
 }
 
+func marshalerSignature() Code {
+	return Id("MarshalWithEncoder").
+		Params(
+			ListFunc(func(params *Group) {
+				// Parameters:
+				params.Id("encoder").Op("*").Qual(PkgDfuseBinary, "Encoder")
+			}),
+		).
+		Params(
+			ListFunc(func(results *Group) {
+				// Results:
+				results.Err().Error()
+			}),
+		)
+}
+
+func unmarshalerSignature() Code {
+	return Id("UnmarshalWithDecoder").
+		Params(
+			ListFunc(func(params *Group) {
+				// Parameters:
+				params.Id("decoder").Op("*").Qual(PkgDfuseBinary, "Decoder")
+			}),
+		).
+		Params(
+			ListFunc(func(results *Group) {
+				// Results:
+				results.Err().Error()
+			}),
+		)
+}
+
 func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 
 	st := newStatement()
@@ -204,6 +238,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 							discriminatorName,
 							*def.Type.Fields,
 							sighash,
+							false,
 						))
 				} else {
 					// Declare MarshalWithEncoder:
@@ -226,6 +261,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 							"",
 							*def.Type.Fields,
 							bin.TypeID{},
+							false,
 						))
 				}
 
@@ -270,8 +306,50 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 						}
 						switchBlock.Default().Line().Return(Lit(""))
 					})
-
 				})
+
+			// // Declare MarshalWithEncoder
+			// code.Line().Line().Func().Params(Id("obj").Id(enumTypeName)).Id("MarshalWithEncoder").
+			// 	Params(
+			// 		ListFunc(func(params *Group) {
+			// 			// Parameters:
+			// 			params.Id("encoder").Op("*").Qual(PkgDfuseBinary, "Encoder")
+			// 		}),
+			// 	).
+			// 	Params(
+			// 		ListFunc(func(results *Group) {
+			// 			// Results:
+			// 			results.Err().Error()
+			// 		}),
+			// 	).
+			// 	BlockFunc(func(body *Group) {
+			// 		body.Return(Id("encoder").Dot("WriteUint8").Call(Uint8().Call(Id("obj"))))
+			// 	})
+			// code.Line().Line()
+
+			// // Declare UnmarshalWithDecoder
+			// code.Func().Params(Id("obj").Op("*").Id(enumTypeName)).Id("UnmarshalWithDecoder").
+			// 	Params(
+			// 		ListFunc(func(params *Group) {
+			// 			// Parameters:
+			// 			params.Id("decoder").Op("*").Qual(PkgDfuseBinary, "Decoder")
+			// 		}),
+			// 	).
+			// 	Params(
+			// 		ListFunc(func(results *Group) {
+			// 			// Results:
+			// 			results.Err().Error()
+			// 		}),
+			// 	).
+			// 	BlockFunc(func(body *Group) {
+			// 		id := Id("tpm")
+			// 		body.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint8").Call()
+			// 		body.Add(ifErrReturnErr())
+			// 		body.Id("tmpAsserted").Op(":=").Id(enumTypeName).Call(id)
+			// 		body.Id("obj").Op("=").Op("&").Id("tmpAsserted")
+			// 		body.Return(Nil())
+			// 	})
+			// code.Line().Line()
 			st.Add(code.Line())
 		} else {
 			addTypeNameIsComplexEnum(enumTypeName)
@@ -281,6 +359,8 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 			// Declare the interface of the enum type:
 			code.Type().Id(enumTypeName).Interface(
 				Id(interfaceMethodName).Call(),
+				marshalerSignature(),
+				unmarshalerSignature(),
 			).Line().Line()
 
 			// Declare the enum variants container (non-exported, used internally)
@@ -387,6 +467,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 								"",
 								*variant.Fields.IdlEnumFieldsNamed,
 								bin.TypeID{},
+								false,
 							))
 						code.Line().Line()
 					}
@@ -546,6 +627,7 @@ func genUnmarshalWithDecoder_struct(
 	discriminatorName string,
 	fields []IdlField,
 	sighash bin.TypeID,
+	isPointer bool,
 ) Code {
 	code := Empty()
 	{
@@ -645,16 +727,12 @@ func genUnmarshalWithDecoder_struct(
 									Return(Err()),
 								)
 								optGroup.If(Id("ok")).Block(
-									Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(exportedArgName)),
-									If(Err().Op("!=").Nil()).Block(
-										Return(Err()),
-									),
+									fieldToDecoderCall(true, "obj", exportedArgName, field.Type.GetIdlTypeOption().Option),
 								)
 							})
 						} else {
-							body.Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(exportedArgName))
-							body.If(Err().Op("!=").Nil()).Block(
-								Return(Err()),
+							body.Add(
+								fieldToDecoderCall(isPointer, "obj", exportedArgName, field.Type),
 							)
 						}
 					}
@@ -665,4 +743,279 @@ func genUnmarshalWithDecoder_struct(
 			})
 	}
 	return code
+}
+
+func fieldToDecoderCall(
+	isPointer bool,
+	receiver string,
+	fieldName string,
+	idlTypeEnv IdlTypeEnvelope,
+) Code {
+	body := newStatement()
+	switch {
+	case idlTypeEnv.IsString():
+		{
+			body.Add(typeStringToDecoder(isPointer, receiver, fieldName, idlTypeEnv.GetString()))
+		}
+	case idlTypeEnv.IsIdlTypeOption():
+		{
+			// TODO: is this case ever reached?
+			body.Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(fieldName))
+			body.Line().Add(ifErrReturnErr())
+			// opt := idlTypeEnv.GetIdlTypeOption()
+			// // TODO: optional = pointer?
+			// body.Add(genTypeName(opt.Option))
+		}
+	case idlTypeEnv.IsIdlTypeVec():
+		{
+			body.BlockFunc(func(bodyBlock *Group) {
+				bodyBlock.List(Id("ln"), Err()).Op(":=").Id("decoder").Dot("ReadLength").Call()
+				bodyBlock.Add(ifErrReturnErr())
+				vec := idlTypeEnv.GetIdlTypeVec()
+				bodyBlock.Id("tmpArr").Op(":=").Make(Index().Add(genTypeName(vec.Vec)), Id("ln"))
+				bodyBlock.For(Id("i").Op(":=").Lit(0), Id("i").Op("<").Id("ln"), Id("i").Op("++")).BlockFunc(func(forloop *Group) {
+					forloop.Err().Op(":=").Id("tmpArr").Index(Id("i")).Dot("UnmarshalWithDecoder").Call(Id("decoder"))
+					forloop.Add(ifErrReturnErr())
+				})
+				if isPointer {
+					bodyBlock.Id(receiver).Dot(fieldName).Op("=").Op("&").Id("tmpArr")
+				} else {
+					bodyBlock.Id(receiver).Dot(fieldName).Op("=").Id("tmpArr")
+				}
+			})
+			// body.Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(fieldName))
+			// body.Add(ifErrReturnErr())
+			// vec := idlTypeEnv.GetIdlTypeVec()
+			// body.Index().Add(genTypeName(vec.Vec))
+		}
+	case idlTypeEnv.IsIdlTypeDefined():
+		{
+			body.Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(fieldName))
+			// if isPointer {
+			// } else {
+			// 	body.Err().Op("=").Id("obj").Dot(fieldName).Dot("UnmarshalWithDecoder").Call(Id("decoder"))
+			// }
+			body.Line().Add(ifErrReturnErr())
+			// body.Add(Id(idlTypeEnv.GetIdlTypeDefined().Defined))
+		}
+	case idlTypeEnv.IsArray():
+		{
+			body.Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(fieldName))
+			body.Line().Add(ifErrReturnErr())
+			// arr := idlTypeEnv.GetArray()
+			// body.Index(Id(Itoa(arr.Num))).Add(genTypeName(arr.Thing))
+		}
+	default:
+		panic(spew.Sdump(idlTypeEnv))
+	}
+
+	return body
+}
+
+func ifErrReturnErr() Code {
+	body := newStatement()
+	body.If(Err().Op("!=").Nil()).Block(
+		Return(Err()),
+	)
+	return body
+}
+
+func typeStringToDecoder(
+	isPointer bool,
+	receiver string,
+	fieldName string,
+	ts IdlTypeAsString,
+) Code {
+	stat := newStatement()
+	stat.BlockFunc(func(block *Group) {
+		switch ts {
+		case IdlTypeBool:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadBool").Call()
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadBool").Call()
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeU8:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint8").Call()
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint8").Call()
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeI8:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt8").Call()
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt8").Call()
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeU16:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint16").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint16").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeI16:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt16").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt16").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeU32:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint32").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint32").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeI32:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt32").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt32").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeU64:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint64").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint64").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeI64:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt64").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt64").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeU128:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint128").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint128").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeI128:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt128").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt128").Call(Qual("encoding/binary", "LittleEndian"))
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeBytes:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadByte").Call()
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadByte").Call()
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypeString:
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadString").Call()
+				block.Add(ifErrReturnErr())
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadString").Call()
+				block.Add(ifErrReturnErr())
+			}
+		case IdlTypePublicKey:
+			block.List(Id("buf"), Id("err")).Op(":=").Id("decoder").Dot("ReadNBytes").Call(Lit(32))
+			block.If(Err().Op("!=").Nil()).Block(
+				Return(Err()),
+			)
+
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.Add(id).Op(":=").Qual(PkgSolanaGo, "PublicKeyFromBytes").Call(Id("buf"))
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.Id(receiver).Dot(fieldName).Op("=").Qual(PkgSolanaGo, "PublicKeyFromBytes").Call(Id("buf"))
+			}
+
+		// Custom:
+		case IdlTypeUnixTimestamp:
+			block.List(Id("tmp"), Id("err")).Op(":=").Id("decoder").Dot("ReadInt64").Call(Qual("encoding/binary", "LittleEndian"))
+			block.If(Err().Op("!=").Nil()).Block(
+				Return(Err()),
+			)
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.Add(id).Op(":=").Qual(PkgSolanaGo, "UnixTimeSeconds").Call(Id("tmp"))
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.Id(receiver).Dot(fieldName).Op("=").Qual(PkgSolanaGo, "UnixTimeSeconds").Call(Id("tmp"))
+			}
+		case IdlTypeHash:
+			// TODO: is it always the same length?
+			block.List(Id("buf"), Id("err")).Op(":=").Id("decoder").Dot("ReadNBytes").Call(Lit(32))
+			block.If(Err().Op("!=").Nil()).Block(
+				Return(Err()),
+			)
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.Add(id).Op(":=").Qual(PkgSolanaGo, "HashFromBytes").Call(Id("buf"))
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.Id(receiver).Dot(fieldName).Op("=").Qual(PkgSolanaGo, "HashFromBytes").Call(Id("buf"))
+			}
+		case IdlTypeDuration:
+			block.List(Id("tmp"), Id("err")).Op(":=").Id("decoder").Dot("ReadInt64").Call(Qual("encoding/binary", "LittleEndian"))
+			block.If(Err().Op("!=").Nil()).Block(
+				Return(Err()),
+			)
+			if isPointer {
+				id := Id("tpm" + fieldName)
+				block.Add(id).Op(":=").Qual(PkgSolanaGo, "DurationSeconds").Call(Id("tmp"))
+				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
+			} else {
+				block.Id(receiver).Dot(fieldName).Op("=").Qual(PkgSolanaGo, "DurationSeconds").Call(Id("tmp"))
+			}
+
+		default:
+			panic(Sf("unknown type string: %s", ts))
+		}
+	})
+
+	return stat
 }

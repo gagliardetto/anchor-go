@@ -837,6 +837,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					"",
 					instruction.Args,
 					bin.TypeID{},
+					true,
 				))
 		}
 
