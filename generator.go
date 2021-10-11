@@ -345,8 +345,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 			// 		id := Id("tpm")
 			// 		body.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint8").Call()
 			// 		body.Add(ifErrReturnErr())
-			// 		body.Id("tmpAsserted").Op(":=").Id(enumTypeName).Call(id)
-			// 		body.Id("obj").Op("=").Op("&").Id("tmpAsserted")
+			// 		body.Id("obj").Op("=").Call(Op("*").Id(enumTypeName)).Call(Op("&").Add(id))
 			// 		body.Return(Nil())
 			// 	})
 			// code.Line().Line()
@@ -791,7 +790,7 @@ func fieldToDecoderCall(
 	case idlTypeEnv.IsIdlTypeDefined():
 		{
 			body.Err().Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(fieldName))
-			// if isPointer {
+			// if isPointer  {
 			// } else {
 			// 	body.Err().Op("=").Id("obj").Dot(fieldName).Dot("UnmarshalWithDecoder").Call(Id("decoder"))
 			// }
