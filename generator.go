@@ -825,6 +825,7 @@ func typeStringToDecoder(
 	fieldName string,
 	ts IdlTypeAsString,
 ) Code {
+	endianness := Qual("encoding/binary", "LittleEndian")
 	stat := newStatement()
 	stat.BlockFunc(func(block *Group) {
 		switch ts {
@@ -861,81 +862,81 @@ func typeStringToDecoder(
 		case IdlTypeU16:
 			if isPointer {
 				id := Id("tpm" + fieldName)
-				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint16").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint16").Call(endianness)
 				block.Add(ifErrReturnErr())
 				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
 			} else {
-				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint16").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint16").Call(endianness)
 				block.Add(ifErrReturnErr())
 			}
 		case IdlTypeI16:
 			if isPointer {
 				id := Id("tpm" + fieldName)
-				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt16").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt16").Call(endianness)
 				block.Add(ifErrReturnErr())
 				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
 			} else {
-				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt16").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt16").Call(endianness)
 				block.Add(ifErrReturnErr())
 			}
 		case IdlTypeU32:
 			if isPointer {
 				id := Id("tpm" + fieldName)
-				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint32").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint32").Call(endianness)
 				block.Add(ifErrReturnErr())
 				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
 			} else {
-				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint32").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint32").Call(endianness)
 				block.Add(ifErrReturnErr())
 			}
 		case IdlTypeI32:
 			if isPointer {
 				id := Id("tpm" + fieldName)
-				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt32").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt32").Call(endianness)
 				block.Add(ifErrReturnErr())
 				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
 			} else {
-				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt32").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt32").Call(endianness)
 				block.Add(ifErrReturnErr())
 			}
 		case IdlTypeU64:
 			if isPointer {
 				id := Id("tpm" + fieldName)
-				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint64").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint64").Call(endianness)
 				block.Add(ifErrReturnErr())
 				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
 			} else {
-				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint64").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint64").Call(endianness)
 				block.Add(ifErrReturnErr())
 			}
 		case IdlTypeI64:
 			if isPointer {
 				id := Id("tpm" + fieldName)
-				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt64").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt64").Call(endianness)
 				block.Add(ifErrReturnErr())
 				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
 			} else {
-				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt64").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt64").Call(endianness)
 				block.Add(ifErrReturnErr())
 			}
 		case IdlTypeU128:
 			if isPointer {
 				id := Id("tpm" + fieldName)
-				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint128").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadUint128").Call(endianness)
 				block.Add(ifErrReturnErr())
 				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
 			} else {
-				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint128").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadUint128").Call(endianness)
 				block.Add(ifErrReturnErr())
 			}
 		case IdlTypeI128:
 			if isPointer {
 				id := Id("tpm" + fieldName)
-				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt128").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(id, Err()).Op(":=").Id("decoder").Dot("ReadInt128").Call(endianness)
 				block.Add(ifErrReturnErr())
 				block.Id(receiver).Dot(fieldName).Op("=").Op("&").Add(id)
 			} else {
-				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt128").Call(Qual("encoding/binary", "LittleEndian"))
+				block.List(Id(receiver).Dot(fieldName), Err()).Op("=").Id("decoder").Dot("ReadInt128").Call(endianness)
 				block.Add(ifErrReturnErr())
 			}
 		case IdlTypeBytes:
@@ -974,7 +975,7 @@ func typeStringToDecoder(
 
 		// Custom:
 		case IdlTypeUnixTimestamp:
-			block.List(Id("tmp"), Id("err")).Op(":=").Id("decoder").Dot("ReadInt64").Call(Qual("encoding/binary", "LittleEndian"))
+			block.List(Id("tmp"), Id("err")).Op(":=").Id("decoder").Dot("ReadInt64").Call(endianness)
 			block.If(Err().Op("!=").Nil()).Block(
 				Return(Err()),
 			)
@@ -999,7 +1000,7 @@ func typeStringToDecoder(
 				block.Id(receiver).Dot(fieldName).Op("=").Qual(PkgSolanaGo, "HashFromBytes").Call(Id("buf"))
 			}
 		case IdlTypeDuration:
-			block.List(Id("tmp"), Id("err")).Op(":=").Id("decoder").Dot("ReadInt64").Call(Qual("encoding/binary", "LittleEndian"))
+			block.List(Id("tmp"), Id("err")).Op(":=").Id("decoder").Dot("ReadInt64").Call(endianness)
 			block.If(Err().Op("!=").Nil()).Block(
 				Return(Err()),
 			)
