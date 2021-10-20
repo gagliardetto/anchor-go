@@ -28,6 +28,7 @@ func main() {
 	flag.Var(&filenames, "src", "Path to source; can use multiple times.")
 	flag.StringVar(&conf.DstDir, "dst", generatedDir, "Destination folder")
 	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
+	flag.BoolVar(&conf.RemoveAccountSuffix, "remove-account", false, "remove 'Account' suffix from accessors")
 
 	flag.StringVar((*string)(&conf.Encoding), "codec", string(EncodingBorsh), "Choose codec")
 	flag.StringVar((*string)(&conf.TypeID), "type-id", string(TypeIDAnchor), "Choose typeID kind")
@@ -1634,16 +1635,16 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 
 // formatAccountAccessorName formats a name for a function that
 // either gets or sets an account.
-// If the name already has a "Account" suffix, then another "Account" suffix
-// is NOT added.
+// If the RemoveAccountSuffix config flag is set, and the name already
+// has an "Account" suffix, then another "Account" suffix is NOT added.
 // E.g. ("Set", "Foo") => "SetFooAccount"
 // E.g. ("Set", "BarAccount") => "SetBarAccount"
 func formatAccountAccessorName(prefix, name string) string {
 	endsWithAccount := strings.HasSuffix(strings.ToLower(name), "account")
-	if endsWithAccount {
-		return prefix + name
+	if !conf.RemoveAccountSuffix || !endsWithAccount {
+		return prefix + name + "Account"
 	}
-	return prefix + name + "Account"
+	return prefix + name
 }
 
 func treeFindLongestNameFromFields(fields []IdlField) (ln int) {

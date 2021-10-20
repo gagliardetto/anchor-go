@@ -10,11 +10,12 @@ import (
 var conf = &Config{}
 
 type Config struct {
-	Encoding EncoderName
-	TypeID   TypeIDName
-	Debug    bool
-	DstDir   string
-	ModPath  string
+	Encoding            EncoderName
+	TypeID              TypeIDName
+	Debug               bool
+	DstDir              string
+	ModPath             string
+	RemoveAccountSuffix bool
 }
 
 func GetConfig() *Config {

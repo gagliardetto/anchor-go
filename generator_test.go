@@ -7,6 +7,7 @@ import (
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
+	"github.com/test-go/testify/assert"
 )
 
 func Test_genTypeName(t *testing.T) {
@@ -270,4 +271,24 @@ func Test_IdlAccountItemSlice_Walk(t *testing.T) {
 	require.Equal(t, expectedGroups, gotGroups)
 	require.Equal(t, expectedAccountNames, gotAccountNames)
 	require.Equal(t, expectedIndexes, gotIndexes)
+}
+
+func TestFormatAccountAccessorName(t *testing.T) {
+	t.Run("default config", func(t *testing.T) {
+		assert.Equal(t, "GetFooAccount", formatAccountAccessorName("Get", "Foo"))
+		assert.Equal(t, "GetFooAccountAccount", formatAccountAccessorName("Get", "FooAccount"))
+	})
+
+	t.Run("remove config on", func(t *testing.T) {
+		oldConf := GetConfig()
+		defer func() {
+			conf = oldConf
+		}()
+		conf = &Config{
+			RemoveAccountSuffix: true,
+		}
+
+		assert.Equal(t, "GetFooAccount", formatAccountAccessorName("Get", "Foo"))
+		assert.Equal(t, "GetFooAccount", formatAccountAccessorName("Get", "FooAccount"))
+	})
 }
