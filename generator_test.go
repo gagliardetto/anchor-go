@@ -7,7 +7,7 @@ import (
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
-	"github.com/test-go/testify/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_genTypeName(t *testing.T) {
