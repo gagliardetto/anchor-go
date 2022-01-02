@@ -31,7 +31,7 @@ func TestToSnakeForSighash(t *testing.T) {
 						assert.Equal(t,
 							testCase[1],
 							ToSnakeForSighash(testCase[0]),
-							"from %s", testCase[0],
+							"from %q", testCase[0],
 						)
 					})
 			}
@@ -52,21 +52,23 @@ func TestToSnakeForSighash(t *testing.T) {
 				{"SHOUTY_SNAKE_CASE", "shouty_snake_case"},
 				{"snake_case", "snake_case"},
 				{"this-contains_ ALLKinds OfWord_Boundaries", "this_contains_all_kinds_of_word_boundaries"},
-				{"XΣXΣ baﬄe", "xσxς_baﬄe"},
+
+				// #[cfg(feature = "unicode")]
+				{"XΣXΣ baﬄe", "xσxσ_baﬄe"},
 				{"XMLHttpRequest", "xml_http_request"},
 				{"FIELD_NAME11", "field_name11"},
 				{"99BOTTLES", "99bottles"},
 				{"FieldNamE11", "field_nam_e11"},
 
 				{"abc123def456", "abc123def456"},
-				{"abc123DEF456", "abc123_def456"}, //
+				{"abc123DEF456", "abc123_def456"},
 				{"abc123Def456", "abc123_def456"},
 				{"abc123DEf456", "abc123_d_ef456"},
 				{"ABC123def456", "abc123def456"},
 				{"ABC123DEF456", "abc123def456"},
 				{"ABC123Def456", "abc123_def456"},
-				{"ABC123DEf456", "abc123d_ef456"},           //
-				{"ABC123dEEf456FOO", "abc123d_e_ef456_foo"}, //
+				{"ABC123DEf456", "abc123d_ef456"},
+				{"ABC123dEEf456FOO", "abc123d_e_ef456_foo"},
 				{"abcDEF", "abc_def"},
 				{"ABcDE", "a_bc_de"},
 			}
@@ -78,7 +80,7 @@ func TestToSnakeForSighash(t *testing.T) {
 						assert.Equal(t,
 							testCase[1],
 							ToSnakeForSighash(testCase[0]),
-							"from %s", testCase[0],
+							"from %q", testCase[0],
 						)
 					})
 			}
