@@ -9,43 +9,19 @@ import (
 )
 
 func ToSnakeForSighash(s string) string {
-	s = ToRustSnakeCase(s)
-	// s = strings.Trim(ToSighashSnakeCase(s), "_")
-	// s = strings.Replace(s, "__", "_", -1)
-	return s
+	return ToRustSnakeCase(s)
 }
 
 type reader struct {
 	runes []rune
 	index int
-	buf   []rune
 }
 
 func newReader(s string) *reader {
 	return &reader{
 		runes: SplitStringByRune(s),
-		buf:   make([]rune, 0),
 		index: -1,
 	}
-}
-
-func (r *reader) Write(v rune) {
-	r.buf = append(r.buf, v)
-}
-
-func (r reader) HasWritten() bool {
-	return len(r.buf) > 0
-}
-
-func (r reader) GetWritten() []rune {
-	return r.buf
-}
-
-func (r reader) GetLastWritten() rune {
-	if len(r.buf) == 0 {
-		return rune(0)
-	}
-	return r.buf[len(r.buf)-1]
 }
 
 func (r reader) This() (int, rune) {
@@ -71,22 +47,6 @@ func (r *reader) Move() bool {
 	return false
 }
 
-// MoveToNearestPrintable will move the cursor to
-// the next nearest printable rune (and will return true);
-// it will return false if there is no more printable runes left.
-func (r *reader) MoveToNearestPrintable() bool {
-	for r.Move() {
-		if _, char := r.This(); isPrintable(char) {
-			return true
-		}
-	}
-	return false
-}
-
-func isPrintable(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsNumber(r)
-}
-
 // #[cfg(feature = "unicode")]
 // fn get_iterator(s: &str) -> unicode_segmentation::UnicodeWords {
 //     use unicode_segmentation::UnicodeSegmentation;
@@ -94,6 +54,7 @@ func isPrintable(r rune) bool {
 // }
 func splitByUnicode(s string) []string {
 	parts := strings.FieldsFunc(s, func(r rune) bool {
+		// TODO: see https://unicode.org/reports/tr29/#Word_Boundaries
 		return !(unicode.IsLetter(r) || unicode.IsDigit(r)) || unicode.Is(unicode.Extender, r)
 	})
 	return parts
