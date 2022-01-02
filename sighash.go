@@ -121,11 +121,10 @@ func ToRustSnakeCase(s string) string {
 				// not uppercase and next is uppercase
 				if next == '_' || (next_mode == Lowercase && unicode.IsUpper(next)) {
 					if !first_word {
-						// TODO:
 						// boundary(f)?;
-						builder.WriteString(strings.ToLower("_"))
+						builder.WriteRune('_')
 					}
-					{ // TODO:
+					{
 						// with_word(&word[init..next_i], f)?;
 						builder.WriteString(strings.ToLower(word[init:next_i]))
 					}
@@ -138,14 +137,12 @@ func ToRustSnakeCase(s string) string {
 					// is lowercase, word boundary before
 				} else if mode == Uppercase && unicode.IsUpper(c) && unicode.IsLower(next) {
 					if !first_word {
-						// TODO:
 						// boundary(f)?;
-						builder.WriteString(strings.ToLower("_"))
+						builder.WriteRune('_')
 					} else {
 						first_word = false
 					}
 					{
-						// TODO:
 						// with_word(&word[init..i], f)?;
 						builder.WriteString(strings.ToLower(word[init:i]))
 					}
@@ -162,12 +159,11 @@ func ToRustSnakeCase(s string) string {
 				if !first_word {
 					// TODO:
 					// boundary(f)?;
-					builder.WriteString(strings.ToLower("_"))
+					builder.WriteRune('_')
 				} else {
 					first_word = false
 				}
 				{
-					// TODO:
 					// with_word(&word[init..], f)?;
 					builder.WriteString(strings.ToLower(word[init:]))
 				}
