@@ -4,7 +4,6 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/davecgh/go-spew/spew"
 	. "github.com/gagliardetto/utilz"
 )
 
@@ -88,7 +87,6 @@ func ToRustSnakeCase(s string) string {
 
 	first_word := true
 	words := splitByNotUnicode(s)
-	spew.Dump(words)
 	for _, word := range words {
 		char_indices := newReader(word)
 		init := 0
