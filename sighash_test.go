@@ -28,7 +28,11 @@ func TestToSnakeForSighash(t *testing.T) {
 				t.Run(
 					testCase[0],
 					func(t *testing.T) {
-						assert.Equal(t, testCase[1], ToSnakeForSighash(testCase[0]))
+						assert.Equal(t,
+							testCase[1],
+							ToSnakeForSighash(testCase[0]),
+							"from %s", testCase[0],
+						)
 					})
 			}
 		},
@@ -71,7 +75,11 @@ func TestToSnakeForSighash(t *testing.T) {
 				t.Run(
 					testCase[0],
 					func(t *testing.T) {
-						assert.Equal(t, testCase[1], ToSnakeForSighash(testCase[0]))
+						assert.Equal(t,
+							testCase[1],
+							ToSnakeForSighash(testCase[0]),
+							"from %s", testCase[0],
+						)
 					})
 			}
 		})
