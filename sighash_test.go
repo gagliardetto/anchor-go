@@ -22,6 +22,7 @@ func TestToSnakeForSighash(t *testing.T) {
 				{"TestV2", "test_v2"},
 				{"version 1.2.10", "version_1_2_10"},
 				{"version 1.21.0", "version_1_21_0"},
+				{"doSomething2", "do_something2"},
 			}
 
 			for _, testCase := range testCases {
