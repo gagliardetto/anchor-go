@@ -60,7 +60,7 @@ func splitByUnicode(s string) []string {
 }
 
 // #[cfg(not(feature = "unicode"))]
-func splitByNotUnicode(s string) []string {
+func splitIntoWords(s string) []string {
 	parts := strings.FieldsFunc(s, func(r rune) bool {
 		return !(unicode.IsLetter(r) || unicode.IsDigit(r))
 	})
@@ -86,7 +86,7 @@ func ToRustSnakeCase(s string) string {
 	builder := new(strings.Builder)
 
 	first_word := true
-	words := splitByNotUnicode(s)
+	words := splitIntoWords(s)
 	for _, word := range words {
 		char_indices := newReader(word)
 		init := 0
