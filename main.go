@@ -1173,7 +1173,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 								for _, doc := range instruction.Docs {
 									ins.Comment(doc).Line()
 								}
-								toBeHashed := ToSnake(instruction.Name)
+								toBeHashed := ToSnakeForSighash(instruction.Name)
 								if GetConfig().Debug {
 									ins.Comment(Sf(`hash("%s:%s")`, bin.SIGHASH_GLOBAL_NAMESPACE, toBeHashed)).Line()
 								}
@@ -1357,8 +1357,8 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 								call.Index().Qual(PkgDfuseBinary, "VariantType").
 									BlockFunc(func(variantBlock *Group) {
 										for _, instruction := range idl.Instructions {
-											// NOTE: using `ToSnake` here (necessary for sighash computing from instruction name)
-											insName := ToSnake(instruction.Name)
+											// NOTE: using `ToSnakeForSighash` here (necessary for sighash computing from instruction name)
+											insName := ToSnakeForSighash(instruction.Name)
 											insExportedName := ToCamel(instruction.Name)
 											variantBlock.Block(
 												List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
