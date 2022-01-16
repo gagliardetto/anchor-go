@@ -157,7 +157,6 @@ func ToRustSnakeCase(s string) string {
 			} else {
 				// Collect trailing characters as a word
 				if !first_word {
-					// TODO:
 					// boundary(f)?;
 					builder.WriteRune('_')
 				} else {
