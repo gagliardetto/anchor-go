@@ -245,6 +245,7 @@
                 "name": "limitedEditionPrintingMint",
                 "isMut": true,
                 "isSigner": false,
+                "optional": true,
                 "docs": [
                     "Limited edition Printing mint account (optional - only if using sending Limited Edition)"
                 ]
@@ -614,6 +615,7 @@
                 "name": "masterMetadata",
                 "isMut": true,
                 "isSigner": false,
+                "optional": true,
                 "docs": [
                     "Master Metadata account (pda of ['metadata', program id, Printing mint id]) - remember PDA is relative to token metadata program",
                     "(This account is optional, and will only be used if metadata is unique, otherwise this account key will be ignored no matter it's value)"
@@ -1106,6 +1108,7 @@
                 "name": "masterEdition",
                 "isMut": false,
                 "isSigner": false,
+                "optional": true,
                 "docs": [
                     "The master edition of the metadata (optional if exists)",
                     "(pda of ['metadata', program id, metadata mint id, 'edition']) - remember PDA is relative to token metadata program"

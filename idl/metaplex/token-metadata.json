@@ -1486,6 +1486,7 @@
                 "name": "useAuthorityRecord",
                 "isMut": true,
                 "isSigner": false,
+                "optional": true,
                 "docs": [
                     "Use Authority Record PDA If present the program Assumes a delegated use authority"
                 ]
