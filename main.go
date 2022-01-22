@@ -20,6 +20,9 @@ import (
 
 const generatedDir = "generated"
 
+// TODO:
+// - scan all complex enums before scanning other types.
+
 func main() {
 	conf.Encoding = EncodingBorsh
 	conf.TypeID = TypeIDAnchor
