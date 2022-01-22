@@ -291,20 +291,25 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 					})
 
 					for _, variant := range def.Type.Variants {
-						structGroup.Id(ToCamel(variant.Name)).Id(ToCamel(variant.Name))
+						if variant.IsUint8() {
+							structGroup.Id(ToCamel(variant.Name)).Id(ToCamel(variant.Name))
+						} else {
+							structGroup.Id(ToCamel(variant.Name)).Id(ToCamel(Sf("%s_%s", enumTypeName, variant.Name)))
+						}
 					}
 				},
 			).Line().Line()
 
 			for _, variant := range def.Type.Variants {
 				variantTypeName := ToCamel(variant.Name)
+				variantTypeNameStruct := ToCamel(Sf("%s_%s", enumTypeName, variant.Name))
 
 				// Declare the enum variant types:
 				if variant.IsUint8() {
 					// TODO: make the name {variantTypeName}_{interface_name} ???
 					code.Type().Id(variantTypeName).Uint8().Line().Line()
 				} else {
-					code.Type().Id(variantTypeName).StructFunc(
+					code.Type().Id(variantTypeNameStruct).StructFunc(
 						func(structGroup *Group) {
 							switch {
 							case variant.Fields.IdlEnumFieldsNamed != nil:
@@ -372,7 +377,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 							genMarshalWithEncoder_struct(
 								idl,
 								false,
-								variantTypeName,
+								variantTypeNameStruct,
 								"",
 								*variant.Fields.IdlEnumFieldsNamed,
 								true,
@@ -383,7 +388,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 							genUnmarshalWithDecoder_struct(
 								idl,
 								false,
-								variantTypeName,
+								variantTypeNameStruct,
 								"",
 								*variant.Fields.IdlEnumFieldsNamed,
 								bin.TypeID{},
@@ -393,7 +398,11 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 				}
 
 				// Declare the method to implement the parent enum interface:
-				code.Func().Params(Id("_").Op("*").Id(variantTypeName)).Id(interfaceMethodName).Params().Block().Line().Line()
+				if variant.IsUint8() {
+					code.Func().Params(Id("_").Op("*").Id(variantTypeName)).Id(interfaceMethodName).Params().Block().Line().Line()
+				} else {
+					code.Func().Params(Id("_").Op("*").Id(variantTypeNameStruct)).Id(interfaceMethodName).Params().Block().Line().Line()
+				}
 			}
 
 			st.Add(code.Line().Line())
@@ -469,7 +478,9 @@ func genMarshalWithEncoder_struct(
 									// TODO: maybe it's from idl.Accounts ???
 									interfaceType := idl.Types.GetByName(enumName)
 									for variantIndex, variant := range interfaceType.Type.Variants {
-										switchGroup.Case(Op("*").Id(ToCamel(variant.Name))).
+										variantTypeNameStruct := ToCamel(Sf("%s_%s", enumName, variant.Name))
+
+										switchGroup.Case(Op("*").Id(variantTypeNameStruct)).
 											BlockFunc(func(caseGroup *Group) {
 												caseGroup.Id("tmp").Dot("Enum").Op("=").Lit(variantIndex)
 												caseGroup.Id("tmp").Dot(ToCamel(variant.Name)).Op("=").Op("*").Id("realvalue")
