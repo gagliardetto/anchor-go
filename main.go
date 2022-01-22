@@ -377,8 +377,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					})
 				}
 				fieldsGroup.Qual(PkgSolanaGo, "AccountMetaSlice").Tag(map[string]string{
-					"bin":        "-",
-					"borsh_skip": "true",
+					"bin": "-",
 				})
 			})
 
@@ -500,8 +499,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					}
 					code.Type().Id(builderStructName).Struct(
 						Qual(PkgSolanaGo, "AccountMetaSlice").Tag(map[string]string{
-							"bin":        "-",
-							"borsh_skip": "true",
+							"bin": "-",
 						}),
 					)
 
