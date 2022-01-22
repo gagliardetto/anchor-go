@@ -296,22 +296,24 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 						if variant.IsUint8() {
 							structGroup.Id(ToCamel(variant.Name)).Id(ToCamel(variant.Name))
 						} else {
-							structGroup.Id(ToCamel(variant.Name)).Id(ToCamel(Sf("%s_%s", enumTypeName, variant.Name)))
+							structGroup.Id(ToCamel(variant.Name)).Id(formatComplexEnumVariantTypeName(enumTypeName, variant.Name))
 						}
 					}
 				},
 			).Line().Line()
 
 			for _, variant := range def.Type.Variants {
+				// Name of the variant type if the enum is a simple enum (i.e. all uint8):
 				variantTypeName := ToCamel(variant.Name)
-				variantTypeNameStruct := ToCamel(Sf("%s_%s", enumTypeName, variant.Name))
+				// Name of the variant type if the enum is a complex enum (i.e. enum variants are inline structs):
+				variantTypeNameComplex := formatComplexEnumVariantTypeName(enumTypeName, variant.Name)
 
 				// Declare the enum variant types:
 				if variant.IsUint8() {
 					// TODO: make the name {variantTypeName}_{interface_name} ???
 					code.Type().Id(variantTypeName).Uint8().Line().Line()
 				} else {
-					code.Type().Id(variantTypeNameStruct).StructFunc(
+					code.Type().Id(variantTypeNameComplex).StructFunc(
 						func(structGroup *Group) {
 							switch {
 							case variant.Fields.IdlEnumFieldsNamed != nil:
@@ -379,7 +381,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 							genMarshalWithEncoder_struct(
 								idl,
 								false,
-								variantTypeNameStruct,
+								variantTypeNameComplex,
 								"",
 								*variant.Fields.IdlEnumFieldsNamed,
 								true,
@@ -390,7 +392,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 							genUnmarshalWithDecoder_struct(
 								idl,
 								false,
-								variantTypeNameStruct,
+								variantTypeNameComplex,
 								"",
 								*variant.Fields.IdlEnumFieldsNamed,
 								bin.TypeID{},
@@ -403,7 +405,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 				if variant.IsUint8() {
 					code.Func().Params(Id("_").Op("*").Id(variantTypeName)).Id(interfaceMethodName).Params().Block().Line().Line()
 				} else {
-					code.Func().Params(Id("_").Op("*").Id(variantTypeNameStruct)).Id(interfaceMethodName).Params().Block().Line().Line()
+					code.Func().Params(Id("_").Op("*").Id(variantTypeNameComplex)).Id(interfaceMethodName).Params().Block().Line().Line()
 				}
 			}
 
@@ -472,15 +474,15 @@ func genMarshalWithEncoder_struct(
 					}
 
 					if isComplexEnum(field.Type) {
-						enumName := field.Type.GetIdlTypeDefined().Defined
+						enumTypeName := field.Type.GetIdlTypeDefined().Defined
 						body.BlockFunc(func(argBody *Group) {
-							argBody.List(Id("tmp")).Op(":=").Id(formatEnumContainerName(enumName)).Block()
+							argBody.List(Id("tmp")).Op(":=").Id(formatEnumContainerName(enumTypeName)).Block()
 							argBody.Switch(Id("realvalue").Op(":=").Id("obj").Dot(exportedArgName).Op(".").Parens(Type())).
 								BlockFunc(func(switchGroup *Group) {
 									// TODO: maybe it's from idl.Accounts ???
-									interfaceType := idl.Types.GetByName(enumName)
+									interfaceType := idl.Types.GetByName(enumTypeName)
 									for variantIndex, variant := range interfaceType.Type.Variants {
-										variantTypeNameStruct := ToCamel(Sf("%s_%s", enumName, variant.Name))
+										variantTypeNameStruct := formatComplexEnumVariantTypeName(enumTypeName, variant.Name)
 
 										switchGroup.Case(Op("*").Id(variantTypeNameStruct)).
 											BlockFunc(func(caseGroup *Group) {
@@ -678,4 +680,8 @@ func genUnmarshalWithDecoder_struct(
 			})
 	}
 	return code
+}
+
+func formatComplexEnumVariantTypeName(enumTypeName string, variantName string) string {
+	return ToCamel(Sf("%s_%s", enumTypeName, variantName))
 }
