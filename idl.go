@@ -223,6 +223,8 @@ const (
 	// Custom additions:
 	IdlTypeUnixTimestamp IdlTypeAsString = "unixTimestamp"
 	IdlTypeHash          IdlTypeAsString = "hash"
+	IdlTypeDuration      IdlTypeAsString = "duration"
+
 	// | IdlTypeVec
 	// | IdlTypeOption
 	// | IdlTypeDefined;

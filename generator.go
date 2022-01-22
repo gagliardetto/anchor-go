@@ -60,6 +60,8 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 		stat.Qual(PkgSolanaGo, "UnixTimeSeconds")
 	case IdlTypeHash:
 		stat.Qual(PkgSolanaGo, "Hash")
+	case IdlTypeDuration:
+		stat.Qual(PkgSolanaGo, "DurationSeconds")
 
 	default:
 		panic(Sf("unknown type string: %s", ts))
