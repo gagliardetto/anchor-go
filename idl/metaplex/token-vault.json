@@ -2,7 +2,7 @@
     "version": "0.0.0",
     "name": "token-vault",
     "docs": [],
-    "ref": "https://github.com/metaplex-foundation/metaplex/blob/e9841d4bb121fbea784ff60c83ddd3bb1a26d220/rust/token-vault/program/src/instruction.rs",
+    "ref": "https://github.com/metaplex-foundation/metaplex-program-library/blob/821e5aac0780fe45525dae72b9ad6f8dc2ba8e5b/token-vault/program/src/instruction.rs",
     "instructions": [
         {
             "name": "InitVault",
@@ -785,6 +785,53 @@
     ],
     "accounts": [
         {
+            "name": "Key",
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Uninitialized",
+                        "docs": []
+                    },
+                    {
+                        "name": "SafetyDepositBoxV1",
+                        "docs": []
+                    },
+                    {
+                        "name": "ExternalAccountKeyV1",
+                        "docs": []
+                    },
+                    {
+                        "name": "VaultV1",
+                        "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "VaultState",
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                {
+                    "name": "Inactive"
+                },
+                {
+                    "name": "Active"
+                },
+                {
+                    "name": "Combined"
+                },
+                {
+                    "name": "Deactivated"
+                }]
+            },
+            "docs": []
+        },
+        {
             "name": "Vault",
             "type":
             {
@@ -924,6 +971,44 @@
                 }]
             },
             "docs": []
+        },
+        {
+            "name": "ExternalPriceAccount",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type":
+                        {
+                            "defined": "Key"
+                        },
+                        "docs": []
+                    },
+                    {
+                        "name": "price_per_share",
+                        "type": "u64",
+                        "docs": []
+                    },
+                    {
+                        "name": "price_mint",
+                        "type": "publicKey",
+                        "docs": [
+                            "Mint of the currency we are pricing the shares against, should be same as redeem_treasury.",
+                            "Most likely will be USDC mint most of the time."
+                        ]
+                    },
+                    {
+                        "name": "allowed_to_combine",
+                        "type": "bool",
+                        "docs": [
+                            "Whether or not combination has been allowed for this vault."
+                        ]
+                    }
+
+                ]
+            }
         }
 
     ],
@@ -987,92 +1072,6 @@
 
                 ]
             }
-        },
-        {
-            "name": "ExternalPriceAccount",
-            "type":
-            {
-                "kind": "struct",
-                "fields": [
-                    {
-                        "name": "key",
-                        "type":
-                        {
-                            "defined": "Key"
-                        },
-                        "docs": []
-                    },
-                    {
-                        "name": "price_per_share",
-                        "type": "u64",
-                        "docs": []
-                    },
-                    {
-                        "name": "price_mint",
-                        "type": "publicKey",
-                        "docs": [
-                            "Mint of the currency we are pricing the shares against, should be same as redeem_treasury.",
-                            "Most likely will be USDC mint most of the time."
-                        ]
-                    },
-                    {
-                        "name": "allowed_to_combine",
-                        "type": "bool",
-                        "docs": [
-                            "Whether or not combination has been allowed for this vault."
-                        ]
-                    }
-
-                ]
-            }
-        },
-        {
-            "name": "Key",
-            "docs": [],
-            "type":
-            {
-                "kind": "enum",
-                "variants": [
-                    {
-                        "name": "Uninitialized",
-                        "docs": []
-                    },
-                    {
-                        "name": "SafetyDepositBoxV1",
-                        "docs": []
-                    },
-                    {
-                        "name": "ExternalAccountKeyV1",
-                        "docs": []
-                    },
-                    {
-                        "name": "VaultV1",
-                        "docs": []
-                    }
-
-                ]
-            }
-        },
-        {
-            "name": "VaultState",
-            "type":
-            {
-                "kind": "enum",
-                "variants": [
-                {
-                    "name": "Inactive"
-                },
-                {
-                    "name": "Active"
-                },
-                {
-                    "name": "Combined"
-                },
-                {
-                    "name": "Deactivated"
-                }]
-            },
-            "docs": []
         }
 
 
