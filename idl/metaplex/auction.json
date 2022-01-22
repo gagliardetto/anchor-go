@@ -607,7 +607,7 @@
                         "name": "end_auction_gap",
                         "type":
                         {
-                            "option": "unixTimestamp"
+                            "option": "duration"
                         },
                         "docs": [
                             "Gap time is the amount of time in slots after the previous bid at which the auction ends."
@@ -799,7 +799,7 @@
                         "name": "end_auction_gap",
                         "type":
                         {
-                            "option": "unixTimestamp"
+                            "option": "duration"
                         },
                         "docs": [
                             "Gap time is how much time after the previous bid where the auction ends. See AuctionData."
@@ -890,7 +890,7 @@
                     "name": "end_auction_gap",
                     "type":
                     {
-                        "option": "unixTimestamp"
+                        "option": "duration"
                     },
                     "docs": [
                         "Gap time is how much time after the previous bid where the auction ends. See AuctionData."
