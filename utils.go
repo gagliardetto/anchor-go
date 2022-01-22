@@ -11,7 +11,7 @@ import (
 )
 
 func ToPackageName(s string) string {
-	return ToSnake(ToCamel(s))
+	return ToRustSnakeCase(ToCamel(s))
 }
 func NewGoFile(programName string, includeBoilerplace bool) *File {
 	file := NewFile(ToPackageName(programName))
