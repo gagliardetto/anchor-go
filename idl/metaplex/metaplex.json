@@ -3297,7 +3297,7 @@
                 "name": "winning_config_item_index",
                 "type":
                 {
-                    "option": "u8"
+                    "option": "u64"
                 },
                 "docs": []
             }]
@@ -3327,7 +3327,7 @@
                 "name": "winning_config_item_index",
                 "type":
                 {
-                    "option": "u8"
+                    "option": "u64"
                 },
                 "docs": []
             }]
@@ -4644,7 +4644,7 @@
                         "name": "winning_config_item_index",
                         "type":
                         {
-                            "option": "u8"
+                            "option": "u64"
                         },
                         "docs": [
                             "If not redeeming a participation NFT, you also need to index into the winning config item's list."
@@ -4702,7 +4702,7 @@
                 "fields": [
                     {
                         "name": "winning_config_item_index",
-                        "type": "u8",
+                        "type": "u64",
                         "docs": []
                     },
                     {
@@ -4762,13 +4762,6 @@
             {
                 "kind": "struct",
                 "fields": [
-                {
-                    "name": "resource",
-                    "type": "publicKey",
-                    "docs": [
-                        "The resource being auctioned. See AuctionData."
-                    ]
-                },
                 {
                     "name": "reveal",
                     "type":
