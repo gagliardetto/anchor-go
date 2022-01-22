@@ -22,6 +22,7 @@ const generatedDir = "generated"
 
 // TODO:
 // - scan all complex enums before scanning other types.
+// - tests where type has field that is a complex enum (represented as an interface): assign a random concrete value from the possible enum variants.
 
 func main() {
 	conf.Encoding = EncodingBorsh
