@@ -554,6 +554,122 @@
     ],
     "accounts": [
         {
+            "name": "PriceFloor",
+            "docs": [
+                "Structure with pricing floor data."
+            ],
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "None",
+                        "fields": [
+                        {
+                            "name": "v",
+                            "type":
+                            {
+                                "array": [
+                                    "u8",
+                                    32
+                                ]
+                            },
+                            "docs": [
+                                "No price floor, any bid is valid."
+                            ]
+                        }]
+                    },
+                    {
+                        "name": "MinimumPrice",
+                        "fields": [
+                        {
+                            "name": "v",
+                            "type":
+                            {
+                                "array": [
+                                    "u64",
+                                    4
+                                ]
+                            },
+                            "docs": [
+                                "Explicit minimum price, any bid below this is rejected."
+                            ]
+                        }]
+                    },
+                    {
+                        "name": "BlindedPrice",
+                        "fields": [
+                        {
+                            "name": "v",
+                            "type": "hash",
+                            "docs": [
+                                "Hidden minimum price, revealed at the end of the auction."
+                            ]
+                        }]
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "BidState",
+            "docs": [
+                "BidState tracks the running state of an auction, each variant represents a different kind of",
+                "auction being run."
+            ],
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "EnglishAuction",
+                        "fields": [
+                            {
+                                "name": "bids",
+                                "type":
+                                {
+                                    "vec":
+                                    {
+                                        "defined": "Bid"
+                                    }
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "max",
+                                "type": "u8",
+                                "docs": []
+                            }
+
+                        ]
+                    },
+                    {
+                        "name": "OpenEdition",
+                        "fields": [
+                            {
+                                "name": "bids",
+                                "type":
+                                {
+                                    "vec":
+                                    {
+                                        "defined": "Bid"
+                                    }
+                                },
+                                "docs": []
+                            },
+                            {
+                                "name": "max",
+                                "type": "u8",
+                                "docs": []
+                            }
+
+                        ]
+                    }
+
+                ]
+            }
+        },
+        {
             "name": "AuctionData",
             "type":
             {
@@ -764,6 +880,38 @@
                         "name": "resource",
                         "type": "publicKey",
                         "docs": []
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "WinnerLimit",
+            "type":
+            {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Unlimited",
+                        "fields": [
+                            {
+                                "name": "n",
+                                "type": "u64",
+                                "docs": []
+                            }
+
+                        ]
+                    },
+                    {
+                        "name": "Capped",
+                        "fields": [
+                            {
+                                "name": "limit",
+                                "type": "u64",
+                                "docs": []
+                            }
+
+                        ]
                     }
 
                 ]
@@ -1046,96 +1194,6 @@
             }
         },
         {
-            "name": "WinnerLimit",
-            "type":
-            {
-                "kind": "enum",
-                "variants": [
-                    {
-                        "name": "Unlimited",
-                        "fields": [
-                            {
-                                "name": "n",
-                                "type": "u64",
-                                "docs": []
-                            }
-
-                        ]
-                    },
-                    {
-                        "name": "Capped",
-                        "fields": [
-                            {
-                                "name": "limit",
-                                "type": "u64",
-                                "docs": []
-                            }
-
-                        ]
-                    }
-
-                ]
-            }
-        },
-        {
-            "name": "PriceFloor",
-            "docs": [
-                "Structure with pricing floor data."
-            ],
-            "type":
-            {
-                "kind": "enum",
-                "variants": [
-                    {
-                        "name": "None",
-                        "fields": [
-                        {
-                            "name": "v",
-                            "type":
-                            {
-                                "array": [
-                                    "u8",
-                                    32
-                                ]
-                            },
-                            "docs": [
-                                "No price floor, any bid is valid."
-                            ]
-                        }]
-                    },
-                    {
-                        "name": "MinimumPrice",
-                        "fields": [
-                        {
-                            "name": "v",
-                            "type":
-                            {
-                                "array": [
-                                    "u64",
-                                    4
-                                ]
-                            },
-                            "docs": [
-                                "Explicit minimum price, any bid below this is rejected."
-                            ]
-                        }]
-                    },
-                    {
-                        "name": "BlindedPrice",
-                        "fields": [
-                        {
-                            "name": "v",
-                            "type": "hash",
-                            "docs": [
-                                "Hidden minimum price, revealed at the end of the auction."
-                            ]
-                        }]
-                    }
-
-                ]
-            }
-        },
-        {
             "name": "Revealer",
             "type":
             {
@@ -1172,64 +1230,6 @@
                     },
                     {
                         "name": "Ended"
-                    }
-
-                ]
-            }
-        },
-        {
-            "name": "BidState",
-            "docs": [
-                "BidState tracks the running state of an auction, each variant represents a different kind of",
-                "auction being run."
-            ],
-            "type":
-            {
-                "kind": "enum",
-                "variants": [
-                    {
-                        "name": "EnglishAuction",
-                        "fields": [
-                            {
-                                "name": "bids",
-                                "type":
-                                {
-                                    "vec":
-                                    {
-                                        "defined": "Bid"
-                                    }
-                                },
-                                "docs": []
-                            },
-                            {
-                                "name": "max",
-                                "type": "u8",
-                                "docs": []
-                            }
-
-                        ]
-                    },
-                    {
-                        "name": "OpenEdition",
-                        "fields": [
-                            {
-                                "name": "bids",
-                                "type":
-                                {
-                                    "vec":
-                                    {
-                                        "defined": "Bid"
-                                    }
-                                },
-                                "docs": []
-                            },
-                            {
-                                "name": "max",
-                                "type": "u8",
-                                "docs": []
-                            }
-
-                        ]
                     }
 
                 ]
