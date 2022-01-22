@@ -2,7 +2,7 @@
     "version": "0.0.0",
     "name": "auction",
     "docs": [],
-    "ref": "https://github.com/metaplex-foundation/metaplex/blob/4a1b7d2f674013bc8bd3149294c66b03b27120d0/rust/auction/program/src/instruction.rs",
+    "ref": "https://github.com/metaplex-foundation/metaplex-program-library/blob/821e5aac0780fe45525dae72b9ad6f8dc2ba8e5b/auction/program/src/instruction.rs",
     "instructions": [
         {
             "name": "CancelBid",
@@ -131,6 +131,14 @@
                 ]
             },
             {
+                "name": "auctionExtendedData",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction extended data account (pda relative to auction of ['auction', program id, vault key, 'extended'])."
+                ]
+            },
+            {
                 "name": "rentSysvar",
                 "isMut": false,
                 "isSigner": false,
@@ -233,6 +241,14 @@
                 "docs": [
                     "Token program"
                 ]
+            },
+            {
+                "name": "auctionExtendedPDA",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Auction extended (pda relative to auction of ['auction', program id, vault key, 'extended'])"
+                ]
             }],
             "args": [
             {
@@ -249,7 +265,31 @@
             "docs": [
                 "Ends an auction, regardless of end timing conditions"
             ],
-            "accounts": [],
+            "accounts": [
+            {
+                "name": "auctionAuthority",
+                "isMut": true,
+                "isSigner": true,
+                "docs": [
+                    "Auction authority"
+                ]
+            },
+            {
+                "name": "auction",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction"
+                ]
+            },
+            {
+                "name": "clockSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Clock sysvar"
+                ]
+            }],
             "args": [
             {
                 "name": "args",
@@ -303,30 +343,33 @@
         {
             "name": "SetAuthority",
             "docs": [
-                "Update the authority for an auction account.",
-                "https://github.com/metaplex-foundation/metaplex/blob/4a1b7d2f674013bc8bd3149294c66b03b27120d0/rust/auction/program/src/instruction.rs#L115"
+                "Update the authority for an auction account."
             ],
             "accounts": [
-                {
-                    "name": "auction",
-                    "isMut": true,
-                    "isSigner": false,
-                    "docs": []
-                },
-                {
-                    "name": "authority",
-                    "isMut": false,
-                    "isSigner": true,
-                    "docs": []
-                },
-                {
-                    "name": "newAuthority",
-                    "isMut": false,
-                    "isSigner": false,
-                    "docs": []
-                }
-
-            ],
+            {
+                "name": "auction",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "auction (pda of ['auction', program id, resource id])"
+                ]
+            },
+            {
+                "name": "authority",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "authority"
+                ]
+            },
+            {
+                "name": "newAuthority",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "newAuthority"
+                ]
+            }],
             "args": []
         },
         {
@@ -445,6 +488,63 @@
                 "type":
                 {
                     "defined": "PlaceBidArgs"
+                },
+                "docs": []
+            }]
+        },
+        {
+            "name": "CreateAuctionV2",
+            "docs": [
+                "Create a new auction account bound to a resource, initially in a pending state.",
+                "The only one difference with above instruction it's additional parameters in CreateAuctionArgsV2"
+            ],
+            "accounts": [
+            {
+                "name": "creator",
+                "isMut": false,
+                "isSigner": true,
+                "docs": [
+                    "The account creating the auction, which is authorised to make changes."
+                ]
+            },
+            {
+                "name": "uninitializedAuction",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Uninitialized auction account."
+                ]
+            },
+            {
+                "name": "auctionExtended",
+                "isMut": true,
+                "isSigner": false,
+                "docs": [
+                    "Auction extended data account (pda relative to auction of ['auction', program id, vault key, 'extended'])."
+                ]
+            },
+            {
+                "name": "rentSysvar",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "Rent sysvar"
+                ]
+            },
+            {
+                "name": "system",
+                "isMut": false,
+                "isSigner": false,
+                "docs": [
+                    "System account"
+                ]
+            }],
+            "args": [
+            {
+                "name": "args",
+                "type":
+                {
+                    "defined": "CreateAuctionArgsV2"
                 },
                 "docs": []
             }]
@@ -761,6 +861,119 @@
             }
         },
         {
+            "name": "CreateAuctionArgsV2",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "winners",
+                    "type":
+                    {
+                        "defined": "WinnerLimit"
+                    },
+                    "docs": [
+                        "How many winners are allowed for this auction. See AuctionData."
+                    ]
+                },
+                {
+                    "name": "end_auction_at",
+                    "type":
+                    {
+                        "option": "unixTimestamp"
+                    },
+                    "docs": [
+                        "End time is the cut-off point that the auction is forced to end by. See AuctionData."
+                    ]
+                },
+                {
+                    "name": "end_auction_gap",
+                    "type":
+                    {
+                        "option": "unixTimestamp"
+                    },
+                    "docs": [
+                        "Gap time is how much time after the previous bid where the auction ends. See AuctionData."
+                    ]
+                },
+                {
+                    "name": "token_mint",
+                    "type": "publicKey",
+                    "docs": [
+                        "Token mint for the SPL token used for bidding."
+                    ]
+                },
+                {
+                    "name": "authority",
+                    "type": "publicKey",
+                    "docs": [
+                        "Authority"
+                    ]
+                },
+                {
+                    "name": "resource",
+                    "type": "publicKey",
+                    "docs": [
+                        "The resource being auctioned. See AuctionData."
+                    ]
+                },
+                {
+                    "name": "price_floor",
+                    "type":
+                    {
+                        "defined": "PriceFloor"
+                    },
+                    "docs": [
+                        "Set a price floor."
+                    ]
+                },
+                {
+                    "name": "tick_size",
+                    "type":
+                    {
+                        "option": "u64"
+                    },
+                    "docs": [
+                        "Add a tick size increment"
+                    ]
+                },
+                {
+                    "name": "gap_tick_size_percentage",
+                    "type":
+                    {
+                        "option": "u8"
+                    },
+                    "docs": [
+                        "Add a minimum percentage increase each bid must meet."
+                    ]
+                },
+                {
+                    "name": "instant_sale_price",
+                    "type":
+                    {
+                        "option": "u64"
+                    },
+                    "docs": [
+                        "Add a instant sale price."
+                    ]
+                },
+                {
+                    "name": "name",
+                    "type":
+                    {
+                        "option":
+                        {
+                            "defined": "AuctionName"
+                        }
+                    },
+                    "docs": [
+                        "Auction name"
+                    ]
+                }]
+            },
+            "docs": []
+        },
+        {
             "name": "EndAuctionArgs",
             "type":
             {
@@ -843,7 +1056,7 @@
                         "fields": [
                             {
                                 "name": "n",
-                                "type": "i64",
+                                "type": "u64",
                                 "docs": []
                             }
 
@@ -854,7 +1067,7 @@
                         "fields": [
                             {
                                 "name": "limit",
-                                "type": "i64",
+                                "type": "u64",
                                 "docs": []
                             }
 
@@ -1082,10 +1295,53 @@
                         "docs": [
                             "gap_tick_size_percentage - two decimal points"
                         ]
+                    },
+                    {
+                        "name": "instant_sale_price",
+                        "type":
+                        {
+                            "option": "u64"
+                        },
+                        "docs": [
+                            "Instant sale price"
+                        ]
+                    },
+                    {
+                        "name": "name",
+                        "type":
+                        {
+                            "option":
+                            {
+                                "defined": "AuctionName"
+                            }
+                        },
+                        "docs": [
+                            "Auction name"
+                        ]
                     }
 
                 ]
             }
+        },
+        {
+            "name": "AuctionName",
+            "type":
+            {
+                "kind": "struct",
+                "fields": [
+                {
+                    "name": "name",
+                    "type":
+                    {
+                        "array": [
+                            "u8",
+                            32
+                        ]
+                    },
+                    "docs": []
+                }]
+            },
+            "docs": []
         }
 
 
