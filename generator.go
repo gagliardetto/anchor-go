@@ -138,6 +138,17 @@ func addTypeNameIsComplexEnum(name string) {
 	typeRegistryComplexEnum[name] = struct{}{}
 }
 
+func registerComplexEnums(idl *IDL, def IdlTypeDef) {
+	switch def.Type.Kind {
+	case IdlTypeDefTyKindEnum:
+		enumTypeName := def.Name
+		if def.Type.Variants.IsAllUint8() {
+		} else {
+			addTypeNameIsComplexEnum(enumTypeName)
+		}
+	}
+}
+
 func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 
 	st := newStatement()
