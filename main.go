@@ -256,6 +256,15 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			File: file,
 		})
 	}
+	{
+		// register complex enums:
+		for _, typ := range idl.Types {
+			registerComplexEnums(&idl, typ)
+		}
+		for _, typ := range idl.Accounts {
+			registerComplexEnums(&idl, typ)
+		}
+	}
 
 	{
 		file := NewGoFile(idl.Name, true)
