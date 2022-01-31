@@ -385,11 +385,14 @@ const (
 	IdlTypeDefTyKindEnum   IdlTypeDefTyKind = "enum"
 )
 
+// TODO:
 type IdlTypeDefTyStruct struct {
 	Kind IdlTypeDefTyKind `json:"kind"` // == "struct"
 
 	Fields *IdlTypeDefStruct `json:"fields,omitempty"`
 }
+
+// TODO:
 type IdlTypeDefTyEnum struct {
 	Kind IdlTypeDefTyKind `json:"kind"` // == "enum"
 
