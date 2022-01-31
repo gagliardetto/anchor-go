@@ -93,9 +93,9 @@ func (name TypeIDName) On(
 type EncoderName string
 
 const (
-	// github.com/gagliardetto/binary
+	// github.com/gagliardetto/binary: NewBinEncoder, NewBinDecoder
 	EncodingBin EncoderName = "bin"
-	// github.com/gagliardetto/borsh-go
+	// github.com/gagliardetto/binary: NewBorshEncoder, NewBorshDecoder
 	EncodingBorsh EncoderName = "borsh"
 	// https://docs.solana.com/developing/programming-model/transactions#compact-array-format
 	EncodingCompactU16 EncoderName = "compact-u16"
