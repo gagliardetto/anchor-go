@@ -22,6 +22,7 @@ const generatedDir = "generated"
 
 // TODO:
 // - tests where type has field that is a complex enum (represented as an interface): assign a random concrete value from the possible enum variants.
+// - when printing tree, check for len before accessing array indexes.
 
 func main() {
 	conf.Encoding = EncodingBorsh
@@ -820,7 +821,8 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 												exportedAccountName := filepath.Join(groupPath, cleanedName)
 
-												accountsBranchGroup.Id("accountsBranch").Dot("Child").Call(Qual(PkgFormat, "Meta").Call(Lit(strings.Repeat(" ", longest-len(exportedAccountName))+exportedAccountName), Id("inst").Dot("AccountMetaSlice").Index(Lit(accountIndex))))
+												access := Id("accountsBranch").Dot("Child").Call(Qual(PkgFormat, "Meta").Call(Lit(strings.Repeat(" ", longest-len(exportedAccountName))+exportedAccountName), Id("inst").Dot("AccountMetaSlice").Dot("Get").Call(Lit(accountIndex))))
+												accountsBranchGroup.Add(access)
 												return true
 											})
 										}))
@@ -1058,7 +1060,11 @@ func genAccountGettersSetters(
 	{ // Create account getters:
 		code.Line().Line()
 		name := formatAccountAccessorName("Get", exportedAccountName)
-		code.Commentf("%s gets the %q account.", name, account.Name).Line()
+		if account.Optional {
+			code.Commentf("%s gets the %q account (optional).", name, account.Name).Line()
+		} else {
+			code.Commentf("%s gets the %q account.", name, account.Name).Line()
+		}
 		for _, doc := range account.Docs {
 			code.Comment(doc).Line()
 		}
@@ -1076,7 +1082,7 @@ func genAccountGettersSetters(
 			).
 			BlockFunc(func(body *Group) {
 				// Body:
-				body.Return(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)))
+				body.Return(Id("inst").Dot("AccountMetaSlice").Dot("Get").Call(Lit(index)))
 			})
 	}
 
