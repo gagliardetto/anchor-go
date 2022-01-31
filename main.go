@@ -21,7 +21,6 @@ import (
 const generatedDir = "generated"
 
 // TODO:
-// - scan all complex enums before scanning other types.
 // - tests where type has field that is a complex enum (represented as an interface): assign a random concrete value from the possible enum variants.
 
 func main() {
@@ -104,19 +103,25 @@ func main() {
 		{
 			if idl.State != nil {
 				Sfln(
-					"%s idl.State is defined, but handler is not implemented yet.",
+					"%s idl.State is defined, but generator is not implemented yet.",
 					OrangeBG("[?]"),
 				)
 			}
 			if len(idl.Events) > 0 {
 				Sfln(
-					"%s idl.Events is defined, but handler is not implemented yet.",
+					"%s idl.Events is defined, but generator is not implemented yet.",
 					OrangeBG("[?]"),
 				)
 			}
 			if len(idl.Errors) > 0 {
 				Sfln(
-					"%s idl.Errors is defined, but handler is not implemented yet.",
+					"%s idl.Errors is defined, but generator is not implemented yet.",
+					OrangeBG("[?]"),
+				)
+			}
+			if len(idl.Constants) > 0 {
+				Sfln(
+					"%s idl.Constants is defined, but generator is not implemented yet.",
 					OrangeBG("[?]"),
 				)
 			}

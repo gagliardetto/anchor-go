@@ -86,7 +86,7 @@ func genField(field IdlField, pointer bool) Code {
 	return st
 }
 
-func genTypeName(idlTypeEnv IdlTypeEnvelope) Code {
+func genTypeName(idlTypeEnv IdlType) Code {
 	st := newStatement()
 	switch {
 	case idlTypeEnv.IsString():
@@ -126,7 +126,7 @@ func codeToString(code Code) string {
 // typeRegistryComplexEnum contains all types that are a complex enum (and thus implemented as an interface).
 var typeRegistryComplexEnum = make(map[string]struct{})
 
-func isComplexEnum(envel IdlTypeEnvelope) bool {
+func isComplexEnum(envel IdlType) bool {
 	if envel.IsIdlTypeDefined() {
 		_, ok := typeRegistryComplexEnum[envel.GetIdlTypeDefined().Defined]
 		return ok
@@ -142,8 +142,7 @@ func registerComplexEnums(idl *IDL, def IdlTypeDef) {
 	switch def.Type.Kind {
 	case IdlTypeDefTyKindEnum:
 		enumTypeName := def.Name
-		if def.Type.Variants.IsAllUint8() {
-		} else {
+		if !def.Type.Variants.IsSimpleEnum() {
 			addTypeNameIsComplexEnum(enumTypeName)
 		}
 	}
@@ -250,7 +249,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 		code := newStatement()
 		enumTypeName := def.Name
 
-		if def.Type.Variants.IsAllUint8() {
+		if def.Type.Variants.IsSimpleEnum() {
 			code.Type().Id(enumTypeName).Qual(PkgDfuseBinary, "BorshEnum")
 			code.Line().Const().Parens(DoGroup(func(gr *Group) {
 				for variantIndex, variant := range def.Type.Variants {
@@ -262,7 +261,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 						gr.Comment(doc).Line()
 					}
 
-					gr.Id(variant.Name + "_" + enumTypeName).Add(func() Code {
+					gr.Id(formatSimpleEnumVariantName(variant.Name, enumTypeName)).Add(func() Code {
 						if variantIndex == 0 {
 							return Id(enumTypeName).Op("=").Iota()
 						}
@@ -279,7 +278,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 				BlockFunc(func(body *Group) {
 					body.Switch(Id("value")).BlockFunc(func(switchBlock *Group) {
 						for _, variant := range def.Type.Variants {
-							switchBlock.Case(Id(variant.Name + "_" + enumTypeName)).Line().Return(Lit(variant.Name))
+							switchBlock.Case(Id(formatSimpleEnumVariantName(variant.Name, enumTypeName))).Line().Return(Lit(variant.Name))
 						}
 						switchBlock.Default().Line().Return(Lit(""))
 					})
@@ -694,5 +693,9 @@ func genUnmarshalWithDecoder_struct(
 }
 
 func formatComplexEnumVariantTypeName(enumTypeName string, variantName string) string {
+	return ToCamel(Sf("%s_%s", enumTypeName, variantName))
+}
+
+func formatSimpleEnumVariantName(variantName string, enumTypeName string) string {
 	return ToCamel(Sf("%s_%s", enumTypeName, variantName))
 }

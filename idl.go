@@ -19,7 +19,16 @@ type IDL struct {
 	Types        IdlTypeDefSlice  `json:"types,omitempty"`
 	Events       []IdlEvent       `json:"events,omitempty"`
 	Errors       []IdlErrorCode   `json:"errors,omitempty"`
-	Metadata     *IdlMetadata     `json:"metadata,omitempty"`
+	Constants    []IdlConstant    `json:"constants,omitempty"`
+
+	Metadata *IdlMetadata `json:"metadata,omitempty"` // NOTE: deprecated
+}
+
+// TODO: write generator
+type IdlConstant struct {
+	Name  string
+	Type  IdlType
+	Value string
 }
 
 type IdlMetadata struct {
@@ -50,9 +59,9 @@ type IdlEvent struct {
 }
 
 type IdlEventField struct {
-	Name  string          `json:"name"`
-	Type  IdlTypeEnvelope `json:"type"`
-	Index bool            `json:"index"`
+	Name  string  `json:"name"`
+	Type  IdlType `json:"type"`
+	Index bool    `json:"index"`
 }
 
 type IdlInstruction struct {
@@ -197,9 +206,9 @@ type IdlAccounts struct {
 }
 
 type IdlField struct {
-	Name string          `json:"name"`
-	Docs []string        `json:"docs"` // @custom
-	Type IdlTypeEnvelope `json:"type"`
+	Name string   `json:"name"`
+	Docs []string `json:"docs"` // @custom
+	Type IdlType  `json:"type"`
 }
 
 type IdlTypeAsString string
@@ -231,11 +240,11 @@ const (
 )
 
 type IdlTypeVec struct {
-	Vec IdlTypeEnvelope `json:"vec"`
+	Vec IdlType `json:"vec"`
 }
 
 type IdlTypeOption struct {
-	Option IdlTypeEnvelope `json:"option"`
+	Option IdlType `json:"option"`
 }
 
 // User defined type.
@@ -244,12 +253,12 @@ type IdlTypeDefined struct {
 }
 
 // Wrapper type:
-type IdlTypeEnvelopeArray struct {
-	Thing IdlTypeEnvelope
+type IdlTypeArray struct {
+	Thing IdlType
 	Num   int
 }
 
-func (env *IdlTypeEnvelope) UnmarshalJSON(data []byte) error {
+func (env *IdlType) UnmarshalJSON(data []byte) error {
 
 	var temp interface{}
 	if err := json.Unmarshal(data, &temp); err != nil {
@@ -267,7 +276,7 @@ func (env *IdlTypeEnvelope) UnmarshalJSON(data []byte) error {
 		}
 	case map[string]interface{}:
 		{
-			// Ln(PurpleBG("::IdlTypeEnvelope"))
+			// Ln(PurpleBG("::IdlType"))
 			// spew.Dump(v)
 
 			if len(v) == 0 {
@@ -304,14 +313,14 @@ func (env *IdlTypeEnvelope) UnmarshalJSON(data []byte) error {
 				if len(arrVal) != 2 {
 					panic(Sf("array is not of expected length:\n%s", spew.Sdump(got)))
 				}
-				var target IdlTypeEnvelopeArray
+				var target IdlTypeArray
 				if err := TranscodeJSON(arrVal[0], &target.Thing); err != nil {
 					return err
 				}
 
 				target.Num = int(arrVal[1].(float64))
 
-				env.asIdlTypeEnvelopeArray = &target
+				env.asIdlTypeArray = &target
 			}
 			// panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
 		}
@@ -323,45 +332,45 @@ func (env *IdlTypeEnvelope) UnmarshalJSON(data []byte) error {
 }
 
 // Wrapper type:
-type IdlTypeEnvelope struct {
-	asString               IdlTypeAsString
-	asIdlTypeVec           *IdlTypeVec
-	asIdlTypeOption        *IdlTypeOption
-	asIdlTypeDefined       *IdlTypeDefined
-	asIdlTypeEnvelopeArray *IdlTypeEnvelopeArray
+type IdlType struct {
+	asString         IdlTypeAsString
+	asIdlTypeVec     *IdlTypeVec
+	asIdlTypeOption  *IdlTypeOption
+	asIdlTypeDefined *IdlTypeDefined
+	asIdlTypeArray   *IdlTypeArray
 }
 
-func (env *IdlTypeEnvelope) IsString() bool {
+func (env *IdlType) IsString() bool {
 	return env.asString != ""
 }
-func (env *IdlTypeEnvelope) IsIdlTypeVec() bool {
+func (env *IdlType) IsIdlTypeVec() bool {
 	return env.asIdlTypeVec != nil
 }
-func (env *IdlTypeEnvelope) IsIdlTypeOption() bool {
+func (env *IdlType) IsIdlTypeOption() bool {
 	return env.asIdlTypeOption != nil
 }
-func (env *IdlTypeEnvelope) IsIdlTypeDefined() bool {
+func (env *IdlType) IsIdlTypeDefined() bool {
 	return env.asIdlTypeDefined != nil
 }
-func (env *IdlTypeEnvelope) IsArray() bool {
-	return env.asIdlTypeEnvelopeArray != nil
+func (env *IdlType) IsArray() bool {
+	return env.asIdlTypeArray != nil
 }
 
 // Getters:
-func (env *IdlTypeEnvelope) GetString() IdlTypeAsString {
+func (env *IdlType) GetString() IdlTypeAsString {
 	return env.asString
 }
-func (env *IdlTypeEnvelope) GetIdlTypeVec() *IdlTypeVec {
+func (env *IdlType) GetIdlTypeVec() *IdlTypeVec {
 	return env.asIdlTypeVec
 }
-func (env *IdlTypeEnvelope) GetIdlTypeOption() *IdlTypeOption {
+func (env *IdlType) GetIdlTypeOption() *IdlTypeOption {
 	return env.asIdlTypeOption
 }
-func (env *IdlTypeEnvelope) GetIdlTypeDefined() *IdlTypeDefined {
+func (env *IdlType) GetIdlTypeDefined() *IdlTypeDefined {
 	return env.asIdlTypeDefined
 }
-func (env *IdlTypeEnvelope) GetArray() *IdlTypeEnvelopeArray {
-	return env.asIdlTypeEnvelopeArray
+func (env *IdlType) GetArray() *IdlTypeArray {
+	return env.asIdlTypeArray
 }
 
 type IdlTypeDef struct {
@@ -375,6 +384,17 @@ const (
 	IdlTypeDefTyKindStruct IdlTypeDefTyKind = "struct"
 	IdlTypeDefTyKindEnum   IdlTypeDefTyKind = "enum"
 )
+
+type IdlTypeDefTyStruct struct {
+	Kind IdlTypeDefTyKind `json:"kind"` // == "struct"
+
+	Fields *IdlTypeDefStruct `json:"fields,omitempty"`
+}
+type IdlTypeDefTyEnum struct {
+	Kind IdlTypeDefTyKind `json:"kind"` // == "enum"
+
+	Variants IdlEnumVariantSlice `json:"variants,omitempty"`
+}
 
 type IdlTypeDefTy struct {
 	Kind IdlTypeDefTyKind `json:"kind"`
@@ -392,6 +412,10 @@ func (slice IdlEnumVariantSlice) IsAllUint8() bool {
 		}
 	}
 	return true
+}
+
+func (slice IdlEnumVariantSlice) IsSimpleEnum() bool {
+	return slice.IsAllUint8()
 }
 
 type IdlTypeDefStruct = []IdlField
@@ -416,7 +440,7 @@ type IdlEnumFields struct {
 
 type IdlEnumFieldsNamed []IdlField
 
-type IdlEnumFieldsTuple []IdlTypeEnvelope
+type IdlEnumFieldsTuple []IdlType
 
 // TODO: verify with examples
 func (env *IdlEnumFields) UnmarshalJSON(data []byte) error {
@@ -466,6 +490,5 @@ func (env *IdlEnumFields) UnmarshalJSON(data []byte) error {
 type IdlErrorCode struct {
 	Code int    `json:"code"`
 	Name string `json:"name"`
-	// TODO: is Msg an interface?
-	Msg string `json:"msg,omitempty"`
+	Msg  string `json:"msg,omitempty"`
 }
