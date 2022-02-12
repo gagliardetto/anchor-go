@@ -33,8 +33,14 @@ Anchor is a framework for Solana's Sealevel runtime providing several convenient
 ### example 1: metaplex nft candy machine
 
 ```bash
-git clone https://github.com/metaplex-foundation/metaplex.git
-cd metaplex
-anchor idl parse -f rust/nft-candy-machine/src/lib.rs -o nft_candy_machine.json
-anchor-go --src=nft_candy_machine.json
+git clone https://github.com/metaplex-foundation/metaplex-program-library.git
+cd metaplex-program-library
+anchor idl parse -f candy-machine/program/src/lib.rs -o nft_candy_machine_v2.json
+anchor-go --src=nft_candy_machine_v2.json
 ```
+
+Note
+----
+
+- anchor-go is in active development, so all APIs are subject to change.
+- This code is unaudited. Use at your own risk.
