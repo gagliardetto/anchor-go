@@ -14,6 +14,7 @@ Generated Code will be generated and saved to `./generated/`.
 - [ ] events
 - [ ] errors
 - [ ] handle tuple types
+- [ ] constants
 
 
 ## what is anchor-go?
