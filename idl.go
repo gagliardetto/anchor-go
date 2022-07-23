@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/davecgh/go-spew/spew"
 	. "github.com/gagliardetto/utilz"
 )
