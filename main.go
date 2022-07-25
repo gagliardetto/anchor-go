@@ -13,6 +13,7 @@ import (
 	"time"
 
 	. "github.com/dave/jennifer/jen"
+	"github.com/gagliardetto/anchor-go/sighash"
 	bin "github.com/gagliardetto/binary"
 	. "github.com/gagliardetto/utilz"
 	"golang.org/x/mod/modfile"
@@ -131,7 +132,7 @@ func main() {
 		// spew.Dump(idl)
 
 		// Create subfolder for package for generated assets:
-		packageAssetFolderName := ToRustSnakeCase(idl.Name)
+		packageAssetFolderName := sighash.ToRustSnakeCase(idl.Name)
 		var dstDirForFiles string
 		if GetConfig().Debug {
 			packageAssetFolderPath := path.Join(GetConfig().DstDir, packageAssetFolderName)
@@ -1195,7 +1196,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 								for _, doc := range instruction.Docs {
 									ins.Comment(doc).Line()
 								}
-								toBeHashed := ToSnakeForSighash(instruction.Name)
+								toBeHashed := sighash.ToSnakeForSighash(instruction.Name)
 								if GetConfig().Debug {
 									ins.Comment(Sf(`hash("%s:%s")`, bin.SIGHASH_GLOBAL_NAMESPACE, toBeHashed)).Line()
 								}
@@ -1380,7 +1381,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 									BlockFunc(func(variantBlock *Group) {
 										for _, instruction := range idl.Instructions {
 											// NOTE: using `ToSnakeForSighash` here (necessary for sighash computing from instruction name)
-											insName := ToSnakeForSighash(instruction.Name)
+											insName := sighash.ToSnakeForSighash(instruction.Name)
 											insExportedName := ToCamel(instruction.Name)
 											variantBlock.Block(
 												List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),

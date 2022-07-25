@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	. "github.com/dave/jennifer/jen"
+	"github.com/gagliardetto/anchor-go/sighash"
 	"github.com/gagliardetto/solana-go"
 	. "github.com/gagliardetto/utilz"
 )
 
 func ToPackageName(s string) string {
-	return ToRustSnakeCase(ToCamel(s))
+	return sighash.ToRustSnakeCase(ToCamel(s))
 }
 func NewGoFile(programName string, includeBoilerplace bool) *File {
 	file := NewFile(ToPackageName(programName))
