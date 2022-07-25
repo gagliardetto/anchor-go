@@ -1,5 +1,5 @@
 {
-    "version": "0.1.0",
+    "version": "0.0.0",
     "name": "serum_dex",
     "instructions": [
     {
@@ -89,7 +89,7 @@
             "name": "openOrdersMarketAuthority",
             "isMut": false,
             "isSigner": false,
-            "isOptional": true,
+            "optional": true,
             "docs": [
                 "open orders market authority (optional)"
             ]
@@ -98,7 +98,7 @@
             "name": "pruneAuthority",
             "isMut": false,
             "isSigner": false,
-            "isOptional": true,
+            "optional": true,
             "docs": [
                 "prune authority (optional, requires open orders market authority)"
             ]
@@ -107,7 +107,7 @@
             "name": "crankAuthority",
             "isMut": false,
             "isSigner": false,
-            "isOptional": true,
+            "optional": true,
             "docs": [
                 "crank authority (optional, requires prune authority)"
             ]
@@ -157,7 +157,7 @@
             ]
         },
         {
-            "name": "openOrdersAccountOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -200,7 +200,7 @@
             "name": "feeDiscounts",
             "isMut": false,
             "isSigner": false,
-            "isOptional": true,
+            "optional": true,
             "docs": [
                 "(optional) the (M)SRM account used for fee discounts"
             ]
@@ -338,7 +338,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -374,7 +374,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -433,7 +433,7 @@
             "name": "referrerPcWallet",
             "isMut": true,
             "isSigner": false,
-            "isOptional": true,
+            "optional": true,
             "docs": [
                 "(optional) referrer pc wallet"
             ]
@@ -468,7 +468,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -592,7 +592,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -635,7 +635,7 @@
             "name": "feeDiscounts",
             "isMut": false,
             "isSigner": false,
-            "isOptional": true,
+            "optional": true,
             "docs": [
                 "(optional) the (M)SRM account used for fee discounts"
             ]
@@ -709,7 +709,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -752,7 +752,7 @@
             "name": "feeDiscounts",
             "isMut": false,
             "isSigner": false,
-            "isOptional": true,
+            "optional": true,
             "docs": [
                 "(optional) the (M)SRM account used for fee discounts"
             ]
@@ -803,7 +803,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -864,7 +864,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -1006,7 +1006,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -1043,7 +1043,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": true,
             "docs": [
@@ -1070,7 +1070,7 @@
             "name": "marketAuthority",
             "isMut": false,
             "isSigner": false,
-            "isOptional": true,
+            "optional": true,
             "docs": [
                 "open orders market authority (optional)."
             ]
@@ -1124,7 +1124,7 @@
             ]
         },
         {
-            "name": "openOrdersOwner",
+            "name": "owner",
             "isMut": false,
             "isSigner": false,
             "docs": [
@@ -1189,48 +1189,6 @@
         }]
     }],
     "accounts": [
-    {
-        "name": "AccountFlag",
-        "type":
-        {
-            "kind": "enum",
-            "variants": [
-            {
-                "name": "Initialized"
-            },
-            {
-                "name": "Market"
-            },
-            {
-                "name": "OpenOrders"
-            },
-            {
-                "name": "RequestQueue"
-            },
-            {
-                "name": "EventQueue"
-            },
-            {
-                "name": "Bids"
-            },
-            {
-                "name": "Asks"
-            },
-            {
-                "name": "Disabled"
-            },
-            {
-                "name": "Closed"
-            },
-            {
-                "name": "Permissioned"
-            },
-            {
-                "name": "CrankAuthorityRequired"
-            }]
-        },
-        "docs": []
-    },
     {
         "name": "MarketStateV2",
         "type":
@@ -1724,20 +1682,14 @@
                 },
                 {
                     "name": "max_coin_qty",
-                    "type":
-                    {
-                        "defined": "NonZeroU64"
-                    },
+                    "type": "u64",
                     "docs": []
                 },
                 {
                     "name": "native_pc_qty_locked",
                     "type":
                     {
-                        "option":
-                        {
-                            "defined": "NonZeroU64"
-                        }
+                        "option": "u64"
                     },
                     "docs": []
                 },
@@ -1756,10 +1708,7 @@
                     "name": "client_order_id",
                     "type":
                     {
-                        "option":
-                        {
-                            "defined": "NonZeroU64"
-                        }
+                        "option": "u64"
                     },
                     "docs": []
                 },
@@ -1813,10 +1762,7 @@
                     "name": "client_order_id",
                     "type":
                     {
-                        "option":
-                        {
-                            "defined": "NonZeroU64"
-                        }
+                        "option": "u64"
                     },
                     "docs": []
                 }]
@@ -1996,10 +1942,7 @@
                     "name": "client_order_id",
                     "type":
                     {
-                        "option":
-                        {
-                            "defined": "NonZeroU64"
-                        }
+                        "option": "u64"
                     },
                     "docs": []
                 }]
@@ -2055,10 +1998,7 @@
                     "name": "client_order_id",
                     "type":
                     {
-                        "option":
-                        {
-                            "defined": "NonZeroU64"
-                        }
+                        "option": "u64"
                     },
                     "docs": []
                 }]
@@ -2126,18 +2066,12 @@
             },
             {
                 "name": "limit_price",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
                 "name": "max_qty",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
@@ -2194,18 +2128,12 @@
             },
             {
                 "name": "limit_price",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
                 "name": "max_qty",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
@@ -2248,26 +2176,17 @@
             },
             {
                 "name": "limit_price",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
                 "name": "max_coin_qty",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
                 "name": "max_native_pc_qty_including_fees",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
@@ -2315,26 +2234,17 @@
             },
             {
                 "name": "limit_price",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
                 "name": "max_coin_qty",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
                 "name": "max_native_pc_qty_including_fees",
-                "type":
-                {
-                    "defined": "NonZeroU64"
-                },
+                "type": "u64",
                 "docs": []
             },
             {
@@ -2402,22 +2312,6 @@
             },
             {
                 "name": "AbortTransaction"
-            }]
-        },
-        "docs": []
-    },
-    {
-        "name": "NonZeroU64",
-        "type":
-        {
-            "kind": "struct",
-            "fields": [
-            {
-                "name": "warning",
-                "type": "u64",
-                "docs": [
-                    "TODO: remove this; THIS IS NOT A STRUCT, but a non-zero u64, which I'm not sure how to represent."
-                ]
             }]
         },
         "docs": []
