@@ -303,25 +303,19 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 					})
 
 					for _, variant := range def.Type.Variants {
-						if variant.IsUint8() {
-							structGroup.Id(ToCamel(variant.Name)).Id(ToCamel(variant.Name))
-						} else {
-							structGroup.Id(ToCamel(variant.Name)).Id(formatComplexEnumVariantTypeName(enumTypeName, variant.Name))
-						}
+						structGroup.Id(ToCamel(variant.Name)).Id(formatComplexEnumVariantTypeName(enumTypeName, variant.Name))
 					}
 				},
 			).Line().Line()
 
 			for _, variant := range def.Type.Variants {
-				// Name of the variant type if the enum is a simple enum (i.e. all uint8):
-				variantTypeName := ToCamel(variant.Name)
 				// Name of the variant type if the enum is a complex enum (i.e. enum variants are inline structs):
 				variantTypeNameComplex := formatComplexEnumVariantTypeName(enumTypeName, variant.Name)
 
 				// Declare the enum variant types:
 				if variant.IsUint8() {
 					// TODO: make the name {variantTypeName}_{interface_name} ???
-					code.Type().Id(variantTypeName).Uint8().Line().Line()
+					code.Type().Id(variantTypeNameComplex).Uint8().Line().Line()
 				} else {
 					code.Type().Id(variantTypeNameComplex).StructFunc(
 						func(structGroup *Group) {
@@ -348,7 +342,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 
 				if variant.IsUint8() {
 					// Declare MarshalWithEncoder
-					code.Line().Line().Func().Params(Id("obj").Id(variantTypeName)).Id("MarshalWithEncoder").
+					code.Line().Line().Func().Params(Id("obj").Id(variantTypeNameComplex)).Id("MarshalWithEncoder").
 						Params(
 							ListFunc(func(params *Group) {
 								// Parameters:
@@ -367,7 +361,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 					code.Line().Line()
 
 					// Declare UnmarshalWithDecoder
-					code.Func().Params(Id("obj").Op("*").Id(variantTypeName)).Id("UnmarshalWithDecoder").
+					code.Func().Params(Id("obj").Op("*").Id(variantTypeNameComplex)).Id("UnmarshalWithDecoder").
 						Params(
 							ListFunc(func(params *Group) {
 								// Parameters:
@@ -413,7 +407,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 
 				// Declare the method to implement the parent enum interface:
 				if variant.IsUint8() {
-					code.Func().Params(Id("_").Op("*").Id(variantTypeName)).Id(interfaceMethodName).Params().Block().Line().Line()
+					code.Func().Params(Id("_").Op("*").Id(variantTypeNameComplex)).Id(interfaceMethodName).Params().Block().Line().Line()
 				} else {
 					code.Func().Params(Id("_").Op("*").Id(variantTypeNameComplex)).Id(interfaceMethodName).Params().Block().Line().Line()
 				}
@@ -636,6 +630,7 @@ func genUnmarshalWithDecoder_struct(
 								BlockFunc(func(switchGroup *Group) {
 									interfaceType := idl.Types.GetByName(enumName)
 									for variantIndex, variant := range interfaceType.Type.Variants {
+										variantTypeNameComplex := formatComplexEnumVariantTypeName(enumName, variant.Name)
 
 										if variant.IsUint8() {
 											// TODO: the actual value is not important;
@@ -643,7 +638,7 @@ func genUnmarshalWithDecoder_struct(
 											switchGroup.Case(Lit(variantIndex)).
 												BlockFunc(func(caseGroup *Group) {
 													caseGroup.Id("obj").Dot(exportedArgName).Op("=").
-														Parens(Op("*").Id(ToCamel(variant.Name))).
+														Parens(Op("*").Id(variantTypeNameComplex)).
 														Parens(Op("&").Id("tmp").Dot("Enum"))
 												})
 										} else {
