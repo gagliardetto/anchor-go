@@ -334,7 +334,7 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 								}
 							default:
 								// TODO: handle tuples
-								panic("not handled")
+								panic("not handled: " + Sdump(variant.Fields))
 							}
 						},
 					).Line().Line()
