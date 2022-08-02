@@ -1,3 +1,7 @@
+# anchor-go
+
+![logo](logo.png)
+
 ## usage
 
 ```bash
