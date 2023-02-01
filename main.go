@@ -302,7 +302,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 	for _, instruction := range idl.Instructions {
 		file := NewGoFile(idl.Name, true)
 		insExportedName := ToCamel(instruction.Name)
-
+		insAccountsExportedName := ToCamel(fmt.Sprintf("%s_accounts", instruction.Name))
 		// fmt.Println(RedBG(instruction.Name))
 
 		{
@@ -396,6 +396,15 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				fieldsGroup.Qual(PkgSolanaGo, "AccountMetaSlice").Tag(map[string]string{
 					"bin": "-",
 				})
+			})
+
+			code.Line().Line()
+			
+			// Generate Instruction Account Struct
+			code.Type().Id(insAccountsExportedName).StructFunc(func(fieldsGroup *Group) {
+				for _, accountItem := range instruction.Accounts {
+					fieldsGroup.Add(genAccountField(accountItem))
+				}
 			})
 
 			file.Add(code.Line())
