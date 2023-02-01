@@ -101,7 +101,7 @@ func genAccountField(field IdlAccountItem) Code {
 			}())
 	}
 	if field.IdlAccounts != nil {
-		st.Id(field.IdlAccounts.Name).StructFunc(func(group *Group) {
+		st.Id(ToCamel(field.IdlAccounts.Name)).StructFunc(func(group *Group) {
 			for _, idlAccountItem := range field.IdlAccounts.Accounts {
 				group.Add(genAccountField(idlAccountItem))
 			}

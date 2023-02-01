@@ -399,7 +399,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			})
 
 			code.Line().Line()
-			
+
 			// Generate Instruction Account Struct
 			code.Type().Id(insAccountsExportedName).StructFunc(func(fieldsGroup *Group) {
 				for _, accountItem := range instruction.Accounts {
@@ -457,6 +457,29 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 
 		{
+			// Declare method to get Account struct form AccountMetasSlice
+			code := Empty().Line().Line()
+			code.
+				Func().
+				Params(Id("inst").Op("*").Id(insExportedName)).
+				Id("Get" + insAccountsExportedName).Params().Op("*").Id(insAccountsExportedName).
+				BlockFunc(func(body *Group) {
+					body.Id("res").Op(":=").Op("&").Id(insAccountsExportedName).Block()
+					instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
+						field := body.Id("res")
+						if parentGroupPath != "" {
+							field = field.Dot(ToCamel(parentGroupPath))
+						}
+						field = field.Dot(ToCamel(account.Name)).Op("=").Add(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).Dot("PublicKey"))
+						return true
+					})
+					body.Return().Op("res")
+				})
+
+			file.Add(code.Line().Line())
+		}
+
+		{
 			// Declare methods that set the parameters of the instruction:
 			code := Empty()
 			for _, arg := range instruction.Args {
@@ -499,6 +522,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 			file.Add(code.Line())
 		}
+
 		{
 			// Declare methods that set/get accounts for the instruction:
 			code := Empty()
@@ -597,6 +621,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 			file.Add(code.Line())
 		}
+
 		{
 			// Declare `Build` method on instruction:
 			code := Empty()
@@ -673,6 +698,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				})
 			file.Add(code.Line())
 		}
+
 		{
 			// Declare `ValidateAndBuild` method on instruction:
 			code := Empty()
@@ -710,6 +736,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				})
 			file.Add(code.Line())
 		}
+
 		{
 			// Declare `Validate` method on instruction:
 			code := Empty()
@@ -775,6 +802,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				})
 			file.Add(code.Line())
 		}
+
 		{
 			// Declare `EncodeToTree(parent treeout.Branches)` method in instruction:
 			code := Empty()
