@@ -457,7 +457,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 
 		{
-			// Declare method to get Account struct form AccountMetasSlice
+			// Declare method to get Account struct from AccountMetasSlice
 			code := Empty().Line().Line()
 			code.
 				Func().
