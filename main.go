@@ -466,11 +466,14 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				BlockFunc(func(body *Group) {
 					body.Id("res").Op(":=").Op("&").Id(insAccountsExportedName).Block()
 					instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
-						field := body.Id("res")
-						if parentGroupPath != "" {
-							field = field.Dot(ToCamel(parentGroupPath))
-						}
-						field = field.Dot(ToCamel(account.Name)).Op("=").Add(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).Dot("PublicKey"))
+						// check if not nil before accessing "PublicKey"
+						body.If(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).Op("!=").Nil()).BlockFunc(func(group *Group) {
+							field := group.Id("res")
+							if parentGroupPath != "" {
+								field = field.Dot(ToCamel(parentGroupPath))
+							}
+							field.Dot(ToCamel(account.Name)).Op("=").Add(Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).Dot("PublicKey"))
+						})
 						return true
 					})
 					body.Return().Op("res")
