@@ -177,7 +177,7 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 
 			enumName := arg.Type.GetIdlTypeDefined().Defined
 			interfaceType := idl.Types.GetByName(enumName)
-			for _, variant := range interfaceType.Type.Variants {
+			for _, variant := range *interfaceType.Type.Variants {
 
 				enumBlock.BlockFunc(func(variantBlock *Group) {
 					variantBlock.Id("params").Op(":=").New(Id(insExportedName))
