@@ -2,8 +2,12 @@
 
 ![logo](logo.png)
 
-## usage
-
+## Usage
+1) Build `anchor-go` program.
+```bash
+go build .
+```
+2) Run the program.
 ```bash
 anchor-go --src=/path/to/idl.json
 ```
