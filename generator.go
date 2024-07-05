@@ -107,7 +107,7 @@ func genTypeName(idlTypeEnv IdlType) Code {
 		}
 	case idlTypeEnv.IsIdlTypeDefined():
 		{
-			st.Add(Id(idlTypeEnv.GetIdlTypeDefined().Defined))
+			st.Add(Id(idlTypeEnv.GetIdlTypeDefined().Defined.Name))
 		}
 	case idlTypeEnv.IsArray():
 		{
@@ -129,7 +129,7 @@ var typeRegistryComplexEnum = make(map[string]struct{})
 
 func isComplexEnum(envel IdlType) bool {
 	if envel.IsIdlTypeDefined() {
-		_, ok := typeRegistryComplexEnum[envel.GetIdlTypeDefined().Defined]
+		_, ok := typeRegistryComplexEnum[envel.GetIdlTypeDefined().Defined.Name]
 		return ok
 	}
 	return false
@@ -492,7 +492,7 @@ func genMarshalWithEncoder_struct(
 					}
 
 					if isComplexEnum(field.Type) {
-						enumTypeName := field.Type.GetIdlTypeDefined().Defined
+						enumTypeName := field.Type.GetIdlTypeDefined().Defined.Name
 						body.BlockFunc(func(argBody *Group) {
 							argBody.List(Id("tmp")).Op(":=").Id(formatEnumContainerName(enumTypeName)).Block()
 							argBody.Switch(Id("realvalue").Op(":=").Id("obj").Dot(exportedArgName).Op(".").Parens(Type())).
@@ -627,7 +627,7 @@ func genUnmarshalWithDecoder_struct(
 
 					if isComplexEnum(field.Type) {
 						// TODO:
-						enumName := field.Type.GetIdlTypeDefined().Defined
+						enumName := field.Type.GetIdlTypeDefined().Defined.Name
 						body.BlockFunc(func(argBody *Group) {
 
 							argBody.List(Id("tmp")).Op(":=").New(Id(formatEnumContainerName(enumName)))
