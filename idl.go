@@ -174,9 +174,11 @@ func (item *IdlAccountItem) UnmarshalJSON(data []byte) error {
 				}
 			}
 			// Single account:
-			// TODO: check both isMut and isSigner
-			if _, ok := v["isMut"]; ok {
-				if err := TranscodeJSON(temp, &item.IdlAccount); err != nil {
+			// TODO: check both writable and signer
+			_, signer := v["signer"]
+			_, writable := v["writable"]
+			if signer || writable {
+				if err := TranscodeJSON(temp, &env.IdlAccount); err != nil {
 					return err
 				}
 			}
@@ -193,8 +195,8 @@ func (item *IdlAccountItem) UnmarshalJSON(data []byte) error {
 type IdlAccount struct {
 	Docs     []string `json:"docs"` // @custom
 	Name     string   `json:"name"`
-	IsMut    bool     `json:"isMut"`
-	IsSigner bool     `json:"isSigner"`
+	Signer   bool     `json:"signer"`
+	Writable bool     `json:"writable"`
 	Optional bool     `json:"optional"` // @custom
 }
 
@@ -247,9 +249,12 @@ type IdlTypeOption struct {
 	Option IdlType `json:"option"`
 }
 
-// IdlTypeDefined is a User defined type.
+type IdLTypeDefinedName struct {
+	Name string `json:"name"`
+}
+// User defined type.
 type IdlTypeDefined struct {
-	Defined string `json:"defined"`
+	Defined IdLTypeDefinedName `json:"defined"`
 }
 
 // IdlTypeArray is a Wrapper type:

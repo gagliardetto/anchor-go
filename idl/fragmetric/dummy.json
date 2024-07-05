@@ -10,16 +10,7 @@
   "instructions": [
     {
       "name": "decrement",
-      "discriminator": [
-        106,
-        227,
-        168,
-        59,
-        248,
-        27,
-        150,
-        101
-      ],
+      "discriminator": [106, 227, 168, 59, 248, 27, 150, 101],
       "accounts": [
         {
           "name": "user_token_amount",
@@ -43,16 +34,7 @@
     },
     {
       "name": "increment",
-      "discriminator": [
-        11,
-        18,
-        104,
-        9,
-        104,
-        174,
-        59,
-        33
-      ],
+      "discriminator": [11, 18, 104, 9, 104, 174, 59, 33],
       "accounts": [
         {
           "name": "user_token_amount",
@@ -76,16 +58,7 @@
     },
     {
       "name": "initialize",
-      "discriminator": [
-        175,
-        175,
-        109,
-        31,
-        13,
-        152,
-        155,
-        237
-      ],
+      "discriminator": [175, 175, 109, 31, 13, 152, 155, 237],
       "accounts": [
         {
           "name": "user_token_amount",
@@ -108,44 +81,17 @@
   "accounts": [
     {
       "name": "UserTokenAmount",
-      "discriminator": [
-        126,
-        248,
-        226,
-        129,
-        204,
-        69,
-        113,
-        125
-      ]
+      "discriminator": [126, 248, 226, 129, 204, 69, 113, 125]
     }
   ],
   "events": [
     {
       "name": "Decremented",
-      "discriminator": [
-        100,
-        178,
-        255,
-        27,
-        214,
-        222,
-        85,
-        48
-      ]
+      "discriminator": [100, 178, 255, 27, 214, 222, 85, 48]
     },
     {
       "name": "Incremented",
-      "discriminator": [
-        92,
-        207,
-        119,
-        204,
-        71,
-        205,
-        108,
-        15
-      ]
+      "discriminator": [92, 207, 119, 204, 71, 205, 108, 15]
     }
   ],
   "types": [

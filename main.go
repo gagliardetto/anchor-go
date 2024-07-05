@@ -273,11 +273,18 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 	}
 
+	defs := make(map[string]IdlTypeDef)
 	{
 		file := NewGoFile(idl.Name, true)
 		// Declare types from IDL:
 		for _, typ := range idl.Types {
-			file.Add(genTypeDef(&idl, false, typ))
+			defs[typ.Name] = typ
+			typ_suffix := IdlTypeDef{
+				Name: typ.Name + "Type",
+				Type: typ.Type, 
+			}
+			
+			file.Add(genTypeDef(&idl, false, typ_suffix))
 		}
 		files = append(files, &FileWrapper{
 			Name: "types",
@@ -289,8 +296,18 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		file := NewGoFile(idl.Name, true)
 		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
+
+			if _, ok := defs[acc.Name]; ok {
+				acc_suffix := IdlTypeDef{
+					Name: defs[acc.Name].Name + "Account",
+					Type: defs[acc.Name].Type, 
+				}
+				file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc_suffix))
+			} else {
+				panic(`not implemented - only IDL from ("anchor": ">=0.30.0") is availavle`)
+			}
 			// generate type definition:
-			file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc))
+
 		}
 		files = append(files, &FileWrapper{
 			Name: "accounts",
@@ -302,6 +319,25 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 	for _, instruction := range idl.Instructions {
 		file := NewGoFile(idl.Name, true)
 		insExportedName := ToCamel(instruction.Name)
+		var args []IdlField
+		for _, arg := range instruction.Args {
+			idlFieldArg := IdlField{
+				Name: arg.Name,
+				Docs: arg.Docs,
+				Type: IdlType{
+					asString: arg.Type.asString,
+					asIdlTypeVec: arg.Type.asIdlTypeVec,
+					asIdlTypeOption: arg.Type.asIdlTypeOption,
+					asIdlTypeArray: arg.Type.asIdlTypeArray,
+					asIdlTypeDefined: &IdlTypeDefined{
+						Defined: IdLTypeDefinedName{
+							Name: arg.Type.asIdlTypeDefined.Defined.Name + "Type",
+						},
+					},
+				},
+			}
+			args = append(args, idlFieldArg)
+		}
 
 		// fmt.Println(RedBG(instruction.Name))
 
@@ -321,7 +357,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			}
 
 			code.Type().Id(insExportedName).StructFunc(func(fieldsGroup *Group) {
-				for argIndex, arg := range instruction.Args {
+				for argIndex, arg := range args {
 					if len(arg.Docs) > 0 {
 						if argIndex > 0 {
 							fieldsGroup.Line()
@@ -369,11 +405,11 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 						comment.WriteString(Sf("[%v] = ", accountIndex))
 						comment.WriteString("[")
-						if ia.IsMut {
+						if ia.Writable {
 							comment.WriteString("WRITE")
 						}
-						if ia.IsSigner {
-							if ia.IsMut {
+						if ia.Signer {
+							if ia.Writable {
 								comment.WriteString(", ")
 							}
 							comment.WriteString("SIGNER")
@@ -427,10 +463,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 									panic(account)
 								}
 								def := Qual(PkgSolanaGo, "Meta").Call(Qual(PkgSolanaGo, pureVarName))
-								if account.IsMut {
+								if account.Writable {
 									def.Dot("WRITE").Call()
 								}
-								if account.IsSigner {
+								if account.Signer {
 									def.Dot("SIGNER").Call()
 								}
 
@@ -450,7 +486,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		{
 			// Declare methods that set the parameters of the instruction:
 			code := Empty()
-			for _, arg := range instruction.Args {
+			for _, arg := range args {
 				exportedArgName := ToCamel(arg.Name)
 
 				code.Line().Line()
@@ -719,11 +755,11 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				).
 				BlockFunc(func(body *Group) {
 					// Body:
-					if len(instruction.Args) > 0 {
+					if len(args) > 0 {
 						body.Comment("Check whether all (required) parameters are set:")
 
 						body.BlockFunc(func(paramVerifyBody *Group) {
-							for _, arg := range instruction.Args {
+							for _, arg := range args {
 								exportedArgName := ToCamel(arg.Name)
 
 								// Optional params can be empty.
@@ -796,9 +832,9 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 									instructionBranchGroup.Line().Comment("Parameters of the instruction:")
 
-									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit(Sf("Params[len=%v]", len(instruction.Args)))).Dot("ParentFunc").Parens(Func().Parens(Id("paramsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(paramsBranchGroup *Group) {
-										longest := treeFindLongestNameFromFields(instruction.Args)
-										for _, arg := range instruction.Args {
+									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit(Sf("Params[len=%v]", len(args)))).Dot("ParentFunc").Parens(Func().Parens(Id("paramsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(paramsBranchGroup *Group) {
+										longest := treeFindLongestNameFromFields(args)
+										for _, arg := range args {
 											exportedArgName := ToCamel(arg.Name)
 											paramsBranchGroup.Id("paramsBranch").Dot("Child").
 												Call(
@@ -841,7 +877,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					false,
 					insExportedName,
 					"",
-					instruction.Args,
+					args,
 					true,
 				),
 			)
@@ -855,7 +891,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					false,
 					insExportedName,
 					"",
-					instruction.Args,
+					args,
 					bin.TypeID{},
 				))
 		}
@@ -863,7 +899,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		{
 			// Declare instruction initializer func:
 			paramNames := []string{}
-			for _, arg := range instruction.Args {
+			for _, arg := range args {
 				paramNames = append(paramNames, arg.Name)
 			}
 			code := Empty()
@@ -875,7 +911,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					ListFunc(func(params *Group) {
 						// Parameters:
 						{
-							for argIndex, arg := range instruction.Args {
+							for argIndex, arg := range args {
 								paramNames = append(paramNames, arg.Name)
 								params.Add(func() Code {
 									if argIndex == 0 {
@@ -923,7 +959,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 					// Body:
 					builder := body.Return().Id(formatBuilderFuncName(insExportedName)).Call()
 					{
-						for _, arg := range instruction.Args {
+						for _, arg := range args {
 							exportedArgName := ToCamel(arg.Name)
 							builder.Op(".").Line().Id("Set" + exportedArgName).Call(Id(arg.Name))
 						}
@@ -1045,10 +1081,10 @@ func genAccountGettersSetters(
 				// Body:
 				def := Id("inst").Dot("AccountMetaSlice").Index(Lit(index)).
 					Op("=").Qual(PkgSolanaGo, "Meta").Call(Id(lowerAccountName))
-				if account.IsMut {
+				if account.Writable {
 					def.Dot("WRITE").Call()
 				}
-				if account.IsSigner {
+				if account.Signer {
 					def.Dot("SIGNER").Call()
 				}
 
