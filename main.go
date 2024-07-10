@@ -132,13 +132,13 @@ func main() {
 		// spew.Dump(idl)
 
 		// Create subfolder for package for generated assets:
-		packageAssetFolderName := sighash.ToRustSnakeCase(idl.Name)
+		packageAssetFolderName := sighash.ToRustSnakeCase(idl.Metadata.Name)
 		var dstDirForFiles string
 		if GetConfig().Debug {
 			packageAssetFolderPath := path.Join(GetConfig().DstDir, packageAssetFolderName)
 			MustCreateFolderIfNotExists(packageAssetFolderPath, os.ModePerm)
 			// Create folder for assets generated during this run:
-			thisRunAssetFolderName := ToLowerCamel(idl.Name) + "_" + ts.Format(FilenameTimeFormat)
+			thisRunAssetFolderName := ToLowerCamel(idl.Metadata.Name) + "_" + ts.Format(FilenameTimeFormat)
 			thisRunAssetFolderPath := path.Join(packageAssetFolderPath, thisRunAssetFolderName)
 			// Create a new assets folder inside the main assets folder:
 			MustCreateFolderIfNotExists(thisRunAssetFolderPath, os.ModePerm)
@@ -275,7 +275,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 	defs := make(map[string]IdlTypeDef)
 	{
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(idl.Metadata.Name, true)
 		// Declare types from IDL:
 		for _, typ := range idl.Types {
 			defs[typ.Name] = typ
@@ -293,7 +293,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 	}
 
 	{
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(idl.Metadata.Name, true)
 		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
 
@@ -317,7 +317,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 	// Instructions:
 	for _, instruction := range idl.Instructions {
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(idl.Metadata.Name, true)
 		insExportedName := ToCamel(instruction.Name)
 		var args []IdlField
 		for _, arg := range instruction.Args {
@@ -1127,7 +1127,7 @@ func genAccountGettersSetters(
 }
 
 func genProgramBoilerplate(idl IDL) (*File, error) {
-	file := NewGoFile(idl.Name, true)
+	file := NewGoFile(idl.Metadata.Name, true)
 	for _, programDoc := range idl.Docs {
 		file.HeaderComment(programDoc)
 	}
@@ -1151,8 +1151,8 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 	{
 		// `SetProgramID` func:
 		code := Empty()
-		code.Func().Id("SetProgramID").Params(Id("pubkey").Qual(PkgSolanaGo, "PublicKey")).Block(
-			Id("ProgramID").Op("=").Id("pubkey"),
+		code.Func().Id("SetProgramID").Params(Id("PublicKey").Qual(PkgSolanaGo, "PublicKey")).Block(
+			Id("ProgramID").Op("=").Id("PublicKey"),
 			Qual(PkgSolanaGo, "RegisterInstructionDecoder").Call(Id("ProgramID"), Id("registryDecodeInstruction")),
 		)
 		file.Add(code.Line())
@@ -1160,7 +1160,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 	{
 		// ProgramName variable:
 		code := Empty()
-		programName := ToCamel(idl.Name)
+		programName := ToCamel(idl.Metadata.Name)
 		code.Const().Id("ProgramName").Op("=").Lit(programName)
 		file.Add(code.Line())
 	}
@@ -1733,7 +1733,7 @@ func treeFindLongestNameFromAccounts(accounts IdlAccountItemSlice) (ln int) {
 func treeFormatAccountName(name string) string {
 	cleanedName := name
 	if isSysVar(name) {
-		cleanedName = strings.TrimSuffix(getSysVarName(name), "Pubkey")
+		cleanedName = strings.TrimSuffix(getSysVarName(name), "PublicKey")
 	}
 	if len(cleanedName) > len("account") {
 		if strings.HasSuffix(cleanedName, "account") {

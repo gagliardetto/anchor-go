@@ -28,7 +28,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 
 	files := make([]*FileWrapper, 0)
 	{
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(idl.Metadata.Name, true)
 		// Declare testing tools:
 		{
 			code := Empty()
@@ -87,7 +87,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 		})
 	}
 	for _, instruction := range idl.Instructions {
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(idl.Metadata.Name, true)
 		insExportedName := ToCamel(instruction.Name)
 		{
 			// Declare test: encode, decode:

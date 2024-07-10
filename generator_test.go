@@ -19,7 +19,7 @@ func Test_genTypeName(t *testing.T) {
 	tests := []jsonToSource{
 		//
 		{
-			`{"type": "publicKey"}`,
+			`{"type": "pubkey"}`,
 			"var thing solanago.PublicKey",
 		},
 		{
@@ -76,7 +76,7 @@ func Test_genTypeName(t *testing.T) {
 			"var thing string",
 		},
 		{
-			`{"type": "publicKey"}`,
+			`{"type": "pubkey"}`,
 			"var thing solanago.PublicKey",
 		},
 
@@ -110,7 +110,7 @@ func Test_genTypeName(t *testing.T) {
 
 		// "vec":
 		{
-			`{"type": {"vec": "publicKey"}}`,
+			`{"type": {"vec": "pubkey"}}`,
 			"var thing []solanago.PublicKey",
 		},
 		{

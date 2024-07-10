@@ -11,7 +11,6 @@ import (
 // https://github.com/project-serum/anchor/blob/97e9e03fb041b8b888a9876a7c0676d9bb4736f3/ts/src/idl.ts
 type IDL struct {
 	Version      string           `json:"version"`
-	Name         string           `json:"name"`
 	Docs         []string         `json:"docs"` // @custom
 	Instructions []IdlInstruction `json:"instructions"`
 	State        *IdlState        `json:"state,omitempty"`
@@ -32,6 +31,7 @@ type IdlConstant struct {
 }
 
 type IdlMetadata struct {
+	Name    string `json:"name"`
 	Address string `json:"address"`
 }
 
@@ -229,7 +229,7 @@ const (
 	IdlTypeI128      IdlTypeAsString = "i128"
 	IdlTypeBytes     IdlTypeAsString = "bytes"
 	IdlTypeString    IdlTypeAsString = "string"
-	IdlTypePublicKey IdlTypeAsString = "publicKey"
+	IdlTypePubkey IdlTypeAsString = "pubkey"
 
 	// Custom additions:
 	IdlTypeUnixTimestamp IdlTypeAsString = "unixTimestamp"
