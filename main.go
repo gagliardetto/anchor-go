@@ -63,16 +63,7 @@ func main() {
 			panic(err)
 		}
 		if !exists {
-			if GetConfig().DstDir == generatedDir {
-				MustCreateFolderIfNotExists(generatedDir, os.ModePerm)
-			} else {
-				Sfln(
-					"[%s] destination dir doesn't exist: %s",
-					Red(XMark),
-					GetConfig().DstDir,
-				)
-				os.Exit(1)
-			}
+			MustCreateFolderIfNotExists(generatedDir, os.ModePerm)		
 		}
 	}
 
