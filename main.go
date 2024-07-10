@@ -1420,7 +1420,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 											insName := sighash.ToSnakeForSighash(instruction.Name)
 											insExportedName := ToCamel(instruction.Name)
 											variantBlock.Block(
-												List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
+												List(Id("Name").Op(":").Lit(insName), Id("Type").Op(":").Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
 											).Op(",")
 										}
 									}).Op(",").Line()

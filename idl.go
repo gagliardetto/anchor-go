@@ -178,7 +178,7 @@ func (item *IdlAccountItem) UnmarshalJSON(data []byte) error {
 			_, signer := v["signer"]
 			_, writable := v["writable"]
 			if signer || writable {
-				if err := TranscodeJSON(temp, &env.IdlAccount); err != nil {
+				if err := TranscodeJSON(temp, &item.IdlAccount); err != nil {
 					return err
 				}
 			}
@@ -186,7 +186,7 @@ func (item *IdlAccountItem) UnmarshalJSON(data []byte) error {
 			// panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
 		}
 	default:
-		return fmt.Errorf("Unknown kind: %s", spew.Sdump(temp))
+		return fmt.Errorf("unknown kind: %s", spew.Sdump(temp))
 	}
 
 	return nil
@@ -330,7 +330,7 @@ func (env *IdlType) UnmarshalJSON(data []byte) error {
 			// panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
 		}
 	default:
-		return fmt.Errorf("Unknown kind: %s", spew.Sdump(temp))
+		return fmt.Errorf("unknown kind: %s", spew.Sdump(temp))
 	}
 
 	return nil
