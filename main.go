@@ -63,7 +63,7 @@ func main() {
 			panic(err)
 		}
 		if !exists {
-			MustCreateFolderIfNotExists(generatedDir, os.ModePerm)		
+			MustCreateFolderIfNotExists(GetConfig().DstDir, os.ModePerm)		
 		}
 	}
 

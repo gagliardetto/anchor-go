@@ -1,5 +1,5 @@
 generated/
-anchor-go
+solana-anchor-go
 .vscode
 .idea
 .anchor
