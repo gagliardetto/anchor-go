@@ -1,4 +1,4 @@
-module github.com/gagliardetto/anchor-go
+module github.com/encrypt-x/solana-anchor-go
 
 go 1.16
 
