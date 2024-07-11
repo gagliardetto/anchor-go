@@ -696,6 +696,10 @@ func genUnmarshalWithDecoder_struct(
 						}
 					}
 
+					body.If(Op("!").Id("decoder").Dot("HasRemaining").Call()).Block(
+						Return(Nil()),
+					)
+
 				}
 
 				body.Return(Nil())

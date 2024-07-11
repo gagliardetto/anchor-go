@@ -259,14 +259,14 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			return nil, err
 		}
 
-		file.Add(Empty().Id(fmt.Sprintf(`
+		file.Add(Empty().Id(`
 func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instruction, err error) {
 	for _, ins := range message.Instructions {
 		var programID ag_solanago.PublicKey
 		if programID, err = message.Program(ins.ProgramIDIndex); err != nil {
 			return
 		}
-		if programID.String() != "%s" {
+		if !programID.Equals(ProgramID) {
 			continue
 		}
 		var accounts []*ag_solanago.AccountMeta
@@ -274,14 +274,14 @@ func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instructi
 			return
 		}
 		var insDecoded *Instruction
-		if insDecoded, err = DecodeInstruction(accounts, ins.Data); err != nil {
+		if insDecoded, err = decodeInstruction(accounts, ins.Data); err != nil {
 			return
 		}
 		instructions = append(instructions, insDecoded)
 	}
 	return
 }
-`, idl.Address)))
+`))
 
 		files = append(files, &FileWrapper{
 			Name: "instructions",
@@ -382,17 +382,21 @@ type EventData interface {
 const eventLogPrefix = "Program data: "
 
 func DecodeEvents(logMessages []string) (evts []*Event, err error) {
+	decoder := ag_binary.NewDecoderWithEncoding(nil, ag_binary.EncodingBorsh)
 	for _, log := range logMessages {
 		if strings.HasPrefix(log, eventLogPrefix) {
 			eventBase64 := log[len(eventLogPrefix):]
+
 			var eventBinary []byte
 			if eventBinary, err = base64.StdEncoding.DecodeString(eventBase64); err != nil {
 				return
 			}
+
 			eventDiscriminator := ag_binary.TypeID(eventBinary[:8])
 			if eventType, ok := eventTypes[eventDiscriminator]; ok {
 				eventData := reflect.New(eventType).Interface().(EventData)
-				if err = eventData.UnmarshalWithDecoder(ag_binary.NewBorshDecoder(eventBinary)); err != nil {
+				decoder.Reset(eventBinary)
+				if err = eventData.UnmarshalWithDecoder(decoder); err != nil {
 					return
 				}
 				evts = append(evts, &Event{
@@ -1723,7 +1727,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 				).
 				BlockFunc(func(body *Group) {
 					// Body:
-					body.List(Id("inst"), Err()).Op(":=").Id("DecodeInstruction").Call(Id("accounts"), Id("data"))
+					body.List(Id("inst"), Err()).Op(":=").Id("decodeInstruction").Call(Id("accounts"), Id("data"))
 
 					body.If(
 						Err().Op("!=").Nil(),
@@ -1737,7 +1741,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		{
 			// `DecodeInstruction` func:
 			code := Empty()
-			code.Func().Id("DecodeInstruction").
+			code.Func().Id("decodeInstruction").
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:

@@ -55,7 +55,8 @@
                 "fields": [
                     { "name": "user", "type": "pubkey" },
                     { "name": "token", "type": "string" },
-                    { "name": "amount", "type": "u64" }
+                    { "name": "amount", "type": "u64" },
+                    { "name": "extra", "type": "u64" }
                 ]
             }
         },
