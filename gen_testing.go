@@ -3,6 +3,7 @@ package main
 import (
 	. "github.com/dave/jennifer/jen"
 	. "github.com/gagliardetto/utilz"
+	"strings"
 )
 
 func isAnyFieldComplexEnum(envelopes ...IdlField) bool {
@@ -138,7 +139,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 		}
 		////
 		files = append(files, &FileWrapper{
-			Name: insExportedName + "_test",
+			Name: strings.ToLower(insExportedName) + "_test",
 			File: file,
 		})
 	}

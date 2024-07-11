@@ -32,6 +32,7 @@ func main() {
 	filenames := FlagStringArray{}
 	flag.Var(&filenames, "src", "Path to source; can use multiple times.")
 	flag.StringVar(&conf.DstDir, "dst", generatedDir, "Destination folder")
+	flag.StringVar(&conf.Package, "pkg", "", "Set package name to generate, default value is metadata.name of the source IDL.")
 	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
 	flag.BoolVar(&conf.RemoveAccountSuffix, "remove-account-suffix", false, "Remove \"Account\" suffix from accessors (if leads to duplication, e.g. \"SetFooAccountAccount\")")
 
@@ -63,7 +64,7 @@ func main() {
 			panic(err)
 		}
 		if !exists {
-			MustCreateFolderIfNotExists(GetConfig().DstDir, os.ModePerm)		
+			MustCreateFolderIfNotExists(GetConfig().DstDir, os.ModePerm)
 		}
 	}
 
@@ -100,12 +101,12 @@ func main() {
 					OrangeBG("[?]"),
 				)
 			}
-			if len(idl.Events) > 0 {
-				Sfln(
-					"%s idl.Events is defined, but generator is not implemented yet.",
-					OrangeBG("[?]"),
-				)
-			}
+			//if len(idl.Events) > 0 {
+			//	Sfln(
+			//		"%s idl.Events is defined, but generator is not implemented yet.",
+			//		OrangeBG("[?]"),
+			//	)
+			//}
 			if len(idl.Errors) > 0 {
 				Sfln(
 					"%s idl.Errors is defined, but generator is not implemented yet.",
@@ -160,19 +161,19 @@ func main() {
 			mdf.AddNewRequire("github.com/davecgh/go-spew", "v1.1.1", false)
 			mdf.Cleanup()
 
-			callbacks = append(callbacks, func() {
-				Ln()
-				Ln(Bold("Don't forget to import the necessary dependencies!"))
-				Ln()
-				for _, v := range mdf.Require {
-					Sfln(
-						"	go get %s@%s",
-						v.Mod.Path,
-						v.Mod.Version,
-					)
-				}
-				Ln()
-			})
+			//callbacks = append(callbacks, func() {
+			//	Ln()
+			//	Ln(Bold("Don't forget to import the necessary dependencies!"))
+			//	Ln()
+			//	for _, v := range mdf.Require {
+			//		Sfln(
+			//			"	go get %s@%s",
+			//			v.Mod.Path,
+			//			v.Mod.Version,
+			//		)
+			//	}
+			//	Ln()
+			//})
 
 			if GetConfig().ModPath != "" {
 				mfBytes, err := mdf.Format()
@@ -237,6 +238,14 @@ func FormatSighash(buf []byte) string {
 }
 
 func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
+	if idl.Address == "" {
+		idl.Address = idl.Metadata.Address
+	}
+
+	if GetConfig().Package != "" {
+		idl.Metadata.Name = GetConfig().Package
+	}
+
 	if err := idl.Validate(); err != nil {
 		return nil, err
 	}
@@ -249,6 +258,31 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		file.Add(Empty().Id(fmt.Sprintf(`
+func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instruction, err error) {
+	for _, ins := range message.Instructions {
+		var programID ag_solanago.PublicKey
+		if programID, err = message.Program(ins.ProgramIDIndex); err != nil {
+			return
+		}
+		if programID.String() != "%s" {
+			continue
+		}
+		var accounts []*ag_solanago.AccountMeta
+		if accounts, err = ins.ResolveInstructionAccounts(message); err != nil {
+			return
+		}
+		var insDecoded *Instruction
+		if insDecoded, err = DecodeInstruction(accounts, ins.Data); err != nil {
+			return
+		}
+		instructions = append(instructions, insDecoded)
+	}
+	return
+}
+`, idl.Address)))
+
 		files = append(files, &FileWrapper{
 			Name: "instructions",
 			File: file,
@@ -270,12 +304,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		// Declare types from IDL:
 		for _, typ := range idl.Types {
 			defs[typ.Name] = typ
-			typ_suffix := IdlTypeDef{
-				Name: typ.Name + "Type",
-				Type: typ.Type, 
-			}
-			
-			file.Add(genTypeDef(&idl, false, typ_suffix))
+			file.Add(genTypeDef(&idl, nil, IdlTypeDef{
+				Name: typ.Name + "Data",
+				Type: typ.Type,
+			}))
 		}
 		files = append(files, &FileWrapper{
 			Name: "types",
@@ -287,21 +319,95 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		file := NewGoFile(idl.Metadata.Name, true)
 		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
-
 			if _, ok := defs[acc.Name]; ok {
-				acc_suffix := IdlTypeDef{
+				file.Add(genTypeDef(&idl, acc.Discriminator, IdlTypeDef{
 					Name: defs[acc.Name].Name + "Account",
-					Type: defs[acc.Name].Type, 
-				}
-				file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc_suffix))
+					Type: defs[acc.Name].Type,
+				}))
 			} else {
-				panic(`not implemented - only IDL from ("anchor": ">=0.30.0") is availavle`)
+				panic(`not implemented - only IDL from ("anchor": ">=0.30.0") is available`)
 			}
-			// generate type definition:
-
 		}
 		files = append(files, &FileWrapper{
 			Name: "accounts",
+			File: file,
+		})
+	}
+
+	{
+		file := NewGoFile(idl.Metadata.Name, true)
+
+		// Declare account layouts from IDL:
+		for _, evt := range idl.Events {
+			if _, ok := defs[evt.Name]; ok {
+				file.Add(genTypeDef(&idl, evt.Discriminator, IdlTypeDef{
+					Name: defs[evt.Name].Name + "EventData",
+					Type: defs[evt.Name].Type,
+				}))
+			} else {
+				panic(`not implemented - only IDL from ("anchor": ">=0.30.0") is available`)
+			}
+		}
+
+		file.Add(Empty().Var().Id("eventTypes").Op("=").Map(Index(Lit(8)).Byte()).Qual("reflect", "Type").Values(DictFunc(func(d Dict) {
+			for _, evt := range idl.Events {
+				if def, ok := defs[evt.Name]; ok {
+					d[Id(def.Name+"EventDataDiscriminator")] = Id("reflect.TypeOf(" + def.Name + "EventData{})")
+				}
+			}
+		})))
+
+		file.Add(Empty().Var().Id("eventNames").Op("=").Map(Index(Lit(8)).Byte()).String().Values(DictFunc(func(d Dict) {
+			for _, evt := range idl.Events {
+				if def, ok := defs[evt.Name]; ok {
+					d[Id(def.Name+"EventDataDiscriminator")] = Lit(def.Name)
+				}
+			}
+		})))
+
+		// to generate import statements
+		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual("strings", "Builder").Op("=").Nil()))
+		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual("encoding/base64", "Encoding").Op("=").Nil()))
+
+		file.Add(Empty().Id(`
+type Event struct {
+	Name string
+	Data EventData
+}
+
+type EventData interface {
+	UnmarshalWithDecoder(decoder *ag_binary.Decoder) error
+}
+
+const eventLogPrefix = "Program data: "
+
+func DecodeEvents(logMessages []string) (evts []*Event, err error) {
+	for _, log := range logMessages {
+		if strings.HasPrefix(log, eventLogPrefix) {
+			eventBase64 := log[len(eventLogPrefix):]
+			var eventBinary []byte
+			if eventBinary, err = base64.StdEncoding.DecodeString(eventBase64); err != nil {
+				return
+			}
+			eventDiscriminator := ag_binary.TypeID(eventBinary[:8])
+			if eventType, ok := eventTypes[eventDiscriminator]; ok {
+				eventData := reflect.New(eventType).Interface().(EventData)
+				if err = eventData.UnmarshalWithDecoder(ag_binary.NewBorshDecoder(eventBinary)); err != nil {
+					return
+				}
+				evts = append(evts, &Event{
+					Name: eventNames[eventDiscriminator],
+					Data: eventData,
+				})
+			}
+		}
+	}
+	return
+}
+`))
+
+		files = append(files, &FileWrapper{
+			Name: "events",
 			File: file,
 		})
 	}
@@ -316,13 +422,13 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				Name: arg.Name,
 				Docs: arg.Docs,
 				Type: IdlType{
-					asString: arg.Type.asString,
-					asIdlTypeVec: arg.Type.asIdlTypeVec,
+					asString:        arg.Type.asString,
+					asIdlTypeVec:    arg.Type.asIdlTypeVec,
 					asIdlTypeOption: arg.Type.asIdlTypeOption,
-					asIdlTypeArray: arg.Type.asIdlTypeArray,
+					asIdlTypeArray:  arg.Type.asIdlTypeArray,
 					asIdlTypeDefined: &IdlTypeDefined{
 						Defined: IdLTypeDefinedName{
-							Name: arg.Type.asIdlTypeDefined.Defined.Name + "Type",
+							Name: arg.Type.asIdlTypeDefined.Defined.Name + "Data",
 						},
 					},
 				},
@@ -1022,7 +1128,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 		////
 		files = append(files, &FileWrapper{
-			Name: insExportedName,
+			Name: strings.ToLower(insExportedName),
 			File: file,
 		})
 	}
@@ -1232,6 +1338,9 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 								ins.Op("=").Qual(PkgDfuseBinary, "TypeID").Call(
 									Index(Lit(8)).Byte().Op("{").ListFunc(func(byteGroup *Group) {
 										sighash := bin.SighashTypeID(bin.SIGHASH_GLOBAL_NAMESPACE, toBeHashed)
+										if instruction.Discriminator != nil {
+											sighash = *instruction.Discriminator
+										}
 										for _, byteVal := range sighash[:] {
 											byteGroup.Lit(int(byteVal))
 										}

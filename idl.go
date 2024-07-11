@@ -20,6 +20,7 @@ type IDL struct {
 	Errors       []IdlErrorCode   `json:"errors,omitempty"`
 	Constants    []IdlConstant    `json:"constants,omitempty"`
 
+	Address  string       `json:"address,omitempty"`
 	Metadata *IdlMetadata `json:"metadata,omitempty"` // NOTE: deprecated
 }
 
@@ -54,21 +55,16 @@ func (idl *IDL) Validate() error {
 }
 
 type IdlEvent struct {
-	Name   string          `json:"name"`
-	Fields []IdlEventField `json:"fields"`
-}
-
-type IdlEventField struct {
-	Name  string  `json:"name"`
-	Type  IdlType `json:"type"`
-	Index bool    `json:"index"`
+	Name          string   `json:"name"`
+	Discriminator *[8]byte `json:"discriminator,omitempty"`
 }
 
 type IdlInstruction struct {
-	Name     string              `json:"name"`
-	Docs     []string            `json:"docs"` // @custom
-	Accounts IdlAccountItemSlice `json:"accounts"`
-	Args     []IdlField          `json:"args"`
+	Name          string              `json:"name"`
+	Discriminator *[8]byte            `json:"discriminator,omitempty"`
+	Docs          []string            `json:"docs"` // @custom
+	Accounts      IdlAccountItemSlice `json:"accounts"`
+	Args          []IdlField          `json:"args"`
 }
 
 type IdlAccountItemSlice []IdlAccountItem
@@ -216,19 +212,19 @@ type IdlField struct {
 type IdlTypeAsString string
 
 const (
-	IdlTypeBool      IdlTypeAsString = "bool"
-	IdlTypeU8        IdlTypeAsString = "u8"
-	IdlTypeI8        IdlTypeAsString = "i8"
-	IdlTypeU16       IdlTypeAsString = "u16"
-	IdlTypeI16       IdlTypeAsString = "i16"
-	IdlTypeU32       IdlTypeAsString = "u32"
-	IdlTypeI32       IdlTypeAsString = "i32"
-	IdlTypeU64       IdlTypeAsString = "u64"
-	IdlTypeI64       IdlTypeAsString = "i64"
-	IdlTypeU128      IdlTypeAsString = "u128"
-	IdlTypeI128      IdlTypeAsString = "i128"
-	IdlTypeBytes     IdlTypeAsString = "bytes"
-	IdlTypeString    IdlTypeAsString = "string"
+	IdlTypeBool   IdlTypeAsString = "bool"
+	IdlTypeU8     IdlTypeAsString = "u8"
+	IdlTypeI8     IdlTypeAsString = "i8"
+	IdlTypeU16    IdlTypeAsString = "u16"
+	IdlTypeI16    IdlTypeAsString = "i16"
+	IdlTypeU32    IdlTypeAsString = "u32"
+	IdlTypeI32    IdlTypeAsString = "i32"
+	IdlTypeU64    IdlTypeAsString = "u64"
+	IdlTypeI64    IdlTypeAsString = "i64"
+	IdlTypeU128   IdlTypeAsString = "u128"
+	IdlTypeI128   IdlTypeAsString = "i128"
+	IdlTypeBytes  IdlTypeAsString = "bytes"
+	IdlTypeString IdlTypeAsString = "string"
 	IdlTypePubkey IdlTypeAsString = "pubkey"
 
 	// Custom additions:
@@ -252,6 +248,7 @@ type IdlTypeOption struct {
 type IdLTypeDefinedName struct {
 	Name string `json:"name"`
 }
+
 // User defined type.
 type IdlTypeDefined struct {
 	Defined IdLTypeDefinedName `json:"defined"`
@@ -379,9 +376,10 @@ func (env *IdlType) GetArray() *IdlTypeArray {
 }
 
 type IdlTypeDef struct {
-	Name string       `json:"name"`
-	Type IdlTypeDefTy `json:"type"`
-	Docs []string     `json:"docs"`
+	Name          string       `json:"name"`
+	Type          IdlTypeDefTy `json:"type"`
+	Docs          []string     `json:"docs,omitempty"`
+	Discriminator *[8]byte     `json:"discriminator,omitempty"`
 }
 
 type IdlTypeDefTy struct {

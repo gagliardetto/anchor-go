@@ -150,7 +150,7 @@ func registerComplexEnums(idl *IDL, def IdlTypeDef) {
 	}
 }
 
-func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
+func genTypeDef(idl *IDL, withDiscriminator *[8]byte, def IdlTypeDef) Code {
 
 	st := newStatement()
 	switch def.Type.Kind {
@@ -184,14 +184,16 @@ func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
 				code := Empty()
 				exportedAccountName := ToCamel(def.Name)
 
-				toBeHashed := ToCamel(def.Name)
+				//toBeHashed := ToCamel(def.Name)
 
-				if withDiscriminator {
+				if withDiscriminator != nil {
 					discriminatorName := exportedAccountName + "Discriminator"
-					if GetConfig().Debug {
-						code.Comment(Sf(`hash("%s:%s")`, bin.SIGHASH_ACCOUNT_NAMESPACE, toBeHashed)).Line()
-					}
-					sighash := bin.SighashTypeID(bin.SIGHASH_ACCOUNT_NAMESPACE, toBeHashed)
+					//if GetConfig().Debug {
+					//	code.Comment(Sf(`hash("%s:%s")`, bin.SIGHASH_ACCOUNT_NAMESPACE, toBeHashed)).Line()
+					//}
+					//sighash := bin.SighashTypeID(bin.SIGHASH_ACCOUNT_NAMESPACE, toBeHashed)
+
+					sighash := bin.TypeID(*withDiscriminator)
 					code.Var().Id(discriminatorName).Op("=").Index(Lit(8)).Byte().Op("{").ListFunc(func(byteGroup *Group) {
 						for _, byteVal := range sighash[:] {
 							byteGroup.Lit(int(byteVal))

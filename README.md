@@ -6,10 +6,11 @@
 
 ```bash
 $ go build
-$ ./anchor-go --src=./idl/fragmetric/dummy.json
+$ ./solana-anchor-go -src=./idl/fragmetric/dummy.json -pkg=dummy -dst=./generated/dummy
 ```
 
 Generated Code will be generated and saved to `./generated/`.
+And check `./example/dummy_test.go` for generated code usage.
 
 ## TODO
 - [x] instructions
