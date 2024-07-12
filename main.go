@@ -556,7 +556,7 @@ func DecodeEvents(logMessages []string) (evts []*Event, err error) {
 						Id("AccountMetaSlice").Op(":").Make(Qual(PkgSolanaGo, "AccountMetaSlice"), Lit(instruction.Accounts.NumAccounts())).Op(","),
 					)
 
-					// Set sysvar accounts:
+					// Set sysvar accounts and constant accounts:
 					instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
 						if isVar(account.Name) {
 							pureVarName := getSysVarName(account.Name)
@@ -573,11 +573,19 @@ func DecodeEvents(logMessages []string) (evts []*Event, err error) {
 								if account.Signer {
 									def.Dot("SIGNER").Call()
 								}
-
 								body.Id("nd").Dot("AccountMetaSlice").Index(Lit(index)).Op("=").Add(def)
 							} else {
 								panic(account)
 							}
+						} else if account.Address != "" {
+							def := Qual(PkgSolanaGo, "Meta").Call(Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(account.Address)))
+							if account.Writable {
+								def.Dot("WRITE").Call()
+							}
+							if account.Signer {
+								def.Dot("SIGNER").Call()
+							}
+							body.Id("nd").Dot("AccountMetaSlice").Index(Lit(index)).Op("=").Add(def)
 						}
 						return true
 					})
@@ -720,6 +728,7 @@ func DecodeEvents(logMessages []string) (evts []*Event, err error) {
 						groupMemberIndex,
 						exportedAccountName,
 						lowerAccountName,
+						instruction.Accounts,
 					))
 					groupMemberIndex++
 				}
@@ -1157,6 +1166,7 @@ func genAccountGettersSetters(
 	index int,
 	exportedAccountName string,
 	lowerAccountName string,
+	accounts []IdlAccountItem,
 ) Code {
 	code := Empty()
 
@@ -1167,6 +1177,7 @@ func genAccountGettersSetters(
 		for _, doc := range account.Docs {
 			code.Comment(doc).Line()
 		}
+
 		// Create account setters:
 		code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(name).
 			Params(
@@ -1191,11 +1202,177 @@ func genAccountGettersSetters(
 				if account.Signer {
 					def.Dot("SIGNER").Call()
 				}
-
 				body.Add(def)
 
 				body.Return().Id("inst")
 			})
+	}
+
+	{ // create PDA helper
+		/**
+		func FindUserTokenAmountAccountAddress(user ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+			pda, bumpSeed, err = findUserTokenAmountAccountAddress(user, 0)
+			return
+		}
+
+		func FindUserTokenAmountAccountAddressWithBumpSeed(user ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+			pda, _, err = findUserTokenAmountAccountAddress(user, bumpSeed)
+			return
+		}
+
+		func findUserTokenAmountAccountAddress(user ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+			var seeds [][]byte
+			seeds = append(seeds, []byte{1,2,3})
+			seeds = append(seeds, user.Bytes())
+			if knownBumpSeed != 0 {
+				seeds = append(seeds, []byte{byte(bumpSeed)})
+				pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+			} else {
+				pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+			}
+			return
+		}
+		*/
+		if account.PDA != nil {
+			code.Line().Line()
+			name := formatAccountAccessorName("find", exportedAccountName) + "Address"
+
+			// find seeds
+			seedValues := make([][]byte, len(account.PDA.Seeds))
+			seedRefs := make([]string, len(account.PDA.Seeds))
+		OUTER:
+			for i, seedDef := range account.PDA.Seeds {
+				if seedDef.Value != nil {
+					seedValues[i] = seedDef.Value
+				} else {
+					for _, acc := range accounts {
+						if acc.IdlAccount.Name == seedDef.Path {
+							seedRefs[i] = ToLowerCamel(acc.IdlAccount.Name)
+							continue OUTER
+						}
+					}
+					panic("cannot find related account path " + seedDef.Path)
+				}
+			}
+
+			code.Func().Id(name).
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						for _, seedRef := range seedRefs {
+							if seedRef != "" {
+								params.Id(seedRef).Qual(PkgSolanaGo, "PublicKey")
+							}
+						}
+						params.Id("knownBumpSeed").Uint8()
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Id("pda").Qual(PkgSolanaGo, "PublicKey")
+						results.Id("bumpSeed").Uint8()
+						results.Id("err").Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					// Body:
+					body.Add(Var().Id("seeds").Index().Index().Byte())
+
+					for i, seedValue := range seedValues {
+						if seedValue != nil {
+							body.Add(Id("seeds").Op("=").Append(Id("seeds"), Index().Byte().Call(Lit(string(seedValue)))))
+						} else {
+							seedRef := seedRefs[i]
+							body.Add(Id("seeds").Op("=").Append(Id("seeds"), Id(seedRef).Dot("Bytes").Call()))
+						}
+					}
+
+					body.Add(
+						If(Id("knownBumpSeed").Op("!=").Lit(0)).BlockFunc(func(group *Group) {
+							group.Add(Id("seeds").Op("=").Append(Id("seeds"), Index().Byte().Values(Byte().Call(Id("bumpSeed")))))
+							group.Add(List(Id("pda"), Id("err")).Op("=").Add(Qual(PkgSolanaGo, "CreateProgramAddress").Call(Id("seeds"), Id("ProgramID"))))
+						}).
+							Else().BlockFunc(func(group *Group) {
+							group.Add(List(Id("pda"), Id("bumpSeed"), Id("err")).Op("=").Add(Qual(PkgSolanaGo, "FindProgramAddress").Call(Id("seeds"), Id("ProgramID"))))
+						}),
+					)
+
+					body.Return()
+				})
+
+			code.Line().Line()
+			name2 := formatAccountAccessorName("Find", exportedAccountName) + "AddressWithBumpSeed"
+			code.Commentf("%s calculates %s account address with given seeds and a known bump seed.", name2, exportedAccountName).Line()
+			code.Func().Id(name2).
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						for _, seedRef := range seedRefs {
+							if seedRef != "" {
+								params.Id(seedRef).Qual(PkgSolanaGo, "PublicKey")
+							}
+						}
+						params.Id("bumpSeed").Uint8()
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Id("pda").Qual(PkgSolanaGo, "PublicKey")
+						results.Id("err").Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					body.Add(List(Id("pda"), Id("_"), Id("err")).Op("=").Id(name).CallFunc(func(group *Group) {
+						for _, seedRef := range seedRefs {
+							if seedRef != "" {
+								group.Add(Id(seedRef))
+							}
+						}
+						group.Add(Id("bumpSeed"))
+						return
+					}))
+
+					body.Return()
+				})
+
+			code.Line().Line()
+			name3 := formatAccountAccessorName("Find", exportedAccountName) + "Address"
+			code.Commentf("%s finds %s account address with given seeds.", name3, exportedAccountName).Line()
+			code.Func().Id(name3).
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						for _, seedRef := range seedRefs {
+							if seedRef != "" {
+								params.Id(seedRef).Qual(PkgSolanaGo, "PublicKey")
+							}
+						}
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Id("pda").Qual(PkgSolanaGo, "PublicKey")
+						results.Id("bumpSeed").Uint8()
+						results.Id("err").Error()
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					body.Add(List(Id("pda"), Id("bumpSeed"), Id("err")).Op("=").Id(name).CallFunc(func(group *Group) {
+						for _, seedRef := range seedRefs {
+							if seedRef != "" {
+								group.Add(Id(seedRef))
+							}
+						}
+						group.Add(Lit(0))
+						return
+					}))
+
+					body.Return()
+				})
+		}
 	}
 
 	{ // Create account getters:

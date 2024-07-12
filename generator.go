@@ -422,9 +422,10 @@ func genTypeDef(idl *IDL, withDiscriminator *[8]byte, def IdlTypeDef) Code {
 
 				// Declare the method to implement the parent enum interface:
 				if variant.IsUint8() {
-					code.Func().Params(Id("_").Op("*").Id(variantTypeNameComplex)).Id(interfaceMethodName).Params().Block().Line().Line()
+					code.Func().Params(Id("_").Id(variantTypeNameComplex)).Id(interfaceMethodName).Params().Block().Line().Line()
 				} else {
-					code.Func().Params(Id("_").Op("*").Id(variantTypeNameComplex)).Id(interfaceMethodName).Params().Block().Line().Line()
+					// .Op("*") why had used pointer receiver?
+					code.Func().Params(Id("_").Id(variantTypeNameComplex)).Id(interfaceMethodName).Params().Block().Line().Line()
 				}
 			}
 

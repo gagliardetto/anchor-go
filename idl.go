@@ -173,13 +173,13 @@ func (item *IdlAccountItem) UnmarshalJSON(data []byte) error {
 			// TODO: check both writable and signer
 			_, signer := v["signer"]
 			_, writable := v["writable"]
-			if signer || writable {
+			if signer || writable || v["address"] != "" {
 				if err := TranscodeJSON(temp, &item.IdlAccount); err != nil {
 					return err
 				}
+			} else {
+				panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
 			}
-
-			// panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
 		}
 	default:
 		return fmt.Errorf("unknown kind: %s", spew.Sdump(temp))
@@ -189,11 +189,23 @@ func (item *IdlAccountItem) UnmarshalJSON(data []byte) error {
 }
 
 type IdlAccount struct {
-	Docs     []string `json:"docs"` // @custom
-	Name     string   `json:"name"`
-	Signer   bool     `json:"signer"`
-	Writable bool     `json:"writable"`
-	Optional bool     `json:"optional"` // @custom
+	Docs     []string       `json:"docs"` // @custom
+	Name     string         `json:"name"`
+	Signer   bool           `json:"signer"`
+	Writable bool           `json:"writable"`
+	Optional bool           `json:"optional"`          // @custom
+	Address  string         `json:"address,omitempty"` // constant address
+	PDA      *idlAccountPDA `json:"pda,omitempty"`
+}
+
+type idlAccountPDA struct {
+	Seeds []idlAccountPDASeed `json:"seeds"`
+}
+
+type idlAccountPDASeed struct {
+	Kind  string `json:"kind"`  // const or account
+	Value []byte `json:"value"` // const
+	Path  string `json:"path,omitempty"`
 }
 
 // IdlAccounts is a nested/recursive version of IdlAccount.

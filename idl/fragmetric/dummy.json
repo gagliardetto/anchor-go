@@ -1,5 +1,5 @@
 {
-  "address": "5yYKAKV5r62ooXrKZNpxr9Bkk7CTtpyJ8sXD7k2WryUc",
+  "address": "A58NQYmJCyDPsc1EfaQZ99piFopPtCYArP242rLTbYbV",
   "metadata": {
     "name": "dummy",
     "version": "0.1.0",
@@ -89,7 +89,36 @@
         {
           "name": "user_token_amount",
           "writable": true,
-          "signer": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  95,
+                  97,
+                  109,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
         },
         {
           "name": "user",
@@ -264,6 +293,14 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
           {
             "name": "token",
             "type": "string"
