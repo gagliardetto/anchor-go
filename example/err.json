@@ -1,0 +1,31 @@
+{
+  "code": 0,
+  "message": "blabla",
+  "data": {
+    "accounts": null,
+    "err": {
+      "InstructionError": [
+        1,
+        {
+          "Custom": 6001
+        }
+      ]
+    },
+    "innerInstructions": null,
+    "logs": [
+      "Program A58NQYmJCyDPsc1EfaQZ99piFopPtCYArP242rLTbYbV invoke [1]",
+      "Program log: Instruction: Increment",
+      "Program data: XM93zEfNbA/Qd4bdeFpuBGi0pMA2wRt86zDFzhcORhcfHWAbFNkfAgcAAABMU1QxMDAxrggAAAAAAAA=",
+      "Program A58NQYmJCyDPsc1EfaQZ99piFopPtCYArP242rLTbYbV consumed 3830 of 400000 compute units",
+      "Program A58NQYmJCyDPsc1EfaQZ99piFopPtCYArP242rLTbYbV success",
+      "Program A58NQYmJCyDPsc1EfaQZ99piFopPtCYArP242rLTbYbV invoke [1]",
+      "Program log: Instruction: VersionedMethod",
+      "Program data: zChHawm68OkAAAAAAAAAAAAAAAA=",
+      "Program log: AnchorError thrown in programs/dummy/src/lib.rs:113. Error Code: NotImplemented. Error Number: 6001. Error Message: not implemented.",
+      "Program A58NQYmJCyDPsc1EfaQZ99piFopPtCYArP242rLTbYbV consumed 4343 of 396170 compute units",
+      "Program A58NQYmJCyDPsc1EfaQZ99piFopPtCYArP242rLTbYbV failed: custom program error: 0x1771"
+    ],
+    "returnData": null,
+    "unitsConsumed": 8173
+  }
+}

@@ -17,6 +17,6 @@ And check `./example/dummy_test.go` for generated code usage.
 - [x] accounts
 - [x] types
 - [x] events
-- [ ] errors
+- [x] errors
 - [ ] handle tuple types
-- [ ] constants
+- [ ] constants (?)

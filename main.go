@@ -107,12 +107,12 @@ func main() {
 			//		OrangeBG("[?]"),
 			//	)
 			//}
-			if len(idl.Errors) > 0 {
-				Sfln(
-					"%s idl.Errors is defined, but generator is not implemented yet.",
-					OrangeBG("[?]"),
-				)
-			}
+			//if len(idl.Errors) > 0 {
+			//	Sfln(
+			//		"%s idl.Errors is defined, but generator is not implemented yet.",
+			//		OrangeBG("[?]"),
+			//	)
+			//}
 			if len(idl.Constants) > 0 {
 				Sfln(
 					"%s idl.Constants is defined, but generator is not implemented yet.",
@@ -415,6 +415,103 @@ func DecodeEvents(logMessages []string) (evts []*Event, err error) {
 
 		files = append(files, &FileWrapper{
 			Name: "events",
+			File: file,
+		})
+	}
+
+	{
+		// define custom errors
+		file := NewGoFile(idl.Metadata.Name, true)
+
+		// to generate import statements
+		file.Add(Var().Defs(
+			Id("_").Op("*").Qual("encoding/json", "Encoder").Op("=").Nil(),
+			Id("_").Op("*").Qual("github.com/gagliardetto/solana-go/rpc/jsonrpc", "RPCError").Op("=").Nil(),
+			Id("_").Qual("fmt", "Formatter").Op("=").Nil(),
+			Id("_").Op("=").Qual("errors", "ErrUnsupported"),
+		))
+
+		file.Add(Var().DefsFunc(func(group *Group) {
+			errDict := Dict{}
+			for _, errDef := range idl.Errors {
+				name := "Err" + ToCamel(errDef.Name)
+				group.Add(Id(name).Op("=").Op("&").Id("customErrorDef").Values(Dict{
+					Id("code"): Lit(errDef.Code),
+					Id("name"): Lit(errDef.Name),
+					Id("msg"):  Lit(errDef.Msg),
+				}))
+				errDict[Lit(errDef.Code)] = Id(name)
+			}
+			group.Add(Id("Errors").Op("=").Map(Int()).Id("CustomError").Values(errDict))
+		}))
+
+		file.Add(Empty().Id(`
+type CustomError interface {
+	Code() int
+	Name() string
+	Error() string
+}
+
+type customErrorDef struct {
+	code int
+	name string
+	msg  string
+}
+
+func (e *customErrorDef) Code() int {
+	return e.code
+}
+
+func (e *customErrorDef) Name() string {
+	return e.name
+}
+
+func (e *customErrorDef) Error() string {
+	return fmt.Sprintf("%s(%d): %s", e.name, e.code, e.msg)
+}
+
+func DecodeCustomError(rpcErr error) (err error, ok bool) {
+	if errCode, o := decodeErrorCode(rpcErr); o {
+		if customErr, o := Errors[errCode]; o {
+			err = customErr
+			ok = true
+			return
+		}
+	}
+	return
+}
+
+func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
+	var jErr *ag_jsonrpc.RPCError
+	if errors.As(rpcErr, &jErr) && jErr.Data != nil {
+		if root, o := jErr.Data.(map[string]interface{}); o {
+			if rootErr, o := root["err"].(map[string]interface{}); o {
+				if rootErrInstructionError, o := rootErr["InstructionError"]; o {
+					if rootErrInstructionErrorItems, o := rootErrInstructionError.([]interface{}); o {
+						if len(rootErrInstructionErrorItems) == 2 {
+							if v, o := rootErrInstructionErrorItems[1].(map[string]interface{}); o {
+								if v2, o := v["Custom"].(json.Number); o {
+									if code, err := v2.Int64(); err == nil {
+										ok = true
+										errorCode = int(code)
+									}
+								} else if v2, o := v["Custom"].(float64); o {
+									ok = true
+									errorCode = int(v2)
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return
+}
+`))
+
+		files = append(files, &FileWrapper{
+			Name: "errors",
 			File: file,
 		})
 	}
@@ -1281,12 +1378,20 @@ func genAccountGettersSetters(
 
 					for i, seedValue := range seedValues {
 						if seedValue != nil {
-							body.Add(Id("seeds").Op("=").Append(Id("seeds"), Index().Byte().Call(Lit(string(seedValue)))))
+							body.Commentf("const: %s", string(seedValue))
+							body.Add(Id("seeds").Op("=").Append(Id("seeds"), Index().Byte().ValuesFunc(func(group *Group) {
+								for _, v := range seedValue {
+									group.LitByte(v)
+								}
+							})))
 						} else {
 							seedRef := seedRefs[i]
+							body.Commentf("path: %s", seedRef)
 							body.Add(Id("seeds").Op("=").Append(Id("seeds"), Id(seedRef).Dot("Bytes").Call()))
 						}
 					}
+
+					body.Line()
 
 					body.Add(
 						If(Id("knownBumpSeed").Op("!=").Lit(0)).BlockFunc(func(group *Group) {
