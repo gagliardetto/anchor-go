@@ -1,7 +1,7 @@
 {
   "meta": {
     "err": null,
-    "fee": 10000,
+    "fee": 5000,
     "status": {
       "Ok": null
     },
@@ -9,18 +9,20 @@
     "logMessages": [
       "Program 5yYKAKV5r62ooXrKZNpxr9Bkk7CTtpyJ8sXD7k2WryUc invoke [1]",
       "Program log: Instruction: Increment",
-      "Program data: XM93zEfNbA+QRqFIX8xmobT0VYYb17myTy98PYAG0nlnbFDw1aZIBQQAAABMU1QxZAAAAAAAAAA=",
-      "Program 5yYKAKV5r62ooXrKZNpxr9Bkk7CTtpyJ8sXD7k2WryUc consumed 2010 of 200000 compute units",
+      "Program data: XM93zEfNbA/sHzD8PZYL+jlvVTHA4Boxmnr6AAe8Td0QxttQUm+W+QcAAABMU1QxMDAxCREAAAAAAAA=",
+      "Program 5yYKAKV5r62ooXrKZNpxr9Bkk7CTtpyJ8sXD7k2WryUc consumed 2866 of 200000 compute units",
       "Program 5yYKAKV5r62ooXrKZNpxr9Bkk7CTtpyJ8sXD7k2WryUc success"
     ],
     "preBalances": [
-      11553600040,
+      11552355760,
       1169280,
+      0,
       1141440
     ],
     "postBalances": [
-      11553590040,
+      11552350760,
       1169280,
+      0,
       1141440
     ],
     "loadedAddresses": {
@@ -30,13 +32,13 @@
     "preTokenBalances": [],
     "innerInstructions": [],
     "postTokenBalances": [],
-    "computeUnitsConsumed": 2010
+    "computeUnitsConsumed": 2866
   },
-  "slot": 310631041,
+  "slot": 310879062,
   "version": 0,
-  "blockTime": 1720592688,
+  "blockTime": 1720686110,
   "transaction": [
-    "AulTT5rY/J0wpZwXwYM2tq2x4l87RCtk0BjGMMLcklWc5wVMzmjTZeFcY/hK9rOXglWqVDeP4KF2cnBhi67gTA5YG0DnW8nCGxLIhBrOduMZgThQf0O9QLbMHVaoMVBX7sFkhpE3tm9uCVpZrXQJgcX2st1hqJ1rf2NFj3sLD/IGAgABA3ceJy+yghiPm5/Rqdflm6uwbKDOamJDe86gXlckW4LtkEahSF/MZqG09FWGG9e5sk8vfD2ABtJ5Z2xQ8NWmSAVJ6q3KIiq9nh6/6P3Y6+8omy5KMMLX+D8OwSaxw/ZL+QZ5Ij9CviCjZP6fzlC+jBD3EvDMAiDzKSHvp4mM/DIfAQICAQEYCxJoCWiuOyEEAAAATFNUMWQAAAAAAAAA",
+    "Ab/ZouTtPIjd85itXc++f7fkyMrTyqn43G/UNGU6taKbEHOAFXqQiCfb/GFW3Bi5t/kV89THuMaY8ZQR8exkZAIBAAEEdx4nL7KCGI+bn9Gp1+Wbq7BsoM5qYkN7zqBeVyRbgu3sHzD8PZYL+jlvVTHA4Boxmnr6AAe8Td0QxttQUm+W+anIAmiqdE0OXQpH7S6Fi/2NDIea0j0XxPNHM389CHNdSeqtyiIqvZ4ev+j92OvvKJsuSjDC1/g/DsEmscP2S/mJPi3h3ROMTD7GZkebVCwJ2++5h7XN/r/zeKcu6AvldgEDAwEAAj4LEmgJaK47IQcAAABMU1QxMDAxVwQAAAAAAABvAAAAAAAAAAcAAABMU1QyMDAyrggAAAAAAADeAAAAAAAAAA==",
     "base64"
   ]
 }

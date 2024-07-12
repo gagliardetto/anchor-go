@@ -47,7 +47,7 @@ func Example1() {
 	if err != nil {
 		panic(fmt.Errorf("cannot decode ins - %v", err))
 	}
-	fmt.Printf("parsed %d instructions of dummy program\n", len(instructions))
+	spew.Printf("parsed %d instructions of dummy program\n%v\n", len(instructions), instructions)
 
 	for _, ins := range instructions {
 		switch ins := ins.Impl.(type) {
@@ -62,9 +62,10 @@ func Example1() {
 
 	//output:
 	//dummy.ProgramID=5yYKAKV5r62ooXrKZNpxr9Bkk7CTtpyJ8sXD7k2WryUc, programID=5yYKAKV5r62ooXrKZNpxr9Bkk7CTtpyJ8sXD7k2WryUc
-	//events from log: <*>{Incremented <*>{AiCB6Pp7uiJDky3yg3zb462FMcD6GpMvP4bd3B1BQf5E LST1 100 0}}
+	//events from log: <*>{Incremented <*>{GtioYUL1PGYecn1yrgs89YyirzrftJn52gumLEeoU1qa LST1001 4361}}
 	//parsed 1 instructions of dummy program
-	//incremented LST1 token for 100 amount
+	//[<*>{{[11 18 104 9 104 174 59 33] <*>{<*>{LST1001 1111} [<*>{GtioYUL1PGYecn1yrgs89YyirzrftJn52gumLEeoU1qa true false} <*>{91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ true true} <*>{CRknqRhj9BfCcZTFEQfukeZiRxxmzd9MggiymG9ft3Jc true false}]}}}]
+	//incremented LST1001 token for 1111 amount
 }
 
 //func Example2() {

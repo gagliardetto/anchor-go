@@ -305,7 +305,7 @@ func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instructi
 		for _, typ := range idl.Types {
 			defs[typ.Name] = typ
 			file.Add(genTypeDef(&idl, nil, IdlTypeDef{
-				Name: typ.Name + "Data",
+				Name: typ.Name,
 				Type: typ.Type,
 			}))
 		}
@@ -340,10 +340,12 @@ func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instructi
 		// Declare account layouts from IDL:
 		for _, evt := range idl.Events {
 			if _, ok := defs[evt.Name]; ok {
+				eventDataTypeName := defs[evt.Name].Name + "EventData"
 				file.Add(genTypeDef(&idl, evt.Discriminator, IdlTypeDef{
-					Name: defs[evt.Name].Name + "EventData",
+					Name: eventDataTypeName,
 					Type: defs[evt.Name].Type,
 				}))
+				file.Add(Func().Params(Op("*").Id(eventDataTypeName)).Id("isEventData").Params().Block())
 			} else {
 				panic(`not implemented - only IDL from ("anchor": ">=0.30.0") is available`)
 			}
@@ -377,6 +379,7 @@ type Event struct {
 
 type EventData interface {
 	UnmarshalWithDecoder(decoder *ag_binary.Decoder) error
+	isEventData()
 }
 
 const eventLogPrefix = "Program data: "
@@ -432,7 +435,7 @@ func DecodeEvents(logMessages []string) (evts []*Event, err error) {
 					asIdlTypeArray:  arg.Type.asIdlTypeArray,
 					asIdlTypeDefined: &IdlTypeDefined{
 						Defined: IdLTypeDefinedName{
-							Name: arg.Type.asIdlTypeDefined.Defined.Name + "Data",
+							Name: arg.Type.asIdlTypeDefined.Defined.Name,
 						},
 					},
 				},
