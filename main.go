@@ -1311,13 +1311,34 @@ func genAccountGettersSetters(
 
 	{ // create PDA helper
 		/**
-		func FindUserTokenAmountAccountAddress(user ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+		func (inst *FooInstruction) FindUserTokenAmountAccountAddress(user ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
 			pda, bumpSeed, err = findUserTokenAmountAccountAddress(user, 0)
 			return
 		}
 
-		func FindUserTokenAmountAccountAddressWithBumpSeed(user ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
-			pda, _, err = findUserTokenAmountAccountAddress(user, bumpSeed)
+		func (inst *FooInstruction) FindUserTokenAmountAccountAddress(user ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+			pda, bumpSeed, err = findUserTokenAmountAccountAddress(user, 0)
+			return
+		}
+
+		func (inst *FooInstruction) MustFindUserTokenAmountAccountAddress(user ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+			pda, _, err := findUserTokenAmountAccountAddress(user)
+			if err != nil {
+				panic(err)
+			}
+			return
+		}
+
+		func (inst *FooInstruction) FindUserTokenAmountAccountAddress(user ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+			pda, bumpSeed, err = findUserTokenAmountAccountAddress(user, 0)
+			return
+		}
+
+		func (inst *FooInstruction) MustFindUserTokenAmountAccountAddressWithBumpSeed(user ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+			pda, _, err := findUserTokenAmountAccountAddress(user, bumpSeed)
+			if err != nil {
+				panic(err)
+			}
 			return
 		}
 
@@ -1448,6 +1469,41 @@ func genAccountGettersSetters(
 				})
 
 			code.Line().Line()
+			code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id("Must" + accessorName2).
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						for _, seedRef := range seedRefs {
+							if seedRef != "" {
+								params.Id(seedRef).Qual(PkgSolanaGo, "PublicKey")
+							}
+						}
+						params.Id("bumpSeed").Uint8()
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Id("pda").Qual(PkgSolanaGo, "PublicKey")
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					body.Add(List(Id("pda"), Id("_"), Id("err")).Op(":=").Id("inst").Dot(internalAccessorName).CallFunc(func(group *Group) {
+						for _, seedRef := range seedRefs {
+							if seedRef != "" {
+								group.Add(Id(seedRef))
+							}
+						}
+						group.Add(Id("bumpSeed"))
+						return
+					}))
+
+					body.Add(If(Id("err").Op("!=").Nil()).Block(Panic(Id("err"))))
+
+					body.Return()
+				})
+
+			code.Line().Line()
 			accessorName3 := accessorName
 			code.Commentf("%s finds %s account address with given seeds.", accessorName3, exportedAccountName).Line()
 			code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(accessorName3).
@@ -1479,6 +1535,40 @@ func genAccountGettersSetters(
 						group.Add(Lit(0))
 						return
 					}))
+
+					body.Return()
+				})
+
+			code.Line().Line()
+			code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id("Must" + accessorName3).
+				Params(
+					ListFunc(func(params *Group) {
+						// Parameters:
+						for _, seedRef := range seedRefs {
+							if seedRef != "" {
+								params.Id(seedRef).Qual(PkgSolanaGo, "PublicKey")
+							}
+						}
+					}),
+				).
+				Params(
+					ListFunc(func(results *Group) {
+						// Results:
+						results.Id("pda").Qual(PkgSolanaGo, "PublicKey")
+					}),
+				).
+				BlockFunc(func(body *Group) {
+					body.Add(List(Id("pda"), Id("_"), Id("err")).Op(":=").Id("inst").Dot(internalAccessorName).CallFunc(func(group *Group) {
+						for _, seedRef := range seedRefs {
+							if seedRef != "" {
+								group.Add(Id(seedRef))
+							}
+						}
+						group.Add(Lit(0))
+						return
+					}))
+
+					body.Add(If(Id("err").Op("!=").Nil()).Block(Panic(Id("err"))))
 
 					body.Return()
 				})
