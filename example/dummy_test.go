@@ -102,8 +102,8 @@ func Example2() {
 
 func Example3() {
 	user1, _ := solana.WalletFromPrivateKeyBase58("6Vw4jPBpL6tdAdtQeQ8zTaTV1f8fjda7nBNChswD5cyJ")
-	dummy.SetProgramID(dummyProgramID)                                                      // should set this first before find PDA
-	userData1, _, _ := dummy.InitializeInstructionUserTokenAmountAccount(user1.PublicKey()) // find PDA
+	dummy.SetProgramID(dummyProgramID)                                                        // should set this first before find PDA
+	userData1, _, _ := (*dummy.Initialize)(nil).FindUserTokenAmountAddress(user1.PublicKey()) // find PDA for instruction, it is safe for nil receiver
 
 	tx, _ := solana.NewTransaction(
 		[]solana.Instruction{

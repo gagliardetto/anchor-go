@@ -8,6 +8,55 @@
   },
   "instructions": [
     {
+      "name": "create_user_account",
+      "docs": [
+        "Versioned Instructions"
+      ],
+      "discriminator": [
+        146,
+        68,
+        100,
+        69,
+        63,
+        46,
+        182,
+        199
+      ],
+      "accounts": [
+        {
+          "name": "user_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "request",
+          "type": {
+            "defined": {
+              "name": "InstructionRequest"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "decrement",
       "discriminator": [
         106,
@@ -133,6 +182,52 @@
       "args": []
     },
     {
+      "name": "update_user_account",
+      "discriminator": [
+        147,
+        83,
+        243,
+        122,
+        110,
+        128,
+        92,
+        33
+      ],
+      "accounts": [
+        {
+          "name": "user_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "request",
+          "type": {
+            "defined": {
+              "name": "InstructionRequest"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "versioned_method",
       "discriminator": [
         199,
@@ -167,6 +262,19 @@
     }
   ],
   "accounts": [
+    {
+      "name": "AccountData",
+      "discriminator": [
+        23,
+        205,
+        88,
+        172,
+        233,
+        226,
+        180,
+        239
+      ]
+    },
     {
       "name": "UserTokenAmount",
       "discriminator": [
@@ -249,6 +357,70 @@
   ],
   "types": [
     {
+      "name": "AccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": {
+              "defined": {
+                "name": "VersionedData"
+              }
+            }
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DataV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "field1",
+            "type": "u64"
+          },
+          {
+            "name": "field2",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DataV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "field1",
+            "type": "u64"
+          },
+          {
+            "name": "field2",
+            "type": "u32"
+          },
+          {
+            "name": "field3",
+            "type": "string"
+          },
+          {
+            "name": "field4",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
       "name": "Decremented",
       "type": {
         "kind": "struct",
@@ -289,6 +461,74 @@
       }
     },
     {
+      "name": "InstructionRequest",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "V1",
+            "fields": [
+              {
+                "defined": {
+                  "name": "RequestV1"
+                }
+              }
+            ]
+          },
+          {
+            "name": "V2",
+            "fields": [
+              {
+                "defined": {
+                  "name": "RequestV2"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "RequestV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "field1",
+            "type": "u64"
+          },
+          {
+            "name": "field2",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RequestV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "field1",
+            "type": "u64"
+          },
+          {
+            "name": "field2",
+            "type": "u32"
+          },
+          {
+            "name": "field3",
+            "type": "string"
+          },
+          {
+            "name": "field4",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
       "name": "UserTokenAmount",
       "type": {
         "kind": "struct",
@@ -308,6 +548,34 @@
           {
             "name": "amount",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VersionedData",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "V1",
+            "fields": [
+              {
+                "defined": {
+                  "name": "DataV1"
+                }
+              }
+            ]
+          },
+          {
+            "name": "V2",
+            "fields": [
+              {
+                "defined": {
+                  "name": "DataV2"
+                }
+              }
+            ]
           }
         ]
       }

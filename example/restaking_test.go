@@ -14,7 +14,7 @@ func Example4() {
 	fragSOLMintAddress, _ := solana.PublicKeyFromBase58("FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN")
 
 	restaking.SetProgramID(restakingProgramID)                                                       // should set this first before find PDA
-	fragSOLFundAddress, _, _ := restaking.FundDepositTokenInstructionFundAccount(fragSOLMintAddress) // find PDA
+	fragSOLFundAddress, _, _ := (*restaking.FundInitialize)(nil).FindFundAddress(fragSOLMintAddress) // find PDA for instruction, it is safe for nil receiver
 
 	tx, _ := solana.NewTransaction(
 		[]solana.Instruction{

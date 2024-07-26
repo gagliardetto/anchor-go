@@ -1336,7 +1336,7 @@ func genAccountGettersSetters(
 		*/
 		if account.PDA != nil {
 			code.Line().Line()
-			accessorName := formatAccountAccessorName(receiverTypeName+"Instruction", exportedAccountName)
+			accessorName := strings.TrimSuffix(formatAccountAccessorName("Find", exportedAccountName), "Account") + "Address"
 
 			// find seeds
 			seedValues := make([][]byte, len(account.PDA.Seeds))
@@ -1357,7 +1357,7 @@ func genAccountGettersSetters(
 			}
 
 			internalAccessorName := "find" + accessorName
-			code.Func().Id(internalAccessorName).
+			code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(internalAccessorName).
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -1414,7 +1414,7 @@ func genAccountGettersSetters(
 			code.Line().Line()
 			accessorName2 := accessorName + "WithBumpSeed"
 			code.Commentf("%s calculates %s account address with given seeds and a known bump seed.", accessorName2, exportedAccountName).Line()
-			code.Func().Id(accessorName2).
+			code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(accessorName2).
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -1434,7 +1434,7 @@ func genAccountGettersSetters(
 					}),
 				).
 				BlockFunc(func(body *Group) {
-					body.Add(List(Id("pda"), Id("_"), Id("err")).Op("=").Id(internalAccessorName).CallFunc(func(group *Group) {
+					body.Add(List(Id("pda"), Id("_"), Id("err")).Op("=").Id("inst").Dot(internalAccessorName).CallFunc(func(group *Group) {
 						for _, seedRef := range seedRefs {
 							if seedRef != "" {
 								group.Add(Id(seedRef))
@@ -1450,7 +1450,7 @@ func genAccountGettersSetters(
 			code.Line().Line()
 			accessorName3 := accessorName
 			code.Commentf("%s finds %s account address with given seeds.", accessorName3, exportedAccountName).Line()
-			code.Func().Id(accessorName3).
+			code.Func().Params(Id("inst").Op("*").Id(receiverTypeName)).Id(accessorName3).
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -1470,7 +1470,7 @@ func genAccountGettersSetters(
 					}),
 				).
 				BlockFunc(func(body *Group) {
-					body.Add(List(Id("pda"), Id("bumpSeed"), Id("err")).Op("=").Id(internalAccessorName).CallFunc(func(group *Group) {
+					body.Add(List(Id("pda"), Id("bumpSeed"), Id("err")).Op("=").Id("inst").Dot(internalAccessorName).CallFunc(func(group *Group) {
 						for _, seedRef := range seedRefs {
 							if seedRef != "" {
 								group.Add(Id(seedRef))
@@ -2094,7 +2094,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 // E.g. ("Set", "BarAccount") => "SetBarAccount"
 func formatAccountAccessorName(prefix, name string) string {
 	endsWithAccount := strings.HasSuffix(strings.ToLower(name), "account")
-	if !conf.RemoveAccountSuffix && !endsWithAccount {
+	if !conf.RemoveAccountSuffix || !endsWithAccount {
 		return prefix + name + "Account"
 	}
 	return prefix + name
