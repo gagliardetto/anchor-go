@@ -22,8 +22,10 @@ Generated Code will be generated and saved to `./generated/`.
 
 ## Future Development
 
-TBD
-
+1. **Fork and Maintain Anchor-Go Repository**: We have noted that an anchor-go repository exists in a deprecated state; this shall be our starting point. We shall fork, update, and maintain the repository to align it with contemporary standards and requirements. This repository will be modified to better serve not only our needs but also those of the wider Solana ecosystem.
+2. **Improve On-Chain and Off-Chain Interaction**: We will enable more seamless on-chain to off-chain data synchronization, on-chain event subscription management, and network status monitoring services through the utilization of Go's concurrency features and the performance advantages that the language inherently brings.
+3. **IDL Support in GoLang**: Will provide full IDL support to build the SDK in GoLang, with the help of the Anchor IDL specification; thus, it's easily adopted and becomes integrated smoothly into the GoLang development environment.
+4. **Comprehensive Documentation and Community Support**: We'll have up-to-date documentation that will also come with lifetime support to developers in the community, including detailed guides, lots of examples, and a maintained team, ready to respond to issues and implement feedback
 ## what is anchor-go?
 
 `anchor-go` generates Go clients for [Solana](https://solana.com/) programs (smart contracts) written using the [anchor](https://github.com/project-serum/anchor) framework.
