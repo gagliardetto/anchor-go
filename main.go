@@ -367,10 +367,11 @@ func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instructi
 			}
 		})))
 
+		// TODO: refactor it
 		// to generate import statements
 		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual("strings", "Builder").Op("=").Nil()))
 		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual("encoding/base64", "Encoding").Op("=").Nil()))
-
+		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual(PkgDfuseBinary, "Decoder").Op("=").Nil())) // TODO: ..
 		file.Add(Empty().Id(`
 type Event struct {
 	Name string
@@ -526,16 +527,19 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 				Name: arg.Name,
 				Docs: arg.Docs,
 				Type: IdlType{
-					asString:        arg.Type.asString,
-					asIdlTypeVec:    arg.Type.asIdlTypeVec,
-					asIdlTypeOption: arg.Type.asIdlTypeOption,
-					asIdlTypeArray:  arg.Type.asIdlTypeArray,
-					asIdlTypeDefined: &IdlTypeDefined{
-						Defined: IdLTypeDefinedName{
-							Name: arg.Type.asIdlTypeDefined.Defined.Name,
-						},
-					},
+					asString:         arg.Type.asString,
+					asIdlTypeVec:     arg.Type.asIdlTypeVec,
+					asIdlTypeOption:  arg.Type.asIdlTypeOption,
+					asIdlTypeArray:   arg.Type.asIdlTypeArray,
+					asIdlTypeDefined: nil,
 				},
+			}
+			if arg.Type.asIdlTypeDefined != nil {
+				idlFieldArg.Type.asIdlTypeDefined = &IdlTypeDefined{
+					Defined: IdLTypeDefinedName{
+						Name: arg.Type.asIdlTypeDefined.Defined.Name,
+					},
+				}
 			}
 			args = append(args, idlFieldArg)
 		}
@@ -1332,7 +1336,7 @@ func genAccountGettersSetters(
 		*/
 		if account.PDA != nil {
 			code.Line().Line()
-			name := formatAccountAccessorName("find", exportedAccountName) + "Address"
+			accessorName := formatAccountAccessorName(receiverTypeName+"Instruction", exportedAccountName)
 
 			// find seeds
 			seedValues := make([][]byte, len(account.PDA.Seeds))
@@ -1352,7 +1356,8 @@ func genAccountGettersSetters(
 				}
 			}
 
-			code.Func().Id(name).
+			internalAccessorName := "find" + accessorName
+			code.Func().Id(internalAccessorName).
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -1407,9 +1412,9 @@ func genAccountGettersSetters(
 				})
 
 			code.Line().Line()
-			name2 := formatAccountAccessorName("Find", exportedAccountName) + "AddressWithBumpSeed"
-			code.Commentf("%s calculates %s account address with given seeds and a known bump seed.", name2, exportedAccountName).Line()
-			code.Func().Id(name2).
+			accessorName2 := accessorName + "WithBumpSeed"
+			code.Commentf("%s calculates %s account address with given seeds and a known bump seed.", accessorName2, exportedAccountName).Line()
+			code.Func().Id(accessorName2).
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -1429,7 +1434,7 @@ func genAccountGettersSetters(
 					}),
 				).
 				BlockFunc(func(body *Group) {
-					body.Add(List(Id("pda"), Id("_"), Id("err")).Op("=").Id(name).CallFunc(func(group *Group) {
+					body.Add(List(Id("pda"), Id("_"), Id("err")).Op("=").Id(internalAccessorName).CallFunc(func(group *Group) {
 						for _, seedRef := range seedRefs {
 							if seedRef != "" {
 								group.Add(Id(seedRef))
@@ -1443,9 +1448,9 @@ func genAccountGettersSetters(
 				})
 
 			code.Line().Line()
-			name3 := formatAccountAccessorName("Find", exportedAccountName) + "Address"
-			code.Commentf("%s finds %s account address with given seeds.", name3, exportedAccountName).Line()
-			code.Func().Id(name3).
+			accessorName3 := accessorName
+			code.Commentf("%s finds %s account address with given seeds.", accessorName3, exportedAccountName).Line()
+			code.Func().Id(accessorName3).
 				Params(
 					ListFunc(func(params *Group) {
 						// Parameters:
@@ -1465,7 +1470,7 @@ func genAccountGettersSetters(
 					}),
 				).
 				BlockFunc(func(body *Group) {
-					body.Add(List(Id("pda"), Id("bumpSeed"), Id("err")).Op("=").Id(name).CallFunc(func(group *Group) {
+					body.Add(List(Id("pda"), Id("bumpSeed"), Id("err")).Op("=").Id(internalAccessorName).CallFunc(func(group *Group) {
 						for _, seedRef := range seedRefs {
 							if seedRef != "" {
 								group.Add(Id(seedRef))
@@ -2089,7 +2094,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 // E.g. ("Set", "BarAccount") => "SetBarAccount"
 func formatAccountAccessorName(prefix, name string) string {
 	endsWithAccount := strings.HasSuffix(strings.ToLower(name), "account")
-	if !conf.RemoveAccountSuffix || !endsWithAccount {
+	if !conf.RemoveAccountSuffix && !endsWithAccount {
 		return prefix + name + "Account"
 	}
 	return prefix + name

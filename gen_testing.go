@@ -185,12 +185,7 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 
 					variantBlock.Id("fu").Dot("Fuzz").Call(Id("params"))
 					variantBlock.Id("params").Dot("AccountMetaSlice").Op("=").Nil()
-					if variant.Fields != nil && variant.Fields.IdlEnumFieldsTuple != nil && len([]IdlType(*variant.Fields.IdlEnumFieldsTuple)) == 1 {
-						name := (*variant.Fields.IdlEnumFieldsTuple)[0].GetIdlTypeDefined().Defined.Name
-						variantBlock.Id("tmp").Op(":=").New(Id(ToCamel(name)))
-					} else {
-						variantBlock.Id("tmp").Op(":=").New(Id(ToCamel(variant.Name)))
-					}
+					variantBlock.Id("tmp").Op(":=").New(Id(formatComplexEnumVariantTypeName(enumName, variant.Name)))
 					variantBlock.Id("fu").Dot("Fuzz").Call(Id("tmp"))
 					variantBlock.Id("params").Dot("Set" + exportedArgName).Call(Id("tmp"))
 

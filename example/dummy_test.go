@@ -12,13 +12,13 @@ import (
 	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
 )
 
-//go:embed tx.json
+//go:embed dummy_tx.json
 var txJSON []byte
 
-//go:embed err.json
+//go:embed dummy_err.json
 var errJSON []byte
 
-var programID = solana.MustPublicKeyFromBase58("A58NQYmJCyDPsc1EfaQZ99piFopPtCYArP242rLTbYbV")
+var dummyProgramID = solana.MustPublicKeyFromBase58("A58NQYmJCyDPsc1EfaQZ99piFopPtCYArP242rLTbYbV")
 
 // an example of parsing a transaction.
 // generate dummy IDL code first.
@@ -36,8 +36,8 @@ func Example1() {
 	}
 
 	// set program id
-	dummy.SetProgramID(programID)
-	fmt.Printf("dummy.ProgramID=%v, programID=%v\n", dummy.ProgramID, programID)
+	dummy.SetProgramID(dummyProgramID)
+	fmt.Printf("dummy.ProgramID=%v, programID=%v\n", dummy.ProgramID, dummyProgramID)
 
 	// parsing events
 	events, err := dummy.DecodeEvents(res.Meta.LogMessages)
@@ -102,8 +102,8 @@ func Example2() {
 
 func Example3() {
 	user1, _ := solana.WalletFromPrivateKeyBase58("6Vw4jPBpL6tdAdtQeQ8zTaTV1f8fjda7nBNChswD5cyJ")
-	dummy.SetProgramID(programID)                                                 // should set this first before find PDA
-	userData1, _, _ := dummy.FindUserTokenAmountAccountAddress(user1.PublicKey()) // find PDA
+	dummy.SetProgramID(dummyProgramID)                                                      // should set this first before find PDA
+	userData1, _, _ := dummy.InitializeInstructionUserTokenAmountAccount(user1.PublicKey()) // find PDA
 
 	tx, _ := solana.NewTransaction(
 		[]solana.Instruction{
@@ -121,9 +121,11 @@ func Example3() {
 				SetUserAccount(userData1).
 				Build(),
 			dummy.NewVersionedMethodInstruction(
-				dummy.VersionedStateV1{
-					Field1: 1234,
-					Field2: "XYZ",
+				dummy.VersionedStateV1Tuple{
+					Elem0: dummy.VersionedStateV1{
+						Field1: 1234,
+						Field2: "XYZ",
+					},
 				},
 				userData1,
 				user1.PublicKey(),

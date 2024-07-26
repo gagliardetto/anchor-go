@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
 	bin "github.com/gagliardetto/binary"
@@ -155,8 +156,11 @@ func genTypeDef(idl *IDL, withDiscriminator *[8]byte, def IdlTypeDef) Code {
 	case IdlTypeDefTyKindStruct:
 		code := Empty()
 		code.Type().Id(def.Name).StructFunc(func(fieldsGroup *Group) {
+			if def.Type.Fields == nil {
+				emptyFields := []IdlField{}
+				def.Type.Fields = (*IdlStructFieldSlice)(&emptyFields)
+			}
 			for fieldIndex, field := range *def.Type.Fields {
-
 				for docIndex, doc := range field.Docs {
 					if docIndex == 0 && fieldIndex > 0 {
 						fieldsGroup.Line()
@@ -319,40 +323,40 @@ func genTypeDef(idl *IDL, withDiscriminator *[8]byte, def IdlTypeDef) Code {
 					// TODO: make the name {variantTypeName}_{interface_name} ???
 					code.Type().Id(variantTypeNameComplex).Uint8().Line().Line()
 				} else {
-					//code.Type().Id(variantTypeNameComplex).StructFunc(
-					//	func(structGroup *Group) {
-					//		switch {
-					//		case variant.Fields.IdlEnumFieldsNamed != nil:
-					//			for _, variantField := range *variant.Fields.IdlEnumFieldsNamed {
-					//				structGroup.Add(genField(variantField, variantField.Type.IsIdlTypeOption())).
-					//					Add(func() Code {
-					//						if variantField.Type.IsIdlTypeOption() {
-					//							return Tag(map[string]string{
-					//								"bin": "optional",
-					//							})
-					//						}
-					//						return nil
-					//					}())
-					//			}
-					//		default:
-					//			for i, variantTupleItem := range *variant.Fields.IdlEnumFieldsTuple {
-					//				variantField := IdlField{
-					//					Name: fmt.Sprintf("Elem_%d", i),
-					//					Type: variantTupleItem,
-					//				}
-					//				structGroup.Add(genField(variantField, variantField.Type.IsIdlTypeOption())).
-					//					Add(func() Code {
-					//						if variantField.Type.IsIdlTypeOption() {
-					//							return Tag(map[string]string{
-					//								"bin": "optional",
-					//							})
-					//						}
-					//						return nil
-					//					}())
-					//			}
-					//		}
-					//	},
-					//).Line().Line()
+					code.Type().Id(variantTypeNameComplex).StructFunc(
+						func(structGroup *Group) {
+							switch {
+							case variant.Fields.IdlEnumFieldsNamed != nil:
+								for _, variantField := range *variant.Fields.IdlEnumFieldsNamed {
+									structGroup.Add(genField(variantField, variantField.Type.IsIdlTypeOption())).
+										Add(func() Code {
+											if variantField.Type.IsIdlTypeOption() {
+												return Tag(map[string]string{
+													"bin": "optional",
+												})
+											}
+											return nil
+										}())
+								}
+							default:
+								for i, variantTupleItem := range *variant.Fields.IdlEnumFieldsTuple {
+									variantField := IdlField{
+										Name: fmt.Sprintf("Elem_%d", i),
+										Type: variantTupleItem,
+									}
+									structGroup.Add(genField(variantField, variantField.Type.IsIdlTypeOption())).
+										Add(func() Code {
+											if variantField.Type.IsIdlTypeOption() {
+												return Tag(map[string]string{
+													"bin": "optional",
+												})
+											}
+											return nil
+										}())
+								}
+							}
+						},
+					).Line().Line()
 				}
 
 				if variant.IsUint8() {
@@ -708,7 +712,7 @@ func genUnmarshalWithDecoder_struct(
 }
 
 func formatComplexEnumVariantTypeName(enumTypeName string, variantName string) string {
-	return ToCamel(Sf("%s_%s", enumTypeName, variantName))
+	return ToCamel(Sf("%s_%s_Tuple", enumTypeName, variantName))
 }
 
 func formatSimpleEnumVariantName(variantName string, enumTypeName string) string {
