@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/encrypt-x/solana-anchor-go/generated/restaking"
+	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -18,11 +19,15 @@ func Example4() {
 
 	tx, _ := solana.NewTransaction(
 		[]solana.Instruction{
-			restaking.NewFundUpdateDefaultProtocolFeeRateInstructionBuilder().
+			restaking.NewFundAddWhitelistedTokenInstructionBuilder().
 				SetFundAccount(fragSOLFundAddress).
-				SetRequest(restaking.FundUpdateDefaultProtocolFeeRateRequestV1Tuple{
-					Elem0: restaking.FundUpdateDefaultProtocolFeeRateRequestV1{
-						DefaultProtocolFeeRate: 10,
+				SetRequest(restaking.FundAddWhitelistedTokenRequestV1Tuple{
+					Elem0: restaking.FundAddWhitelistedTokenRequestV1{
+						Token: solana.NewWallet().PublicKey(),
+						TokenCap: ag_binary.Uint128{
+							Hi: 10,
+							Lo: 10,
+						},
 					},
 				}).
 				// SetAdminAccount(...). // automatically set
@@ -37,5 +42,5 @@ func Example4() {
 	//fmt.Println(tx.String())
 	fmt.Printf(tx.MustToBase64())
 	//output:
-	//AAEAAgR3HicvsoIYj5uf0anX5ZursGygzmpiQ3vOoF5XJFuC7SJLWwyDI7BtyZou/DbjBDKJSfl66jNt2wx0hNUXqeBHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ9CHDJI615fn5u1m6o0UWxEI9cGhKuWamLZSL/7HtQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgMDAAECC89G0OK1pwykAAAAAwCEAZQELCLKBVNzeAAAAHRyYWNlcGFyZW50OiAwMC0wYWY3NjUxOTE2Y2Q0M2RkODQ0OGViMjExYzgwMzE5Yy1iOWM3Yzk4OWY5NzkxOGUxLTAxCnRyYWNlc3RhdGU6IGNvbmdvPXVjZkppZmw1R09FLHJvam89MDBmMDY3YWEwYmE5MDJiNw==
+	//AAEAAgR3HicvsoIYj5uf0anX5ZursGygzmpiQ3vOoF5XJFuC7SJLWwyDI7BtyZou/DbjBDKJSfl66jNt2wx0hNUXqeBHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ9CHDJI615fn5u1m6o0UWxEI9cGhKuWamLZSL/7HtQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgMDAAECOd9+//W3vPEXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAhAGUBCwiygVTc3gAAAB0cmFjZXBhcmVudDogMDAtMGFmNzY1MTkxNmNkNDNkZDg0NDhlYjIxMWM4MDMxOWMtYjljN2M5ODlmOTc5MThlMS0wMQp0cmFjZXN0YXRlOiBjb25nbz11Y2ZKaWZsNUdPRSxyb2pvPTAwZjA2N2FhMGJhOTAyYjc=
 }

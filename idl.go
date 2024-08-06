@@ -238,6 +238,8 @@ const (
 	IdlTypeBytes  IdlTypeAsString = "bytes"
 	IdlTypeString IdlTypeAsString = "string"
 	IdlTypePubkey IdlTypeAsString = "pubkey"
+	IdlTypeF32    IdlTypeAsString = "f32"
+	IdlTypeF64    IdlTypeAsString = "f64"
 
 	// Custom additions:
 	IdlTypeUnixTimestamp IdlTypeAsString = "unixTimestamp"

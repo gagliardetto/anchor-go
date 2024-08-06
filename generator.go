@@ -55,6 +55,10 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 		stat.String()
 	case IdlTypePubkey:
 		stat.Qual(PkgSolanaGo, "PublicKey")
+	case IdlTypeF32:
+		stat.Float32()
+	case IdlTypeF64:
+		stat.Float64()
 
 	// Custom:
 	case IdlTypeUnixTimestamp:
