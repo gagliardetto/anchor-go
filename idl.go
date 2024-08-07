@@ -199,7 +199,8 @@ type IdlAccount struct {
 }
 
 type idlAccountPDA struct {
-	Seeds []idlAccountPDASeed `json:"seeds"`
+	Seeds   []idlAccountPDASeed `json:"seeds"`
+	Program *idlAccountPDASeed  `json:"program,omitempty"`
 }
 
 type idlAccountPDASeed struct {

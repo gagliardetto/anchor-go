@@ -1362,9 +1362,18 @@ func genAccountGettersSetters(
 			// find seeds
 			seedValues := make([][]byte, len(account.PDA.Seeds))
 			seedRefs := make([]string, len(account.PDA.Seeds))
+
+			var seedProgramValue *[]byte
+			if account.PDA.Program != nil {
+				if account.PDA.Program.Value == nil {
+					panic("cannot handle non-const type program value in PDA seeds")
+				}
+				seedProgramValue = &account.PDA.Program.Value
+			}
+
 		OUTER:
 			for i, seedDef := range account.PDA.Seeds {
-				if seedDef.Value != nil {
+				if seedDef.Value != nil { // type: const
 					seedValues[i] = seedDef.Value
 				} else {
 					for _, acc := range accounts {
@@ -1419,13 +1428,25 @@ func genAccountGettersSetters(
 
 					body.Line()
 
+					seedProgramRef := Id("ProgramID")
+					if seedProgramValue != nil {
+						seedProgramRef = Id("programID")
+						body.Add(Id("programID").Op(":=").Qual(PkgSolanaGo, "PublicKey").Call(Index().Byte().ValuesFunc(func(group *Group) {
+							for _, v := range *seedProgramValue {
+								group.LitByte(v)
+							}
+						})))
+					}
+
+					body.Line()
+
 					body.Add(
 						If(Id("knownBumpSeed").Op("!=").Lit(0)).BlockFunc(func(group *Group) {
 							group.Add(Id("seeds").Op("=").Append(Id("seeds"), Index().Byte().Values(Byte().Call(Id("bumpSeed")))))
-							group.Add(List(Id("pda"), Id("err")).Op("=").Add(Qual(PkgSolanaGo, "CreateProgramAddress").Call(Id("seeds"), Id("ProgramID"))))
+							group.Add(List(Id("pda"), Id("err")).Op("=").Add(Qual(PkgSolanaGo, "CreateProgramAddress").Call(Id("seeds"), seedProgramRef)))
 						}).
 							Else().BlockFunc(func(group *Group) {
-							group.Add(List(Id("pda"), Id("bumpSeed"), Id("err")).Op("=").Add(Qual(PkgSolanaGo, "FindProgramAddress").Call(Id("seeds"), Id("ProgramID"))))
+							group.Add(List(Id("pda"), Id("bumpSeed"), Id("err")).Op("=").Add(Qual(PkgSolanaGo, "FindProgramAddress").Call(Id("seeds"), seedProgramRef)))
 						}),
 					)
 
