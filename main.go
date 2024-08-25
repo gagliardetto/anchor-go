@@ -393,6 +393,7 @@ func DecodeEvents(logMessages []string) (evts []*Event, err error) {
 
 			var eventBinary []byte
 			if eventBinary, err = base64.StdEncoding.DecodeString(eventBase64); err != nil {
+				err = fmt.Errorf("failed to decode event log: %s", eventBase64)
 				return
 			}
 
@@ -401,6 +402,7 @@ func DecodeEvents(logMessages []string) (evts []*Event, err error) {
 				eventData := reflect.New(eventType).Interface().(EventData)
 				decoder.Reset(eventBinary)
 				if err = eventData.UnmarshalWithDecoder(decoder); err != nil {
+					err = fmt.Errorf("failed to unmarshal event %s: %w", eventType.String(), err)
 					return
 				}
 				evts = append(evts, &Event{

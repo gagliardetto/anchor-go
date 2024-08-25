@@ -8,30 +8,166 @@
   },
   "instructions": [
     {
-      "name": "fund_add_whitelisted_token",
+      "name": "fund_add_supported_token",
       "discriminator": [
-        223,
-        126,
-        255,
-        245,
-        183,
-        188,
-        241,
-        23
+        144,
+        50,
+        243,
+        20,
+        77,
+        240,
+        96,
+        158
       ],
       "accounts": [
         {
           "name": "admin",
           "writable": true,
           "signer": true,
-          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ",
-          "relations": [
-            "fund"
-          ]
+          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ"
         },
         {
           "name": "fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fund_token_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100,
+                  95,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receipt_token_mint",
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund",
+            "fund_token_authority"
+          ]
+        },
+        {
+          "name": "token_mint",
           "writable": true
+        },
+        {
+          "name": "fund_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "fund_token_authority"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program"
         },
         {
           "name": "system_program",
@@ -40,10 +176,14 @@
       ],
       "args": [
         {
-          "name": "request",
+          "name": "token_cap",
+          "type": "u64"
+        },
+        {
+          "name": "token_pricing_source",
           "type": {
             "defined": {
-              "name": "FundAddWhitelistedTokenRequest"
+              "name": "TokenPricingSource"
             }
           }
         }
@@ -65,7 +205,10 @@
         {
           "name": "user",
           "writable": true,
-          "signer": true
+          "signer": true,
+          "relations": [
+            "user_receipt"
+          ]
         },
         {
           "name": "user_receipt",
@@ -86,8 +229,17 @@
                   101,
                   105,
                   112,
-                  116
+                  116,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
               },
               {
                 "kind": "account",
@@ -107,6 +259,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -144,7 +301,12 @@
                   114,
                   105,
                   116,
-                  121
+                  121,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
               },
               {
@@ -157,7 +319,12 @@
         {
           "name": "receipt_token_mint",
           "writable": true,
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "user_receipt",
+            "fund",
+            "fund_token_authority"
+          ]
         },
         {
           "name": "receipt_token_account",
@@ -280,10 +447,6 @@
         {
           "name": "associated_token_program",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -330,8 +493,17 @@
                   101,
                   105,
                   112,
-                  116
+                  116,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
               },
               {
                 "kind": "account",
@@ -351,6 +523,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -388,7 +565,12 @@
                   114,
                   105,
                   116,
-                  121
+                  121,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
               },
               {
@@ -401,7 +583,11 @@
         {
           "name": "receipt_token_mint",
           "writable": true,
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund",
+            "fund_token_authority"
+          ]
         },
         {
           "name": "receipt_token_account",
@@ -461,6 +647,19 @@
           }
         },
         {
+          "name": "token_pricing_source_0",
+          "address": "azFVdHtAJN8BX3sbGAYkXvtdjdrT5U6rj9rovvUFos9"
+        },
+        {
+          "name": "token_pricing_source_1",
+          "address": "8szGkuLTAux9XMgZ2vtY39jVSowEcpBfFfD8hXSEqdGC"
+        },
+        {
+          "name": "instruction_sysvar",
+          "optional": true,
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
           "name": "token_program",
           "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
@@ -475,10 +674,16 @@
       ],
       "args": [
         {
-          "name": "request",
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "metadata",
           "type": {
-            "defined": {
-              "name": "FundDepositSOLRequest"
+            "option": {
+              "defined": {
+                "name": "Metadata"
+              }
             }
           }
         }
@@ -521,8 +726,17 @@
                   101,
                   105,
                   112,
-                  116
+                  116,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
               },
               {
                 "kind": "account",
@@ -542,6 +756,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -579,7 +798,12 @@
                   114,
                   105,
                   116,
-                  121
+                  121,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
               },
               {
@@ -592,7 +816,11 @@
         {
           "name": "receipt_token_mint",
           "writable": true,
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund",
+            "fund_token_authority"
+          ]
         },
         {
           "name": "receipt_token_account",
@@ -717,6 +945,19 @@
           }
         },
         {
+          "name": "token_pricing_source_0",
+          "address": "azFVdHtAJN8BX3sbGAYkXvtdjdrT5U6rj9rovvUFos9"
+        },
+        {
+          "name": "token_pricing_source_1",
+          "address": "8szGkuLTAux9XMgZ2vtY39jVSowEcpBfFfD8hXSEqdGC"
+        },
+        {
+          "name": "instruction_sysvar",
+          "optional": true,
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
           "name": "deposit_token_program"
         },
         {
@@ -734,10 +975,16 @@
       ],
       "args": [
         {
-          "name": "request",
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "metadata",
           "type": {
-            "defined": {
-              "name": "FundDepositTokenRequest"
+            "option": {
+              "defined": {
+                "name": "Metadata"
+              }
             }
           }
         }
@@ -773,6 +1020,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -810,7 +1062,12 @@
                   114,
                   105,
                   116,
-                  121
+                  121,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
               },
               {
@@ -926,6 +1183,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -938,13 +1200,16 @@
         },
         {
           "name": "receipt_token_mint",
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
         }
       ],
       "args": [
         {
           "name": "amount",
-          "type": "u128"
+          "type": "u64"
         },
         {
           "name": "duration",
@@ -982,6 +1247,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -994,71 +1264,16 @@
         },
         {
           "name": "receipt_token_mint",
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
         }
       ],
       "args": [
         {
           "name": "sol_withdrawal_fee_rate",
           "type": "u16"
-        }
-      ]
-    },
-    {
-      "name": "fund_initialize_whitelisted_tokens",
-      "discriminator": [
-        17,
-        162,
-        55,
-        110,
-        70,
-        44,
-        49,
-        10
-      ],
-      "accounts": [
-        {
-          "name": "admin",
-          "writable": true,
-          "signer": true,
-          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ"
-        },
-        {
-          "name": "fund",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  102,
-                  117,
-                  110,
-                  100
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "receipt_token_mint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "receipt_token_mint",
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
-        }
-      ],
-      "args": [
-        {
-          "name": "whitelisted_tokens",
-          "type": {
-            "vec": {
-              "defined": {
-                "name": "TokenInfo"
-              }
-            }
-          }
         }
       ]
     },
@@ -1092,6 +1307,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -1104,7 +1324,10 @@
         },
         {
           "name": "receipt_token_mint",
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
         }
       ],
       "args": [
@@ -1151,8 +1374,17 @@
                   101,
                   105,
                   112,
-                  116
+                  116,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
               },
               {
                 "kind": "account",
@@ -1172,6 +1404,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -1209,7 +1446,12 @@
                   114,
                   105,
                   116,
-                  121
+                  121,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
               },
               {
@@ -1222,7 +1464,11 @@
         {
           "name": "receipt_token_mint",
           "writable": true,
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund",
+            "fund_token_authority"
+          ]
         },
         {
           "name": "receipt_token_account",
@@ -1359,6 +1605,64 @@
       ]
     },
     {
+      "name": "fund_reset_receipt_token_price",
+      "discriminator": [
+        26,
+        251,
+        29,
+        3,
+        194,
+        222,
+        221,
+        92
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receipt_token_mint",
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "fund_update_batch_processing_threshold",
       "discriminator": [
         139,
@@ -1375,25 +1679,47 @@
           "name": "admin",
           "writable": true,
           "signer": true,
-          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ",
-          "relations": [
-            "fund"
-          ]
+          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ"
         },
         {
           "name": "fund",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              }
+            ]
+          }
         },
         {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
+          "name": "receipt_token_mint",
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
         }
       ],
       "args": [
         {
           "name": "amount",
           "type": {
-            "option": "u128"
+            "option": "u64"
           }
         },
         {
@@ -1403,6 +1729,110 @@
           }
         }
       ]
+    },
+    {
+      "name": "fund_update_price",
+      "discriminator": [
+        231,
+        124,
+        147,
+        194,
+        249,
+        64,
+        228,
+        186
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fund_token_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100,
+                  95,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receipt_token_mint",
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund",
+            "fund_token_authority"
+          ]
+        },
+        {
+          "name": "token_pricing_source_0",
+          "address": "azFVdHtAJN8BX3sbGAYkXvtdjdrT5U6rj9rovvUFos9"
+        },
+        {
+          "name": "token_pricing_source_1",
+          "address": "8szGkuLTAux9XMgZ2vtY39jVSowEcpBfFfD8hXSEqdGC"
+        }
+      ],
+      "args": []
     },
     {
       "name": "fund_update_sol_withdrawal_fee_rate",
@@ -1421,70 +1851,110 @@
           "name": "admin",
           "writable": true,
           "signer": true,
-          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ",
-          "relations": [
-            "fund"
-          ]
+          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ"
         },
         {
           "name": "fund",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              }
+            ]
+          }
         },
         {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
+          "name": "receipt_token_mint",
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
         }
       ],
       "args": [
         {
-          "name": "request",
-          "type": {
-            "defined": {
-              "name": "FundUpdateSolWithdrawalFeeRateRequest"
-            }
-          }
+          "name": "sol_withdrawal_fee_rate",
+          "type": "u16"
         }
       ]
     },
     {
-      "name": "fund_update_token_info",
+      "name": "fund_update_supported_token",
       "discriminator": [
-        244,
-        183,
-        18,
-        134,
-        205,
-        237,
+        31,
+        227,
+        127,
+        6,
         162,
-        121
+        136,
+        15,
+        140
       ],
       "accounts": [
         {
           "name": "admin",
           "writable": true,
           "signer": true,
-          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ",
-          "relations": [
-            "fund"
-          ]
+          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ"
         },
         {
           "name": "fund",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              }
+            ]
+          }
         },
         {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
+          "name": "receipt_token_mint",
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
         }
       ],
       "args": [
         {
-          "name": "request",
-          "type": {
-            "defined": {
-              "name": "FundUpdateTokenInfoRequest"
-            }
-          }
+          "name": "token",
+          "type": "pubkey"
+        },
+        {
+          "name": "token_cap",
+          "type": "u64"
         }
       ]
     },
@@ -1505,18 +1975,40 @@
           "name": "admin",
           "writable": true,
           "signer": true,
-          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ",
-          "relations": [
-            "fund"
-          ]
+          "address": "91zBeWL8kHBaMtaVrHwWsck1UacDKvje82QQ3HE2k8mJ"
         },
         {
           "name": "fund",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              }
+            ]
+          }
         },
         {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
+          "name": "receipt_token_mint",
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
         }
       ],
       "args": [
@@ -1527,22 +2019,25 @@
       ]
     },
     {
-      "name": "fund_withdraw_sol",
+      "name": "fund_withdraw",
       "discriminator": [
-        126,
-        40,
-        221,
-        37,
-        159,
-        217,
-        171,
-        191
+        15,
+        43,
+        36,
+        110,
+        91,
+        130,
+        216,
+        217
       ],
       "accounts": [
         {
           "name": "user",
           "writable": true,
-          "signer": true
+          "signer": true,
+          "relations": [
+            "user_receipt"
+          ]
         },
         {
           "name": "user_receipt",
@@ -1563,8 +2058,17 @@
                   101,
                   105,
                   112,
-                  116
+                  116,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
               },
               {
                 "kind": "account",
@@ -1584,6 +2088,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -1596,11 +2105,19 @@
         },
         {
           "name": "receipt_token_mint",
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "user_receipt",
+            "fund"
+          ]
         },
         {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
+          "name": "token_pricing_source_0",
+          "address": "azFVdHtAJN8BX3sbGAYkXvtdjdrT5U6rj9rovvUFos9"
+        },
+        {
+          "name": "token_pricing_source_1",
+          "address": "8szGkuLTAux9XMgZ2vtY39jVSowEcpBfFfD8hXSEqdGC"
         }
       ],
       "args": [
@@ -1660,6 +2177,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -1697,7 +2219,12 @@
                   114,
                   105,
                   116,
-                  121
+                  121,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
               },
               {
@@ -1710,7 +2237,11 @@
         {
           "name": "receipt_token_mint",
           "writable": true,
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund",
+            "fund_token_authority"
+          ]
         },
         {
           "name": "receipt_token_lock_account",
@@ -1770,16 +2301,20 @@
           }
         },
         {
+          "name": "token_pricing_source_0",
+          "address": "azFVdHtAJN8BX3sbGAYkXvtdjdrT5U6rj9rovvUFos9"
+        },
+        {
+          "name": "token_pricing_source_1",
+          "address": "8szGkuLTAux9XMgZ2vtY39jVSowEcpBfFfD8hXSEqdGC"
+        },
+        {
           "name": "token_program",
           "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
@@ -1813,6 +2348,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -1850,7 +2390,12 @@
                   114,
                   105,
                   116,
-                  121
+                  121,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
                 ]
               },
               {
@@ -1862,7 +2407,12 @@
         },
         {
           "name": "receipt_token_mint",
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "writable": true,
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund",
+            "fund_token_authority"
+          ]
         },
         {
           "name": "receipt_token_lock_account",
@@ -1922,16 +2472,20 @@
           }
         },
         {
+          "name": "token_pricing_source_0",
+          "address": "azFVdHtAJN8BX3sbGAYkXvtdjdrT5U6rj9rovvUFos9"
+        },
+        {
+          "name": "token_pricing_source_1",
+          "address": "8szGkuLTAux9XMgZ2vtY39jVSowEcpBfFfD8hXSEqdGC"
+        },
+        {
           "name": "token_program",
           "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
@@ -1992,7 +2546,10 @@
         },
         {
           "name": "receipt_token_mint",
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
         },
         {
           "name": "fund",
@@ -2005,6 +2562,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -2027,146 +2589,6 @@
       "args": []
     },
     {
-      "name": "token_mint_receipt_token_for_test",
-      "discriminator": [
-        192,
-        96,
-        13,
-        69,
-        35,
-        122,
-        245,
-        89
-      ],
-      "accounts": [
-        {
-          "name": "payer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "receipt_token_account_owner"
-        },
-        {
-          "name": "receipt_token_mint",
-          "writable": true,
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
-        },
-        {
-          "name": "fund_token_authority",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  102,
-                  117,
-                  110,
-                  100,
-                  95,
-                  116,
-                  111,
-                  107,
-                  101,
-                  110,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "receipt_token_mint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "receipt_token_account",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "receipt_token_account_owner"
-              },
-              {
-                "kind": "account",
-                "path": "token_program"
-              },
-              {
-                "kind": "account",
-                "path": "receipt_token_mint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
-        },
-        {
-          "name": "token_program",
-          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-        },
-        {
-          "name": "associated_token_program",
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
       "name": "token_transfer_hook",
       "discriminator": [
         105,
@@ -2184,7 +2606,10 @@
         },
         {
           "name": "receipt_token_mint",
-          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN"
+          "address": "FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN",
+          "relations": [
+            "fund"
+          ]
         },
         {
           "name": "destination_token_account"
@@ -2238,6 +2663,11 @@
                   102,
                   117,
                   110,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
                   100
                 ]
               },
@@ -2259,19 +2689,6 @@
   ],
   "accounts": [
     {
-      "name": "Empty",
-      "discriminator": [
-        15,
-        64,
-        23,
-        223,
-        220,
-        243,
-        41,
-        219
-      ]
-    },
-    {
       "name": "Fund",
       "discriminator": [
         62,
@@ -2282,6 +2699,19 @@
         31,
         212,
         209
+      ]
+    },
+    {
+      "name": "FundTokenAuthority",
+      "discriminator": [
+        142,
+        159,
+        192,
+        9,
+        6,
+        17,
+        60,
+        115
       ]
     },
     {
@@ -2310,6 +2740,19 @@
         78,
         150,
         71
+      ]
+    },
+    {
+      "name": "FundPriceUpdated",
+      "discriminator": [
+        211,
+        220,
+        64,
+        84,
+        22,
+        25,
+        52,
+        81
       ]
     },
     {
@@ -2461,6 +2904,21 @@
       "code": 6013,
       "name": "FundWithdrawalAlreadyInProgress",
       "msg": "Withdrawal request already started processing"
+    },
+    {
+      "code": 6014,
+      "name": "SigVerificationFailed",
+      "msg": "Signature verification failed"
+    },
+    {
+      "code": 6015,
+      "name": "CalculationFailure",
+      "msg": "Calculation failed due to overflow/underflow"
+    },
+    {
+      "code": 6016,
+      "name": "FundTokenPricingSourceNotFound",
+      "msg": "Token pricing source not provided"
     }
   ],
   "types": [
@@ -2479,19 +2937,19 @@
           },
           {
             "name": "receipt_token_to_process",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "receipt_token_being_processed",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "receipt_token_processed",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "sol_reserved",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "processing_started_at",
@@ -2503,126 +2961,43 @@
       }
     },
     {
-      "name": "Empty",
-      "type": {
-        "kind": "struct",
-        "fields": []
-      }
-    },
-    {
       "name": "Fund",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "admin",
-            "type": "pubkey"
+            "name": "data_version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           },
           {
             "name": "receipt_token_mint",
             "type": "pubkey"
           },
           {
-            "name": "data",
+            "name": "supported_tokens",
             "type": {
-              "defined": {
-                "name": "VersionedFund"
+              "vec": {
+                "defined": {
+                  "name": "TokenInfo"
+                }
               }
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundAddWhitelistedTokenRequest",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1",
-            "fields": [
-              {
-                "defined": {
-                  "name": "FundAddWhitelistedTokenRequestV1"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundAddWhitelistedTokenRequestV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "token",
-            "type": "pubkey"
           },
           {
-            "name": "token_cap",
-            "type": "u128"
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundDepositSOLRequest",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1",
-            "fields": [
-              {
-                "defined": {
-                  "name": "FundDepositSOLRequestV1"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundDepositSOLRequestV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "amount",
+            "name": "sol_amount_in",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundDepositTokenRequest",
-      "type": {
-        "kind": "enum",
-        "variants": [
+          },
           {
-            "name": "V1",
-            "fields": [
-              {
-                "defined": {
-                  "name": "FundDepositTokenRequestV1"
-                }
+            "name": "withdrawal_status",
+            "type": {
+              "defined": {
+                "name": "WithdrawalStatus"
               }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundDepositTokenRequestV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "amount",
-            "type": "u64"
+            }
           }
         ]
       }
@@ -2632,10 +3007,6 @@
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "admin",
-            "type": "pubkey"
-          },
           {
             "name": "lrt_mint",
             "type": "pubkey"
@@ -2652,11 +3023,11 @@
           },
           {
             "name": "sol_amount_in",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "sol_reserved_amount",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "sol_withdrawal_fee_rate",
@@ -2665,6 +3036,30 @@
           {
             "name": "sol_withdrawal_enabled",
             "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundPriceUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lrt_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "lrt_price",
+            "type": "u64"
+          },
+          {
+            "name": "fund_info",
+            "type": {
+              "defined": {
+                "name": "FundInfo"
+              }
+            }
           }
         ]
       }
@@ -2696,7 +3091,7 @@
           },
           {
             "name": "sol_amount_in_fund",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "minted_lrt_mint",
@@ -2704,6 +3099,10 @@
           },
           {
             "name": "minted_lrt_amount",
+            "type": "u64"
+          },
+          {
+            "name": "lrt_price",
             "type": "u64"
           },
           {
@@ -2763,6 +3162,10 @@
             "type": "u64"
           },
           {
+            "name": "lrt_price",
+            "type": "u64"
+          },
+          {
             "name": "sol_withdraw_amount",
             "type": "u64"
           },
@@ -2777,6 +3180,26 @@
                 "name": "FundInfo"
               }
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundTokenAuthority",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data_version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "receipt_token_mint",
+            "type": "pubkey"
           }
         ]
       }
@@ -2816,7 +3239,7 @@
           },
           {
             "name": "token_amount_in_fund",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "minted_lrt_mint",
@@ -2824,6 +3247,10 @@
           },
           {
             "name": "minted_lrt_amount",
+            "type": "u64"
+          },
+          {
+            "name": "lrt_price",
             "type": "u64"
           },
           {
@@ -2847,130 +3274,6 @@
             "type": {
               "defined": {
                 "name": "FundInfo"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundUpdateSolWithdrawalFeeRateRequest",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1",
-            "fields": [
-              {
-                "defined": {
-                  "name": "FundUpdateSolWithdrawalFeeRateRequestV1"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundUpdateSolWithdrawalFeeRateRequestV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "sol_withdrawal_fee_rate",
-            "type": "u16"
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundUpdateTokenInfoRequest",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1",
-            "fields": [
-              {
-                "defined": {
-                  "name": "FundUpdateTokenInfoRequestV1"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundUpdateTokenInfoRequestV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "token",
-            "type": "pubkey"
-          },
-          {
-            "name": "info",
-            "type": {
-              "defined": {
-                "name": "TokenInfo"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "sol_withdrawal_fee_rate",
-            "type": "u16"
-          },
-          {
-            "name": "whitelisted_tokens",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "TokenInfo"
-                }
-              }
-            }
-          },
-          {
-            "name": "sol_amount_in",
-            "type": "u128"
-          }
-        ]
-      }
-    },
-    {
-      "name": "FundV2",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "whitelisted_tokens",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "TokenInfo"
-                }
-              }
-            }
-          },
-          {
-            "name": "sol_amount_in",
-            "type": "u128"
-          },
-          {
-            "name": "withdrawal_status",
-            "type": {
-              "defined": {
-                "name": "WithdrawalStatus"
               }
             }
           }
@@ -3058,6 +3361,22 @@
       }
     },
     {
+      "name": "Metadata",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet_provider",
+            "type": "string"
+          },
+          {
+            "name": "fpoint_accrual_rate_multiplier",
+            "type": "f32"
+          }
+        ]
+      }
+    },
+    {
       "name": "ReservedFund",
       "type": {
         "kind": "struct",
@@ -3076,7 +3395,7 @@
           },
           {
             "name": "sol_remaining",
-            "type": "u128"
+            "type": "u64"
           }
         ]
       }
@@ -3091,12 +3410,28 @@
             "type": "pubkey"
           },
           {
+            "name": "token_decimals",
+            "type": "u8"
+          },
+          {
             "name": "token_cap",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "token_amount_in",
-            "type": "u128"
+            "type": "u64"
+          },
+          {
+            "name": "token_price",
+            "type": "u64"
+          },
+          {
+            "name": "token_pricing_source",
+            "type": {
+              "defined": {
+                "name": "TokenPricingSource"
+              }
+            }
           }
         ]
       }
@@ -3134,10 +3469,52 @@
       }
     },
     {
+      "name": "TokenPricingSource",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "SPLStakePool",
+            "fields": [
+              {
+                "name": "address",
+                "type": "pubkey"
+              }
+            ]
+          },
+          {
+            "name": "MarinadeStakePool",
+            "fields": [
+              {
+                "name": "address",
+                "type": "pubkey"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "UserReceipt",
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "data_version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "receipt_token_mint",
+            "type": "pubkey"
+          },
           {
             "name": "withdrawal_requests",
             "type": {
@@ -3147,34 +3524,6 @@
                 }
               }
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "VersionedFund",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1",
-            "fields": [
-              {
-                "defined": {
-                  "name": "FundV1"
-                }
-              }
-            ]
-          },
-          {
-            "name": "V2",
-            "fields": [
-              {
-                "defined": {
-                  "name": "FundV2"
-                }
-              }
-            ]
           }
         ]
       }
@@ -3246,7 +3595,7 @@
           },
           {
             "name": "batch_processing_threshold_amount",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "batch_processing_threshold_duration",

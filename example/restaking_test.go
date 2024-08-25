@@ -2,45 +2,35 @@ package example
 
 import (
 	_ "embed"
-	"fmt"
 	"github.com/encrypt-x/solana-anchor-go/generated/restaking"
-	ag_binary "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
+	"strings"
+	"testing"
 )
 
-var restakingProgramID = solana.MustPublicKeyFromBase58("fragfP1Z2DXiXNuDYaaCnbGvusMP1DNQswAqTwMuY6e")
+//var restakingProgramID = solana.MustPublicKeyFromBase58("fragfP1Z2DXiXNuDYaaCnbGvusMP1DNQswAqTwMuY6e")
 
-func Example4() {
-	user1, _ := solana.WalletFromPrivateKeyBase58("6Vw4jPBpL6tdAdtQeQ8zTaTV1f8fjda7nBNChswD5cyJ")
-	fragSOLMintAddress, _ := solana.PublicKeyFromBase58("FRAGsJAbW4cHk2DYhtAWohV6MUMauJHCFtT1vGvRwnXN")
-
-	restaking.SetProgramID(restakingProgramID)                                                       // should set this first before find PDA
-	fragSOLFundAddress, _, _ := (*restaking.FundInitialize)(nil).FindFundAddress(fragSOLMintAddress) // find PDA for instruction, it is safe for nil receiver
-
-	tx, _ := solana.NewTransaction(
-		[]solana.Instruction{
-			restaking.NewFundAddWhitelistedTokenInstructionBuilder().
-				SetFundAccount(fragSOLFundAddress).
-				SetRequest(restaking.FundAddWhitelistedTokenRequestV1Tuple{
-					Elem0: restaking.FundAddWhitelistedTokenRequestV1{
-						Token: solana.NewWallet().PublicKey(),
-						TokenCap: ag_binary.Uint128{
-							Hi: 10,
-							Lo: 10,
-						},
-					},
-				}).
-				// SetAdminAccount(...). // automatically set
-				// SetSystemProgramAccount(...). // automatically set
-				Build(),
-			restaking.NewLogMessageInstruction("traceparent: 00-0af7651916cd43dd8448eb211c80319c-b9c7c989f97918e1-01\ntracestate: congo=ucfJifl5GOE,rojo=00f067aa0ba902b7").
-				Build(),
-		},
-		solana.Hash{}, // calc recent block hash for real usage
-		solana.TransactionPayer(user1.PublicKey()),
-	)
-	//fmt.Println(tx.String())
-	fmt.Printf(tx.MustToBase64())
-	//output:
-	//AAEAAgR3HicvsoIYj5uf0anX5ZursGygzmpiQ3vOoF5XJFuC7SJLWwyDI7BtyZou/DbjBDKJSfl66jNt2wx0hNUXqeBHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ9CHDJI615fn5u1m6o0UWxEI9cGhKuWamLZSL/7HtQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgMDAAECOd9+//W3vPEXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAhAGUBCwiygVTc3gAAAB0cmFjZXBhcmVudDogMDAtMGFmNzY1MTkxNmNkNDNkZDg0NDhlYjIxMWM4MDMxOWMtYjljN2M5ODlmOTc5MThlMS0wMQp0cmFjZXN0YXRlOiBjb25nbz11Y2ZKaWZsNUdPRSxyb2pvPTAwZjA2N2FhMGJhOTAyYjc=
+func TestDecodeOldEventLogs(t *testing.T) {
+	_, err := restaking.DecodeEvents([]string{
+		"Program fragfP1Z2DXiXNuDYaaCnbGvusMP1DNQswAqTwMuY6e invoke [1]",
+		"Program log: Instruction: FundDepositSol",
+		"Program log: receipt_token_account: BZWkDnC4iVuydTZHa8SNTZuqCB6BTVg3x2X2zDLJe3FL",
+		"Program log: Transferring from D5zDEBSiA497dge26i4vwHsLk75exUghMoFDc8mBeJDu to 3JsWPNkScgQtM9YonmNgS5awGDqbh2GxfaDrdNccyoD8",
+		"Program 11111111111111111111111111111111 invoke [2]",
+		"Program 11111111111111111111111111111111 success",
+		"Program log: Transferred 100 SOL",
+		"Program log: user's receipt token account key: BZWkDnC4iVuydTZHa8SNTZuqCB6BTVg3x2X2zDLJe3FL",
+		"Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb invoke [2]",
+		"Program log: Instruction: MintTo",
+		"Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb consumed 5448 of 125148 compute units",
+		"Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb success",
+		"Program log: Minted 100 to user token account BZWkDnC4iVuydTZHa8SNTZuqCB6BTVg3x2X2zDLJe3FL",
+		"Program log: transfer hook executed! amount 100 passed from None to Some(BZWkDnC4iVuydTZHa8SNTZuqCB6BTVg3x2X2zDLJe3FL)",
+		"Program log: fund pda: 3JsWPNkScgQtM9YonmNgS5awGDqbh2GxfaDrdNccyoD8",
+		"Program data: R+gnbMZnACGzk0E8U0Qi2BTBiWgc6AHWreJ8tuXlY9cuOzz70ANPeJzpFo/zud9kiMpPRbj/8nSrr2taBkMGI5QXIv3kiii/FgAAAAEAAAAAAAAAAgAAAAAAAAAyAAAAAAAAANwSs2YAAAAAAQAAAAAAAAAFAAAAAAAAADIAAAAAAAAA+BezZgAAAAABAAAAAAAAAAsAAAAAAAAAMgAAAAAAAADGHbNmAAAAAAEAAAAAAAAADQAAAAAAAAAyAAAAAAAAADlIs2YAAAAAAQAAAAAAAAAOAAAAAAAAADIAAAAAAAAAMhG0ZgAAAAABAAAAAAAAABEAAAAAAAAAMgAAAAAAAACKWbRmAAAAAAEAAAAAAAAAEgAAAAAAAAAyAAAAAAAAAJd1tWYAAAAAAQAAAAAAAAATAAAAAAAAADIAAAAAAAAAf3a1ZgAAAAABAAAAAAAAABQAAAAAAAAAMgAAAAAAAAAtd7VmAAAAAAEAAAAAAAAAGQAAAAAAAAAyAAAAAAAAAACqtWYAAAAAAQAAAAAAAAAaAAAAAAAAADIAAAAAAAAAEKy1ZgAAAAABAAAAAAAAABsAAAAAAAAAMgAAAAAAAABsrLVmAAAAAAEAAAAAAAAAHAAAAAAAAAAyAAAAAAAAAJestWYAAAAAAQAAAAAAAAAdAAAAAAAAADIAAAAAAAAAJ7G1ZgAAAAABAAAAAAAAAB4AAAAAAAAAMgAAAAAAAABnsbVmAAAAAAEAAAAAAAAAHwAAAAAAAAAyAAAAAAAAAK2xtWYAAAAAAQAAAAAAAABhAAAAAAAAADIAAAAAAAAAsey5ZgAAAAACAAAAAAAAAHMAAAAAAAAAMgAAAAAAAACF8rpmAAAAAAIAAAAAAAAAdQAAAAAAAAAyAAAAAAAAAPT5umYAAAAACAAAAAAAAAB4AAAAAAAAADIAAAAAAAAAywy7ZgAAAAAcAAAAAAAAAIoAAAAAAAAAMgAAAAAAAAAZRLtmAAAAAB0AAAAAAAAAiwAAAAAAAAAyAAAAAAAAAFJGu2YAAAAAZAAAAAAAAAAOaGmzAAAAAAAAAAAAAAAA1jQKw6dZbynnjHz6JkOmci+TkEMpxTlHgcISQij0KIVkAAAAAAAAAAEeAAAAAAAAAAB3HicvsoIYj5uf0anX5ZursGygzmpiQ3vOoF5XJFuC7dY0CsOnWW8p54x8+iZDpnIvk5BDKcU5R4HCEkIo9CiFAgAAAAjS6XD5PHs9UBkeYRrNk6qApUa0Xsll4YsFhxVWmcisAABkp7O24A0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALYroHT3IsnUEU8tj3CgDGYAIze5v5DIc2V6bSAdtMgAAAZKeztuANAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADmhpswAAAAAAAAAAAAAAAEwEAAAAAAAAAAAAAAAAAAAAAAAAAQ==",
+		"Program fragfP1Z2DXiXNuDYaaCnbGvusMP1DNQswAqTwMuY6e consumed 128674 of 200000 compute units",
+		"Program fragfP1Z2DXiXNuDYaaCnbGvusMP1DNQswAqTwMuY6e success",
+	})
+	if err == nil || !strings.Contains(err.Error(), "failed to unmarshal event restaking.FundSOLDepositedEventData") {
+		t.Fatalf("should fails")
+	}
 }
