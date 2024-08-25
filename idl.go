@@ -225,6 +225,7 @@ const (
 	IdlTypeI64       IdlTypeAsString = "i64"
 	IdlTypeU128      IdlTypeAsString = "u128"
 	IdlTypeI128      IdlTypeAsString = "i128"
+	IdlTypeF64       IdlTypeAsString = "f64"
 	IdlTypeBytes     IdlTypeAsString = "bytes"
 	IdlTypeString    IdlTypeAsString = "string"
 	IdlTypePublicKey IdlTypeAsString = "publicKey"

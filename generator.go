@@ -48,6 +48,8 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 		stat.Qual(PkgDfuseBinary, "Uint128")
 	case IdlTypeI128:
 		stat.Qual(PkgDfuseBinary, "Int128")
+	case IdlTypeF64:
+		stat.Float64()
 	case IdlTypeBytes:
 		stat.Index().Byte()
 	case IdlTypeString:
