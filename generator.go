@@ -4,14 +4,14 @@ import (
 	"fmt"
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
-	bin "github.com/fragmetric-labs/solana-binary-go"
+	bin "github.com/gagliardetto/binary"
 	. "github.com/gagliardetto/utilz"
 )
 
 const (
 	PkgSolanaGo       = "github.com/gagliardetto/solana-go"
 	PkgSolanaGoText   = "github.com/gagliardetto/solana-go/text"
-	PkgDfuseBinary    = "github.com/fragmetric-labs/solana-binary-go"
+	PkgDfuseBinary    = "github.com/gagliardetto/binary"
 	PkgTreeout        = "github.com/gagliardetto/treeout"
 	PkgFormat         = "github.com/gagliardetto/solana-go/text/format"
 	PkgGoFuzz         = "github.com/gagliardetto/gofuzz"

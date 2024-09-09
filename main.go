@@ -16,7 +16,7 @@ import (
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/fragmetric-labs/solana-anchor-go/sighash"
-	bin "github.com/fragmetric-labs/solana-binary-go"
+	bin "github.com/gagliardetto/binary"
 	. "github.com/gagliardetto/utilz"
 	"golang.org/x/mod/modfile"
 )
