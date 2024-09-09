@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gagliardetto/solana-go"
 	"io/ioutil"
 	"os"
 	"path"
@@ -13,8 +15,8 @@ import (
 	"time"
 
 	. "github.com/dave/jennifer/jen"
-	"github.com/encrypt-x/solana-anchor-go/sighash"
-	bin "github.com/gagliardetto/binary"
+	"github.com/fragmetric-labs/solana-anchor-go/sighash"
+	bin "github.com/fragmetric-labs/solana-binary-go"
 	. "github.com/gagliardetto/utilz"
 	"golang.org/x/mod/modfile"
 )
@@ -113,12 +115,12 @@ func main() {
 			//		OrangeBG("[?]"),
 			//	)
 			//}
-			if len(idl.Constants) > 0 {
-				Sfln(
-					"%s idl.Constants is defined, but generator is not implemented yet.",
-					OrangeBG("[?]"),
-				)
-			}
+			//if len(idl.Constants) > 0 {
+			//	Sfln(
+			//		"%s idl.Constants is defined, but generator is not implemented yet.",
+			//		OrangeBG("[?]"),
+			//	)
+			//}
 		}
 
 		// spew.Dump(idl)
@@ -154,7 +156,7 @@ func main() {
 			mdf.AddModuleStmt(GetConfig().ModPath)
 
 			mdf.AddNewRequire("github.com/gagliardetto/solana-go", "v1.5.0", false)
-			mdf.AddNewRequire("github.com/gagliardetto/binary", "v0.7.1", false)
+			mdf.AddNewRequire("github.com/fragmetric-labs/solana-binary-go", "v0.8.0", false)
 			mdf.AddNewRequire("github.com/gagliardetto/treeout", "v0.1.4", false)
 			mdf.AddNewRequire("github.com/gagliardetto/gofuzz", "v1.2.2", false)
 			mdf.AddNewRequire("github.com/stretchr/testify", "v1.6.1", false)
@@ -249,6 +251,9 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 	if err := idl.Validate(); err != nil {
 		return nil, err
 	}
+
+	// configurable address map
+	addresses := make(map[string]string)
 
 	files := make([]*FileWrapper, 0)
 	{
@@ -681,7 +686,9 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 								panic(account)
 							}
 						} else if account.Address != "" {
-							def := Qual(PkgSolanaGo, "Meta").Call(Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(account.Address)))
+							//def := Qual(PkgSolanaGo, "Meta").Call(Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(account.Address)))
+							def := Qual(PkgSolanaGo, "Meta").Call(Id("Addresses").Index(Lit(account.Address)))
+							addresses[account.Address] = account.Address
 							if account.Writable {
 								def.Dot("WRITE").Call()
 							}
@@ -832,6 +839,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 						exportedAccountName,
 						lowerAccountName,
 						instruction.Accounts,
+						addresses,
 					))
 					groupMemberIndex++
 				}
@@ -1252,6 +1260,55 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 		})
 	}
 
+	// add configurable address map file
+	{
+		file := NewGoFile(idl.Metadata.Name, false)
+		code := Empty().Var().Id("Addresses").Op("=").Map(String()).Qual(PkgSolanaGo, "PublicKey").Values(DictFunc(func(dict Dict) {
+			for address, _ := range addresses {
+				dict[Lit(address)] = Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(address))
+			}
+		}))
+		file.Add(code)
+		files = append(files, &FileWrapper{
+			Name: "addresses",
+			File: file,
+		})
+	}
+
+	// add constants file
+	{
+		file := NewGoFile(idl.Metadata.Name, false)
+		code := Empty()
+		for _, c := range idl.Constants {
+			code.Line().Var().Id(fmt.Sprintf("CONST_%s", c.Name)).Op("=")
+			typ := c.Type.GetString()
+			switch typ {
+			case "string":
+				v, err := strconv.Unquote(c.Value)
+				if err != nil {
+					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
+				}
+				code.Lit(v)
+			case "u16":
+				v, err := strconv.ParseInt(c.Value, 10, 16)
+				if err != nil {
+					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
+				}
+				code.Lit(int(v))
+			case "pubkey":
+				code.Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(c.Value))
+			default:
+				panic(fmt.Sprintf("unsupportd constant: %s", spew.Sdump(c)))
+			}
+
+		}
+		file.Add(code)
+		files = append(files, &FileWrapper{
+			Name: "constants",
+			File: file,
+		})
+	}
+
 	{
 		testFiles, err := genTestingFuncs(idl)
 		if err != nil {
@@ -1270,6 +1327,7 @@ func genAccountGettersSetters(
 	exportedAccountName string,
 	lowerAccountName string,
 	accounts []IdlAccountItem,
+	addresses map[string]string,
 ) Code {
 	code := Empty()
 
@@ -1433,11 +1491,14 @@ func genAccountGettersSetters(
 					seedProgramRef := Id("ProgramID")
 					if seedProgramValue != nil {
 						seedProgramRef = Id("programID")
-						body.Add(Id("programID").Op(":=").Qual(PkgSolanaGo, "PublicKey").Call(Index().Byte().ValuesFunc(func(group *Group) {
-							for _, v := range *seedProgramValue {
-								group.LitByte(v)
-							}
-						})))
+						//body.Add(Id("programID").Op(":=").Qual(PkgSolanaGo, "PublicKey").Call(Index().Byte().ValuesFunc(func(group *Group) {
+						//	for _, v := range *seedProgramValue {
+						//		group.LitByte(v)
+						//	}
+						//})))
+						address := solana.PublicKeyFromBytes(*seedProgramValue).String()
+						body.Add(Id("programID").Op(":=").Id("Addresses").Index(Lit(address)))
+						addresses[address] = address
 					}
 
 					body.Line()

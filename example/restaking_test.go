@@ -2,7 +2,7 @@ package example
 
 import (
 	_ "embed"
-	"github.com/encrypt-x/solana-anchor-go/generated/restaking"
+	"github.com/fragmetric-labs/solana-anchor-go/generated/restaking"
 	"strings"
 	"testing"
 )

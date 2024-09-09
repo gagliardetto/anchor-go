@@ -19,6 +19,11 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fatih/color v1.9.0 h1:8xPHl4/q1VyqGIPif1F+1V3Y3lSmrq01EabUW3CoW5s=
 github.com/fatih/color v1.9.0/go.mod h1:eQcE1qtQxscV5RaZvpXrrb8Drkc3/DdQ+uUYCNjL+zU=
+github.com/fragmetric-labs/solana-anchor-go v0.0.0-20240825055753-0fd0bc4200da h1:I1uEUptiBdgpx5siTMO2W63CWcqkitvpCbi0a6Lrl8k=
+github.com/fragmetric-labs/solana-anchor-go v0.0.0-20240825055753-0fd0bc4200da/go.mod h1:OngKzXXI3YcbPYLJdbUA2qVNL8O5UHKDn/Lz5JtBCXw=
+github.com/fragmetric-labs/solana-binary-go v0.0.0-20240909100756-32678e39aa13 h1:Mcu35DjSqhGvkNhgO0XY/dKmq8TqfgPOhRErFYvhzks=
+github.com/fragmetric-labs/solana-binary-go v0.0.0-20240909100756-32678e39aa13/go.mod h1:y4YoJ9KJnBkPfFKWEXuwGEVOdcjEkc63r9o+whZkob8=
+github.com/fragmetric-labs/solana-binary-go v0.0.0-20240909102245-cd4a602837b9/go.mod h1:y4YoJ9KJnBkPfFKWEXuwGEVOdcjEkc63r9o+whZkob8=
 github.com/gagliardetto/binary v0.8.0 h1:U9ahc45v9HW0d15LoN++vIXSJyqR/pWw8DDlhd7zvxg=
 github.com/gagliardetto/binary v0.8.0/go.mod h1:2tfj51g5o9dnvsc+fL3Jxr22MuWzYXwx9wEoN0XQ7/c=
 github.com/gagliardetto/gofuzz v1.2.2 h1:XL/8qDMzcgvR4+CyRQW9UGdwPRPMHVJfqQ/uMvSUuQw=
