@@ -408,10 +408,10 @@ func DecodeEventsFromLogMessage(logMessages []string) (eventBinaries [][]byte, e
 	return
 }
 
-func DecodeEventsFromEmitCPI(ParsedInnerInstructions []ag_rpc.ParsedInnerInstruction, programId string) (eventBinaries [][]byte, err error) {
-	for _, parsedIx := range ParsedInnerInstructions {
+func DecodeEventsFromEmitCPI(InnerInstructions []ag_rpc.InnerInstruction, accountKeys ag_solanago.PublicKeySlice, targetProgramId ag_solanago.PublicKey) (eventBinaries [][]byte, err error) {
+	for _, parsedIx := range InnerInstructions {
 		for _, ix := range parsedIx.Instructions {
-			if ix.Program != programId {
+			if accountKeys[ix.ProgramIDIndex] != targetProgramId {
 				continue
 			}
 
@@ -432,13 +432,18 @@ func DecodeEventsFromEmitCPI(ParsedInnerInstructions []ag_rpc.ParsedInnerInstruc
 	return
 }
 
-func DecodeEvents(meta ag_rpc.ParsedTransactionMeta, programId string) (evts []*Event, err error) {
+func DecodeEvents(txData *ag_rpc.GetTransactionResult, targetProgramId ag_solanago.PublicKey) (evts []*Event, err error) {
+	var tx *ag_solanago.Transaction
+	if tx, err = txData.Transaction.GetTransaction(); err != nil {
+		return
+	}
+
 	var base64Binaries [][]byte
-	logMessageEventBinaries, err := DecodeEventsFromLogMessage(meta.LogMessages)
+	logMessageEventBinaries, err := DecodeEventsFromLogMessage(txData.Meta.LogMessages)
 	if err != nil {
 		return
 	}
-	emitedCPIEventBinaries, err := DecodeEventsFromEmitCPI(meta.InnerInstructions, programId)
+	emitedCPIEventBinaries, err := DecodeEventsFromEmitCPI(txData.Meta.InnerInstructions, tx.Message.AccountKeys, targetProgramId)
 	if err != nil {
 		return
 	}
@@ -469,7 +474,6 @@ func ParseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
 	}
 	return
 }
-
 `))
 
 		files = append(files, &FileWrapper{
