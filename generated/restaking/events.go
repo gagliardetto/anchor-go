@@ -7,6 +7,7 @@ import (
 	"fmt"
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
+	ag_rpc "github.com/gagliardetto/solana-go/rpc"
 	"reflect"
 	"strings"
 )
@@ -1175,6 +1176,9 @@ var (
 var (
 	_ *ag_binary.Decoder = nil
 )
+var (
+	_ *ag_rpc.ParsedTransactionMeta = nil
+)
 
 type Event struct {
 	Name string
@@ -1188,31 +1192,74 @@ type EventData interface {
 
 const eventLogPrefix = "Program data: "
 
-func DecodeEvents(logMessages []string) (evts []*Event, err error) {
-	decoder := ag_binary.NewDecoderWithEncoding(nil, ag_binary.EncodingBorsh)
+func DecodeEventsFromLogMessage(logMessages []string) (eventBinaries [][]byte, err error) {
 	for _, log := range logMessages {
 		if strings.HasPrefix(log, eventLogPrefix) {
 			eventBase64 := log[len(eventLogPrefix):]
 
 			var eventBinary []byte
 			if eventBinary, err = base64.StdEncoding.DecodeString(eventBase64); err != nil {
-				err = fmt.Errorf("failed to decode event log: %s", eventBase64)
+				err = fmt.Errorf("failed to decode logMessage event: %s", eventBase64)
 				return
 			}
+			eventBinaries = append(eventBinaries, eventBinary)
+		}
+	}
+	return
+}
 
-			eventDiscriminator := ag_binary.TypeID(eventBinary[:8])
-			if eventType, ok := eventTypes[eventDiscriminator]; ok {
-				eventData := reflect.New(eventType).Interface().(EventData)
-				decoder.Reset(eventBinary)
-				if err = eventData.UnmarshalWithDecoder(decoder); err != nil {
-					err = fmt.Errorf("failed to unmarshal event %s: %w", eventType.String(), err)
-					return
-				}
-				evts = append(evts, &Event{
-					Name: eventNames[eventDiscriminator],
-					Data: eventData,
-				})
+func DecodeEventsFromEmitCPI(ParsedInnerInstructions []ag_rpc.ParsedInnerInstruction, programId string) (eventBinaries [][]byte, err error) {
+	for _, parsedIx := range ParsedInnerInstructions {
+		for _, ix := range parsedIx.Instructions {
+			if ix.Program != programId {
+				continue
 			}
+
+			eventBase64 := base64.StdEncoding.EncodeToString(ix.Data[8:])
+			var eventBinary []byte
+			if eventBinary, err = base64.StdEncoding.DecodeString(eventBase64); err != nil {
+				err = fmt.Errorf("failed to decode emit cpi event: %s", eventBase64)
+				return
+			}
+			eventBinaries = append(eventBinaries, eventBinary)
+		}
+	}
+	return
+}
+
+func DecodeEvents(meta ag_rpc.ParsedTransactionMeta, programId string) (evts []*Event, err error) {
+	var base64Binaries [][]byte
+	logMessageEventBinaries, err := DecodeEventsFromLogMessage(meta.LogMessages)
+	if err != nil {
+		return
+	}
+	emitedCPIEventBinaries, err := DecodeEventsFromEmitCPI(meta.InnerInstructions, programId)
+	if err != nil {
+		return
+	}
+
+	base64Binaries = append(base64Binaries, logMessageEventBinaries...)
+	base64Binaries = append(base64Binaries, emitedCPIEventBinaries...)
+	evts, err = ParseEvents(base64Binaries)
+	return
+}
+
+func ParseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
+	decoder := ag_binary.NewDecoderWithEncoding(nil, ag_binary.EncodingBorsh)
+
+	for _, eventBinary := range base64Binaries {
+		eventDiscriminator := ag_binary.TypeID(eventBinary[:8])
+		if eventType, ok := eventTypes[eventDiscriminator]; ok {
+			eventData := reflect.New(eventType).Interface().(EventData)
+			decoder.Reset(eventBinary)
+			if err = eventData.UnmarshalWithDecoder(decoder); err != nil {
+				err = fmt.Errorf("failed to unmarshal event %s: %w", eventType.String(), err)
+				return
+			}
+			evts = append(evts, &Event{
+				Name: eventNames[eventDiscriminator],
+				Data: eventData,
+			})
 		}
 	}
 	return
