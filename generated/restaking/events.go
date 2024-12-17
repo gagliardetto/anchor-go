@@ -8,6 +8,7 @@ import (
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_rpc "github.com/gagliardetto/solana-go/rpc"
+	ag_base58 "github.com/mr-tron/base58"
 	"reflect"
 	"strings"
 )
@@ -1177,7 +1178,10 @@ var (
 	_ *ag_binary.Decoder = nil
 )
 var (
-	_ *ag_rpc.ParsedTransactionMeta = nil
+	_ *ag_rpc.GetTransactionResult = nil
+)
+var (
+	_ *ag_base58.Decode = nil
 )
 
 type Event struct {
@@ -1208,17 +1212,22 @@ func DecodeEventsFromLogMessage(logMessages []string) (eventBinaries [][]byte, e
 	return
 }
 
-func DecodeEventsFromEmitCPI(ParsedInnerInstructions []ag_rpc.ParsedInnerInstruction, programId string) (eventBinaries [][]byte, err error) {
-	for _, parsedIx := range ParsedInnerInstructions {
+func DecodeEventsFromEmitCPI(InnerInstructions []ag_rpc.InnerInstruction, accountKeys ag_solanago.PublicKeySlice, targetProgramId ag_solanago.PublicKey) (eventBinaries [][]byte, err error) {
+	for _, parsedIx := range InnerInstructions {
 		for _, ix := range parsedIx.Instructions {
-			if ix.Program != programId {
+			if accountKeys[ix.ProgramIDIndex] != targetProgramId {
 				continue
 			}
 
-			eventBase64 := base64.StdEncoding.EncodeToString(ix.Data[8:])
+			var ixData []byte
+			if ixData, err = ag_base58.Decode(string(ix.Data)); err != nil {
+				err = fmt.Errorf("failed to decode base58 emit cpi event: %s", string(ixData))
+				return
+			}
+			eventBase64 := base64.StdEncoding.EncodeToString(ixData[8:])
 			var eventBinary []byte
 			if eventBinary, err = base64.StdEncoding.DecodeString(eventBase64); err != nil {
-				err = fmt.Errorf("failed to decode emit cpi event: %s", eventBase64)
+				err = fmt.Errorf("failed to decode base64 emit cpi event: %s", eventBase64)
 				return
 			}
 			eventBinaries = append(eventBinaries, eventBinary)
@@ -1227,13 +1236,18 @@ func DecodeEventsFromEmitCPI(ParsedInnerInstructions []ag_rpc.ParsedInnerInstruc
 	return
 }
 
-func DecodeEvents(meta ag_rpc.ParsedTransactionMeta, programId string) (evts []*Event, err error) {
+func DecodeEvents(txData *ag_rpc.GetTransactionResult, targetProgramId ag_solanago.PublicKey) (evts []*Event, err error) {
+	var tx *ag_solanago.Transaction
+	if tx, err = txData.Transaction.GetTransaction(); err != nil {
+		return
+	}
+
 	var base64Binaries [][]byte
-	logMessageEventBinaries, err := DecodeEventsFromLogMessage(meta.LogMessages)
+	logMessageEventBinaries, err := DecodeEventsFromLogMessage(txData.Meta.LogMessages)
 	if err != nil {
 		return
 	}
-	emitedCPIEventBinaries, err := DecodeEventsFromEmitCPI(meta.InnerInstructions, programId)
+	emitedCPIEventBinaries, err := DecodeEventsFromEmitCPI(txData.Meta.InnerInstructions, tx.Message.AccountKeys, targetProgramId)
 	if err != nil {
 		return
 	}

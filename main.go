@@ -376,8 +376,9 @@ func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instructi
 		// to generate import statements
 		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual("strings", "Builder").Op("=").Nil()))
 		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual("encoding/base64", "Encoding").Op("=").Nil()))
-		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual(PkgDfuseBinary, "Decoder").Op("=").Nil()))                                        // TODO: ..
-		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual("github.com/gagliardetto/solana-go/rpc", "ParsedTransactionMeta").Op("=").Nil())) // TODO: ..
+		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual(PkgDfuseBinary, "Decoder").Op("=").Nil())) // TODO: ..
+		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual("github.com/gagliardetto/solana-go/rpc", "GetTransactionResult").Op("=").Nil()))
+		file.Add(Empty().Var().Defs(Id("_").Op("*").Qual("github.com/mr-tron/base58", "Decode").Op("=").Nil()))
 
 		file.Add(Empty().Id(`
 type Event struct {
@@ -416,7 +417,7 @@ func DecodeEventsFromEmitCPI(InnerInstructions []ag_rpc.InnerInstruction, accoun
 			}
 
 			var ixData []byte
-			if ixData, err = base58.Decode(string(ix.Data)); err != nil {
+			if ixData, err = ag_base58.Decode(string(ix.Data)); err != nil {
 				err = fmt.Errorf("failed to decode base58 emit cpi event: %s", string(ixData))
 				return
 			}
