@@ -1181,7 +1181,7 @@ var (
 	_ *ag_rpc.GetTransactionResult = nil
 )
 var (
-	_ *ag_base58.Decode = nil
+	_ *ag_base58.Alphabet = nil
 )
 
 type Event struct {
