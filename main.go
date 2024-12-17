@@ -415,10 +415,15 @@ func DecodeEventsFromEmitCPI(ParsedInnerInstructions []ag_rpc.ParsedInnerInstruc
 				continue
 			}
 
-			eventBase64 := base64.StdEncoding.EncodeToString(ix.Data[8:])
+			var ixData []byte
+			if ixData, err = base58.Decode(string(ix.Data)); err != nil {
+				err = fmt.Errorf("failed to decode base58 emit cpi event: %s", string(ixData))
+				return
+			}
+			eventBase64 := base64.StdEncoding.EncodeToString(ixData[8:])
 			var eventBinary []byte
 			if eventBinary, err = base64.StdEncoding.DecodeString(eventBase64); err != nil {
-				err = fmt.Errorf("failed to decode emit cpi event: %s", eventBase64)
+				err = fmt.Errorf("failed to decode base64 emit cpi event: %s", eventBase64)
 				return
 			}
 			eventBinaries = append(eventBinaries, eventBinary)
@@ -464,6 +469,7 @@ func ParseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
 	}
 	return
 }
+
 `))
 
 		files = append(files, &FileWrapper{
