@@ -17,50 +17,43 @@ type UserDepositSupportedToken struct {
 
 	// [0] = [WRITE, SIGNER] user
 	//
-	// [1] = [] system_program
+	// [1] = [] receipt_token_program
 	//
-	// [2] = [] associated_token_program
+	// [2] = [] supported_token_program
 	//
-	// [3] = [] receipt_token_program
+	// [3] = [WRITE] receipt_token_mint
 	//
-	// [4] = [] supported_token_program
+	// [4] = [WRITE] user_receipt_token_account
 	//
-	// [5] = [WRITE] receipt_token_mint
+	// [5] = [] supported_token_mint
 	//
-	// [6] = [] receipt_token_mint_authority
+	// [6] = [WRITE] fund_supported_token_reserve_account
 	//
-	// [7] = [WRITE] user_receipt_token_account
+	// [7] = [WRITE] user_supported_token_account
 	//
-	// [8] = [] supported_token_mint
+	// [8] = [WRITE] fund_account
 	//
-	// [9] = [] supported_token_authority
+	// [9] = [WRITE] user_fund_account
 	//
-	// [10] = [WRITE] supported_token_account
+	// [10] = [WRITE] reward_account
 	//
-	// [11] = [WRITE] user_supported_token_account
+	// [11] = [WRITE] user_reward_account
 	//
-	// [12] = [WRITE] fund_account
+	// [12] = [] instructions_sysvar
 	//
-	// [13] = [WRITE] user_fund_account
+	// [13] = [] event_authority
 	//
-	// [14] = [WRITE] reward_account
-	//
-	// [15] = [WRITE] user_reward_account
-	//
-	// [16] = [] instruction_sysvar
+	// [14] = [] program
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewUserDepositSupportedTokenInstructionBuilder creates a new `UserDepositSupportedToken` instruction builder.
 func NewUserDepositSupportedTokenInstructionBuilder() *UserDepositSupportedToken {
 	nd := &UserDepositSupportedToken{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 17),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 15),
 	}
-	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["11111111111111111111111111111111"])
-	nd.AccountMetaSlice[2] = ag_solanago.Meta(Addresses["ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"])
-	nd.AccountMetaSlice[3] = ag_solanago.Meta(Addresses["TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"])
-	nd.AccountMetaSlice[5] = ag_solanago.Meta(Addresses["FRAGSEthVFL7fdqM8hxfxkfCZzUvmg21cqPJVvC1qdbo"]).WRITE()
-	nd.AccountMetaSlice[16] = ag_solanago.Meta(Addresses["Sysvar1nstructions1111111111111111111111111"])
+	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"])
+	nd.AccountMetaSlice[12] = ag_solanago.Meta(Addresses["Sysvar1nstructions1111111111111111111111111"])
 	return nd
 }
 
@@ -87,119 +80,42 @@ func (inst *UserDepositSupportedToken) GetUserAccount() *ag_solanago.AccountMeta
 	return inst.AccountMetaSlice.Get(0)
 }
 
-// SetSystemProgramAccount sets the "system_program" account.
-func (inst *UserDepositSupportedToken) SetSystemProgramAccount(systemProgram ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(systemProgram)
-	return inst
-}
-
-// GetSystemProgramAccount gets the "system_program" account.
-func (inst *UserDepositSupportedToken) GetSystemProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
-}
-
-// SetAssociatedTokenProgramAccount sets the "associated_token_program" account.
-func (inst *UserDepositSupportedToken) SetAssociatedTokenProgramAccount(associatedTokenProgram ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(associatedTokenProgram)
-	return inst
-}
-
-// GetAssociatedTokenProgramAccount gets the "associated_token_program" account.
-func (inst *UserDepositSupportedToken) GetAssociatedTokenProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(2)
-}
-
 // SetReceiptTokenProgramAccount sets the "receipt_token_program" account.
 func (inst *UserDepositSupportedToken) SetReceiptTokenProgramAccount(receiptTokenProgram ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(receiptTokenProgram)
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(receiptTokenProgram)
 	return inst
 }
 
 // GetReceiptTokenProgramAccount gets the "receipt_token_program" account.
 func (inst *UserDepositSupportedToken) GetReceiptTokenProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(3)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 // SetSupportedTokenProgramAccount sets the "supported_token_program" account.
 func (inst *UserDepositSupportedToken) SetSupportedTokenProgramAccount(supportedTokenProgram ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(supportedTokenProgram)
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(supportedTokenProgram)
 	return inst
 }
 
 // GetSupportedTokenProgramAccount gets the "supported_token_program" account.
 func (inst *UserDepositSupportedToken) GetSupportedTokenProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(4)
+	return inst.AccountMetaSlice.Get(2)
 }
 
 // SetReceiptTokenMintAccount sets the "receipt_token_mint" account.
 func (inst *UserDepositSupportedToken) SetReceiptTokenMintAccount(receiptTokenMint ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[5] = ag_solanago.Meta(receiptTokenMint).WRITE()
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(receiptTokenMint).WRITE()
 	return inst
 }
 
 // GetReceiptTokenMintAccount gets the "receipt_token_mint" account.
 func (inst *UserDepositSupportedToken) GetReceiptTokenMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(5)
-}
-
-// SetReceiptTokenMintAuthorityAccount sets the "receipt_token_mint_authority" account.
-func (inst *UserDepositSupportedToken) SetReceiptTokenMintAuthorityAccount(receiptTokenMintAuthority ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[6] = ag_solanago.Meta(receiptTokenMintAuthority)
-	return inst
-}
-
-func (inst *UserDepositSupportedToken) findFindReceiptTokenMintAuthorityAddress(receiptTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	var seeds [][]byte
-	// const: receipt_token_mint_authority
-	seeds = append(seeds, []byte{byte(0x72), byte(0x65), byte(0x63), byte(0x65), byte(0x69), byte(0x70), byte(0x74), byte(0x5f), byte(0x74), byte(0x6f), byte(0x6b), byte(0x65), byte(0x6e), byte(0x5f), byte(0x6d), byte(0x69), byte(0x6e), byte(0x74), byte(0x5f), byte(0x61), byte(0x75), byte(0x74), byte(0x68), byte(0x6f), byte(0x72), byte(0x69), byte(0x74), byte(0x79)})
-	// path: receiptTokenMint
-	seeds = append(seeds, receiptTokenMint.Bytes())
-
-	if knownBumpSeed != 0 {
-		seeds = append(seeds, []byte{byte(bumpSeed)})
-		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
-	} else {
-		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
-	}
-	return
-}
-
-// FindReceiptTokenMintAuthorityAddressWithBumpSeed calculates ReceiptTokenMintAuthority account address with given seeds and a known bump seed.
-func (inst *UserDepositSupportedToken) FindReceiptTokenMintAuthorityAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
-	pda, _, err = inst.findFindReceiptTokenMintAuthorityAddress(receiptTokenMint, bumpSeed)
-	return
-}
-
-func (inst *UserDepositSupportedToken) MustFindReceiptTokenMintAuthorityAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindReceiptTokenMintAuthorityAddress(receiptTokenMint, bumpSeed)
-	if err != nil {
-		panic(err)
-	}
-	return
-}
-
-// FindReceiptTokenMintAuthorityAddress finds ReceiptTokenMintAuthority account address with given seeds.
-func (inst *UserDepositSupportedToken) FindReceiptTokenMintAuthorityAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	pda, bumpSeed, err = inst.findFindReceiptTokenMintAuthorityAddress(receiptTokenMint, 0)
-	return
-}
-
-func (inst *UserDepositSupportedToken) MustFindReceiptTokenMintAuthorityAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindReceiptTokenMintAuthorityAddress(receiptTokenMint, 0)
-	if err != nil {
-		panic(err)
-	}
-	return
-}
-
-// GetReceiptTokenMintAuthorityAccount gets the "receipt_token_mint_authority" account.
-func (inst *UserDepositSupportedToken) GetReceiptTokenMintAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(6)
+	return inst.AccountMetaSlice.Get(3)
 }
 
 // SetUserReceiptTokenAccountAccount sets the "user_receipt_token_account" account.
 func (inst *UserDepositSupportedToken) SetUserReceiptTokenAccountAccount(userReceiptTokenAccount ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[7] = ag_solanago.Meta(userReceiptTokenAccount).WRITE()
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(userReceiptTokenAccount).WRITE()
 	return inst
 }
 
@@ -253,148 +169,93 @@ func (inst *UserDepositSupportedToken) MustFindUserReceiptTokenAccountAddress(us
 
 // GetUserReceiptTokenAccountAccount gets the "user_receipt_token_account" account.
 func (inst *UserDepositSupportedToken) GetUserReceiptTokenAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(7)
+	return inst.AccountMetaSlice.Get(4)
 }
 
 // SetSupportedTokenMintAccount sets the "supported_token_mint" account.
 func (inst *UserDepositSupportedToken) SetSupportedTokenMintAccount(supportedTokenMint ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[8] = ag_solanago.Meta(supportedTokenMint)
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(supportedTokenMint)
 	return inst
 }
 
 // GetSupportedTokenMintAccount gets the "supported_token_mint" account.
 func (inst *UserDepositSupportedToken) GetSupportedTokenMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(8)
+	return inst.AccountMetaSlice.Get(5)
 }
 
-// SetSupportedTokenAuthorityAccount sets the "supported_token_authority" account.
-func (inst *UserDepositSupportedToken) SetSupportedTokenAuthorityAccount(supportedTokenAuthority ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[9] = ag_solanago.Meta(supportedTokenAuthority)
+// SetFundSupportedTokenReserveAccountAccount sets the "fund_supported_token_reserve_account" account.
+func (inst *UserDepositSupportedToken) SetFundSupportedTokenReserveAccountAccount(fundSupportedTokenReserveAccount ag_solanago.PublicKey) *UserDepositSupportedToken {
+	inst.AccountMetaSlice[6] = ag_solanago.Meta(fundSupportedTokenReserveAccount).WRITE()
 	return inst
 }
 
-func (inst *UserDepositSupportedToken) findFindSupportedTokenAuthorityAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+func (inst *UserDepositSupportedToken) findFindFundSupportedTokenReserveAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
 	var seeds [][]byte
-	// const: supported_token_authority
-	seeds = append(seeds, []byte{byte(0x73), byte(0x75), byte(0x70), byte(0x70), byte(0x6f), byte(0x72), byte(0x74), byte(0x65), byte(0x64), byte(0x5f), byte(0x74), byte(0x6f), byte(0x6b), byte(0x65), byte(0x6e), byte(0x5f), byte(0x61), byte(0x75), byte(0x74), byte(0x68), byte(0x6f), byte(0x72), byte(0x69), byte(0x74), byte(0x79)})
-	// path: receiptTokenMint
-	seeds = append(seeds, receiptTokenMint.Bytes())
+	// path: fundAccount
+	seeds = append(seeds, fundAccount.Bytes())
+	// path: supportedTokenProgram
+	seeds = append(seeds, supportedTokenProgram.Bytes())
 	// path: supportedTokenMint
 	seeds = append(seeds, supportedTokenMint.Bytes())
 
-	if knownBumpSeed != 0 {
-		seeds = append(seeds, []byte{byte(bumpSeed)})
-		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
-	} else {
-		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
-	}
-	return
-}
-
-// FindSupportedTokenAuthorityAddressWithBumpSeed calculates SupportedTokenAuthority account address with given seeds and a known bump seed.
-func (inst *UserDepositSupportedToken) FindSupportedTokenAuthorityAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
-	pda, _, err = inst.findFindSupportedTokenAuthorityAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
-	return
-}
-
-func (inst *UserDepositSupportedToken) MustFindSupportedTokenAuthorityAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAuthorityAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
-	if err != nil {
-		panic(err)
-	}
-	return
-}
-
-// FindSupportedTokenAuthorityAddress finds SupportedTokenAuthority account address with given seeds.
-func (inst *UserDepositSupportedToken) FindSupportedTokenAuthorityAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	pda, bumpSeed, err = inst.findFindSupportedTokenAuthorityAddress(receiptTokenMint, supportedTokenMint, 0)
-	return
-}
-
-func (inst *UserDepositSupportedToken) MustFindSupportedTokenAuthorityAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAuthorityAddress(receiptTokenMint, supportedTokenMint, 0)
-	if err != nil {
-		panic(err)
-	}
-	return
-}
-
-// GetSupportedTokenAuthorityAccount gets the "supported_token_authority" account.
-func (inst *UserDepositSupportedToken) GetSupportedTokenAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(9)
-}
-
-// SetSupportedTokenAccountAccount sets the "supported_token_account" account.
-func (inst *UserDepositSupportedToken) SetSupportedTokenAccountAccount(supportedTokenAccount ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[10] = ag_solanago.Meta(supportedTokenAccount).WRITE()
-	return inst
-}
-
-func (inst *UserDepositSupportedToken) findFindSupportedTokenAccountAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	var seeds [][]byte
-	// const: supported_token
-	seeds = append(seeds, []byte{byte(0x73), byte(0x75), byte(0x70), byte(0x70), byte(0x6f), byte(0x72), byte(0x74), byte(0x65), byte(0x64), byte(0x5f), byte(0x74), byte(0x6f), byte(0x6b), byte(0x65), byte(0x6e)})
-	// path: receiptTokenMint
-	seeds = append(seeds, receiptTokenMint.Bytes())
-	// path: supportedTokenMint
-	seeds = append(seeds, supportedTokenMint.Bytes())
+	programID := Addresses["ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"]
 
 	if knownBumpSeed != 0 {
 		seeds = append(seeds, []byte{byte(bumpSeed)})
-		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+		pda, err = ag_solanago.CreateProgramAddress(seeds, programID)
 	} else {
-		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, programID)
 	}
 	return
 }
 
-// FindSupportedTokenAccountAddressWithBumpSeed calculates SupportedTokenAccount account address with given seeds and a known bump seed.
-func (inst *UserDepositSupportedToken) FindSupportedTokenAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
-	pda, _, err = inst.findFindSupportedTokenAccountAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
+// FindFundSupportedTokenReserveAccountAddressWithBumpSeed calculates FundSupportedTokenReserveAccount account address with given seeds and a known bump seed.
+func (inst *UserDepositSupportedToken) FindFundSupportedTokenReserveAccountAddressWithBumpSeed(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindFundSupportedTokenReserveAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
 	return
 }
 
-func (inst *UserDepositSupportedToken) MustFindSupportedTokenAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAccountAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
+func (inst *UserDepositSupportedToken) MustFindFundSupportedTokenReserveAccountAddressWithBumpSeed(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundSupportedTokenReserveAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
 	if err != nil {
 		panic(err)
 	}
 	return
 }
 
-// FindSupportedTokenAccountAddress finds SupportedTokenAccount account address with given seeds.
-func (inst *UserDepositSupportedToken) FindSupportedTokenAccountAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	pda, bumpSeed, err = inst.findFindSupportedTokenAccountAddress(receiptTokenMint, supportedTokenMint, 0)
+// FindFundSupportedTokenReserveAccountAddress finds FundSupportedTokenReserveAccount account address with given seeds.
+func (inst *UserDepositSupportedToken) FindFundSupportedTokenReserveAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindFundSupportedTokenReserveAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, 0)
 	return
 }
 
-func (inst *UserDepositSupportedToken) MustFindSupportedTokenAccountAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAccountAddress(receiptTokenMint, supportedTokenMint, 0)
+func (inst *UserDepositSupportedToken) MustFindFundSupportedTokenReserveAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundSupportedTokenReserveAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, 0)
 	if err != nil {
 		panic(err)
 	}
 	return
 }
 
-// GetSupportedTokenAccountAccount gets the "supported_token_account" account.
-func (inst *UserDepositSupportedToken) GetSupportedTokenAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(10)
+// GetFundSupportedTokenReserveAccountAccount gets the "fund_supported_token_reserve_account" account.
+func (inst *UserDepositSupportedToken) GetFundSupportedTokenReserveAccountAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(6)
 }
 
 // SetUserSupportedTokenAccountAccount sets the "user_supported_token_account" account.
 func (inst *UserDepositSupportedToken) SetUserSupportedTokenAccountAccount(userSupportedTokenAccount ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[11] = ag_solanago.Meta(userSupportedTokenAccount).WRITE()
+	inst.AccountMetaSlice[7] = ag_solanago.Meta(userSupportedTokenAccount).WRITE()
 	return inst
 }
 
 // GetUserSupportedTokenAccountAccount gets the "user_supported_token_account" account.
 func (inst *UserDepositSupportedToken) GetUserSupportedTokenAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(11)
+	return inst.AccountMetaSlice.Get(7)
 }
 
 // SetFundAccountAccount sets the "fund_account" account.
 func (inst *UserDepositSupportedToken) SetFundAccountAccount(fundAccount ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[12] = ag_solanago.Meta(fundAccount).WRITE()
+	inst.AccountMetaSlice[8] = ag_solanago.Meta(fundAccount).WRITE()
 	return inst
 }
 
@@ -444,12 +305,12 @@ func (inst *UserDepositSupportedToken) MustFindFundAccountAddress(receiptTokenMi
 
 // GetFundAccountAccount gets the "fund_account" account.
 func (inst *UserDepositSupportedToken) GetFundAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(12)
+	return inst.AccountMetaSlice.Get(8)
 }
 
 // SetUserFundAccountAccount sets the "user_fund_account" account.
 func (inst *UserDepositSupportedToken) SetUserFundAccountAccount(userFundAccount ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[13] = ag_solanago.Meta(userFundAccount).WRITE()
+	inst.AccountMetaSlice[9] = ag_solanago.Meta(userFundAccount).WRITE()
 	return inst
 }
 
@@ -501,12 +362,12 @@ func (inst *UserDepositSupportedToken) MustFindUserFundAccountAddress(receiptTok
 
 // GetUserFundAccountAccount gets the "user_fund_account" account.
 func (inst *UserDepositSupportedToken) GetUserFundAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(13)
+	return inst.AccountMetaSlice.Get(9)
 }
 
 // SetRewardAccountAccount sets the "reward_account" account.
 func (inst *UserDepositSupportedToken) SetRewardAccountAccount(rewardAccount ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[14] = ag_solanago.Meta(rewardAccount).WRITE()
+	inst.AccountMetaSlice[10] = ag_solanago.Meta(rewardAccount).WRITE()
 	return inst
 }
 
@@ -556,12 +417,12 @@ func (inst *UserDepositSupportedToken) MustFindRewardAccountAddress(receiptToken
 
 // GetRewardAccountAccount gets the "reward_account" account.
 func (inst *UserDepositSupportedToken) GetRewardAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(14)
+	return inst.AccountMetaSlice.Get(10)
 }
 
 // SetUserRewardAccountAccount sets the "user_reward_account" account.
 func (inst *UserDepositSupportedToken) SetUserRewardAccountAccount(userRewardAccount ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[15] = ag_solanago.Meta(userRewardAccount).WRITE()
+	inst.AccountMetaSlice[11] = ag_solanago.Meta(userRewardAccount).WRITE()
 	return inst
 }
 
@@ -613,18 +474,82 @@ func (inst *UserDepositSupportedToken) MustFindUserRewardAccountAddress(receiptT
 
 // GetUserRewardAccountAccount gets the "user_reward_account" account.
 func (inst *UserDepositSupportedToken) GetUserRewardAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(15)
+	return inst.AccountMetaSlice.Get(11)
 }
 
-// SetInstructionSysvarAccount sets the "instruction_sysvar" account.
-func (inst *UserDepositSupportedToken) SetInstructionSysvarAccount(instructionSysvar ag_solanago.PublicKey) *UserDepositSupportedToken {
-	inst.AccountMetaSlice[16] = ag_solanago.Meta(instructionSysvar)
+// SetInstructionsSysvarAccount sets the "instructions_sysvar" account.
+func (inst *UserDepositSupportedToken) SetInstructionsSysvarAccount(instructionsSysvar ag_solanago.PublicKey) *UserDepositSupportedToken {
+	inst.AccountMetaSlice[12] = ag_solanago.Meta(instructionsSysvar)
 	return inst
 }
 
-// GetInstructionSysvarAccount gets the "instruction_sysvar" account.
-func (inst *UserDepositSupportedToken) GetInstructionSysvarAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(16)
+// GetInstructionsSysvarAccount gets the "instructions_sysvar" account.
+func (inst *UserDepositSupportedToken) GetInstructionsSysvarAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(12)
+}
+
+// SetEventAuthorityAccount sets the "event_authority" account.
+func (inst *UserDepositSupportedToken) SetEventAuthorityAccount(eventAuthority ag_solanago.PublicKey) *UserDepositSupportedToken {
+	inst.AccountMetaSlice[13] = ag_solanago.Meta(eventAuthority)
+	return inst
+}
+
+func (inst *UserDepositSupportedToken) findFindEventAuthorityAddress(knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// const: __event_authority
+	seeds = append(seeds, []byte{byte(0x5f), byte(0x5f), byte(0x65), byte(0x76), byte(0x65), byte(0x6e), byte(0x74), byte(0x5f), byte(0x61), byte(0x75), byte(0x74), byte(0x68), byte(0x6f), byte(0x72), byte(0x69), byte(0x74), byte(0x79)})
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+	}
+	return
+}
+
+// FindEventAuthorityAddressWithBumpSeed calculates EventAuthority account address with given seeds and a known bump seed.
+func (inst *UserDepositSupportedToken) FindEventAuthorityAddressWithBumpSeed(bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindEventAuthorityAddress(bumpSeed)
+	return
+}
+
+func (inst *UserDepositSupportedToken) MustFindEventAuthorityAddressWithBumpSeed(bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindEventAuthorityAddress(bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindEventAuthorityAddress finds EventAuthority account address with given seeds.
+func (inst *UserDepositSupportedToken) FindEventAuthorityAddress() (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindEventAuthorityAddress(0)
+	return
+}
+
+func (inst *UserDepositSupportedToken) MustFindEventAuthorityAddress() (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindEventAuthorityAddress(0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// GetEventAuthorityAccount gets the "event_authority" account.
+func (inst *UserDepositSupportedToken) GetEventAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(13)
+}
+
+// SetProgramAccount sets the "program" account.
+func (inst *UserDepositSupportedToken) SetProgramAccount(program ag_solanago.PublicKey) *UserDepositSupportedToken {
+	inst.AccountMetaSlice[14] = ag_solanago.Meta(program)
+	return inst
+}
+
+// GetProgramAccount gets the "program" account.
+func (inst *UserDepositSupportedToken) GetProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(14)
 }
 
 func (inst UserDepositSupportedToken) Build() *Instruction {
@@ -658,52 +583,46 @@ func (inst *UserDepositSupportedToken) Validate() error {
 			return errors.New("accounts.User is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.SystemProgram is not set")
-		}
-		if inst.AccountMetaSlice[2] == nil {
-			return errors.New("accounts.AssociatedTokenProgram is not set")
-		}
-		if inst.AccountMetaSlice[3] == nil {
 			return errors.New("accounts.ReceiptTokenProgram is not set")
 		}
-		if inst.AccountMetaSlice[4] == nil {
+		if inst.AccountMetaSlice[2] == nil {
 			return errors.New("accounts.SupportedTokenProgram is not set")
 		}
-		if inst.AccountMetaSlice[5] == nil {
+		if inst.AccountMetaSlice[3] == nil {
 			return errors.New("accounts.ReceiptTokenMint is not set")
 		}
-		if inst.AccountMetaSlice[6] == nil {
-			return errors.New("accounts.ReceiptTokenMintAuthority is not set")
-		}
-		if inst.AccountMetaSlice[7] == nil {
+		if inst.AccountMetaSlice[4] == nil {
 			return errors.New("accounts.UserReceiptTokenAccount is not set")
 		}
-		if inst.AccountMetaSlice[8] == nil {
+		if inst.AccountMetaSlice[5] == nil {
 			return errors.New("accounts.SupportedTokenMint is not set")
 		}
-		if inst.AccountMetaSlice[9] == nil {
-			return errors.New("accounts.SupportedTokenAuthority is not set")
+		if inst.AccountMetaSlice[6] == nil {
+			return errors.New("accounts.FundSupportedTokenReserveAccount is not set")
 		}
-		if inst.AccountMetaSlice[10] == nil {
-			return errors.New("accounts.SupportedTokenAccount is not set")
-		}
-		if inst.AccountMetaSlice[11] == nil {
+		if inst.AccountMetaSlice[7] == nil {
 			return errors.New("accounts.UserSupportedTokenAccount is not set")
 		}
-		if inst.AccountMetaSlice[12] == nil {
+		if inst.AccountMetaSlice[8] == nil {
 			return errors.New("accounts.FundAccount is not set")
 		}
-		if inst.AccountMetaSlice[13] == nil {
+		if inst.AccountMetaSlice[9] == nil {
 			return errors.New("accounts.UserFundAccount is not set")
 		}
-		if inst.AccountMetaSlice[14] == nil {
+		if inst.AccountMetaSlice[10] == nil {
 			return errors.New("accounts.RewardAccount is not set")
 		}
-		if inst.AccountMetaSlice[15] == nil {
+		if inst.AccountMetaSlice[11] == nil {
 			return errors.New("accounts.UserRewardAccount is not set")
 		}
-		if inst.AccountMetaSlice[16] == nil {
-			return errors.New("accounts.InstructionSysvar is not set")
+		if inst.AccountMetaSlice[12] == nil {
+			return errors.New("accounts.InstructionsSysvar is not set")
+		}
+		if inst.AccountMetaSlice[13] == nil {
+			return errors.New("accounts.EventAuthority is not set")
+		}
+		if inst.AccountMetaSlice[14] == nil {
+			return errors.New("accounts.Program is not set")
 		}
 	}
 	return nil
@@ -724,24 +643,22 @@ func (inst *UserDepositSupportedToken) EncodeToTree(parent ag_treeout.Branches) 
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=17]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("                        user", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("              system_program", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("    associated_token_program", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(ag_format.Meta("       receipt_token_program", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(ag_format.Meta("     supported_token_program", inst.AccountMetaSlice.Get(4)))
-						accountsBranch.Child(ag_format.Meta("          receipt_token_mint", inst.AccountMetaSlice.Get(5)))
-						accountsBranch.Child(ag_format.Meta("receipt_token_mint_authority", inst.AccountMetaSlice.Get(6)))
-						accountsBranch.Child(ag_format.Meta("         user_receipt_token_", inst.AccountMetaSlice.Get(7)))
-						accountsBranch.Child(ag_format.Meta("        supported_token_mint", inst.AccountMetaSlice.Get(8)))
-						accountsBranch.Child(ag_format.Meta("   supported_token_authority", inst.AccountMetaSlice.Get(9)))
-						accountsBranch.Child(ag_format.Meta("            supported_token_", inst.AccountMetaSlice.Get(10)))
-						accountsBranch.Child(ag_format.Meta("       user_supported_token_", inst.AccountMetaSlice.Get(11)))
-						accountsBranch.Child(ag_format.Meta("                       fund_", inst.AccountMetaSlice.Get(12)))
-						accountsBranch.Child(ag_format.Meta("                  user_fund_", inst.AccountMetaSlice.Get(13)))
-						accountsBranch.Child(ag_format.Meta("                     reward_", inst.AccountMetaSlice.Get(14)))
-						accountsBranch.Child(ag_format.Meta("                user_reward_", inst.AccountMetaSlice.Get(15)))
-						accountsBranch.Child(ag_format.Meta("          instruction_sysvar", inst.AccountMetaSlice.Get(16)))
+					instructionBranch.Child("Accounts[len=15]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("                         user", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("        receipt_token_program", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("      supported_token_program", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("           receipt_token_mint", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("          user_receipt_token_", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("         supported_token_mint", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(ag_format.Meta("fund_supported_token_reserve_", inst.AccountMetaSlice.Get(6)))
+						accountsBranch.Child(ag_format.Meta("        user_supported_token_", inst.AccountMetaSlice.Get(7)))
+						accountsBranch.Child(ag_format.Meta("                        fund_", inst.AccountMetaSlice.Get(8)))
+						accountsBranch.Child(ag_format.Meta("                   user_fund_", inst.AccountMetaSlice.Get(9)))
+						accountsBranch.Child(ag_format.Meta("                      reward_", inst.AccountMetaSlice.Get(10)))
+						accountsBranch.Child(ag_format.Meta("                 user_reward_", inst.AccountMetaSlice.Get(11)))
+						accountsBranch.Child(ag_format.Meta("          instructions_sysvar", inst.AccountMetaSlice.Get(12)))
+						accountsBranch.Child(ag_format.Meta("              event_authority", inst.AccountMetaSlice.Get(13)))
+						accountsBranch.Child(ag_format.Meta("                      program", inst.AccountMetaSlice.Get(14)))
 					})
 				})
 		})
@@ -802,40 +719,36 @@ func NewUserDepositSupportedTokenInstruction(
 	metadata DepositMetadata,
 	// Accounts:
 	user ag_solanago.PublicKey,
-	systemProgram ag_solanago.PublicKey,
-	associatedTokenProgram ag_solanago.PublicKey,
 	receiptTokenProgram ag_solanago.PublicKey,
 	supportedTokenProgram ag_solanago.PublicKey,
 	receiptTokenMint ag_solanago.PublicKey,
-	receiptTokenMintAuthority ag_solanago.PublicKey,
 	userReceiptTokenAccount ag_solanago.PublicKey,
 	supportedTokenMint ag_solanago.PublicKey,
-	supportedTokenAuthority ag_solanago.PublicKey,
-	supportedTokenAccount ag_solanago.PublicKey,
+	fundSupportedTokenReserveAccount ag_solanago.PublicKey,
 	userSupportedTokenAccount ag_solanago.PublicKey,
 	fundAccount ag_solanago.PublicKey,
 	userFundAccount ag_solanago.PublicKey,
 	rewardAccount ag_solanago.PublicKey,
 	userRewardAccount ag_solanago.PublicKey,
-	instructionSysvar ag_solanago.PublicKey) *UserDepositSupportedToken {
+	instructionsSysvar ag_solanago.PublicKey,
+	eventAuthority ag_solanago.PublicKey,
+	program ag_solanago.PublicKey) *UserDepositSupportedToken {
 	return NewUserDepositSupportedTokenInstructionBuilder().
 		SetAmount(amount).
 		SetMetadata(metadata).
 		SetUserAccount(user).
-		SetSystemProgramAccount(systemProgram).
-		SetAssociatedTokenProgramAccount(associatedTokenProgram).
 		SetReceiptTokenProgramAccount(receiptTokenProgram).
 		SetSupportedTokenProgramAccount(supportedTokenProgram).
 		SetReceiptTokenMintAccount(receiptTokenMint).
-		SetReceiptTokenMintAuthorityAccount(receiptTokenMintAuthority).
 		SetUserReceiptTokenAccountAccount(userReceiptTokenAccount).
 		SetSupportedTokenMintAccount(supportedTokenMint).
-		SetSupportedTokenAuthorityAccount(supportedTokenAuthority).
-		SetSupportedTokenAccountAccount(supportedTokenAccount).
+		SetFundSupportedTokenReserveAccountAccount(fundSupportedTokenReserveAccount).
 		SetUserSupportedTokenAccountAccount(userSupportedTokenAccount).
 		SetFundAccountAccount(fundAccount).
 		SetUserFundAccountAccount(userFundAccount).
 		SetRewardAccountAccount(rewardAccount).
 		SetUserRewardAccountAccount(userRewardAccount).
-		SetInstructionSysvarAccount(instructionSysvar)
+		SetInstructionsSysvarAccount(instructionsSysvar).
+		SetEventAuthorityAccount(eventAuthority).
+		SetProgramAccount(program)
 }

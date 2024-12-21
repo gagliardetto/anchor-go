@@ -13,44 +13,33 @@ import (
 
 // FundManagerAddSupportedToken is the `fund_manager_add_supported_token` instruction.
 type FundManagerAddSupportedToken struct {
-	CapacityAmount *uint64
-	PricingSource  TokenPricingSource
+	PricingSource TokenPricingSource
 
-	// [0] = [WRITE, SIGNER] payer
+	// [0] = [SIGNER] fund_manager
 	//
-	// [1] = [SIGNER] fund_manager
+	// [1] = [] receipt_token_mint
 	//
-	// [2] = [] system_program
+	// [2] = [WRITE] fund_account
 	//
-	// [3] = [] receipt_token_mint
+	// [3] = [] supported_token_mint
 	//
-	// [4] = [WRITE] fund_account
+	// [4] = [] supported_token_program
 	//
-	// [5] = [] supported_token_mint
+	// [5] = [] supported_token_account
 	//
-	// [6] = [] supported_token_program
+	// [6] = [] event_authority
 	//
-	// [7] = [WRITE] supported_token_authority
-	//
-	// [8] = [WRITE] supported_token_account
+	// [7] = [] program
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewFundManagerAddSupportedTokenInstructionBuilder creates a new `FundManagerAddSupportedToken` instruction builder.
 func NewFundManagerAddSupportedTokenInstructionBuilder() *FundManagerAddSupportedToken {
 	nd := &FundManagerAddSupportedToken{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 9),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 8),
 	}
-	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"]).SIGNER()
-	nd.AccountMetaSlice[2] = ag_solanago.Meta(Addresses["11111111111111111111111111111111"])
-	nd.AccountMetaSlice[3] = ag_solanago.Meta(Addresses["FRAGSEthVFL7fdqM8hxfxkfCZzUvmg21cqPJVvC1qdbo"])
+	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"]).SIGNER()
 	return nd
-}
-
-// SetCapacityAmount sets the "capacity_amount" parameter.
-func (inst *FundManagerAddSupportedToken) SetCapacityAmount(capacity_amount uint64) *FundManagerAddSupportedToken {
-	inst.CapacityAmount = &capacity_amount
-	return inst
 }
 
 // SetPricingSource sets the "pricing_source" parameter.
@@ -59,53 +48,31 @@ func (inst *FundManagerAddSupportedToken) SetPricingSource(pricing_source TokenP
 	return inst
 }
 
-// SetPayerAccount sets the "payer" account.
-func (inst *FundManagerAddSupportedToken) SetPayerAccount(payer ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(payer).WRITE().SIGNER()
-	return inst
-}
-
-// GetPayerAccount gets the "payer" account.
-func (inst *FundManagerAddSupportedToken) GetPayerAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
-}
-
 // SetFundManagerAccount sets the "fund_manager" account.
 func (inst *FundManagerAddSupportedToken) SetFundManagerAccount(fundManager ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(fundManager).SIGNER()
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(fundManager).SIGNER()
 	return inst
 }
 
 // GetFundManagerAccount gets the "fund_manager" account.
 func (inst *FundManagerAddSupportedToken) GetFundManagerAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
-}
-
-// SetSystemProgramAccount sets the "system_program" account.
-func (inst *FundManagerAddSupportedToken) SetSystemProgramAccount(systemProgram ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(systemProgram)
-	return inst
-}
-
-// GetSystemProgramAccount gets the "system_program" account.
-func (inst *FundManagerAddSupportedToken) GetSystemProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(2)
+	return inst.AccountMetaSlice.Get(0)
 }
 
 // SetReceiptTokenMintAccount sets the "receipt_token_mint" account.
 func (inst *FundManagerAddSupportedToken) SetReceiptTokenMintAccount(receiptTokenMint ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(receiptTokenMint)
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(receiptTokenMint)
 	return inst
 }
 
 // GetReceiptTokenMintAccount gets the "receipt_token_mint" account.
 func (inst *FundManagerAddSupportedToken) GetReceiptTokenMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(3)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 // SetFundAccountAccount sets the "fund_account" account.
 func (inst *FundManagerAddSupportedToken) SetFundAccountAccount(fundAccount ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(fundAccount).WRITE()
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(fundAccount).WRITE()
 	return inst
 }
 
@@ -155,120 +122,65 @@ func (inst *FundManagerAddSupportedToken) MustFindFundAccountAddress(receiptToke
 
 // GetFundAccountAccount gets the "fund_account" account.
 func (inst *FundManagerAddSupportedToken) GetFundAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(4)
+	return inst.AccountMetaSlice.Get(2)
 }
 
 // SetSupportedTokenMintAccount sets the "supported_token_mint" account.
 func (inst *FundManagerAddSupportedToken) SetSupportedTokenMintAccount(supportedTokenMint ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[5] = ag_solanago.Meta(supportedTokenMint)
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(supportedTokenMint)
 	return inst
 }
 
 // GetSupportedTokenMintAccount gets the "supported_token_mint" account.
 func (inst *FundManagerAddSupportedToken) GetSupportedTokenMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(5)
+	return inst.AccountMetaSlice.Get(3)
 }
 
 // SetSupportedTokenProgramAccount sets the "supported_token_program" account.
 func (inst *FundManagerAddSupportedToken) SetSupportedTokenProgramAccount(supportedTokenProgram ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[6] = ag_solanago.Meta(supportedTokenProgram)
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(supportedTokenProgram)
 	return inst
 }
 
 // GetSupportedTokenProgramAccount gets the "supported_token_program" account.
 func (inst *FundManagerAddSupportedToken) GetSupportedTokenProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(6)
-}
-
-// SetSupportedTokenAuthorityAccount sets the "supported_token_authority" account.
-func (inst *FundManagerAddSupportedToken) SetSupportedTokenAuthorityAccount(supportedTokenAuthority ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[7] = ag_solanago.Meta(supportedTokenAuthority).WRITE()
-	return inst
-}
-
-func (inst *FundManagerAddSupportedToken) findFindSupportedTokenAuthorityAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	var seeds [][]byte
-	// const: supported_token_authority
-	seeds = append(seeds, []byte{byte(0x73), byte(0x75), byte(0x70), byte(0x70), byte(0x6f), byte(0x72), byte(0x74), byte(0x65), byte(0x64), byte(0x5f), byte(0x74), byte(0x6f), byte(0x6b), byte(0x65), byte(0x6e), byte(0x5f), byte(0x61), byte(0x75), byte(0x74), byte(0x68), byte(0x6f), byte(0x72), byte(0x69), byte(0x74), byte(0x79)})
-	// path: receiptTokenMint
-	seeds = append(seeds, receiptTokenMint.Bytes())
-	// path: supportedTokenMint
-	seeds = append(seeds, supportedTokenMint.Bytes())
-
-	if knownBumpSeed != 0 {
-		seeds = append(seeds, []byte{byte(bumpSeed)})
-		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
-	} else {
-		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
-	}
-	return
-}
-
-// FindSupportedTokenAuthorityAddressWithBumpSeed calculates SupportedTokenAuthority account address with given seeds and a known bump seed.
-func (inst *FundManagerAddSupportedToken) FindSupportedTokenAuthorityAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
-	pda, _, err = inst.findFindSupportedTokenAuthorityAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
-	return
-}
-
-func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAuthorityAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAuthorityAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
-	if err != nil {
-		panic(err)
-	}
-	return
-}
-
-// FindSupportedTokenAuthorityAddress finds SupportedTokenAuthority account address with given seeds.
-func (inst *FundManagerAddSupportedToken) FindSupportedTokenAuthorityAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	pda, bumpSeed, err = inst.findFindSupportedTokenAuthorityAddress(receiptTokenMint, supportedTokenMint, 0)
-	return
-}
-
-func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAuthorityAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAuthorityAddress(receiptTokenMint, supportedTokenMint, 0)
-	if err != nil {
-		panic(err)
-	}
-	return
-}
-
-// GetSupportedTokenAuthorityAccount gets the "supported_token_authority" account.
-func (inst *FundManagerAddSupportedToken) GetSupportedTokenAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(7)
+	return inst.AccountMetaSlice.Get(4)
 }
 
 // SetSupportedTokenAccountAccount sets the "supported_token_account" account.
 func (inst *FundManagerAddSupportedToken) SetSupportedTokenAccountAccount(supportedTokenAccount ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[8] = ag_solanago.Meta(supportedTokenAccount).WRITE()
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(supportedTokenAccount)
 	return inst
 }
 
-func (inst *FundManagerAddSupportedToken) findFindSupportedTokenAccountAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+func (inst *FundManagerAddSupportedToken) findFindSupportedTokenAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
 	var seeds [][]byte
-	// const: supported_token
-	seeds = append(seeds, []byte{byte(0x73), byte(0x75), byte(0x70), byte(0x70), byte(0x6f), byte(0x72), byte(0x74), byte(0x65), byte(0x64), byte(0x5f), byte(0x74), byte(0x6f), byte(0x6b), byte(0x65), byte(0x6e)})
-	// path: receiptTokenMint
-	seeds = append(seeds, receiptTokenMint.Bytes())
+	// path: fundAccount
+	seeds = append(seeds, fundAccount.Bytes())
+	// path: supportedTokenProgram
+	seeds = append(seeds, supportedTokenProgram.Bytes())
 	// path: supportedTokenMint
 	seeds = append(seeds, supportedTokenMint.Bytes())
 
+	programID := Addresses["ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"]
+
 	if knownBumpSeed != 0 {
 		seeds = append(seeds, []byte{byte(bumpSeed)})
-		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+		pda, err = ag_solanago.CreateProgramAddress(seeds, programID)
 	} else {
-		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, programID)
 	}
 	return
 }
 
 // FindSupportedTokenAccountAddressWithBumpSeed calculates SupportedTokenAccount account address with given seeds and a known bump seed.
-func (inst *FundManagerAddSupportedToken) FindSupportedTokenAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
-	pda, _, err = inst.findFindSupportedTokenAccountAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
+func (inst *FundManagerAddSupportedToken) FindSupportedTokenAccountAddressWithBumpSeed(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindSupportedTokenAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
 	return
 }
 
-func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAccountAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
+func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAccountAddressWithBumpSeed(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindSupportedTokenAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
 	if err != nil {
 		panic(err)
 	}
@@ -276,13 +188,13 @@ func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAccountAddressWi
 }
 
 // FindSupportedTokenAccountAddress finds SupportedTokenAccount account address with given seeds.
-func (inst *FundManagerAddSupportedToken) FindSupportedTokenAccountAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	pda, bumpSeed, err = inst.findFindSupportedTokenAccountAddress(receiptTokenMint, supportedTokenMint, 0)
+func (inst *FundManagerAddSupportedToken) FindSupportedTokenAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindSupportedTokenAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, 0)
 	return
 }
 
-func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAccountAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAccountAddress(receiptTokenMint, supportedTokenMint, 0)
+func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindSupportedTokenAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -291,7 +203,71 @@ func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAccountAddress(r
 
 // GetSupportedTokenAccountAccount gets the "supported_token_account" account.
 func (inst *FundManagerAddSupportedToken) GetSupportedTokenAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(8)
+	return inst.AccountMetaSlice.Get(5)
+}
+
+// SetEventAuthorityAccount sets the "event_authority" account.
+func (inst *FundManagerAddSupportedToken) SetEventAuthorityAccount(eventAuthority ag_solanago.PublicKey) *FundManagerAddSupportedToken {
+	inst.AccountMetaSlice[6] = ag_solanago.Meta(eventAuthority)
+	return inst
+}
+
+func (inst *FundManagerAddSupportedToken) findFindEventAuthorityAddress(knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// const: __event_authority
+	seeds = append(seeds, []byte{byte(0x5f), byte(0x5f), byte(0x65), byte(0x76), byte(0x65), byte(0x6e), byte(0x74), byte(0x5f), byte(0x61), byte(0x75), byte(0x74), byte(0x68), byte(0x6f), byte(0x72), byte(0x69), byte(0x74), byte(0x79)})
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+	}
+	return
+}
+
+// FindEventAuthorityAddressWithBumpSeed calculates EventAuthority account address with given seeds and a known bump seed.
+func (inst *FundManagerAddSupportedToken) FindEventAuthorityAddressWithBumpSeed(bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindEventAuthorityAddress(bumpSeed)
+	return
+}
+
+func (inst *FundManagerAddSupportedToken) MustFindEventAuthorityAddressWithBumpSeed(bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindEventAuthorityAddress(bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindEventAuthorityAddress finds EventAuthority account address with given seeds.
+func (inst *FundManagerAddSupportedToken) FindEventAuthorityAddress() (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindEventAuthorityAddress(0)
+	return
+}
+
+func (inst *FundManagerAddSupportedToken) MustFindEventAuthorityAddress() (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindEventAuthorityAddress(0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// GetEventAuthorityAccount gets the "event_authority" account.
+func (inst *FundManagerAddSupportedToken) GetEventAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(6)
+}
+
+// SetProgramAccount sets the "program" account.
+func (inst *FundManagerAddSupportedToken) SetProgramAccount(program ag_solanago.PublicKey) *FundManagerAddSupportedToken {
+	inst.AccountMetaSlice[7] = ag_solanago.Meta(program)
+	return inst
+}
+
+// GetProgramAccount gets the "program" account.
+func (inst *FundManagerAddSupportedToken) GetProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(7)
 }
 
 func (inst FundManagerAddSupportedToken) Build() *Instruction {
@@ -314,9 +290,6 @@ func (inst FundManagerAddSupportedToken) ValidateAndBuild() (*Instruction, error
 func (inst *FundManagerAddSupportedToken) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.CapacityAmount == nil {
-			return errors.New("CapacityAmount parameter is not set")
-		}
 		if inst.PricingSource == nil {
 			return errors.New("PricingSource parameter is not set")
 		}
@@ -325,31 +298,28 @@ func (inst *FundManagerAddSupportedToken) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return errors.New("accounts.Payer is not set")
-		}
-		if inst.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.FundManager is not set")
 		}
-		if inst.AccountMetaSlice[2] == nil {
-			return errors.New("accounts.SystemProgram is not set")
-		}
-		if inst.AccountMetaSlice[3] == nil {
+		if inst.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.ReceiptTokenMint is not set")
 		}
-		if inst.AccountMetaSlice[4] == nil {
+		if inst.AccountMetaSlice[2] == nil {
 			return errors.New("accounts.FundAccount is not set")
 		}
-		if inst.AccountMetaSlice[5] == nil {
+		if inst.AccountMetaSlice[3] == nil {
 			return errors.New("accounts.SupportedTokenMint is not set")
 		}
-		if inst.AccountMetaSlice[6] == nil {
+		if inst.AccountMetaSlice[4] == nil {
 			return errors.New("accounts.SupportedTokenProgram is not set")
 		}
-		if inst.AccountMetaSlice[7] == nil {
-			return errors.New("accounts.SupportedTokenAuthority is not set")
-		}
-		if inst.AccountMetaSlice[8] == nil {
+		if inst.AccountMetaSlice[5] == nil {
 			return errors.New("accounts.SupportedTokenAccount is not set")
+		}
+		if inst.AccountMetaSlice[6] == nil {
+			return errors.New("accounts.EventAuthority is not set")
+		}
+		if inst.AccountMetaSlice[7] == nil {
+			return errors.New("accounts.Program is not set")
 		}
 	}
 	return nil
@@ -364,33 +334,26 @@ func (inst *FundManagerAddSupportedToken) EncodeToTree(parent ag_treeout.Branche
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=2]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param(" CapacityAmount", *inst.CapacityAmount))
-						paramsBranch.Child(ag_format.Param("  PricingSource", inst.PricingSource))
+					instructionBranch.Child("Params[len=1]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+						paramsBranch.Child(ag_format.Param(" PricingSource", inst.PricingSource))
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=9]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("                    payer", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("             fund_manager", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("           system_program", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(ag_format.Meta("       receipt_token_mint", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(ag_format.Meta("                    fund_", inst.AccountMetaSlice.Get(4)))
-						accountsBranch.Child(ag_format.Meta("     supported_token_mint", inst.AccountMetaSlice.Get(5)))
-						accountsBranch.Child(ag_format.Meta("  supported_token_program", inst.AccountMetaSlice.Get(6)))
-						accountsBranch.Child(ag_format.Meta("supported_token_authority", inst.AccountMetaSlice.Get(7)))
-						accountsBranch.Child(ag_format.Meta("         supported_token_", inst.AccountMetaSlice.Get(8)))
+					instructionBranch.Child("Accounts[len=8]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("           fund_manager", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("     receipt_token_mint", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("                  fund_", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("   supported_token_mint", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("supported_token_program", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("       supported_token_", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(ag_format.Meta("        event_authority", inst.AccountMetaSlice.Get(6)))
+						accountsBranch.Child(ag_format.Meta("                program", inst.AccountMetaSlice.Get(7)))
 					})
 				})
 		})
 }
 
 func (obj FundManagerAddSupportedToken) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `CapacityAmount` param:
-	err = encoder.Encode(obj.CapacityAmount)
-	if err != nil {
-		return err
-	}
 	// Serialize `PricingSource` param:
 	{
 		tmp := tokenPricingSourceContainer{}
@@ -401,6 +364,15 @@ func (obj FundManagerAddSupportedToken) MarshalWithEncoder(encoder *ag_binary.En
 		case *TokenPricingSourceMarinadeStakePoolTuple:
 			tmp.Enum = 1
 			tmp.MarinadeStakePool = *realvalue
+		case *TokenPricingSourceJitoRestakingVaultTuple:
+			tmp.Enum = 2
+			tmp.JitoRestakingVault = *realvalue
+		case *TokenPricingSourceFragmetricNormalizedTokenPoolTuple:
+			tmp.Enum = 3
+			tmp.FragmetricNormalizedTokenPool = *realvalue
+		case *TokenPricingSourceFragmetricRestakingFundTuple:
+			tmp.Enum = 4
+			tmp.FragmetricRestakingFund = *realvalue
 		}
 		err := encoder.Encode(tmp)
 		if err != nil {
@@ -410,11 +382,6 @@ func (obj FundManagerAddSupportedToken) MarshalWithEncoder(encoder *ag_binary.En
 	return nil
 }
 func (obj *FundManagerAddSupportedToken) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `CapacityAmount`:
-	err = decoder.Decode(&obj.CapacityAmount)
-	if err != nil {
-		return err
-	}
 	// Deserialize `PricingSource`:
 	{
 		tmp := new(tokenPricingSourceContainer)
@@ -427,6 +394,12 @@ func (obj *FundManagerAddSupportedToken) UnmarshalWithDecoder(decoder *ag_binary
 			obj.PricingSource = &tmp.SPLStakePool
 		case 1:
 			obj.PricingSource = &tmp.MarinadeStakePool
+		case 2:
+			obj.PricingSource = &tmp.JitoRestakingVault
+		case 3:
+			obj.PricingSource = &tmp.FragmetricNormalizedTokenPool
+		case 4:
+			obj.PricingSource = &tmp.FragmetricRestakingFund
 		default:
 			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
 		}
@@ -437,28 +410,24 @@ func (obj *FundManagerAddSupportedToken) UnmarshalWithDecoder(decoder *ag_binary
 // NewFundManagerAddSupportedTokenInstruction declares a new FundManagerAddSupportedToken instruction with the provided parameters and accounts.
 func NewFundManagerAddSupportedTokenInstruction(
 	// Parameters:
-	capacity_amount uint64,
 	pricing_source TokenPricingSource,
 	// Accounts:
-	payer ag_solanago.PublicKey,
 	fundManager ag_solanago.PublicKey,
-	systemProgram ag_solanago.PublicKey,
 	receiptTokenMint ag_solanago.PublicKey,
 	fundAccount ag_solanago.PublicKey,
 	supportedTokenMint ag_solanago.PublicKey,
 	supportedTokenProgram ag_solanago.PublicKey,
-	supportedTokenAuthority ag_solanago.PublicKey,
-	supportedTokenAccount ag_solanago.PublicKey) *FundManagerAddSupportedToken {
+	supportedTokenAccount ag_solanago.PublicKey,
+	eventAuthority ag_solanago.PublicKey,
+	program ag_solanago.PublicKey) *FundManagerAddSupportedToken {
 	return NewFundManagerAddSupportedTokenInstructionBuilder().
-		SetCapacityAmount(capacity_amount).
 		SetPricingSource(pricing_source).
-		SetPayerAccount(payer).
 		SetFundManagerAccount(fundManager).
-		SetSystemProgramAccount(systemProgram).
 		SetReceiptTokenMintAccount(receiptTokenMint).
 		SetFundAccountAccount(fundAccount).
 		SetSupportedTokenMintAccount(supportedTokenMint).
 		SetSupportedTokenProgramAccount(supportedTokenProgram).
-		SetSupportedTokenAuthorityAccount(supportedTokenAuthority).
-		SetSupportedTokenAccountAccount(supportedTokenAccount)
+		SetSupportedTokenAccountAccount(supportedTokenAccount).
+		SetEventAuthorityAccount(eventAuthority).
+		SetProgramAccount(program)
 }

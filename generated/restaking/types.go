@@ -8,120 +8,811 @@ import (
 	ag_solanago "github.com/gagliardetto/solana-go"
 )
 
-type BatchWithdrawal struct {
-	BatchId                    uint64
-	NumWithdrawalRequests      uint64
-	ReceiptTokenToProcess      uint64
-	ReceiptTokenBeingProcessed uint64
-	ReceiptTokenProcessed      uint64
-	SolReserved                uint64
-	ProcessingStartedAt        *int64 `bin:"optional"`
-	Reserved                   [32]uint8
+type Asset interface {
+	isAsset()
 }
 
-func (obj BatchWithdrawal) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `BatchId` param:
-	err = encoder.Encode(obj.BatchId)
+type assetContainer struct {
+	Enum  ag_binary.BorshEnum `borsh_enum:"true"`
+	SOL   AssetSOLTuple
+	Token AssetTokenTuple
+}
+
+type AssetSOLTuple struct {
+	Elem0 uint64
+}
+
+func (_ AssetSOLTuple) isAsset() {}
+
+type AssetTokenTuple struct {
+	Elem0 ag_solanago.PublicKey
+	Elem1 *TokenPricingSource `bin:"optional"`
+	Elem2 uint64
+}
+
+func (_ AssetTokenTuple) isAsset() {}
+
+type AssetPod struct {
+	Discriminant       uint8
+	Padding            [7]uint8
+	SolAmount          uint64
+	TokenAmount        uint64
+	TokenMint          ag_solanago.PublicKey
+	TokenPricingSource TokenPricingSourcePod
+}
+
+func (obj AssetPod) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Discriminant` param:
+	err = encoder.Encode(obj.Discriminant)
 	if err != nil {
 		return err
 	}
-	// Serialize `NumWithdrawalRequests` param:
-	err = encoder.Encode(obj.NumWithdrawalRequests)
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
 	if err != nil {
 		return err
 	}
-	// Serialize `ReceiptTokenToProcess` param:
-	err = encoder.Encode(obj.ReceiptTokenToProcess)
+	// Serialize `SolAmount` param:
+	err = encoder.Encode(obj.SolAmount)
 	if err != nil {
 		return err
 	}
-	// Serialize `ReceiptTokenBeingProcessed` param:
-	err = encoder.Encode(obj.ReceiptTokenBeingProcessed)
+	// Serialize `TokenAmount` param:
+	err = encoder.Encode(obj.TokenAmount)
 	if err != nil {
 		return err
 	}
-	// Serialize `ReceiptTokenProcessed` param:
-	err = encoder.Encode(obj.ReceiptTokenProcessed)
+	// Serialize `TokenMint` param:
+	err = encoder.Encode(obj.TokenMint)
 	if err != nil {
 		return err
 	}
-	// Serialize `SolReserved` param:
-	err = encoder.Encode(obj.SolReserved)
-	if err != nil {
-		return err
-	}
-	// Serialize `ProcessingStartedAt` param (optional):
-	{
-		if obj.ProcessingStartedAt == nil {
-			err = encoder.WriteBool(false)
-			if err != nil {
-				return err
-			}
-		} else {
-			err = encoder.WriteBool(true)
-			if err != nil {
-				return err
-			}
-			err = encoder.Encode(obj.ProcessingStartedAt)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Serialize `Reserved` param:
-	err = encoder.Encode(obj.Reserved)
+	// Serialize `TokenPricingSource` param:
+	err = encoder.Encode(obj.TokenPricingSource)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (obj *BatchWithdrawal) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `BatchId`:
-	err = decoder.Decode(&obj.BatchId)
+func (obj *AssetPod) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Discriminant`:
+	err = decoder.Decode(&obj.Discriminant)
 	if err != nil {
 		return err
 	}
-	// Deserialize `NumWithdrawalRequests`:
-	err = decoder.Decode(&obj.NumWithdrawalRequests)
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
 	if err != nil {
 		return err
 	}
-	// Deserialize `ReceiptTokenToProcess`:
-	err = decoder.Decode(&obj.ReceiptTokenToProcess)
+	// Deserialize `SolAmount`:
+	err = decoder.Decode(&obj.SolAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `ReceiptTokenBeingProcessed`:
-	err = decoder.Decode(&obj.ReceiptTokenBeingProcessed)
+	// Deserialize `TokenAmount`:
+	err = decoder.Decode(&obj.TokenAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `ReceiptTokenProcessed`:
-	err = decoder.Decode(&obj.ReceiptTokenProcessed)
+	// Deserialize `TokenMint`:
+	err = decoder.Decode(&obj.TokenMint)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SolReserved`:
-	err = decoder.Decode(&obj.SolReserved)
+	// Deserialize `TokenPricingSource`:
+	err = decoder.Decode(&obj.TokenPricingSource)
 	if err != nil {
 		return err
 	}
-	// Deserialize `ProcessingStartedAt` (optional):
-	{
-		ok, err := decoder.ReadBool()
-		if err != nil {
-			return err
-		}
-		if ok {
-			err = decoder.Decode(&obj.ProcessingStartedAt)
-			if err != nil {
-				return err
-			}
-		}
+	return nil
+}
+
+type AssetState struct {
+	TokenMint                        ag_solanago.PublicKey
+	TokenProgram                     ag_solanago.PublicKey
+	AccumulatedDepositCapacityAmount uint64
+	AccumulatedDepositAmount         uint64
+	Depositable                      uint8
+	Padding                          [4]uint8
+	Withdrawable                     uint8
+	NormalReserveRateBps             uint16
+	NormalReserveMaxAmount           uint64
+	WithdrawalLastCreatedRequestId   uint64
+	WithdrawalLastProcessedBatchId   uint64
+	WithdrawalLastBatchEnqueuedAt    int64
+	WithdrawalLastBatchProcessedAt   int64
+	WithdrawalPendingBatch           WithdrawalBatch
+	Padding2                         [15]uint8
+	WithdrawalNumQueuedBatches       uint8
+	WithdrawalQueuedBatches          [10]WithdrawalBatch
+	Reserved                         [56]uint8
+
+	// receipt token amount that users can request to withdraw with the given asset from the fund.
+	// it can be conditionally inaccurate on price changes among multiple assets, so make sure to update this properly before any use of it.
+	// do not make any hard limit constraints with this value from off-chain. a requested withdrawal amount will be adjusted on-chain based on the status.
+	WithdrawableValueAsReceiptTokenAmount uint64
+
+	// informative: reserved amount that users can claim for processed withdrawal requests, which is not accounted for as an asset of the fund.
+	WithdrawalUserReservedAmount uint64
+
+	// asset: A receivable that the fund may charge the users requesting withdrawals.
+	// It is accrued during either the preparation of the withdrawal obligation or rebalancing of LST (fee from unstaking, unrestaking).
+	// And it shall be settled by the withdrawal fee normally. But it also can be written off by an authorized operation.
+	// Then it costs the rebalancing expense to the capital of the fund itself as an operation cost instead of charging the users requesting withdrawals.
+	OperationReceivableAmount uint64
+
+	// asset
+	OperationReservedAmount uint64
+}
+
+func (obj AssetState) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `TokenMint` param:
+	err = encoder.Encode(obj.TokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `TokenProgram` param:
+	err = encoder.Encode(obj.TokenProgram)
+	if err != nil {
+		return err
+	}
+	// Serialize `AccumulatedDepositCapacityAmount` param:
+	err = encoder.Encode(obj.AccumulatedDepositCapacityAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `AccumulatedDepositAmount` param:
+	err = encoder.Encode(obj.AccumulatedDepositAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `Depositable` param:
+	err = encoder.Encode(obj.Depositable)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Serialize `Withdrawable` param:
+	err = encoder.Encode(obj.Withdrawable)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalReserveRateBps` param:
+	err = encoder.Encode(obj.NormalReserveRateBps)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalReserveMaxAmount` param:
+	err = encoder.Encode(obj.NormalReserveMaxAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalLastCreatedRequestId` param:
+	err = encoder.Encode(obj.WithdrawalLastCreatedRequestId)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalLastProcessedBatchId` param:
+	err = encoder.Encode(obj.WithdrawalLastProcessedBatchId)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalLastBatchEnqueuedAt` param:
+	err = encoder.Encode(obj.WithdrawalLastBatchEnqueuedAt)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalLastBatchProcessedAt` param:
+	err = encoder.Encode(obj.WithdrawalLastBatchProcessedAt)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalPendingBatch` param:
+	err = encoder.Encode(obj.WithdrawalPendingBatch)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding2` param:
+	err = encoder.Encode(obj.Padding2)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalNumQueuedBatches` param:
+	err = encoder.Encode(obj.WithdrawalNumQueuedBatches)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalQueuedBatches` param:
+	err = encoder.Encode(obj.WithdrawalQueuedBatches)
+	if err != nil {
+		return err
+	}
+	// Serialize `Reserved` param:
+	err = encoder.Encode(obj.Reserved)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawableValueAsReceiptTokenAmount` param:
+	err = encoder.Encode(obj.WithdrawableValueAsReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalUserReservedAmount` param:
+	err = encoder.Encode(obj.WithdrawalUserReservedAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `OperationReceivableAmount` param:
+	err = encoder.Encode(obj.OperationReceivableAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `OperationReservedAmount` param:
+	err = encoder.Encode(obj.OperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *AssetState) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `TokenMint`:
+	err = decoder.Decode(&obj.TokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `TokenProgram`:
+	err = decoder.Decode(&obj.TokenProgram)
+	if err != nil {
+		return err
+	}
+	// Deserialize `AccumulatedDepositCapacityAmount`:
+	err = decoder.Decode(&obj.AccumulatedDepositCapacityAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `AccumulatedDepositAmount`:
+	err = decoder.Decode(&obj.AccumulatedDepositAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Depositable`:
+	err = decoder.Decode(&obj.Depositable)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Withdrawable`:
+	err = decoder.Decode(&obj.Withdrawable)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalReserveRateBps`:
+	err = decoder.Decode(&obj.NormalReserveRateBps)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalReserveMaxAmount`:
+	err = decoder.Decode(&obj.NormalReserveMaxAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalLastCreatedRequestId`:
+	err = decoder.Decode(&obj.WithdrawalLastCreatedRequestId)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalLastProcessedBatchId`:
+	err = decoder.Decode(&obj.WithdrawalLastProcessedBatchId)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalLastBatchEnqueuedAt`:
+	err = decoder.Decode(&obj.WithdrawalLastBatchEnqueuedAt)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalLastBatchProcessedAt`:
+	err = decoder.Decode(&obj.WithdrawalLastBatchProcessedAt)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalPendingBatch`:
+	err = decoder.Decode(&obj.WithdrawalPendingBatch)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding2`:
+	err = decoder.Decode(&obj.Padding2)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalNumQueuedBatches`:
+	err = decoder.Decode(&obj.WithdrawalNumQueuedBatches)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalQueuedBatches`:
+	err = decoder.Decode(&obj.WithdrawalQueuedBatches)
+	if err != nil {
+		return err
 	}
 	// Deserialize `Reserved`:
 	err = decoder.Decode(&obj.Reserved)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawableValueAsReceiptTokenAmount`:
+	err = decoder.Decode(&obj.WithdrawableValueAsReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalUserReservedAmount`:
+	err = decoder.Decode(&obj.WithdrawalUserReservedAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OperationReceivableAmount`:
+	err = decoder.Decode(&obj.OperationReceivableAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OperationReservedAmount`:
+	err = decoder.Decode(&obj.OperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type ClaimUnrestakedVSTCommand struct {
+	Items []ClaimUnrestakedVSTCommandItem
+	State ClaimUnrestakedVSTCommandState
+}
+
+func (obj ClaimUnrestakedVSTCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Items` param:
+	err = encoder.Encode(obj.Items)
+	if err != nil {
+		return err
+	}
+	// Serialize `State` param:
+	{
+		tmp := claimUnrestakedVSTCommandStateContainer{}
+		switch realvalue := obj.State.(type) {
+		case *ClaimUnrestakedVSTCommandStateInitTuple:
+			tmp.Enum = 0
+			tmp.Init = *realvalue
+		case *ClaimUnrestakedVSTCommandStateInit2Tuple:
+			tmp.Enum = 1
+			tmp.Init2 = *realvalue
+		case *ClaimUnrestakedVSTCommandStateReadVaultStateTuple:
+			tmp.Enum = 2
+			tmp.ReadVaultState = *realvalue
+		case *ClaimUnrestakedVSTCommandStateClaimTuple:
+			tmp.Enum = 3
+			tmp.Claim = *realvalue
+		case *ClaimUnrestakedVSTCommandStateSetupDenormalizeTuple:
+			tmp.Enum = 4
+			tmp.SetupDenormalize = *realvalue
+		case *ClaimUnrestakedVSTCommandStateDenormalizeTuple:
+			tmp.Enum = 5
+			tmp.Denormalize = *realvalue
+		}
+		err := encoder.Encode(tmp)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (obj *ClaimUnrestakedVSTCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Items`:
+	err = decoder.Decode(&obj.Items)
+	if err != nil {
+		return err
+	}
+	// Deserialize `State`:
+	{
+		tmp := new(claimUnrestakedVSTCommandStateContainer)
+		err := decoder.Decode(tmp)
+		if err != nil {
+			return err
+		}
+		switch tmp.Enum {
+		case 0:
+			obj.State = (*ClaimUnrestakedVSTCommandStateInitTuple)(&tmp.Enum)
+		case 1:
+			obj.State = (*ClaimUnrestakedVSTCommandStateInit2Tuple)(&tmp.Enum)
+		case 2:
+			obj.State = (*ClaimUnrestakedVSTCommandStateReadVaultStateTuple)(&tmp.Enum)
+		case 3:
+			obj.State = &tmp.Claim
+		case 4:
+			obj.State = &tmp.SetupDenormalize
+		case 5:
+			obj.State = &tmp.Denormalize
+		default:
+			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
+		}
+	}
+	return nil
+}
+
+type ClaimUnrestakedVSTCommandItem struct {
+	VaultAddress ag_solanago.PublicKey
+}
+
+func (obj ClaimUnrestakedVSTCommandItem) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `VaultAddress` param:
+	err = encoder.Encode(obj.VaultAddress)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *ClaimUnrestakedVSTCommandItem) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `VaultAddress`:
+	err = decoder.Decode(&obj.VaultAddress)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type ClaimUnrestakedVSTCommandResult struct{}
+
+func (obj ClaimUnrestakedVSTCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *ClaimUnrestakedVSTCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type ClaimUnrestakedVSTCommandState interface {
+	isClaimUnrestakedVSTCommandState()
+}
+
+type claimUnrestakedVSTCommandStateContainer struct {
+	Enum             ag_binary.BorshEnum `borsh_enum:"true"`
+	Init             ClaimUnrestakedVSTCommandStateInitTuple
+	Init2            ClaimUnrestakedVSTCommandStateInit2Tuple
+	ReadVaultState   ClaimUnrestakedVSTCommandStateReadVaultStateTuple
+	Claim            ClaimUnrestakedVSTCommandStateClaimTuple
+	SetupDenormalize ClaimUnrestakedVSTCommandStateSetupDenormalizeTuple
+	Denormalize      ClaimUnrestakedVSTCommandStateDenormalizeTuple
+}
+
+type ClaimUnrestakedVSTCommandStateInitTuple uint8
+
+func (obj ClaimUnrestakedVSTCommandStateInitTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *ClaimUnrestakedVSTCommandStateInitTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+func (_ ClaimUnrestakedVSTCommandStateInitTuple) isClaimUnrestakedVSTCommandState() {}
+
+type ClaimUnrestakedVSTCommandStateInit2Tuple uint8
+
+func (obj ClaimUnrestakedVSTCommandStateInit2Tuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *ClaimUnrestakedVSTCommandStateInit2Tuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+func (_ ClaimUnrestakedVSTCommandStateInit2Tuple) isClaimUnrestakedVSTCommandState() {}
+
+type ClaimUnrestakedVSTCommandStateReadVaultStateTuple uint8
+
+func (obj ClaimUnrestakedVSTCommandStateReadVaultStateTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *ClaimUnrestakedVSTCommandStateReadVaultStateTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+func (_ ClaimUnrestakedVSTCommandStateReadVaultStateTuple) isClaimUnrestakedVSTCommandState() {}
+
+type ClaimUnrestakedVSTCommandStateClaimTuple struct {
+	Elem0 ClaimableUnrestakeWithdrawalStatus
+}
+
+func (_ ClaimUnrestakedVSTCommandStateClaimTuple) isClaimUnrestakedVSTCommandState() {}
+
+type ClaimUnrestakedVSTCommandStateSetupDenormalizeTuple struct {
+	Elem0 uint64
+}
+
+func (_ ClaimUnrestakedVSTCommandStateSetupDenormalizeTuple) isClaimUnrestakedVSTCommandState() {}
+
+type ClaimUnrestakedVSTCommandStateDenormalizeTuple struct {
+	Elem0 []DenormalizeSupportedTokenAsset
+}
+
+func (_ ClaimUnrestakedVSTCommandStateDenormalizeTuple) isClaimUnrestakedVSTCommandState() {}
+
+type ClaimUnstakedSOLCommand struct {
+	Items []ClaimUnstakedSOLCommandItem
+	State ClaimUnstakedSOLCommandState
+}
+
+func (obj ClaimUnstakedSOLCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Items` param:
+	err = encoder.Encode(obj.Items)
+	if err != nil {
+		return err
+	}
+	// Serialize `State` param:
+	err = encoder.Encode(obj.State)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *ClaimUnstakedSOLCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Items`:
+	err = decoder.Decode(&obj.Items)
+	if err != nil {
+		return err
+	}
+	// Deserialize `State`:
+	err = decoder.Decode(&obj.State)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type ClaimUnstakedSOLCommandItem struct {
+	Mint              ag_solanago.PublicKey
+	FundStakeAccounts []ag_solanago.PublicKey
+}
+
+func (obj ClaimUnstakedSOLCommandItem) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Mint` param:
+	err = encoder.Encode(obj.Mint)
+	if err != nil {
+		return err
+	}
+	// Serialize `FundStakeAccounts` param:
+	err = encoder.Encode(obj.FundStakeAccounts)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *ClaimUnstakedSOLCommandItem) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Mint`:
+	err = decoder.Decode(&obj.Mint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `FundStakeAccounts`:
+	err = decoder.Decode(&obj.FundStakeAccounts)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type ClaimUnstakedSOLCommandResult struct{}
+
+func (obj ClaimUnstakedSOLCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *ClaimUnstakedSOLCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type ClaimUnstakedSOLCommandState ag_binary.BorshEnum
+
+const (
+	ClaimUnstakedSOLCommandStateInit ClaimUnstakedSOLCommandState = iota
+	ClaimUnstakedSOLCommandStateReadPoolState
+	ClaimUnstakedSOLCommandStateClaim
+)
+
+func (value ClaimUnstakedSOLCommandState) String() string {
+	switch value {
+	case ClaimUnstakedSOLCommandStateInit:
+		return "Init"
+	case ClaimUnstakedSOLCommandStateReadPoolState:
+		return "ReadPoolState"
+	case ClaimUnstakedSOLCommandStateClaim:
+		return "Claim"
+	default:
+		return ""
+	}
+}
+
+type ClaimableUnrestakeWithdrawalStatus struct {
+	WithdrawalTickets   []ClaimableUnrestakeWithdrawalTicket
+	ExpectedNcnEpoch    uint64
+	DelayedNcnEpoch     uint64
+	UnrestakedVstAmount uint64
+}
+
+func (obj ClaimableUnrestakeWithdrawalStatus) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `WithdrawalTickets` param:
+	err = encoder.Encode(obj.WithdrawalTickets)
+	if err != nil {
+		return err
+	}
+	// Serialize `ExpectedNcnEpoch` param:
+	err = encoder.Encode(obj.ExpectedNcnEpoch)
+	if err != nil {
+		return err
+	}
+	// Serialize `DelayedNcnEpoch` param:
+	err = encoder.Encode(obj.DelayedNcnEpoch)
+	if err != nil {
+		return err
+	}
+	// Serialize `UnrestakedVstAmount` param:
+	err = encoder.Encode(obj.UnrestakedVstAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *ClaimableUnrestakeWithdrawalStatus) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `WithdrawalTickets`:
+	err = decoder.Decode(&obj.WithdrawalTickets)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ExpectedNcnEpoch`:
+	err = decoder.Decode(&obj.ExpectedNcnEpoch)
+	if err != nil {
+		return err
+	}
+	// Deserialize `DelayedNcnEpoch`:
+	err = decoder.Decode(&obj.DelayedNcnEpoch)
+	if err != nil {
+		return err
+	}
+	// Deserialize `UnrestakedVstAmount`:
+	err = decoder.Decode(&obj.UnrestakedVstAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type ClaimableUnrestakeWithdrawalTicket struct {
+	WithdrawalTicketAccount      ag_solanago.PublicKey
+	WithdrawalTicketTokenAccount ag_solanago.PublicKey
+}
+
+func (obj ClaimableUnrestakeWithdrawalTicket) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `WithdrawalTicketAccount` param:
+	err = encoder.Encode(obj.WithdrawalTicketAccount)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalTicketTokenAccount` param:
+	err = encoder.Encode(obj.WithdrawalTicketTokenAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *ClaimableUnrestakeWithdrawalTicket) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `WithdrawalTicketAccount`:
+	err = decoder.Decode(&obj.WithdrawalTicketAccount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalTicketTokenAccount`:
+	err = decoder.Decode(&obj.WithdrawalTicketTokenAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type DelegateVSTCommand struct{}
+
+func (obj DelegateVSTCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *DelegateVSTCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type DelegateVSTCommandResult struct{}
+
+func (obj DelegateVSTCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *DelegateVSTCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type DenormalizeNTCommand struct{}
+
+func (obj DenormalizeNTCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *DenormalizeNTCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type DenormalizeNTCommandResult struct{}
+
+func (obj DenormalizeNTCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *DenormalizeNTCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type DenormalizeSupportedTokenAsset struct {
+	OperationReservedAmount uint64
+	TokenMint               ag_solanago.PublicKey
+	TokenProgram            ag_solanago.PublicKey
+}
+
+func (obj DenormalizeSupportedTokenAsset) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `OperationReservedAmount` param:
+	err = encoder.Encode(obj.OperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `TokenMint` param:
+	err = encoder.Encode(obj.TokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `TokenProgram` param:
+	err = encoder.Encode(obj.TokenProgram)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *DenormalizeSupportedTokenAsset) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `OperationReservedAmount`:
+	err = decoder.Decode(&obj.OperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `TokenMint`:
+	err = decoder.Decode(&obj.TokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `TokenProgram`:
+	err = decoder.Decode(&obj.TokenProgram)
 	if err != nil {
 		return err
 	}
@@ -129,11 +820,18 @@ func (obj *BatchWithdrawal) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (er
 }
 
 type DepositMetadata struct {
+	User                    ag_solanago.PublicKey
 	WalletProvider          string
 	ContributionAccrualRate uint8
+	ExpiredAt               int64
 }
 
 func (obj DepositMetadata) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `User` param:
+	err = encoder.Encode(obj.User)
+	if err != nil {
+		return err
+	}
 	// Serialize `WalletProvider` param:
 	err = encoder.Encode(obj.WalletProvider)
 	if err != nil {
@@ -144,10 +842,20 @@ func (obj DepositMetadata) MarshalWithEncoder(encoder *ag_binary.Encoder) (err e
 	if err != nil {
 		return err
 	}
+	// Serialize `ExpiredAt` param:
+	err = encoder.Encode(obj.ExpiredAt)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (obj *DepositMetadata) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `User`:
+	err = decoder.Decode(&obj.User)
+	if err != nil {
+		return err
+	}
 	// Deserialize `WalletProvider`:
 	err = decoder.Decode(&obj.WalletProvider)
 	if err != nil {
@@ -158,19 +866,101 @@ func (obj *DepositMetadata) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (er
 	if err != nil {
 		return err
 	}
+	// Deserialize `ExpiredAt`:
+	err = decoder.Decode(&obj.ExpiredAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type EnqueueWithdrawalBatchCommand struct {
+	Forced bool
+}
+
+func (obj EnqueueWithdrawalBatchCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Forced` param:
+	err = encoder.Encode(obj.Forced)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *EnqueueWithdrawalBatchCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Forced`:
+	err = decoder.Decode(&obj.Forced)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type EnqueueWithdrawalBatchCommandResult struct {
+	EnqueuedReceiptTokenAmount uint64
+}
+
+func (obj EnqueueWithdrawalBatchCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `EnqueuedReceiptTokenAmount` param:
+	err = encoder.Encode(obj.EnqueuedReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *EnqueueWithdrawalBatchCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `EnqueuedReceiptTokenAmount`:
+	err = decoder.Decode(&obj.EnqueuedReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 type FundAccount struct {
-	DataVersion                 uint8
-	Bump                        uint8
-	ReceiptTokenMint            ag_solanago.PublicKey
-	SupportedTokens             []SupportedTokenInfo
-	SolCapacityAmount           uint64
-	SolAccumulatedDepositAmount uint64
-	SolOperationReservedAmount  uint64
-	WithdrawalStatus            WithdrawalStatus
-	Reserved                    [1280]uint8
+	DataVersion         uint16
+	Bump                uint8
+	ReserveAccountBump  uint8
+	TreasuryAccountBump uint8
+	Padding             [10]uint8
+	TransferEnabled     uint8
+
+	// receipt token information
+	ReceiptTokenMint             ag_solanago.PublicKey
+	ReceiptTokenProgram          ag_solanago.PublicKey
+	ReceiptTokenDecimals         uint8
+	Padding2                     [7]uint8
+	ReceiptTokenSupplyAmount     uint64
+	OneReceiptTokenAsSol         uint64
+	ReceiptTokenValueUpdatedSlot uint64
+	ReceiptTokenValue            TokenValuePod
+
+	// global withdrawal configurations
+	WithdrawalBatchThresholdIntervalSeconds int64
+	WithdrawalFeeRateBps                    uint16
+	WithdrawalEnabled                       uint8
+	DepositEnabled                          uint8
+	Padding4                                [4]uint8
+
+	// SOL deposit & withdrawal
+	Sol AssetState
+
+	// underlying assets
+	Padding6           [15]uint8
+	NumSupportedTokens uint8
+	SupportedTokens    [10]SupportedToken
+
+	// optional basket of underlying assets
+	NormalizedToken NormalizedToken
+
+	// investments
+	Padding7           [15]uint8
+	NumRestakingVaults uint8
+	RestakingVaults    [4]RestakingVault
+
+	// fund operation state
+	Operation OperationState
 }
 
 func (obj FundAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
@@ -184,8 +974,103 @@ func (obj FundAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error
 	if err != nil {
 		return err
 	}
+	// Serialize `ReserveAccountBump` param:
+	err = encoder.Encode(obj.ReserveAccountBump)
+	if err != nil {
+		return err
+	}
+	// Serialize `TreasuryAccountBump` param:
+	err = encoder.Encode(obj.TreasuryAccountBump)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Serialize `TransferEnabled` param:
+	err = encoder.Encode(obj.TransferEnabled)
+	if err != nil {
+		return err
+	}
 	// Serialize `ReceiptTokenMint` param:
 	err = encoder.Encode(obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenProgram` param:
+	err = encoder.Encode(obj.ReceiptTokenProgram)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenDecimals` param:
+	err = encoder.Encode(obj.ReceiptTokenDecimals)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding2` param:
+	err = encoder.Encode(obj.Padding2)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenSupplyAmount` param:
+	err = encoder.Encode(obj.ReceiptTokenSupplyAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `OneReceiptTokenAsSol` param:
+	err = encoder.Encode(obj.OneReceiptTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenValueUpdatedSlot` param:
+	err = encoder.Encode(obj.ReceiptTokenValueUpdatedSlot)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenValue` param:
+	err = encoder.Encode(obj.ReceiptTokenValue)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalBatchThresholdIntervalSeconds` param:
+	err = encoder.Encode(obj.WithdrawalBatchThresholdIntervalSeconds)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalFeeRateBps` param:
+	err = encoder.Encode(obj.WithdrawalFeeRateBps)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalEnabled` param:
+	err = encoder.Encode(obj.WithdrawalEnabled)
+	if err != nil {
+		return err
+	}
+	// Serialize `DepositEnabled` param:
+	err = encoder.Encode(obj.DepositEnabled)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding4` param:
+	err = encoder.Encode(obj.Padding4)
+	if err != nil {
+		return err
+	}
+	// Serialize `Sol` param:
+	err = encoder.Encode(obj.Sol)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding6` param:
+	err = encoder.Encode(obj.Padding6)
+	if err != nil {
+		return err
+	}
+	// Serialize `NumSupportedTokens` param:
+	err = encoder.Encode(obj.NumSupportedTokens)
 	if err != nil {
 		return err
 	}
@@ -194,28 +1079,28 @@ func (obj FundAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error
 	if err != nil {
 		return err
 	}
-	// Serialize `SolCapacityAmount` param:
-	err = encoder.Encode(obj.SolCapacityAmount)
+	// Serialize `NormalizedToken` param:
+	err = encoder.Encode(obj.NormalizedToken)
 	if err != nil {
 		return err
 	}
-	// Serialize `SolAccumulatedDepositAmount` param:
-	err = encoder.Encode(obj.SolAccumulatedDepositAmount)
+	// Serialize `Padding7` param:
+	err = encoder.Encode(obj.Padding7)
 	if err != nil {
 		return err
 	}
-	// Serialize `SolOperationReservedAmount` param:
-	err = encoder.Encode(obj.SolOperationReservedAmount)
+	// Serialize `NumRestakingVaults` param:
+	err = encoder.Encode(obj.NumRestakingVaults)
 	if err != nil {
 		return err
 	}
-	// Serialize `WithdrawalStatus` param:
-	err = encoder.Encode(obj.WithdrawalStatus)
+	// Serialize `RestakingVaults` param:
+	err = encoder.Encode(obj.RestakingVaults)
 	if err != nil {
 		return err
 	}
-	// Serialize `Reserved` param:
-	err = encoder.Encode(obj.Reserved)
+	// Serialize `Operation` param:
+	err = encoder.Encode(obj.Operation)
 	if err != nil {
 		return err
 	}
@@ -233,119 +1118,43 @@ func (obj *FundAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err er
 	if err != nil {
 		return err
 	}
+	// Deserialize `ReserveAccountBump`:
+	err = decoder.Decode(&obj.ReserveAccountBump)
+	if err != nil {
+		return err
+	}
+	// Deserialize `TreasuryAccountBump`:
+	err = decoder.Decode(&obj.TreasuryAccountBump)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Deserialize `TransferEnabled`:
+	err = decoder.Decode(&obj.TransferEnabled)
+	if err != nil {
+		return err
+	}
 	// Deserialize `ReceiptTokenMint`:
 	err = decoder.Decode(&obj.ReceiptTokenMint)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SupportedTokens`:
-	err = decoder.Decode(&obj.SupportedTokens)
+	// Deserialize `ReceiptTokenProgram`:
+	err = decoder.Decode(&obj.ReceiptTokenProgram)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SolCapacityAmount`:
-	err = decoder.Decode(&obj.SolCapacityAmount)
+	// Deserialize `ReceiptTokenDecimals`:
+	err = decoder.Decode(&obj.ReceiptTokenDecimals)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SolAccumulatedDepositAmount`:
-	err = decoder.Decode(&obj.SolAccumulatedDepositAmount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `SolOperationReservedAmount`:
-	err = decoder.Decode(&obj.SolOperationReservedAmount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `WithdrawalStatus`:
-	err = decoder.Decode(&obj.WithdrawalStatus)
-	if err != nil {
-		return err
-	}
-	// Deserialize `Reserved`:
-	err = decoder.Decode(&obj.Reserved)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type FundAccountInfo struct {
-	ReceiptTokenMint               ag_solanago.PublicKey
-	ReceiptTokenPrice              uint64
-	ReceiptTokenSupplyAmount       uint64
-	SupportedTokens                []SupportedTokenInfo
-	SolAccumulatedDepositAmount    uint64
-	SolOperationReservedAmount     uint64
-	SolWithdrawalReservedAmount    uint64
-	SolWithdrawalFeeRate           float32
-	WithdrawalEnabled              bool
-	WithdrawalLastCompletedBatchId uint64
-}
-
-func (obj FundAccountInfo) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `ReceiptTokenMint` param:
-	err = encoder.Encode(obj.ReceiptTokenMint)
-	if err != nil {
-		return err
-	}
-	// Serialize `ReceiptTokenPrice` param:
-	err = encoder.Encode(obj.ReceiptTokenPrice)
-	if err != nil {
-		return err
-	}
-	// Serialize `ReceiptTokenSupplyAmount` param:
-	err = encoder.Encode(obj.ReceiptTokenSupplyAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `SupportedTokens` param:
-	err = encoder.Encode(obj.SupportedTokens)
-	if err != nil {
-		return err
-	}
-	// Serialize `SolAccumulatedDepositAmount` param:
-	err = encoder.Encode(obj.SolAccumulatedDepositAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `SolOperationReservedAmount` param:
-	err = encoder.Encode(obj.SolOperationReservedAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `SolWithdrawalReservedAmount` param:
-	err = encoder.Encode(obj.SolWithdrawalReservedAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `SolWithdrawalFeeRate` param:
-	err = encoder.Encode(obj.SolWithdrawalFeeRate)
-	if err != nil {
-		return err
-	}
-	// Serialize `WithdrawalEnabled` param:
-	err = encoder.Encode(obj.WithdrawalEnabled)
-	if err != nil {
-		return err
-	}
-	// Serialize `WithdrawalLastCompletedBatchId` param:
-	err = encoder.Encode(obj.WithdrawalLastCompletedBatchId)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (obj *FundAccountInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `ReceiptTokenMint`:
-	err = decoder.Decode(&obj.ReceiptTokenMint)
-	if err != nil {
-		return err
-	}
-	// Deserialize `ReceiptTokenPrice`:
-	err = decoder.Decode(&obj.ReceiptTokenPrice)
+	// Deserialize `Padding2`:
+	err = decoder.Decode(&obj.Padding2)
 	if err != nil {
 		return err
 	}
@@ -354,28 +1163,28 @@ func (obj *FundAccountInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (er
 	if err != nil {
 		return err
 	}
-	// Deserialize `SupportedTokens`:
-	err = decoder.Decode(&obj.SupportedTokens)
+	// Deserialize `OneReceiptTokenAsSol`:
+	err = decoder.Decode(&obj.OneReceiptTokenAsSol)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SolAccumulatedDepositAmount`:
-	err = decoder.Decode(&obj.SolAccumulatedDepositAmount)
+	// Deserialize `ReceiptTokenValueUpdatedSlot`:
+	err = decoder.Decode(&obj.ReceiptTokenValueUpdatedSlot)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SolOperationReservedAmount`:
-	err = decoder.Decode(&obj.SolOperationReservedAmount)
+	// Deserialize `ReceiptTokenValue`:
+	err = decoder.Decode(&obj.ReceiptTokenValue)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SolWithdrawalReservedAmount`:
-	err = decoder.Decode(&obj.SolWithdrawalReservedAmount)
+	// Deserialize `WithdrawalBatchThresholdIntervalSeconds`:
+	err = decoder.Decode(&obj.WithdrawalBatchThresholdIntervalSeconds)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SolWithdrawalFeeRate`:
-	err = decoder.Decode(&obj.SolWithdrawalFeeRate)
+	// Deserialize `WithdrawalFeeRateBps`:
+	err = decoder.Decode(&obj.WithdrawalFeeRateBps)
 	if err != nil {
 		return err
 	}
@@ -384,8 +1193,58 @@ func (obj *FundAccountInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (er
 	if err != nil {
 		return err
 	}
-	// Deserialize `WithdrawalLastCompletedBatchId`:
-	err = decoder.Decode(&obj.WithdrawalLastCompletedBatchId)
+	// Deserialize `DepositEnabled`:
+	err = decoder.Decode(&obj.DepositEnabled)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding4`:
+	err = decoder.Decode(&obj.Padding4)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Sol`:
+	err = decoder.Decode(&obj.Sol)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding6`:
+	err = decoder.Decode(&obj.Padding6)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumSupportedTokens`:
+	err = decoder.Decode(&obj.NumSupportedTokens)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokens`:
+	err = decoder.Decode(&obj.SupportedTokens)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedToken`:
+	err = decoder.Decode(&obj.NormalizedToken)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding7`:
+	err = decoder.Decode(&obj.Padding7)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumRestakingVaults`:
+	err = decoder.Decode(&obj.NumRestakingVaults)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RestakingVaults`:
+	err = decoder.Decode(&obj.RestakingVaults)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Operation`:
+	err = decoder.Decode(&obj.Operation)
 	if err != nil {
 		return err
 	}
@@ -394,7 +1253,7 @@ func (obj *FundAccountInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (er
 
 type FundManagerUpdatedFund struct {
 	ReceiptTokenMint ag_solanago.PublicKey
-	FundAccount      FundAccountInfo
+	FundAccount      ag_solanago.PublicKey
 }
 
 func (obj FundManagerUpdatedFund) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
@@ -426,16 +1285,68 @@ func (obj *FundManagerUpdatedFund) UnmarshalWithDecoder(decoder *ag_binary.Decod
 }
 
 type FundManagerUpdatedRewardPool struct {
-	RewardAccountDataVersion uint16
-	ReceiptTokenMint         ag_solanago.PublicKey
-	UpdatedRewardPoolIds     []byte
-	Holders                  []HolderInfo
-	Rewards                  []RewardInfo
+	ReceiptTokenMint ag_solanago.PublicKey
+	RewardAccount    ag_solanago.PublicKey
 }
 
 func (obj FundManagerUpdatedRewardPool) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `RewardAccountDataVersion` param:
-	err = encoder.Encode(obj.RewardAccountDataVersion)
+	// Serialize `ReceiptTokenMint` param:
+	err = encoder.Encode(obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `RewardAccount` param:
+	err = encoder.Encode(obj.RewardAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *FundManagerUpdatedRewardPool) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `ReceiptTokenMint`:
+	err = decoder.Decode(&obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RewardAccount`:
+	err = decoder.Decode(&obj.RewardAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type FundWithdrawalBatchAccount struct {
+	DataVersion               uint16
+	Bump                      uint8
+	ReceiptTokenMint          ag_solanago.PublicKey
+	SupportedTokenMint        *ag_solanago.PublicKey `bin:"optional"`
+	SupportedTokenProgram     *ag_solanago.PublicKey `bin:"optional"`
+	BatchId                   uint64
+	NumRequests               uint64
+	NumClaimedRequests        uint64
+	ReceiptTokenAmount        uint64
+	ClaimedReceiptTokenAmount uint64
+
+	// asset to be withdrawn
+	AssetUserAmount        uint64
+	ClaimedAssetUserAmount uint64
+
+	// informative: withdrawal fee is already paid to the treasury account, just informative.
+	AssetFeeAmount uint64
+	ProcessedAt    int64
+	Reserved       [32]uint8
+}
+
+func (obj FundWithdrawalBatchAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `DataVersion` param:
+	err = encoder.Encode(obj.DataVersion)
+	if err != nil {
+		return err
+	}
+	// Serialize `Bump` param:
+	err = encoder.Encode(obj.Bump)
 	if err != nil {
 		return err
 	}
@@ -444,83 +1355,84 @@ func (obj FundManagerUpdatedRewardPool) MarshalWithEncoder(encoder *ag_binary.En
 	if err != nil {
 		return err
 	}
-	// Serialize `UpdatedRewardPoolIds` param:
-	err = encoder.Encode(obj.UpdatedRewardPoolIds)
+	// Serialize `SupportedTokenMint` param (optional):
+	{
+		if obj.SupportedTokenMint == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `SupportedTokenProgram` param (optional):
+	{
+		if obj.SupportedTokenProgram == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenProgram)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `BatchId` param:
+	err = encoder.Encode(obj.BatchId)
 	if err != nil {
 		return err
 	}
-	// Serialize `Holders` param:
-	err = encoder.Encode(obj.Holders)
+	// Serialize `NumRequests` param:
+	err = encoder.Encode(obj.NumRequests)
 	if err != nil {
 		return err
 	}
-	// Serialize `Rewards` param:
-	err = encoder.Encode(obj.Rewards)
+	// Serialize `NumClaimedRequests` param:
+	err = encoder.Encode(obj.NumClaimedRequests)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func (obj *FundManagerUpdatedRewardPool) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `RewardAccountDataVersion`:
-	err = decoder.Decode(&obj.RewardAccountDataVersion)
+	// Serialize `ReceiptTokenAmount` param:
+	err = encoder.Encode(obj.ReceiptTokenAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `ReceiptTokenMint`:
-	err = decoder.Decode(&obj.ReceiptTokenMint)
+	// Serialize `ClaimedReceiptTokenAmount` param:
+	err = encoder.Encode(obj.ClaimedReceiptTokenAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `UpdatedRewardPoolIds`:
-	err = decoder.Decode(&obj.UpdatedRewardPoolIds)
+	// Serialize `AssetUserAmount` param:
+	err = encoder.Encode(obj.AssetUserAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Holders`:
-	err = decoder.Decode(&obj.Holders)
+	// Serialize `ClaimedAssetUserAmount` param:
+	err = encoder.Encode(obj.ClaimedAssetUserAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Rewards`:
-	err = decoder.Decode(&obj.Rewards)
+	// Serialize `AssetFeeAmount` param:
+	err = encoder.Encode(obj.AssetFeeAmount)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-type Holder struct {
-	// ID is determined by reward account.
-	Id          uint8
-	Name        [14]uint8
-	Description [128]uint8
-	NumPubkeys  uint8
-	Reserved    [32]uint64
-
-	// List of allowed pubkeys for this holder.
-	Pubkeys1 [8]ag_solanago.PublicKey
-}
-
-func (obj Holder) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `Id` param:
-	err = encoder.Encode(obj.Id)
-	if err != nil {
-		return err
-	}
-	// Serialize `Name` param:
-	err = encoder.Encode(obj.Name)
-	if err != nil {
-		return err
-	}
-	// Serialize `Description` param:
-	err = encoder.Encode(obj.Description)
-	if err != nil {
-		return err
-	}
-	// Serialize `NumPubkeys` param:
-	err = encoder.Encode(obj.NumPubkeys)
+	// Serialize `ProcessedAt` param:
+	err = encoder.Encode(obj.ProcessedAt)
 	if err != nil {
 		return err
 	}
@@ -529,32 +1441,93 @@ func (obj Holder) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
 	if err != nil {
 		return err
 	}
-	// Serialize `Pubkeys1` param:
-	err = encoder.Encode(obj.Pubkeys1)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
-func (obj *Holder) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `Id`:
-	err = decoder.Decode(&obj.Id)
+func (obj *FundWithdrawalBatchAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `DataVersion`:
+	err = decoder.Decode(&obj.DataVersion)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Name`:
-	err = decoder.Decode(&obj.Name)
+	// Deserialize `Bump`:
+	err = decoder.Decode(&obj.Bump)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Description`:
-	err = decoder.Decode(&obj.Description)
+	// Deserialize `ReceiptTokenMint`:
+	err = decoder.Decode(&obj.ReceiptTokenMint)
 	if err != nil {
 		return err
 	}
-	// Deserialize `NumPubkeys`:
-	err = decoder.Decode(&obj.NumPubkeys)
+	// Deserialize `SupportedTokenMint` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `SupportedTokenProgram` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenProgram)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `BatchId`:
+	err = decoder.Decode(&obj.BatchId)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumRequests`:
+	err = decoder.Decode(&obj.NumRequests)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumClaimedRequests`:
+	err = decoder.Decode(&obj.NumClaimedRequests)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ReceiptTokenAmount`:
+	err = decoder.Decode(&obj.ReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ClaimedReceiptTokenAmount`:
+	err = decoder.Decode(&obj.ClaimedReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `AssetUserAmount`:
+	err = decoder.Decode(&obj.AssetUserAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ClaimedAssetUserAmount`:
+	err = decoder.Decode(&obj.ClaimedAssetUserAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `AssetFeeAmount`:
+	err = decoder.Decode(&obj.AssetFeeAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ProcessedAt`:
+	err = decoder.Decode(&obj.ProcessedAt)
 	if err != nil {
 		return err
 	}
@@ -563,249 +1536,345 @@ func (obj *Holder) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) 
 	if err != nil {
 		return err
 	}
-	// Deserialize `Pubkeys1`:
-	err = decoder.Decode(&obj.Pubkeys1)
+	return nil
+}
+
+type InitializeCommand struct{}
+
+func (obj InitializeCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *InitializeCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type InitializeCommandResult struct{}
+
+func (obj InitializeCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *InitializeCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type NormalizeLSTCommand struct{}
+
+func (obj NormalizeLSTCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *NormalizeLSTCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type NormalizeLSTCommandResult struct{}
+
+func (obj NormalizeLSTCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *NormalizeLSTCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type NormalizeSupportedTokenAsset struct {
+	OperationReservedAmount uint64
+	TokenMint               ag_solanago.PublicKey
+	TokenProgram            ag_solanago.PublicKey
+}
+
+func (obj NormalizeSupportedTokenAsset) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `OperationReservedAmount` param:
+	err = encoder.Encode(obj.OperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `TokenMint` param:
+	err = encoder.Encode(obj.TokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `TokenProgram` param:
+	err = encoder.Encode(obj.TokenProgram)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type HolderInfo struct {
-	Id          uint8
-	Name        string
-	Description string
-	Pubkeys     []ag_solanago.PublicKey
-}
-
-func (obj HolderInfo) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `Id` param:
-	err = encoder.Encode(obj.Id)
+func (obj *NormalizeSupportedTokenAsset) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `OperationReservedAmount`:
+	err = decoder.Decode(&obj.OperationReservedAmount)
 	if err != nil {
 		return err
 	}
-	// Serialize `Name` param:
-	err = encoder.Encode(obj.Name)
+	// Deserialize `TokenMint`:
+	err = decoder.Decode(&obj.TokenMint)
 	if err != nil {
 		return err
 	}
-	// Serialize `Description` param:
-	err = encoder.Encode(obj.Description)
-	if err != nil {
-		return err
-	}
-	// Serialize `Pubkeys` param:
-	err = encoder.Encode(obj.Pubkeys)
+	// Deserialize `TokenProgram`:
+	err = decoder.Decode(&obj.TokenProgram)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (obj *HolderInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `Id`:
-	err = decoder.Decode(&obj.Id)
+type NormalizedClaimableToken struct {
+	Mint            ag_solanago.PublicKey
+	Program         ag_solanago.PublicKey
+	ClaimableAmount uint64
+	Claimed         bool
+}
+
+func (obj NormalizedClaimableToken) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Mint` param:
+	err = encoder.Encode(obj.Mint)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Name`:
-	err = decoder.Decode(&obj.Name)
+	// Serialize `Program` param:
+	err = encoder.Encode(obj.Program)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Description`:
-	err = decoder.Decode(&obj.Description)
+	// Serialize `ClaimableAmount` param:
+	err = encoder.Encode(obj.ClaimableAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Pubkeys`:
-	err = decoder.Decode(&obj.Pubkeys)
+	// Serialize `Claimed` param:
+	err = encoder.Encode(obj.Claimed)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type OperatorProcessedJob struct {
-	ReceiptTokenMint ag_solanago.PublicKey
-	FundAccount      FundAccountInfo
-}
-
-func (obj OperatorProcessedJob) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `ReceiptTokenMint` param:
-	err = encoder.Encode(obj.ReceiptTokenMint)
+func (obj *NormalizedClaimableToken) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Mint`:
+	err = decoder.Decode(&obj.Mint)
 	if err != nil {
 		return err
 	}
-	// Serialize `FundAccount` param:
-	err = encoder.Encode(obj.FundAccount)
+	// Deserialize `Program`:
+	err = decoder.Decode(&obj.Program)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func (obj *OperatorProcessedJob) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `ReceiptTokenMint`:
-	err = decoder.Decode(&obj.ReceiptTokenMint)
+	// Deserialize `ClaimableAmount`:
+	err = decoder.Decode(&obj.ClaimableAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `FundAccount`:
-	err = decoder.Decode(&obj.FundAccount)
+	// Deserialize `Claimed`:
+	err = decoder.Decode(&obj.Claimed)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type OperatorUpdatedFundPrice struct {
-	ReceiptTokenMint ag_solanago.PublicKey
-	FundAccount      FundAccountInfo
+type NormalizedSupportedToken struct {
+	Mint                     ag_solanago.PublicKey
+	Program                  ag_solanago.PublicKey
+	LockAccount              ag_solanago.PublicKey
+	LockedAmount             uint64
+	Decimals                 uint8
+	WithdrawalReservedAmount uint64
+	OneTokenAsSol            uint64
+	PricingSource            TokenPricingSource
+	Reserved                 [14]uint8
 }
 
-func (obj OperatorUpdatedFundPrice) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `ReceiptTokenMint` param:
-	err = encoder.Encode(obj.ReceiptTokenMint)
+func (obj NormalizedSupportedToken) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Mint` param:
+	err = encoder.Encode(obj.Mint)
 	if err != nil {
 		return err
 	}
-	// Serialize `FundAccount` param:
-	err = encoder.Encode(obj.FundAccount)
+	// Serialize `Program` param:
+	err = encoder.Encode(obj.Program)
+	if err != nil {
+		return err
+	}
+	// Serialize `LockAccount` param:
+	err = encoder.Encode(obj.LockAccount)
+	if err != nil {
+		return err
+	}
+	// Serialize `LockedAmount` param:
+	err = encoder.Encode(obj.LockedAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `Decimals` param:
+	err = encoder.Encode(obj.Decimals)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalReservedAmount` param:
+	err = encoder.Encode(obj.WithdrawalReservedAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `OneTokenAsSol` param:
+	err = encoder.Encode(obj.OneTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Serialize `PricingSource` param:
+	{
+		tmp := tokenPricingSourceContainer{}
+		switch realvalue := obj.PricingSource.(type) {
+		case *TokenPricingSourceSPLStakePoolTuple:
+			tmp.Enum = 0
+			tmp.SPLStakePool = *realvalue
+		case *TokenPricingSourceMarinadeStakePoolTuple:
+			tmp.Enum = 1
+			tmp.MarinadeStakePool = *realvalue
+		case *TokenPricingSourceJitoRestakingVaultTuple:
+			tmp.Enum = 2
+			tmp.JitoRestakingVault = *realvalue
+		case *TokenPricingSourceFragmetricNormalizedTokenPoolTuple:
+			tmp.Enum = 3
+			tmp.FragmetricNormalizedTokenPool = *realvalue
+		case *TokenPricingSourceFragmetricRestakingFundTuple:
+			tmp.Enum = 4
+			tmp.FragmetricRestakingFund = *realvalue
+		}
+		err := encoder.Encode(tmp)
+		if err != nil {
+			return err
+		}
+	}
+	// Serialize `Reserved` param:
+	err = encoder.Encode(obj.Reserved)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (obj *OperatorUpdatedFundPrice) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `ReceiptTokenMint`:
-	err = decoder.Decode(&obj.ReceiptTokenMint)
+func (obj *NormalizedSupportedToken) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Mint`:
+	err = decoder.Decode(&obj.Mint)
 	if err != nil {
 		return err
 	}
-	// Deserialize `FundAccount`:
-	err = decoder.Decode(&obj.FundAccount)
+	// Deserialize `Program`:
+	err = decoder.Decode(&obj.Program)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-type ReceiptTokenLockAuthority struct {
-	DataVersion      uint8
-	Bump             uint8
-	ReceiptTokenMint ag_solanago.PublicKey
-}
-
-func (obj ReceiptTokenLockAuthority) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `DataVersion` param:
-	err = encoder.Encode(obj.DataVersion)
+	// Deserialize `LockAccount`:
+	err = decoder.Decode(&obj.LockAccount)
 	if err != nil {
 		return err
 	}
-	// Serialize `Bump` param:
-	err = encoder.Encode(obj.Bump)
+	// Deserialize `LockedAmount`:
+	err = decoder.Decode(&obj.LockedAmount)
 	if err != nil {
 		return err
 	}
-	// Serialize `ReceiptTokenMint` param:
-	err = encoder.Encode(obj.ReceiptTokenMint)
+	// Deserialize `Decimals`:
+	err = decoder.Decode(&obj.Decimals)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func (obj *ReceiptTokenLockAuthority) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `DataVersion`:
-	err = decoder.Decode(&obj.DataVersion)
+	// Deserialize `WithdrawalReservedAmount`:
+	err = decoder.Decode(&obj.WithdrawalReservedAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Bump`:
-	err = decoder.Decode(&obj.Bump)
+	// Deserialize `OneTokenAsSol`:
+	err = decoder.Decode(&obj.OneTokenAsSol)
 	if err != nil {
 		return err
 	}
-	// Deserialize `ReceiptTokenMint`:
-	err = decoder.Decode(&obj.ReceiptTokenMint)
-	if err != nil {
-		return err
+	// Deserialize `PricingSource`:
+	{
+		tmp := new(tokenPricingSourceContainer)
+		err := decoder.Decode(tmp)
+		if err != nil {
+			return err
+		}
+		switch tmp.Enum {
+		case 0:
+			obj.PricingSource = &tmp.SPLStakePool
+		case 1:
+			obj.PricingSource = &tmp.MarinadeStakePool
+		case 2:
+			obj.PricingSource = &tmp.JitoRestakingVault
+		case 3:
+			obj.PricingSource = &tmp.FragmetricNormalizedTokenPool
+		case 4:
+			obj.PricingSource = &tmp.FragmetricRestakingFund
+		default:
+			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
+		}
 	}
-	return nil
-}
-
-type ReceiptTokenMintAuthority struct {
-	DataVersion      uint8
-	Bump             uint8
-	ReceiptTokenMint ag_solanago.PublicKey
-}
-
-func (obj ReceiptTokenMintAuthority) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `DataVersion` param:
-	err = encoder.Encode(obj.DataVersion)
-	if err != nil {
-		return err
-	}
-	// Serialize `Bump` param:
-	err = encoder.Encode(obj.Bump)
-	if err != nil {
-		return err
-	}
-	// Serialize `ReceiptTokenMint` param:
-	err = encoder.Encode(obj.ReceiptTokenMint)
+	// Deserialize `Reserved`:
+	err = decoder.Decode(&obj.Reserved)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (obj *ReceiptTokenMintAuthority) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `DataVersion`:
-	err = decoder.Decode(&obj.DataVersion)
-	if err != nil {
-		return err
-	}
-	// Deserialize `Bump`:
-	err = decoder.Decode(&obj.Bump)
-	if err != nil {
-		return err
-	}
-	// Deserialize `ReceiptTokenMint`:
-	err = decoder.Decode(&obj.ReceiptTokenMint)
-	if err != nil {
-		return err
-	}
-	return nil
+type NormalizedToken struct {
+	Mint                    ag_solanago.PublicKey
+	Program                 ag_solanago.PublicKey
+	Decimals                uint8
+	Enabled                 uint8
+	Padding                 [6]uint8
+	PricingSource           TokenPricingSourcePod
+	OneTokenAsSol           uint64
+	OperationReservedAmount uint64
+	Reserved                [64]uint8
 }
 
-type ReservedFund struct {
-	NumCompletedWithdrawalRequests uint64
-	SolRemaining                   uint64
-	TotalReceiptTokenProcessed     ag_binary.Uint128
-	TotalSolReserved               ag_binary.Uint128
-	Reserved                       [64]uint8
-}
-
-func (obj ReservedFund) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `NumCompletedWithdrawalRequests` param:
-	err = encoder.Encode(obj.NumCompletedWithdrawalRequests)
+func (obj NormalizedToken) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Mint` param:
+	err = encoder.Encode(obj.Mint)
 	if err != nil {
 		return err
 	}
-	// Serialize `SolRemaining` param:
-	err = encoder.Encode(obj.SolRemaining)
+	// Serialize `Program` param:
+	err = encoder.Encode(obj.Program)
 	if err != nil {
 		return err
 	}
-	// Serialize `TotalReceiptTokenProcessed` param:
-	err = encoder.Encode(obj.TotalReceiptTokenProcessed)
+	// Serialize `Decimals` param:
+	err = encoder.Encode(obj.Decimals)
 	if err != nil {
 		return err
 	}
-	// Serialize `TotalSolReserved` param:
-	err = encoder.Encode(obj.TotalSolReserved)
+	// Serialize `Enabled` param:
+	err = encoder.Encode(obj.Enabled)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Serialize `PricingSource` param:
+	err = encoder.Encode(obj.PricingSource)
+	if err != nil {
+		return err
+	}
+	// Serialize `OneTokenAsSol` param:
+	err = encoder.Encode(obj.OneTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Serialize `OperationReservedAmount` param:
+	err = encoder.Encode(obj.OperationReservedAmount)
 	if err != nil {
 		return err
 	}
@@ -817,24 +1886,1868 @@ func (obj ReservedFund) MarshalWithEncoder(encoder *ag_binary.Encoder) (err erro
 	return nil
 }
 
-func (obj *ReservedFund) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `NumCompletedWithdrawalRequests`:
-	err = decoder.Decode(&obj.NumCompletedWithdrawalRequests)
+func (obj *NormalizedToken) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Mint`:
+	err = decoder.Decode(&obj.Mint)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SolRemaining`:
-	err = decoder.Decode(&obj.SolRemaining)
+	// Deserialize `Program`:
+	err = decoder.Decode(&obj.Program)
 	if err != nil {
 		return err
 	}
-	// Deserialize `TotalReceiptTokenProcessed`:
-	err = decoder.Decode(&obj.TotalReceiptTokenProcessed)
+	// Deserialize `Decimals`:
+	err = decoder.Decode(&obj.Decimals)
 	if err != nil {
 		return err
 	}
-	// Deserialize `TotalSolReserved`:
-	err = decoder.Decode(&obj.TotalSolReserved)
+	// Deserialize `Enabled`:
+	err = decoder.Decode(&obj.Enabled)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Deserialize `PricingSource`:
+	err = decoder.Decode(&obj.PricingSource)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OneTokenAsSol`:
+	err = decoder.Decode(&obj.OneTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OperationReservedAmount`:
+	err = decoder.Decode(&obj.OperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Reserved`:
+	err = decoder.Decode(&obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type NormalizedTokenPoolAccount struct {
+	DataVersion                     uint16
+	Bump                            uint8
+	NormalizedTokenMint             ag_solanago.PublicKey
+	NormalizedTokenProgram          ag_solanago.PublicKey
+	SupportedTokens                 []NormalizedSupportedToken
+	NormalizedTokenDecimals         uint8
+	NormalizedTokenSupplyAmount     uint64
+	NormalizedTokenValue            TokenValue
+	NormalizedTokenValueUpdatedSlot uint64
+	OneNormalizedTokenAsSol         uint64
+	Reserved                        [128]uint8
+}
+
+func (obj NormalizedTokenPoolAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `DataVersion` param:
+	err = encoder.Encode(obj.DataVersion)
+	if err != nil {
+		return err
+	}
+	// Serialize `Bump` param:
+	err = encoder.Encode(obj.Bump)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenMint` param:
+	err = encoder.Encode(obj.NormalizedTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenProgram` param:
+	err = encoder.Encode(obj.NormalizedTokenProgram)
+	if err != nil {
+		return err
+	}
+	// Serialize `SupportedTokens` param:
+	err = encoder.Encode(obj.SupportedTokens)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenDecimals` param:
+	err = encoder.Encode(obj.NormalizedTokenDecimals)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenSupplyAmount` param:
+	err = encoder.Encode(obj.NormalizedTokenSupplyAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenValue` param:
+	err = encoder.Encode(obj.NormalizedTokenValue)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenValueUpdatedSlot` param:
+	err = encoder.Encode(obj.NormalizedTokenValueUpdatedSlot)
+	if err != nil {
+		return err
+	}
+	// Serialize `OneNormalizedTokenAsSol` param:
+	err = encoder.Encode(obj.OneNormalizedTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Serialize `Reserved` param:
+	err = encoder.Encode(obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *NormalizedTokenPoolAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `DataVersion`:
+	err = decoder.Decode(&obj.DataVersion)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Bump`:
+	err = decoder.Decode(&obj.Bump)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenMint`:
+	err = decoder.Decode(&obj.NormalizedTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenProgram`:
+	err = decoder.Decode(&obj.NormalizedTokenProgram)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokens`:
+	err = decoder.Decode(&obj.SupportedTokens)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenDecimals`:
+	err = decoder.Decode(&obj.NormalizedTokenDecimals)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenSupplyAmount`:
+	err = decoder.Decode(&obj.NormalizedTokenSupplyAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenValue`:
+	err = decoder.Decode(&obj.NormalizedTokenValue)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenValueUpdatedSlot`:
+	err = decoder.Decode(&obj.NormalizedTokenValueUpdatedSlot)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OneNormalizedTokenAsSol`:
+	err = decoder.Decode(&obj.OneNormalizedTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Reserved`:
+	err = decoder.Decode(&obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type NormalizedTokenWithdrawalAccount struct {
+	DataVersion           uint16
+	Bump                  uint8
+	WithdrawalAuthority   ag_solanago.PublicKey
+	NormalizedTokenMint   ag_solanago.PublicKey
+	NormalizedTokenPool   ag_solanago.PublicKey
+	NormalizedTokenAmount uint64
+	ClaimableTokens       []NormalizedClaimableToken
+	CreatedAt             int64
+	Reserved              [32]uint8
+}
+
+func (obj NormalizedTokenWithdrawalAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `DataVersion` param:
+	err = encoder.Encode(obj.DataVersion)
+	if err != nil {
+		return err
+	}
+	// Serialize `Bump` param:
+	err = encoder.Encode(obj.Bump)
+	if err != nil {
+		return err
+	}
+	// Serialize `WithdrawalAuthority` param:
+	err = encoder.Encode(obj.WithdrawalAuthority)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenMint` param:
+	err = encoder.Encode(obj.NormalizedTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenPool` param:
+	err = encoder.Encode(obj.NormalizedTokenPool)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenAmount` param:
+	err = encoder.Encode(obj.NormalizedTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `ClaimableTokens` param:
+	err = encoder.Encode(obj.ClaimableTokens)
+	if err != nil {
+		return err
+	}
+	// Serialize `CreatedAt` param:
+	err = encoder.Encode(obj.CreatedAt)
+	if err != nil {
+		return err
+	}
+	// Serialize `Reserved` param:
+	err = encoder.Encode(obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *NormalizedTokenWithdrawalAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `DataVersion`:
+	err = decoder.Decode(&obj.DataVersion)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Bump`:
+	err = decoder.Decode(&obj.Bump)
+	if err != nil {
+		return err
+	}
+	// Deserialize `WithdrawalAuthority`:
+	err = decoder.Decode(&obj.WithdrawalAuthority)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenMint`:
+	err = decoder.Decode(&obj.NormalizedTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenPool`:
+	err = decoder.Decode(&obj.NormalizedTokenPool)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenAmount`:
+	err = decoder.Decode(&obj.NormalizedTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ClaimableTokens`:
+	err = decoder.Decode(&obj.ClaimableTokens)
+	if err != nil {
+		return err
+	}
+	// Deserialize `CreatedAt`:
+	err = decoder.Decode(&obj.CreatedAt)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Reserved`:
+	err = decoder.Decode(&obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperationCommand interface {
+	isOperationCommand()
+}
+
+type operationCommandContainer struct {
+	Enum                   ag_binary.BorshEnum `borsh_enum:"true"`
+	Initialize             OperationCommandInitializeTuple
+	ClaimUnstakedSOL       OperationCommandClaimUnstakedSOLTuple
+	EnqueueWithdrawalBatch OperationCommandEnqueueWithdrawalBatchTuple
+	ProcessWithdrawalBatch OperationCommandProcessWithdrawalBatchTuple
+	ClaimUnrestakedVST     OperationCommandClaimUnrestakedVSTTuple
+	DenormalizeNT          OperationCommandDenormalizeNTTuple
+	UndelegateVST          OperationCommandUndelegateVSTTuple
+	UnrestakeVRT           OperationCommandUnrestakeVRTTuple
+	UnstakeLST             OperationCommandUnstakeLSTTuple
+	StakeSOL               OperationCommandStakeSOLTuple
+	NormalizeLST           OperationCommandNormalizeLSTTuple
+	RestakeVST             OperationCommandRestakeVSTTuple
+	DelegateVST            OperationCommandDelegateVSTTuple
+}
+
+type OperationCommandInitializeTuple struct {
+	Elem0 InitializeCommand
+}
+
+func (_ OperationCommandInitializeTuple) isOperationCommand() {}
+
+type OperationCommandClaimUnstakedSOLTuple struct {
+	Elem0 ClaimUnstakedSOLCommand
+}
+
+func (_ OperationCommandClaimUnstakedSOLTuple) isOperationCommand() {}
+
+type OperationCommandEnqueueWithdrawalBatchTuple struct {
+	Elem0 EnqueueWithdrawalBatchCommand
+}
+
+func (_ OperationCommandEnqueueWithdrawalBatchTuple) isOperationCommand() {}
+
+type OperationCommandProcessWithdrawalBatchTuple struct {
+	Elem0 ProcessWithdrawalBatchCommand
+}
+
+func (_ OperationCommandProcessWithdrawalBatchTuple) isOperationCommand() {}
+
+type OperationCommandClaimUnrestakedVSTTuple struct {
+	Elem0 ClaimUnrestakedVSTCommand
+}
+
+func (_ OperationCommandClaimUnrestakedVSTTuple) isOperationCommand() {}
+
+type OperationCommandDenormalizeNTTuple struct {
+	Elem0 DenormalizeNTCommand
+}
+
+func (_ OperationCommandDenormalizeNTTuple) isOperationCommand() {}
+
+type OperationCommandUndelegateVSTTuple struct {
+	Elem0 UndelegateVSTCommand
+}
+
+func (_ OperationCommandUndelegateVSTTuple) isOperationCommand() {}
+
+type OperationCommandUnrestakeVRTTuple struct {
+	Elem0 UnrestakeVRTCommand
+}
+
+func (_ OperationCommandUnrestakeVRTTuple) isOperationCommand() {}
+
+type OperationCommandUnstakeLSTTuple struct {
+	Elem0 UnstakeLSTCommand
+}
+
+func (_ OperationCommandUnstakeLSTTuple) isOperationCommand() {}
+
+type OperationCommandStakeSOLTuple struct {
+	Elem0 StakeSOLCommand
+}
+
+func (_ OperationCommandStakeSOLTuple) isOperationCommand() {}
+
+type OperationCommandNormalizeLSTTuple struct {
+	Elem0 NormalizeLSTCommand
+}
+
+func (_ OperationCommandNormalizeLSTTuple) isOperationCommand() {}
+
+type OperationCommandRestakeVSTTuple struct {
+	Elem0 RestakeVSTCommand
+}
+
+func (_ OperationCommandRestakeVSTTuple) isOperationCommand() {}
+
+type OperationCommandDelegateVSTTuple struct {
+	Elem0 DelegateVSTCommand
+}
+
+func (_ OperationCommandDelegateVSTTuple) isOperationCommand() {}
+
+type OperationCommandAccountMeta struct {
+	Pubkey     ag_solanago.PublicKey
+	IsWritable bool
+}
+
+func (obj OperationCommandAccountMeta) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Pubkey` param:
+	err = encoder.Encode(obj.Pubkey)
+	if err != nil {
+		return err
+	}
+	// Serialize `IsWritable` param:
+	err = encoder.Encode(obj.IsWritable)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperationCommandAccountMeta) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Pubkey`:
+	err = decoder.Decode(&obj.Pubkey)
+	if err != nil {
+		return err
+	}
+	// Deserialize `IsWritable`:
+	err = decoder.Decode(&obj.IsWritable)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperationCommandAccountMetaPod struct {
+	Pubkey     ag_solanago.PublicKey
+	IsWritable uint8
+	Padding    [7]uint8
+}
+
+func (obj OperationCommandAccountMetaPod) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Pubkey` param:
+	err = encoder.Encode(obj.Pubkey)
+	if err != nil {
+		return err
+	}
+	// Serialize `IsWritable` param:
+	err = encoder.Encode(obj.IsWritable)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperationCommandAccountMetaPod) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Pubkey`:
+	err = decoder.Decode(&obj.Pubkey)
+	if err != nil {
+		return err
+	}
+	// Deserialize `IsWritable`:
+	err = decoder.Decode(&obj.IsWritable)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperationCommandEntry struct {
+	Command          OperationCommand
+	RequiredAccounts []OperationCommandAccountMeta
+}
+
+func (obj OperationCommandEntry) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Command` param:
+	{
+		tmp := operationCommandContainer{}
+		switch realvalue := obj.Command.(type) {
+		case *OperationCommandInitializeTuple:
+			tmp.Enum = 0
+			tmp.Initialize = *realvalue
+		case *OperationCommandClaimUnstakedSOLTuple:
+			tmp.Enum = 1
+			tmp.ClaimUnstakedSOL = *realvalue
+		case *OperationCommandEnqueueWithdrawalBatchTuple:
+			tmp.Enum = 2
+			tmp.EnqueueWithdrawalBatch = *realvalue
+		case *OperationCommandProcessWithdrawalBatchTuple:
+			tmp.Enum = 3
+			tmp.ProcessWithdrawalBatch = *realvalue
+		case *OperationCommandClaimUnrestakedVSTTuple:
+			tmp.Enum = 4
+			tmp.ClaimUnrestakedVST = *realvalue
+		case *OperationCommandDenormalizeNTTuple:
+			tmp.Enum = 5
+			tmp.DenormalizeNT = *realvalue
+		case *OperationCommandUndelegateVSTTuple:
+			tmp.Enum = 6
+			tmp.UndelegateVST = *realvalue
+		case *OperationCommandUnrestakeVRTTuple:
+			tmp.Enum = 7
+			tmp.UnrestakeVRT = *realvalue
+		case *OperationCommandUnstakeLSTTuple:
+			tmp.Enum = 8
+			tmp.UnstakeLST = *realvalue
+		case *OperationCommandStakeSOLTuple:
+			tmp.Enum = 9
+			tmp.StakeSOL = *realvalue
+		case *OperationCommandNormalizeLSTTuple:
+			tmp.Enum = 10
+			tmp.NormalizeLST = *realvalue
+		case *OperationCommandRestakeVSTTuple:
+			tmp.Enum = 11
+			tmp.RestakeVST = *realvalue
+		case *OperationCommandDelegateVSTTuple:
+			tmp.Enum = 12
+			tmp.DelegateVST = *realvalue
+		}
+		err := encoder.Encode(tmp)
+		if err != nil {
+			return err
+		}
+	}
+	// Serialize `RequiredAccounts` param:
+	err = encoder.Encode(obj.RequiredAccounts)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperationCommandEntry) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Command`:
+	{
+		tmp := new(operationCommandContainer)
+		err := decoder.Decode(tmp)
+		if err != nil {
+			return err
+		}
+		switch tmp.Enum {
+		case 0:
+			obj.Command = &tmp.Initialize
+		case 1:
+			obj.Command = &tmp.ClaimUnstakedSOL
+		case 2:
+			obj.Command = &tmp.EnqueueWithdrawalBatch
+		case 3:
+			obj.Command = &tmp.ProcessWithdrawalBatch
+		case 4:
+			obj.Command = &tmp.ClaimUnrestakedVST
+		case 5:
+			obj.Command = &tmp.DenormalizeNT
+		case 6:
+			obj.Command = &tmp.UndelegateVST
+		case 7:
+			obj.Command = &tmp.UnrestakeVRT
+		case 8:
+			obj.Command = &tmp.UnstakeLST
+		case 9:
+			obj.Command = &tmp.StakeSOL
+		case 10:
+			obj.Command = &tmp.NormalizeLST
+		case 11:
+			obj.Command = &tmp.RestakeVST
+		case 12:
+			obj.Command = &tmp.DelegateVST
+		default:
+			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
+		}
+	}
+	// Deserialize `RequiredAccounts`:
+	err = decoder.Decode(&obj.RequiredAccounts)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperationCommandEntryPod struct {
+	NumRequiredAccounts uint8
+	Padding             [7]uint8
+	RequiredAccounts    [32]OperationCommandAccountMetaPod
+	Command             OperationCommandPod
+}
+
+func (obj OperationCommandEntryPod) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `NumRequiredAccounts` param:
+	err = encoder.Encode(obj.NumRequiredAccounts)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Serialize `RequiredAccounts` param:
+	err = encoder.Encode(obj.RequiredAccounts)
+	if err != nil {
+		return err
+	}
+	// Serialize `Command` param:
+	err = encoder.Encode(obj.Command)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperationCommandEntryPod) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `NumRequiredAccounts`:
+	err = decoder.Decode(&obj.NumRequiredAccounts)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RequiredAccounts`:
+	err = decoder.Decode(&obj.RequiredAccounts)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Command`:
+	err = decoder.Decode(&obj.Command)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperationCommandPod struct {
+	Discriminant uint8
+	Buffer       [2023]uint8
+}
+
+func (obj OperationCommandPod) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Discriminant` param:
+	err = encoder.Encode(obj.Discriminant)
+	if err != nil {
+		return err
+	}
+	// Serialize `Buffer` param:
+	err = encoder.Encode(obj.Buffer)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperationCommandPod) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Discriminant`:
+	err = decoder.Decode(&obj.Discriminant)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Buffer`:
+	err = decoder.Decode(&obj.Buffer)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperationCommandResult interface {
+	isOperationCommandResult()
+}
+
+type operationCommandResultContainer struct {
+	Enum                   ag_binary.BorshEnum `borsh_enum:"true"`
+	Initialize             OperationCommandResultInitializeTuple
+	ClaimUnstakedSOL       OperationCommandResultClaimUnstakedSOLTuple
+	EnqueueWithdrawalBatch OperationCommandResultEnqueueWithdrawalBatchTuple
+	ProcessWithdrawalBatch OperationCommandResultProcessWithdrawalBatchTuple
+	ClaimUnrestakedVST     OperationCommandResultClaimUnrestakedVSTTuple
+	DenormalizeNT          OperationCommandResultDenormalizeNTTuple
+	UndelegateVST          OperationCommandResultUndelegateVSTTuple
+	UnrestakeVRT           OperationCommandResultUnrestakeVRTTuple
+	UnstakeLST             OperationCommandResultUnstakeLSTTuple
+	StakeSOL               OperationCommandResultStakeSOLTuple
+	NormalizeLST           OperationCommandResultNormalizeLSTTuple
+	RestakeVST             OperationCommandResultRestakeVSTTuple
+	DelegateVST            OperationCommandResultDelegateVSTTuple
+}
+
+type OperationCommandResultInitializeTuple struct {
+	Elem0 InitializeCommandResult
+}
+
+func (_ OperationCommandResultInitializeTuple) isOperationCommandResult() {}
+
+type OperationCommandResultClaimUnstakedSOLTuple struct {
+	Elem0 ClaimUnstakedSOLCommandResult
+}
+
+func (_ OperationCommandResultClaimUnstakedSOLTuple) isOperationCommandResult() {}
+
+type OperationCommandResultEnqueueWithdrawalBatchTuple struct {
+	Elem0 EnqueueWithdrawalBatchCommandResult
+}
+
+func (_ OperationCommandResultEnqueueWithdrawalBatchTuple) isOperationCommandResult() {}
+
+type OperationCommandResultProcessWithdrawalBatchTuple struct {
+	Elem0 ProcessWithdrawalBatchCommandResult
+}
+
+func (_ OperationCommandResultProcessWithdrawalBatchTuple) isOperationCommandResult() {}
+
+type OperationCommandResultClaimUnrestakedVSTTuple struct {
+	Elem0 ClaimUnrestakedVSTCommandResult
+}
+
+func (_ OperationCommandResultClaimUnrestakedVSTTuple) isOperationCommandResult() {}
+
+type OperationCommandResultDenormalizeNTTuple struct {
+	Elem0 DenormalizeNTCommandResult
+}
+
+func (_ OperationCommandResultDenormalizeNTTuple) isOperationCommandResult() {}
+
+type OperationCommandResultUndelegateVSTTuple struct {
+	Elem0 UndelegateVSTCommandResult
+}
+
+func (_ OperationCommandResultUndelegateVSTTuple) isOperationCommandResult() {}
+
+type OperationCommandResultUnrestakeVRTTuple struct {
+	Elem0 UnrestakeVRTCommandResult
+}
+
+func (_ OperationCommandResultUnrestakeVRTTuple) isOperationCommandResult() {}
+
+type OperationCommandResultUnstakeLSTTuple struct {
+	Elem0 UnstakeLSTCommandResult
+}
+
+func (_ OperationCommandResultUnstakeLSTTuple) isOperationCommandResult() {}
+
+type OperationCommandResultStakeSOLTuple struct {
+	Elem0 StakeSOLCommandResult
+}
+
+func (_ OperationCommandResultStakeSOLTuple) isOperationCommandResult() {}
+
+type OperationCommandResultNormalizeLSTTuple struct {
+	Elem0 NormalizeLSTCommandResult
+}
+
+func (_ OperationCommandResultNormalizeLSTTuple) isOperationCommandResult() {}
+
+type OperationCommandResultRestakeVSTTuple struct {
+	Elem0 RestakeVSTCommandResult
+}
+
+func (_ OperationCommandResultRestakeVSTTuple) isOperationCommandResult() {}
+
+type OperationCommandResultDelegateVSTTuple struct {
+	Elem0 DelegateVSTCommandResult
+}
+
+func (_ OperationCommandResultDelegateVSTTuple) isOperationCommandResult() {}
+
+type OperationReservedRestakeToken struct {
+	TokenMint               ag_solanago.PublicKey
+	OperationReservedAmount uint64
+}
+
+func (obj OperationReservedRestakeToken) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `TokenMint` param:
+	err = encoder.Encode(obj.TokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `OperationReservedAmount` param:
+	err = encoder.Encode(obj.OperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperationReservedRestakeToken) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `TokenMint`:
+	err = decoder.Decode(&obj.TokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OperationReservedAmount`:
+	err = decoder.Decode(&obj.OperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperationState struct {
+	UpdatedSlot uint64
+	UpdatedAt   int64
+	ExpiredAt   int64
+	Padding     [5]uint8
+
+	// when the no_transition flag turned on, current command should not be transitioned to other command.
+	// the purpose of this flag is for internal testing by set boundary of the reset command operation.
+	NoTransition uint8
+	NextSequence uint16
+	NumOperated  uint64
+	NextCommand  OperationCommandEntryPod
+	Reserved     [128]uint8
+}
+
+func (obj OperationState) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `UpdatedSlot` param:
+	err = encoder.Encode(obj.UpdatedSlot)
+	if err != nil {
+		return err
+	}
+	// Serialize `UpdatedAt` param:
+	err = encoder.Encode(obj.UpdatedAt)
+	if err != nil {
+		return err
+	}
+	// Serialize `ExpiredAt` param:
+	err = encoder.Encode(obj.ExpiredAt)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Serialize `NoTransition` param:
+	err = encoder.Encode(obj.NoTransition)
+	if err != nil {
+		return err
+	}
+	// Serialize `NextSequence` param:
+	err = encoder.Encode(obj.NextSequence)
+	if err != nil {
+		return err
+	}
+	// Serialize `NumOperated` param:
+	err = encoder.Encode(obj.NumOperated)
+	if err != nil {
+		return err
+	}
+	// Serialize `NextCommand` param:
+	err = encoder.Encode(obj.NextCommand)
+	if err != nil {
+		return err
+	}
+	// Serialize `Reserved` param:
+	err = encoder.Encode(obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperationState) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `UpdatedSlot`:
+	err = decoder.Decode(&obj.UpdatedSlot)
+	if err != nil {
+		return err
+	}
+	// Deserialize `UpdatedAt`:
+	err = decoder.Decode(&obj.UpdatedAt)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ExpiredAt`:
+	err = decoder.Decode(&obj.ExpiredAt)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NoTransition`:
+	err = decoder.Decode(&obj.NoTransition)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NextSequence`:
+	err = decoder.Decode(&obj.NextSequence)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumOperated`:
+	err = decoder.Decode(&obj.NumOperated)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NextCommand`:
+	err = decoder.Decode(&obj.NextCommand)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Reserved`:
+	err = decoder.Decode(&obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperatorRanFundCommand struct {
+	ReceiptTokenMint ag_solanago.PublicKey
+	FundAccount      ag_solanago.PublicKey
+	NextSequence     uint16
+	NumOperated      uint64
+	Command          OperationCommand
+	Result           *OperationCommandResult `bin:"optional"`
+}
+
+func (obj OperatorRanFundCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `ReceiptTokenMint` param:
+	err = encoder.Encode(obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `FundAccount` param:
+	err = encoder.Encode(obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	// Serialize `NextSequence` param:
+	err = encoder.Encode(obj.NextSequence)
+	if err != nil {
+		return err
+	}
+	// Serialize `NumOperated` param:
+	err = encoder.Encode(obj.NumOperated)
+	if err != nil {
+		return err
+	}
+	// Serialize `Command` param:
+	{
+		tmp := operationCommandContainer{}
+		switch realvalue := obj.Command.(type) {
+		case *OperationCommandInitializeTuple:
+			tmp.Enum = 0
+			tmp.Initialize = *realvalue
+		case *OperationCommandClaimUnstakedSOLTuple:
+			tmp.Enum = 1
+			tmp.ClaimUnstakedSOL = *realvalue
+		case *OperationCommandEnqueueWithdrawalBatchTuple:
+			tmp.Enum = 2
+			tmp.EnqueueWithdrawalBatch = *realvalue
+		case *OperationCommandProcessWithdrawalBatchTuple:
+			tmp.Enum = 3
+			tmp.ProcessWithdrawalBatch = *realvalue
+		case *OperationCommandClaimUnrestakedVSTTuple:
+			tmp.Enum = 4
+			tmp.ClaimUnrestakedVST = *realvalue
+		case *OperationCommandDenormalizeNTTuple:
+			tmp.Enum = 5
+			tmp.DenormalizeNT = *realvalue
+		case *OperationCommandUndelegateVSTTuple:
+			tmp.Enum = 6
+			tmp.UndelegateVST = *realvalue
+		case *OperationCommandUnrestakeVRTTuple:
+			tmp.Enum = 7
+			tmp.UnrestakeVRT = *realvalue
+		case *OperationCommandUnstakeLSTTuple:
+			tmp.Enum = 8
+			tmp.UnstakeLST = *realvalue
+		case *OperationCommandStakeSOLTuple:
+			tmp.Enum = 9
+			tmp.StakeSOL = *realvalue
+		case *OperationCommandNormalizeLSTTuple:
+			tmp.Enum = 10
+			tmp.NormalizeLST = *realvalue
+		case *OperationCommandRestakeVSTTuple:
+			tmp.Enum = 11
+			tmp.RestakeVST = *realvalue
+		case *OperationCommandDelegateVSTTuple:
+			tmp.Enum = 12
+			tmp.DelegateVST = *realvalue
+		}
+		err := encoder.Encode(tmp)
+		if err != nil {
+			return err
+		}
+	}
+	// Serialize `Result` param (optional):
+	{
+		if obj.Result == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.Result)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (obj *OperatorRanFundCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `ReceiptTokenMint`:
+	err = decoder.Decode(&obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `FundAccount`:
+	err = decoder.Decode(&obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NextSequence`:
+	err = decoder.Decode(&obj.NextSequence)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumOperated`:
+	err = decoder.Decode(&obj.NumOperated)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Command`:
+	{
+		tmp := new(operationCommandContainer)
+		err := decoder.Decode(tmp)
+		if err != nil {
+			return err
+		}
+		switch tmp.Enum {
+		case 0:
+			obj.Command = &tmp.Initialize
+		case 1:
+			obj.Command = &tmp.ClaimUnstakedSOL
+		case 2:
+			obj.Command = &tmp.EnqueueWithdrawalBatch
+		case 3:
+			obj.Command = &tmp.ProcessWithdrawalBatch
+		case 4:
+			obj.Command = &tmp.ClaimUnrestakedVST
+		case 5:
+			obj.Command = &tmp.DenormalizeNT
+		case 6:
+			obj.Command = &tmp.UndelegateVST
+		case 7:
+			obj.Command = &tmp.UnrestakeVRT
+		case 8:
+			obj.Command = &tmp.UnstakeLST
+		case 9:
+			obj.Command = &tmp.StakeSOL
+		case 10:
+			obj.Command = &tmp.NormalizeLST
+		case 11:
+			obj.Command = &tmp.RestakeVST
+		case 12:
+			obj.Command = &tmp.DelegateVST
+		default:
+			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
+		}
+	}
+	// Deserialize `Result` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.Result)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+type OperatorUpdatedFundPrices struct {
+	ReceiptTokenMint ag_solanago.PublicKey
+	FundAccount      ag_solanago.PublicKey
+}
+
+func (obj OperatorUpdatedFundPrices) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `ReceiptTokenMint` param:
+	err = encoder.Encode(obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `FundAccount` param:
+	err = encoder.Encode(obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperatorUpdatedFundPrices) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `ReceiptTokenMint`:
+	err = decoder.Decode(&obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `FundAccount`:
+	err = decoder.Decode(&obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperatorUpdatedNormalizedTokenPoolPrices struct {
+	NormalizedTokenMint        ag_solanago.PublicKey
+	NormalizedTokenPoolAccount ag_solanago.PublicKey
+}
+
+func (obj OperatorUpdatedNormalizedTokenPoolPrices) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `NormalizedTokenMint` param:
+	err = encoder.Encode(obj.NormalizedTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `NormalizedTokenPoolAccount` param:
+	err = encoder.Encode(obj.NormalizedTokenPoolAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperatorUpdatedNormalizedTokenPoolPrices) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `NormalizedTokenMint`:
+	err = decoder.Decode(&obj.NormalizedTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NormalizedTokenPoolAccount`:
+	err = decoder.Decode(&obj.NormalizedTokenPoolAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type OperatorUpdatedRewardPools struct {
+	ReceiptTokenMint ag_solanago.PublicKey
+	RewardAccount    ag_solanago.PublicKey
+}
+
+func (obj OperatorUpdatedRewardPools) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `ReceiptTokenMint` param:
+	err = encoder.Encode(obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `RewardAccount` param:
+	err = encoder.Encode(obj.RewardAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperatorUpdatedRewardPools) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `ReceiptTokenMint`:
+	err = decoder.Decode(&obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RewardAccount`:
+	err = decoder.Decode(&obj.RewardAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type ProcessWithdrawalBatchCommand struct {
+	State  ProcessWithdrawalBatchCommandState
+	Forced bool
+}
+
+func (obj ProcessWithdrawalBatchCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `State` param:
+	{
+		tmp := processWithdrawalBatchCommandStateContainer{}
+		switch realvalue := obj.State.(type) {
+		case *ProcessWithdrawalBatchCommandStateNewTuple:
+			tmp.Enum = 0
+			tmp.New = *realvalue
+		case *ProcessWithdrawalBatchCommandStateProcessTuple:
+			tmp.Enum = 1
+			tmp.Process = *realvalue
+		}
+		err := encoder.Encode(tmp)
+		if err != nil {
+			return err
+		}
+	}
+	// Serialize `Forced` param:
+	err = encoder.Encode(obj.Forced)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *ProcessWithdrawalBatchCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `State`:
+	{
+		tmp := new(processWithdrawalBatchCommandStateContainer)
+		err := decoder.Decode(tmp)
+		if err != nil {
+			return err
+		}
+		switch tmp.Enum {
+		case 0:
+			obj.State = &tmp.New
+		case 1:
+			obj.State = &tmp.Process
+		default:
+			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
+		}
+	}
+	// Deserialize `Forced`:
+	err = decoder.Decode(&obj.Forced)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type ProcessWithdrawalBatchCommandResult struct {
+	SupportedTokenMint          *ag_solanago.PublicKey `bin:"optional"`
+	RequestedReceiptTokenAmount uint64
+	ProcessedReceiptTokenAmount uint64
+	ReservedAssetUserAmount     uint64
+	DeductedAssetFeeAmount      uint64
+}
+
+func (obj ProcessWithdrawalBatchCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `SupportedTokenMint` param (optional):
+	{
+		if obj.SupportedTokenMint == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `RequestedReceiptTokenAmount` param:
+	err = encoder.Encode(obj.RequestedReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `ProcessedReceiptTokenAmount` param:
+	err = encoder.Encode(obj.ProcessedReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReservedAssetUserAmount` param:
+	err = encoder.Encode(obj.ReservedAssetUserAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `DeductedAssetFeeAmount` param:
+	err = encoder.Encode(obj.DeductedAssetFeeAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *ProcessWithdrawalBatchCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `SupportedTokenMint` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `RequestedReceiptTokenAmount`:
+	err = decoder.Decode(&obj.RequestedReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ProcessedReceiptTokenAmount`:
+	err = decoder.Decode(&obj.ProcessedReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ReservedAssetUserAmount`:
+	err = decoder.Decode(&obj.ReservedAssetUserAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `DeductedAssetFeeAmount`:
+	err = decoder.Decode(&obj.DeductedAssetFeeAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type ProcessWithdrawalBatchCommandState interface {
+	isProcessWithdrawalBatchCommandState()
+}
+
+type processWithdrawalBatchCommandStateContainer struct {
+	Enum    ag_binary.BorshEnum `borsh_enum:"true"`
+	New     ProcessWithdrawalBatchCommandStateNewTuple
+	Process ProcessWithdrawalBatchCommandStateProcessTuple
+}
+
+type ProcessWithdrawalBatchCommandStateNewTuple struct {
+	Elem0 *ag_solanago.PublicKey `bin:"optional"`
+}
+
+func (_ ProcessWithdrawalBatchCommandStateNewTuple) isProcessWithdrawalBatchCommandState() {}
+
+type ProcessWithdrawalBatchCommandStateProcessTuple struct {
+	Elem0 *ag_solanago.PublicKey `bin:"optional"`
+	Elem1 uint64
+}
+
+func (_ ProcessWithdrawalBatchCommandStateProcessTuple) isProcessWithdrawalBatchCommandState() {}
+
+type RestakeVSTCommand struct {
+	Items                         []RestakeVSTCommandItem
+	State                         RestakeVSTCommandState
+	OperationReservedRestakeToken *OperationReservedRestakeToken `bin:"optional"`
+}
+
+func (obj RestakeVSTCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Items` param:
+	err = encoder.Encode(obj.Items)
+	if err != nil {
+		return err
+	}
+	// Serialize `State` param:
+	{
+		tmp := restakeVSTCommandStateContainer{}
+		switch realvalue := obj.State.(type) {
+		case *RestakeVSTCommandStateInitTuple:
+			tmp.Enum = 0
+			tmp.Init = *realvalue
+		case *RestakeVSTCommandStateSetupRestakeTuple:
+			tmp.Enum = 1
+			tmp.SetupRestake = *realvalue
+		case *RestakeVSTCommandStateSetupNormalizeTuple:
+			tmp.Enum = 2
+			tmp.SetupNormalize = *realvalue
+		case *RestakeVSTCommandStateNormalizeTuple:
+			tmp.Enum = 3
+			tmp.Normalize = *realvalue
+		case *RestakeVSTCommandStateReadVaultStateTuple:
+			tmp.Enum = 4
+			tmp.ReadVaultState = *realvalue
+		case *RestakeVSTCommandStateRestakeTuple:
+			tmp.Enum = 5
+			tmp.Restake = *realvalue
+		}
+		err := encoder.Encode(tmp)
+		if err != nil {
+			return err
+		}
+	}
+	// Serialize `OperationReservedRestakeToken` param (optional):
+	{
+		if obj.OperationReservedRestakeToken == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.OperationReservedRestakeToken)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (obj *RestakeVSTCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Items`:
+	err = decoder.Decode(&obj.Items)
+	if err != nil {
+		return err
+	}
+	// Deserialize `State`:
+	{
+		tmp := new(restakeVSTCommandStateContainer)
+		err := decoder.Decode(tmp)
+		if err != nil {
+			return err
+		}
+		switch tmp.Enum {
+		case 0:
+			obj.State = (*RestakeVSTCommandStateInitTuple)(&tmp.Enum)
+		case 1:
+			obj.State = (*RestakeVSTCommandStateSetupRestakeTuple)(&tmp.Enum)
+		case 2:
+			obj.State = (*RestakeVSTCommandStateSetupNormalizeTuple)(&tmp.Enum)
+		case 3:
+			obj.State = &tmp.Normalize
+		case 4:
+			obj.State = (*RestakeVSTCommandStateReadVaultStateTuple)(&tmp.Enum)
+		case 5:
+			obj.State = &tmp.Restake
+		default:
+			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
+		}
+	}
+	// Deserialize `OperationReservedRestakeToken` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.OperationReservedRestakeToken)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+type RestakeVSTCommandItem struct {
+	VaultAddress ag_solanago.PublicKey
+	SolAmount    uint64
+}
+
+func (obj RestakeVSTCommandItem) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `VaultAddress` param:
+	err = encoder.Encode(obj.VaultAddress)
+	if err != nil {
+		return err
+	}
+	// Serialize `SolAmount` param:
+	err = encoder.Encode(obj.SolAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *RestakeVSTCommandItem) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `VaultAddress`:
+	err = decoder.Decode(&obj.VaultAddress)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SolAmount`:
+	err = decoder.Decode(&obj.SolAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type RestakeVSTCommandResult struct{}
+
+func (obj RestakeVSTCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *RestakeVSTCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type RestakeVSTCommandState interface {
+	isRestakeVSTCommandState()
+}
+
+type restakeVSTCommandStateContainer struct {
+	Enum           ag_binary.BorshEnum `borsh_enum:"true"`
+	Init           RestakeVSTCommandStateInitTuple
+	SetupRestake   RestakeVSTCommandStateSetupRestakeTuple
+	SetupNormalize RestakeVSTCommandStateSetupNormalizeTuple
+	Normalize      RestakeVSTCommandStateNormalizeTuple
+	ReadVaultState RestakeVSTCommandStateReadVaultStateTuple
+	Restake        RestakeVSTCommandStateRestakeTuple
+}
+
+type RestakeVSTCommandStateInitTuple uint8
+
+func (obj RestakeVSTCommandStateInitTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *RestakeVSTCommandStateInitTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+func (_ RestakeVSTCommandStateInitTuple) isRestakeVSTCommandState() {}
+
+type RestakeVSTCommandStateSetupRestakeTuple uint8
+
+func (obj RestakeVSTCommandStateSetupRestakeTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *RestakeVSTCommandStateSetupRestakeTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+func (_ RestakeVSTCommandStateSetupRestakeTuple) isRestakeVSTCommandState() {}
+
+type RestakeVSTCommandStateSetupNormalizeTuple uint8
+
+func (obj RestakeVSTCommandStateSetupNormalizeTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *RestakeVSTCommandStateSetupNormalizeTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+func (_ RestakeVSTCommandStateSetupNormalizeTuple) isRestakeVSTCommandState() {}
+
+type RestakeVSTCommandStateNormalizeTuple struct {
+	Elem0 []NormalizeSupportedTokenAsset
+}
+
+func (_ RestakeVSTCommandStateNormalizeTuple) isRestakeVSTCommandState() {}
+
+type RestakeVSTCommandStateReadVaultStateTuple uint8
+
+func (obj RestakeVSTCommandStateReadVaultStateTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *RestakeVSTCommandStateReadVaultStateTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+func (_ RestakeVSTCommandStateReadVaultStateTuple) isRestakeVSTCommandState() {}
+
+type RestakeVSTCommandStateRestakeTuple struct {
+	Elem0 [2]uint64
+}
+
+func (_ RestakeVSTCommandStateRestakeTuple) isRestakeVSTCommandState() {}
+
+type RestakingVault struct {
+	Vault                ag_solanago.PublicKey
+	Program              ag_solanago.PublicKey
+	SupportedTokenMint   ag_solanago.PublicKey
+	ReceiptTokenMint     ag_solanago.PublicKey
+	ReceiptTokenProgram  ag_solanago.PublicKey
+	ReceiptTokenDecimals uint8
+	Padding              [7]uint8
+
+	// transient price
+	OneReceiptTokenAsSol                uint64
+	ReceiptTokenPricingSource           TokenPricingSourcePod
+	ReceiptTokenOperationReservedAmount uint64
+
+	// the amount of vrt being unrestaked
+	ReceiptTokenOperationReceivableAmount uint64
+
+	// configuration: used for restaking allocation strategy.
+	SolAllocationWeight         uint64
+	SolAllocationCapacityAmount uint64
+	Padding2                    [7]uint8
+	NumOperators                uint8
+	Operators                   [30]RestakingVaultOperator
+
+	// auto-compounding
+	CompoundingTokenMints [10]ag_solanago.PublicKey
+	Reserved              [128]uint8
+}
+
+func (obj RestakingVault) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Vault` param:
+	err = encoder.Encode(obj.Vault)
+	if err != nil {
+		return err
+	}
+	// Serialize `Program` param:
+	err = encoder.Encode(obj.Program)
+	if err != nil {
+		return err
+	}
+	// Serialize `SupportedTokenMint` param:
+	err = encoder.Encode(obj.SupportedTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenMint` param:
+	err = encoder.Encode(obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenProgram` param:
+	err = encoder.Encode(obj.ReceiptTokenProgram)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenDecimals` param:
+	err = encoder.Encode(obj.ReceiptTokenDecimals)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Serialize `OneReceiptTokenAsSol` param:
+	err = encoder.Encode(obj.OneReceiptTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenPricingSource` param:
+	err = encoder.Encode(obj.ReceiptTokenPricingSource)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenOperationReservedAmount` param:
+	err = encoder.Encode(obj.ReceiptTokenOperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenOperationReceivableAmount` param:
+	err = encoder.Encode(obj.ReceiptTokenOperationReceivableAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `SolAllocationWeight` param:
+	err = encoder.Encode(obj.SolAllocationWeight)
+	if err != nil {
+		return err
+	}
+	// Serialize `SolAllocationCapacityAmount` param:
+	err = encoder.Encode(obj.SolAllocationCapacityAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding2` param:
+	err = encoder.Encode(obj.Padding2)
+	if err != nil {
+		return err
+	}
+	// Serialize `NumOperators` param:
+	err = encoder.Encode(obj.NumOperators)
+	if err != nil {
+		return err
+	}
+	// Serialize `Operators` param:
+	err = encoder.Encode(obj.Operators)
+	if err != nil {
+		return err
+	}
+	// Serialize `CompoundingTokenMints` param:
+	err = encoder.Encode(obj.CompoundingTokenMints)
+	if err != nil {
+		return err
+	}
+	// Serialize `Reserved` param:
+	err = encoder.Encode(obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *RestakingVault) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Vault`:
+	err = decoder.Decode(&obj.Vault)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Program`:
+	err = decoder.Decode(&obj.Program)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokenMint`:
+	err = decoder.Decode(&obj.SupportedTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ReceiptTokenMint`:
+	err = decoder.Decode(&obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ReceiptTokenProgram`:
+	err = decoder.Decode(&obj.ReceiptTokenProgram)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ReceiptTokenDecimals`:
+	err = decoder.Decode(&obj.ReceiptTokenDecimals)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OneReceiptTokenAsSol`:
+	err = decoder.Decode(&obj.OneReceiptTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ReceiptTokenPricingSource`:
+	err = decoder.Decode(&obj.ReceiptTokenPricingSource)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ReceiptTokenOperationReservedAmount`:
+	err = decoder.Decode(&obj.ReceiptTokenOperationReservedAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ReceiptTokenOperationReceivableAmount`:
+	err = decoder.Decode(&obj.ReceiptTokenOperationReceivableAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SolAllocationWeight`:
+	err = decoder.Decode(&obj.SolAllocationWeight)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SolAllocationCapacityAmount`:
+	err = decoder.Decode(&obj.SolAllocationCapacityAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding2`:
+	err = decoder.Decode(&obj.Padding2)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumOperators`:
+	err = decoder.Decode(&obj.NumOperators)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Operators`:
+	err = decoder.Decode(&obj.Operators)
+	if err != nil {
+		return err
+	}
+	// Deserialize `CompoundingTokenMints`:
+	err = decoder.Decode(&obj.CompoundingTokenMints)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Reserved`:
+	err = decoder.Decode(&obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type RestakingVaultOperator struct {
+	Operator ag_solanago.PublicKey
+
+	// configuration: used for delegation strategy.
+	SupportedTokenAllocationWeight         uint64
+	SupportedTokenAllocationCapacityAmount uint64
+
+	// just informative field
+	SupportedTokenDelegatedAmount uint64
+
+	// configuration: the amount requested to be undelegated as soon as possible regardless of current state, this value should be decreased by each undelegation requested amount.
+	SupportedTokenRedelegationAmount uint64
+	Reserved                         [32]uint8
+}
+
+func (obj RestakingVaultOperator) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Operator` param:
+	err = encoder.Encode(obj.Operator)
+	if err != nil {
+		return err
+	}
+	// Serialize `SupportedTokenAllocationWeight` param:
+	err = encoder.Encode(obj.SupportedTokenAllocationWeight)
+	if err != nil {
+		return err
+	}
+	// Serialize `SupportedTokenAllocationCapacityAmount` param:
+	err = encoder.Encode(obj.SupportedTokenAllocationCapacityAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `SupportedTokenDelegatedAmount` param:
+	err = encoder.Encode(obj.SupportedTokenDelegatedAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `SupportedTokenRedelegationAmount` param:
+	err = encoder.Encode(obj.SupportedTokenRedelegationAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `Reserved` param:
+	err = encoder.Encode(obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *RestakingVaultOperator) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Operator`:
+	err = decoder.Decode(&obj.Operator)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokenAllocationWeight`:
+	err = decoder.Decode(&obj.SupportedTokenAllocationWeight)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokenAllocationCapacityAmount`:
+	err = decoder.Decode(&obj.SupportedTokenAllocationCapacityAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokenDelegatedAmount`:
+	err = decoder.Decode(&obj.SupportedTokenDelegatedAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokenRedelegationAmount`:
+	err = decoder.Decode(&obj.SupportedTokenRedelegationAmount)
 	if err != nil {
 		return err
 	}
@@ -968,7 +3881,7 @@ type RewardAccount struct {
 	NumRewards       uint16
 	NumRewardPools   uint8
 	Padding          [5]uint8
-	Holders1         [4]Holder
+	Holders1         [4]RewardPoolHolder
 	Rewards1         [16]Reward
 	RewardPools1     [4]RewardPool
 }
@@ -1107,88 +4020,6 @@ func (obj *RewardAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err 
 	err = decoder.Decode(&obj.RewardPools1)
 	if err != nil {
 		return err
-	}
-	return nil
-}
-
-type RewardInfo struct {
-	Id          uint16
-	Name        string
-	Description string
-	RewardType  RewardType
-}
-
-func (obj RewardInfo) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `Id` param:
-	err = encoder.Encode(obj.Id)
-	if err != nil {
-		return err
-	}
-	// Serialize `Name` param:
-	err = encoder.Encode(obj.Name)
-	if err != nil {
-		return err
-	}
-	// Serialize `Description` param:
-	err = encoder.Encode(obj.Description)
-	if err != nil {
-		return err
-	}
-	// Serialize `RewardType` param:
-	{
-		tmp := rewardTypeContainer{}
-		switch realvalue := obj.RewardType.(type) {
-		case *RewardTypePointTuple:
-			tmp.Enum = 0
-			tmp.Point = *realvalue
-		case *RewardTypeTokenTuple:
-			tmp.Enum = 1
-			tmp.Token = *realvalue
-		case *RewardTypeSOLTuple:
-			tmp.Enum = 2
-			tmp.SOL = *realvalue
-		}
-		err := encoder.Encode(tmp)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (obj *RewardInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `Id`:
-	err = decoder.Decode(&obj.Id)
-	if err != nil {
-		return err
-	}
-	// Deserialize `Name`:
-	err = decoder.Decode(&obj.Name)
-	if err != nil {
-		return err
-	}
-	// Deserialize `Description`:
-	err = decoder.Decode(&obj.Description)
-	if err != nil {
-		return err
-	}
-	// Deserialize `RewardType`:
-	{
-		tmp := new(rewardTypeContainer)
-		err := decoder.Decode(tmp)
-		if err != nil {
-			return err
-		}
-		switch tmp.Enum {
-		case 0:
-			obj.RewardType = &tmp.Point
-		case 1:
-			obj.RewardType = &tmp.Token
-		case 2:
-			obj.RewardType = (*RewardTypeSOLTuple)(&tmp.Enum)
-		default:
-			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
-		}
 	}
 	return nil
 }
@@ -1342,6 +4173,86 @@ func (obj *RewardPool) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err err
 	}
 	// Deserialize `RewardSettlements1`:
 	err = decoder.Decode(&obj.RewardSettlements1)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type RewardPoolHolder struct {
+	// ID is determined by reward account.
+	Id          uint8
+	Name        [14]uint8
+	Description [128]uint8
+	NumPubkeys  uint8
+	Reserved    [32]uint64
+
+	// List of allowed pubkeys for this holder.
+	Pubkeys1 [8]ag_solanago.PublicKey
+}
+
+func (obj RewardPoolHolder) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Id` param:
+	err = encoder.Encode(obj.Id)
+	if err != nil {
+		return err
+	}
+	// Serialize `Name` param:
+	err = encoder.Encode(obj.Name)
+	if err != nil {
+		return err
+	}
+	// Serialize `Description` param:
+	err = encoder.Encode(obj.Description)
+	if err != nil {
+		return err
+	}
+	// Serialize `NumPubkeys` param:
+	err = encoder.Encode(obj.NumPubkeys)
+	if err != nil {
+		return err
+	}
+	// Serialize `Reserved` param:
+	err = encoder.Encode(obj.Reserved)
+	if err != nil {
+		return err
+	}
+	// Serialize `Pubkeys1` param:
+	err = encoder.Encode(obj.Pubkeys1)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *RewardPoolHolder) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Id`:
+	err = decoder.Decode(&obj.Id)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Name`:
+	err = decoder.Decode(&obj.Name)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Description`:
+	err = decoder.Decode(&obj.Description)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumPubkeys`:
+	err = decoder.Decode(&obj.NumPubkeys)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Reserved`:
+	err = decoder.Decode(&obj.Reserved)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Pubkeys1`:
+	err = decoder.Decode(&obj.Pubkeys1)
 	if err != nil {
 		return err
 	}
@@ -1685,74 +4596,184 @@ func (obj *RewardTypeSOLTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) 
 
 func (_ RewardTypeSOLTuple) isRewardType() {}
 
-type SupportedTokenAuthority struct {
-	DataVersion        uint8
-	Bump               uint8
-	ReceiptTokenMint   ag_solanago.PublicKey
-	SupportedTokenMint ag_solanago.PublicKey
+type SplWithdrawStakeItem struct {
+	ValidatorStakeAccount       ag_solanago.PublicKey
+	FundStakeAccount            ag_solanago.PublicKey
+	FundStakeAccountSignerSeeds [][]byte
+	TokenAmount                 uint64
 }
 
-func (obj SupportedTokenAuthority) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `DataVersion` param:
-	err = encoder.Encode(obj.DataVersion)
+func (obj SplWithdrawStakeItem) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `ValidatorStakeAccount` param:
+	err = encoder.Encode(obj.ValidatorStakeAccount)
 	if err != nil {
 		return err
 	}
-	// Serialize `Bump` param:
-	err = encoder.Encode(obj.Bump)
+	// Serialize `FundStakeAccount` param:
+	err = encoder.Encode(obj.FundStakeAccount)
 	if err != nil {
 		return err
 	}
-	// Serialize `ReceiptTokenMint` param:
-	err = encoder.Encode(obj.ReceiptTokenMint)
+	// Serialize `FundStakeAccountSignerSeeds` param:
+	err = encoder.Encode(obj.FundStakeAccountSignerSeeds)
 	if err != nil {
 		return err
 	}
-	// Serialize `SupportedTokenMint` param:
-	err = encoder.Encode(obj.SupportedTokenMint)
+	// Serialize `TokenAmount` param:
+	err = encoder.Encode(obj.TokenAmount)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (obj *SupportedTokenAuthority) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `DataVersion`:
-	err = decoder.Decode(&obj.DataVersion)
+func (obj *SplWithdrawStakeItem) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `ValidatorStakeAccount`:
+	err = decoder.Decode(&obj.ValidatorStakeAccount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Bump`:
-	err = decoder.Decode(&obj.Bump)
+	// Deserialize `FundStakeAccount`:
+	err = decoder.Decode(&obj.FundStakeAccount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `ReceiptTokenMint`:
-	err = decoder.Decode(&obj.ReceiptTokenMint)
+	// Deserialize `FundStakeAccountSignerSeeds`:
+	err = decoder.Decode(&obj.FundStakeAccountSignerSeeds)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SupportedTokenMint`:
-	err = decoder.Decode(&obj.SupportedTokenMint)
+	// Deserialize `TokenAmount`:
+	err = decoder.Decode(&obj.TokenAmount)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type SupportedTokenInfo struct {
-	Mint                     ag_solanago.PublicKey
-	Program                  ag_solanago.PublicKey
-	Decimals                 uint8
-	CapacityAmount           uint64
-	AccumulatedDepositAmount uint64
-	OperationReservedAmount  uint64
-	Price                    uint64
-	PricingSource            TokenPricingSource
-	Reserved                 [128]uint8
+type StakeSOLCommand struct {
+	Items []StakeSOLCommandItem
+	State StakeSOLCommandState
 }
 
-func (obj SupportedTokenInfo) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+func (obj StakeSOLCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Items` param:
+	err = encoder.Encode(obj.Items)
+	if err != nil {
+		return err
+	}
+	// Serialize `State` param:
+	err = encoder.Encode(obj.State)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *StakeSOLCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Items`:
+	err = decoder.Decode(&obj.Items)
+	if err != nil {
+		return err
+	}
+	// Deserialize `State`:
+	err = decoder.Decode(&obj.State)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type StakeSOLCommandItem struct {
+	Mint      ag_solanago.PublicKey
+	SolAmount uint64
+}
+
+func (obj StakeSOLCommandItem) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Mint` param:
+	err = encoder.Encode(obj.Mint)
+	if err != nil {
+		return err
+	}
+	// Serialize `SolAmount` param:
+	err = encoder.Encode(obj.SolAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *StakeSOLCommandItem) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Mint`:
+	err = decoder.Decode(&obj.Mint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SolAmount`:
+	err = decoder.Decode(&obj.SolAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type StakeSOLCommandResult struct{}
+
+func (obj StakeSOLCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *StakeSOLCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type StakeSOLCommandState ag_binary.BorshEnum
+
+const (
+	StakeSOLCommandStateNew StakeSOLCommandState = iota
+	StakeSOLCommandStateInit
+	StakeSOLCommandStateReadPoolState
+	StakeSOLCommandStateStake
+)
+
+func (value StakeSOLCommandState) String() string {
+	switch value {
+	case StakeSOLCommandStateNew:
+		return "New"
+	case StakeSOLCommandStateInit:
+		return "Init"
+	case StakeSOLCommandStateReadPoolState:
+		return "ReadPoolState"
+	case StakeSOLCommandStateStake:
+		return "Stake"
+	default:
+		return ""
+	}
+}
+
+type SupportedToken struct {
+	Mint          ag_solanago.PublicKey
+	Program       ag_solanago.PublicKey
+	Decimals      uint8
+	Padding       [7]uint8
+	PricingSource TokenPricingSourcePod
+
+	// informative
+	OneTokenAsSol uint64
+
+	// token deposit & withdrawal
+	Token AssetState
+
+	// configuration: the amount requested to be unstaked as soon as possible regardless of current state, this value should be decreased by each unstaking requested amount.
+	RebalancingAmount uint64
+
+	// configuration: used for staking allocation strategy.
+	SolAllocationWeight         uint64
+	SolAllocationCapacityAmount uint64
+	Reserved                    [64]uint8
+}
+
+func (obj SupportedToken) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
 	// Serialize `Mint` param:
 	err = encoder.Encode(obj.Mint)
 	if err != nil {
@@ -1768,41 +4789,40 @@ func (obj SupportedTokenInfo) MarshalWithEncoder(encoder *ag_binary.Encoder) (er
 	if err != nil {
 		return err
 	}
-	// Serialize `CapacityAmount` param:
-	err = encoder.Encode(obj.CapacityAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `AccumulatedDepositAmount` param:
-	err = encoder.Encode(obj.AccumulatedDepositAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `OperationReservedAmount` param:
-	err = encoder.Encode(obj.OperationReservedAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `Price` param:
-	err = encoder.Encode(obj.Price)
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
 	if err != nil {
 		return err
 	}
 	// Serialize `PricingSource` param:
-	{
-		tmp := tokenPricingSourceContainer{}
-		switch realvalue := obj.PricingSource.(type) {
-		case *TokenPricingSourceSPLStakePoolTuple:
-			tmp.Enum = 0
-			tmp.SPLStakePool = *realvalue
-		case *TokenPricingSourceMarinadeStakePoolTuple:
-			tmp.Enum = 1
-			tmp.MarinadeStakePool = *realvalue
-		}
-		err := encoder.Encode(tmp)
-		if err != nil {
-			return err
-		}
+	err = encoder.Encode(obj.PricingSource)
+	if err != nil {
+		return err
+	}
+	// Serialize `OneTokenAsSol` param:
+	err = encoder.Encode(obj.OneTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Serialize `Token` param:
+	err = encoder.Encode(obj.Token)
+	if err != nil {
+		return err
+	}
+	// Serialize `RebalancingAmount` param:
+	err = encoder.Encode(obj.RebalancingAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `SolAllocationWeight` param:
+	err = encoder.Encode(obj.SolAllocationWeight)
+	if err != nil {
+		return err
+	}
+	// Serialize `SolAllocationCapacityAmount` param:
+	err = encoder.Encode(obj.SolAllocationCapacityAmount)
+	if err != nil {
+		return err
 	}
 	// Serialize `Reserved` param:
 	err = encoder.Encode(obj.Reserved)
@@ -1812,7 +4832,7 @@ func (obj SupportedTokenInfo) MarshalWithEncoder(encoder *ag_binary.Encoder) (er
 	return nil
 }
 
-func (obj *SupportedTokenInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+func (obj *SupportedToken) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
 	// Deserialize `Mint`:
 	err = decoder.Decode(&obj.Mint)
 	if err != nil {
@@ -1828,41 +4848,40 @@ func (obj *SupportedTokenInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) 
 	if err != nil {
 		return err
 	}
-	// Deserialize `CapacityAmount`:
-	err = decoder.Decode(&obj.CapacityAmount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `AccumulatedDepositAmount`:
-	err = decoder.Decode(&obj.AccumulatedDepositAmount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `OperationReservedAmount`:
-	err = decoder.Decode(&obj.OperationReservedAmount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `Price`:
-	err = decoder.Decode(&obj.Price)
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
 	if err != nil {
 		return err
 	}
 	// Deserialize `PricingSource`:
-	{
-		tmp := new(tokenPricingSourceContainer)
-		err := decoder.Decode(tmp)
-		if err != nil {
-			return err
-		}
-		switch tmp.Enum {
-		case 0:
-			obj.PricingSource = &tmp.SPLStakePool
-		case 1:
-			obj.PricingSource = &tmp.MarinadeStakePool
-		default:
-			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
-		}
+	err = decoder.Decode(&obj.PricingSource)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OneTokenAsSol`:
+	err = decoder.Decode(&obj.OneTokenAsSol)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Token`:
+	err = decoder.Decode(&obj.Token)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RebalancingAmount`:
+	err = decoder.Decode(&obj.RebalancingAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SolAllocationWeight`:
+	err = decoder.Decode(&obj.SolAllocationWeight)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SolAllocationCapacityAmount`:
+	err = decoder.Decode(&obj.SolAllocationCapacityAmount)
+	if err != nil {
+		return err
 	}
 	// Deserialize `Reserved`:
 	err = decoder.Decode(&obj.Reserved)
@@ -1979,9 +4998,12 @@ type TokenPricingSource interface {
 }
 
 type tokenPricingSourceContainer struct {
-	Enum              ag_binary.BorshEnum `borsh_enum:"true"`
-	SPLStakePool      TokenPricingSourceSPLStakePoolTuple
-	MarinadeStakePool TokenPricingSourceMarinadeStakePoolTuple
+	Enum                          ag_binary.BorshEnum `borsh_enum:"true"`
+	SPLStakePool                  TokenPricingSourceSPLStakePoolTuple
+	MarinadeStakePool             TokenPricingSourceMarinadeStakePoolTuple
+	JitoRestakingVault            TokenPricingSourceJitoRestakingVaultTuple
+	FragmetricNormalizedTokenPool TokenPricingSourceFragmetricNormalizedTokenPoolTuple
+	FragmetricRestakingFund       TokenPricingSourceFragmetricRestakingFundTuple
 }
 
 type TokenPricingSourceSPLStakePoolTuple struct {
@@ -2032,12 +5054,487 @@ func (obj *TokenPricingSourceMarinadeStakePoolTuple) UnmarshalWithDecoder(decode
 
 func (_ TokenPricingSourceMarinadeStakePoolTuple) isTokenPricingSource() {}
 
+type TokenPricingSourceJitoRestakingVaultTuple struct {
+	Address ag_solanago.PublicKey
+}
+
+func (obj TokenPricingSourceJitoRestakingVaultTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Address` param:
+	err = encoder.Encode(obj.Address)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *TokenPricingSourceJitoRestakingVaultTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Address`:
+	err = decoder.Decode(&obj.Address)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (_ TokenPricingSourceJitoRestakingVaultTuple) isTokenPricingSource() {}
+
+type TokenPricingSourceFragmetricNormalizedTokenPoolTuple struct {
+	Address ag_solanago.PublicKey
+}
+
+func (obj TokenPricingSourceFragmetricNormalizedTokenPoolTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Address` param:
+	err = encoder.Encode(obj.Address)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *TokenPricingSourceFragmetricNormalizedTokenPoolTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Address`:
+	err = decoder.Decode(&obj.Address)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (_ TokenPricingSourceFragmetricNormalizedTokenPoolTuple) isTokenPricingSource() {}
+
+type TokenPricingSourceFragmetricRestakingFundTuple struct {
+	Address ag_solanago.PublicKey
+}
+
+func (obj TokenPricingSourceFragmetricRestakingFundTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Address` param:
+	err = encoder.Encode(obj.Address)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *TokenPricingSourceFragmetricRestakingFundTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Address`:
+	err = decoder.Decode(&obj.Address)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (_ TokenPricingSourceFragmetricRestakingFundTuple) isTokenPricingSource() {}
+
+type TokenPricingSourcePod struct {
+	Discriminant uint8
+	Padding      [7]uint8
+	Address      ag_solanago.PublicKey
+}
+
+func (obj TokenPricingSourcePod) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Discriminant` param:
+	err = encoder.Encode(obj.Discriminant)
+	if err != nil {
+		return err
+	}
+	// Serialize `Padding` param:
+	err = encoder.Encode(obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Serialize `Address` param:
+	err = encoder.Encode(obj.Address)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *TokenPricingSourcePod) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Discriminant`:
+	err = decoder.Decode(&obj.Discriminant)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Padding`:
+	err = decoder.Decode(&obj.Padding)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Address`:
+	err = decoder.Decode(&obj.Address)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type TokenValue struct {
+	Numerator   []Asset
+	Denominator uint64
+}
+
+func (obj TokenValue) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Numerator` param:
+	err = encoder.Encode(obj.Numerator)
+	if err != nil {
+		return err
+	}
+	// Serialize `Denominator` param:
+	err = encoder.Encode(obj.Denominator)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *TokenValue) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Numerator`:
+	err = decoder.Decode(&obj.Numerator)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Denominator`:
+	err = decoder.Decode(&obj.Denominator)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type TokenValuePod struct {
+	Numerator    [17]AssetPod
+	NumNumerator uint64
+	Denominator  uint64
+}
+
+func (obj TokenValuePod) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Numerator` param:
+	err = encoder.Encode(obj.Numerator)
+	if err != nil {
+		return err
+	}
+	// Serialize `NumNumerator` param:
+	err = encoder.Encode(obj.NumNumerator)
+	if err != nil {
+		return err
+	}
+	// Serialize `Denominator` param:
+	err = encoder.Encode(obj.Denominator)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *TokenValuePod) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Numerator`:
+	err = decoder.Decode(&obj.Numerator)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumNumerator`:
+	err = decoder.Decode(&obj.NumNumerator)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Denominator`:
+	err = decoder.Decode(&obj.Denominator)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type UndelegateVSTCommand struct{}
+
+func (obj UndelegateVSTCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *UndelegateVSTCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type UndelegateVSTCommandResult struct{}
+
+func (obj UndelegateVSTCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *UndelegateVSTCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type UnrestakeVRTCommand struct {
+	Items []UnrestakeVSTCommandItem
+	State UnrestakeVRTCommandState
+}
+
+func (obj UnrestakeVRTCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Items` param:
+	err = encoder.Encode(obj.Items)
+	if err != nil {
+		return err
+	}
+	// Serialize `State` param:
+	{
+		tmp := unrestakeVRTCommandStateContainer{}
+		switch realvalue := obj.State.(type) {
+		case *UnrestakeVRTCommandStateInitTuple:
+			tmp.Enum = 0
+			tmp.Init = *realvalue
+		case *UnrestakeVRTCommandStateReadVaultStateTuple:
+			tmp.Enum = 1
+			tmp.ReadVaultState = *realvalue
+		case *UnrestakeVRTCommandStateUnstakeTuple:
+			tmp.Enum = 2
+			tmp.Unstake = *realvalue
+		}
+		err := encoder.Encode(tmp)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (obj *UnrestakeVRTCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Items`:
+	err = decoder.Decode(&obj.Items)
+	if err != nil {
+		return err
+	}
+	// Deserialize `State`:
+	{
+		tmp := new(unrestakeVRTCommandStateContainer)
+		err := decoder.Decode(tmp)
+		if err != nil {
+			return err
+		}
+		switch tmp.Enum {
+		case 0:
+			obj.State = (*UnrestakeVRTCommandStateInitTuple)(&tmp.Enum)
+		case 1:
+			obj.State = (*UnrestakeVRTCommandStateReadVaultStateTuple)(&tmp.Enum)
+		case 2:
+			obj.State = &tmp.Unstake
+		default:
+			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
+		}
+	}
+	return nil
+}
+
+type UnrestakeVRTCommandResult struct{}
+
+func (obj UnrestakeVRTCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *UnrestakeVRTCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type UnrestakeVRTCommandState interface {
+	isUnrestakeVRTCommandState()
+}
+
+type unrestakeVRTCommandStateContainer struct {
+	Enum           ag_binary.BorshEnum `borsh_enum:"true"`
+	Init           UnrestakeVRTCommandStateInitTuple
+	ReadVaultState UnrestakeVRTCommandStateReadVaultStateTuple
+	Unstake        UnrestakeVRTCommandStateUnstakeTuple
+}
+
+type UnrestakeVRTCommandStateInitTuple uint8
+
+func (obj UnrestakeVRTCommandStateInitTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *UnrestakeVRTCommandStateInitTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+func (_ UnrestakeVRTCommandStateInitTuple) isUnrestakeVRTCommandState() {}
+
+type UnrestakeVRTCommandStateReadVaultStateTuple uint8
+
+func (obj UnrestakeVRTCommandStateReadVaultStateTuple) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *UnrestakeVRTCommandStateReadVaultStateTuple) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+func (_ UnrestakeVRTCommandStateReadVaultStateTuple) isUnrestakeVRTCommandState() {}
+
+type UnrestakeVRTCommandStateUnstakeTuple struct {
+	Elem0 [][]byte
+}
+
+func (_ UnrestakeVRTCommandStateUnstakeTuple) isUnrestakeVRTCommandState() {}
+
+type UnrestakeVSTCommandItem struct {
+	VaultAddress ag_solanago.PublicKey
+	SolAmount    uint64
+}
+
+func (obj UnrestakeVSTCommandItem) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `VaultAddress` param:
+	err = encoder.Encode(obj.VaultAddress)
+	if err != nil {
+		return err
+	}
+	// Serialize `SolAmount` param:
+	err = encoder.Encode(obj.SolAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *UnrestakeVSTCommandItem) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `VaultAddress`:
+	err = decoder.Decode(&obj.VaultAddress)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SolAmount`:
+	err = decoder.Decode(&obj.SolAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type UnstakeLSTCommand struct {
+	Items                 []UnstakeLSTCommandItem
+	State                 UnstakeLSTCommandState
+	SplWithdrawStakeItems []SplWithdrawStakeItem
+}
+
+func (obj UnstakeLSTCommand) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Items` param:
+	err = encoder.Encode(obj.Items)
+	if err != nil {
+		return err
+	}
+	// Serialize `State` param:
+	err = encoder.Encode(obj.State)
+	if err != nil {
+		return err
+	}
+	// Serialize `SplWithdrawStakeItems` param:
+	err = encoder.Encode(obj.SplWithdrawStakeItems)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *UnstakeLSTCommand) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Items`:
+	err = decoder.Decode(&obj.Items)
+	if err != nil {
+		return err
+	}
+	// Deserialize `State`:
+	err = decoder.Decode(&obj.State)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SplWithdrawStakeItems`:
+	err = decoder.Decode(&obj.SplWithdrawStakeItems)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type UnstakeLSTCommandItem struct {
+	Mint        ag_solanago.PublicKey
+	TokenAmount uint64
+}
+
+func (obj UnstakeLSTCommandItem) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Mint` param:
+	err = encoder.Encode(obj.Mint)
+	if err != nil {
+		return err
+	}
+	// Serialize `TokenAmount` param:
+	err = encoder.Encode(obj.TokenAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *UnstakeLSTCommandItem) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Mint`:
+	err = decoder.Decode(&obj.Mint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `TokenAmount`:
+	err = decoder.Decode(&obj.TokenAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type UnstakeLSTCommandResult struct{}
+
+func (obj UnstakeLSTCommandResult) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return nil
+}
+
+func (obj *UnstakeLSTCommandResult) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	return nil
+}
+
+type UnstakeLSTCommandState ag_binary.BorshEnum
+
+const (
+	UnstakeLSTCommandStateInit UnstakeLSTCommandState = iota
+	UnstakeLSTCommandStateReadPoolState
+	UnstakeLSTCommandStateGetAvailableUnstakeAccount
+	UnstakeLSTCommandStateUnstake
+	UnstakeLSTCommandStateRequestUnstake
+)
+
+func (value UnstakeLSTCommandState) String() string {
+	switch value {
+	case UnstakeLSTCommandStateInit:
+		return "Init"
+	case UnstakeLSTCommandStateReadPoolState:
+		return "ReadPoolState"
+	case UnstakeLSTCommandStateGetAvailableUnstakeAccount:
+		return "GetAvailableUnstakeAccount"
+	case UnstakeLSTCommandStateUnstake:
+		return "Unstake"
+	case UnstakeLSTCommandStateRequestUnstake:
+		return "RequestUnstake"
+	default:
+		return ""
+	}
+}
+
 type UserCanceledWithdrawalRequestFromFund struct {
 	ReceiptTokenMint            ag_solanago.PublicKey
-	RequestId                   uint64
+	FundAccount                 ag_solanago.PublicKey
+	SupportedTokenMint          *ag_solanago.PublicKey `bin:"optional"`
+	UpdatedUserRewardAccounts   []ag_solanago.PublicKey
 	User                        ag_solanago.PublicKey
 	UserReceiptTokenAccount     ag_solanago.PublicKey
-	UserFundAccount             UserFundAccount
+	UserFundAccount             ag_solanago.PublicKey
+	BatchId                     uint64
+	RequestId                   uint64
 	RequestedReceiptTokenAmount uint64
 }
 
@@ -2047,8 +5544,31 @@ func (obj UserCanceledWithdrawalRequestFromFund) MarshalWithEncoder(encoder *ag_
 	if err != nil {
 		return err
 	}
-	// Serialize `RequestId` param:
-	err = encoder.Encode(obj.RequestId)
+	// Serialize `FundAccount` param:
+	err = encoder.Encode(obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	// Serialize `SupportedTokenMint` param (optional):
+	{
+		if obj.SupportedTokenMint == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `UpdatedUserRewardAccounts` param:
+	err = encoder.Encode(obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
@@ -2064,6 +5584,16 @@ func (obj UserCanceledWithdrawalRequestFromFund) MarshalWithEncoder(encoder *ag_
 	}
 	// Serialize `UserFundAccount` param:
 	err = encoder.Encode(obj.UserFundAccount)
+	if err != nil {
+		return err
+	}
+	// Serialize `BatchId` param:
+	err = encoder.Encode(obj.BatchId)
+	if err != nil {
+		return err
+	}
+	// Serialize `RequestId` param:
+	err = encoder.Encode(obj.RequestId)
 	if err != nil {
 		return err
 	}
@@ -2081,8 +5611,26 @@ func (obj *UserCanceledWithdrawalRequestFromFund) UnmarshalWithDecoder(decoder *
 	if err != nil {
 		return err
 	}
-	// Deserialize `RequestId`:
-	err = decoder.Decode(&obj.RequestId)
+	// Deserialize `FundAccount`:
+	err = decoder.Decode(&obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokenMint` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `UpdatedUserRewardAccounts`:
+	err = decoder.Decode(&obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
@@ -2098,6 +5646,16 @@ func (obj *UserCanceledWithdrawalRequestFromFund) UnmarshalWithDecoder(decoder *
 	}
 	// Deserialize `UserFundAccount`:
 	err = decoder.Decode(&obj.UserFundAccount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `BatchId`:
+	err = decoder.Decode(&obj.BatchId)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RequestId`:
+	err = decoder.Decode(&obj.RequestId)
 	if err != nil {
 		return err
 	}
@@ -2109,19 +5667,88 @@ func (obj *UserCanceledWithdrawalRequestFromFund) UnmarshalWithDecoder(decoder *
 	return nil
 }
 
-type UserDepositedSOLToFund struct {
-	ReceiptTokenMint         ag_solanago.PublicKey
-	FundAccount              FundAccountInfo
-	User                     ag_solanago.PublicKey
-	UserReceiptTokenAccount  ag_solanago.PublicKey
-	UserFundAccount          UserFundAccount
-	WalletProvider           *string `bin:"optional"`
-	ContributionAccrualRate  *uint8  `bin:"optional"`
-	DepositedSolAmount       uint64
-	MintedReceiptTokenAmount uint64
+type UserCreatedOrUpdatedFundAccount struct {
+	ReceiptTokenMint ag_solanago.PublicKey
+	UserFundAccount  ag_solanago.PublicKey
 }
 
-func (obj UserDepositedSOLToFund) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+func (obj UserCreatedOrUpdatedFundAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `ReceiptTokenMint` param:
+	err = encoder.Encode(obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `UserFundAccount` param:
+	err = encoder.Encode(obj.UserFundAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *UserCreatedOrUpdatedFundAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `ReceiptTokenMint`:
+	err = decoder.Decode(&obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `UserFundAccount`:
+	err = decoder.Decode(&obj.UserFundAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type UserCreatedOrUpdatedRewardAccount struct {
+	ReceiptTokenMint  ag_solanago.PublicKey
+	UserRewardAccount ag_solanago.PublicKey
+}
+
+func (obj UserCreatedOrUpdatedRewardAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `ReceiptTokenMint` param:
+	err = encoder.Encode(obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `UserRewardAccount` param:
+	err = encoder.Encode(obj.UserRewardAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *UserCreatedOrUpdatedRewardAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `ReceiptTokenMint`:
+	err = decoder.Decode(&obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `UserRewardAccount`:
+	err = decoder.Decode(&obj.UserRewardAccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type UserDepositedToFund struct {
+	ReceiptTokenMint          ag_solanago.PublicKey
+	FundAccount               ag_solanago.PublicKey
+	SupportedTokenMint        *ag_solanago.PublicKey `bin:"optional"`
+	UpdatedUserRewardAccounts []ag_solanago.PublicKey
+	User                      ag_solanago.PublicKey
+	UserReceiptTokenAccount   ag_solanago.PublicKey
+	UserFundAccount           ag_solanago.PublicKey
+	UserSupportedTokenAccount *ag_solanago.PublicKey `bin:"optional"`
+	WalletProvider            *string                `bin:"optional"`
+	ContributionAccrualRate   *uint8                 `bin:"optional"`
+	DepositedAmount           uint64
+	MintedReceiptTokenAmount  uint64
+}
+
+func (obj UserDepositedToFund) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
 	// Serialize `ReceiptTokenMint` param:
 	err = encoder.Encode(obj.ReceiptTokenMint)
 	if err != nil {
@@ -2129,6 +5756,29 @@ func (obj UserDepositedSOLToFund) MarshalWithEncoder(encoder *ag_binary.Encoder)
 	}
 	// Serialize `FundAccount` param:
 	err = encoder.Encode(obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	// Serialize `SupportedTokenMint` param (optional):
+	{
+		if obj.SupportedTokenMint == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `UpdatedUserRewardAccounts` param:
+	err = encoder.Encode(obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
@@ -2146,6 +5796,24 @@ func (obj UserDepositedSOLToFund) MarshalWithEncoder(encoder *ag_binary.Encoder)
 	err = encoder.Encode(obj.UserFundAccount)
 	if err != nil {
 		return err
+	}
+	// Serialize `UserSupportedTokenAccount` param (optional):
+	{
+		if obj.UserSupportedTokenAccount == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.UserSupportedTokenAccount)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	// Serialize `WalletProvider` param (optional):
 	{
@@ -2183,8 +5851,8 @@ func (obj UserDepositedSOLToFund) MarshalWithEncoder(encoder *ag_binary.Encoder)
 			}
 		}
 	}
-	// Serialize `DepositedSolAmount` param:
-	err = encoder.Encode(obj.DepositedSolAmount)
+	// Serialize `DepositedAmount` param:
+	err = encoder.Encode(obj.DepositedAmount)
 	if err != nil {
 		return err
 	}
@@ -2196,7 +5864,7 @@ func (obj UserDepositedSOLToFund) MarshalWithEncoder(encoder *ag_binary.Encoder)
 	return nil
 }
 
-func (obj *UserDepositedSOLToFund) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+func (obj *UserDepositedToFund) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
 	// Deserialize `ReceiptTokenMint`:
 	err = decoder.Decode(&obj.ReceiptTokenMint)
 	if err != nil {
@@ -2204,6 +5872,24 @@ func (obj *UserDepositedSOLToFund) UnmarshalWithDecoder(decoder *ag_binary.Decod
 	}
 	// Deserialize `FundAccount`:
 	err = decoder.Decode(&obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokenMint` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `UpdatedUserRewardAccounts`:
+	err = decoder.Decode(&obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
@@ -2221,6 +5907,19 @@ func (obj *UserDepositedSOLToFund) UnmarshalWithDecoder(decoder *ag_binary.Decod
 	err = decoder.Decode(&obj.UserFundAccount)
 	if err != nil {
 		return err
+	}
+	// Deserialize `UserSupportedTokenAccount` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.UserSupportedTokenAccount)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	// Deserialize `WalletProvider` (optional):
 	{
@@ -2248,182 +5947,8 @@ func (obj *UserDepositedSOLToFund) UnmarshalWithDecoder(decoder *ag_binary.Decod
 			}
 		}
 	}
-	// Deserialize `DepositedSolAmount`:
-	err = decoder.Decode(&obj.DepositedSolAmount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `MintedReceiptTokenAmount`:
-	err = decoder.Decode(&obj.MintedReceiptTokenAmount)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type UserDepositedSupportedTokenToFund struct {
-	ReceiptTokenMint              ag_solanago.PublicKey
-	FundAccount                   FundAccountInfo
-	User                          ag_solanago.PublicKey
-	UserReceiptTokenAccount       ag_solanago.PublicKey
-	UserFundAccount               UserFundAccount
-	SupportedTokenMint            ag_solanago.PublicKey
-	SupportedTokenUserAccount     ag_solanago.PublicKey
-	WalletProvider                *string `bin:"optional"`
-	ContributionAccrualRate       *uint8  `bin:"optional"`
-	DepositedSupportedTokenAmount uint64
-	MintedReceiptTokenAmount      uint64
-}
-
-func (obj UserDepositedSupportedTokenToFund) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `ReceiptTokenMint` param:
-	err = encoder.Encode(obj.ReceiptTokenMint)
-	if err != nil {
-		return err
-	}
-	// Serialize `FundAccount` param:
-	err = encoder.Encode(obj.FundAccount)
-	if err != nil {
-		return err
-	}
-	// Serialize `User` param:
-	err = encoder.Encode(obj.User)
-	if err != nil {
-		return err
-	}
-	// Serialize `UserReceiptTokenAccount` param:
-	err = encoder.Encode(obj.UserReceiptTokenAccount)
-	if err != nil {
-		return err
-	}
-	// Serialize `UserFundAccount` param:
-	err = encoder.Encode(obj.UserFundAccount)
-	if err != nil {
-		return err
-	}
-	// Serialize `SupportedTokenMint` param:
-	err = encoder.Encode(obj.SupportedTokenMint)
-	if err != nil {
-		return err
-	}
-	// Serialize `SupportedTokenUserAccount` param:
-	err = encoder.Encode(obj.SupportedTokenUserAccount)
-	if err != nil {
-		return err
-	}
-	// Serialize `WalletProvider` param (optional):
-	{
-		if obj.WalletProvider == nil {
-			err = encoder.WriteBool(false)
-			if err != nil {
-				return err
-			}
-		} else {
-			err = encoder.WriteBool(true)
-			if err != nil {
-				return err
-			}
-			err = encoder.Encode(obj.WalletProvider)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Serialize `ContributionAccrualRate` param (optional):
-	{
-		if obj.ContributionAccrualRate == nil {
-			err = encoder.WriteBool(false)
-			if err != nil {
-				return err
-			}
-		} else {
-			err = encoder.WriteBool(true)
-			if err != nil {
-				return err
-			}
-			err = encoder.Encode(obj.ContributionAccrualRate)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Serialize `DepositedSupportedTokenAmount` param:
-	err = encoder.Encode(obj.DepositedSupportedTokenAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `MintedReceiptTokenAmount` param:
-	err = encoder.Encode(obj.MintedReceiptTokenAmount)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (obj *UserDepositedSupportedTokenToFund) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `ReceiptTokenMint`:
-	err = decoder.Decode(&obj.ReceiptTokenMint)
-	if err != nil {
-		return err
-	}
-	// Deserialize `FundAccount`:
-	err = decoder.Decode(&obj.FundAccount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `User`:
-	err = decoder.Decode(&obj.User)
-	if err != nil {
-		return err
-	}
-	// Deserialize `UserReceiptTokenAccount`:
-	err = decoder.Decode(&obj.UserReceiptTokenAccount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `UserFundAccount`:
-	err = decoder.Decode(&obj.UserFundAccount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `SupportedTokenMint`:
-	err = decoder.Decode(&obj.SupportedTokenMint)
-	if err != nil {
-		return err
-	}
-	// Deserialize `SupportedTokenUserAccount`:
-	err = decoder.Decode(&obj.SupportedTokenUserAccount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `WalletProvider` (optional):
-	{
-		ok, err := decoder.ReadBool()
-		if err != nil {
-			return err
-		}
-		if ok {
-			err = decoder.Decode(&obj.WalletProvider)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Deserialize `ContributionAccrualRate` (optional):
-	{
-		ok, err := decoder.ReadBool()
-		if err != nil {
-			return err
-		}
-		if ok {
-			err = decoder.Decode(&obj.ContributionAccrualRate)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Deserialize `DepositedSupportedTokenAmount`:
-	err = decoder.Decode(&obj.DepositedSupportedTokenAmount)
+	// Deserialize `DepositedAmount`:
+	err = decoder.Decode(&obj.DepositedAmount)
 	if err != nil {
 		return err
 	}
@@ -2436,7 +5961,7 @@ func (obj *UserDepositedSupportedTokenToFund) UnmarshalWithDecoder(decoder *ag_b
 }
 
 type UserFundAccount struct {
-	DataVersion        uint8
+	DataVersion        uint16
 	Bump               uint8
 	ReceiptTokenMint   ag_solanago.PublicKey
 	User               ag_solanago.PublicKey
@@ -2525,11 +6050,14 @@ func (obj *UserFundAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (er
 
 type UserRequestedWithdrawalFromFund struct {
 	ReceiptTokenMint            ag_solanago.PublicKey
-	BatchId                     uint64
-	RequestId                   uint64
+	FundAccount                 ag_solanago.PublicKey
+	SupportedTokenMint          *ag_solanago.PublicKey `bin:"optional"`
+	UpdatedUserRewardAccounts   []ag_solanago.PublicKey
 	User                        ag_solanago.PublicKey
 	UserReceiptTokenAccount     ag_solanago.PublicKey
-	UserFundAccount             UserFundAccount
+	UserFundAccount             ag_solanago.PublicKey
+	BatchId                     uint64
+	RequestId                   uint64
 	RequestedReceiptTokenAmount uint64
 }
 
@@ -2539,13 +6067,31 @@ func (obj UserRequestedWithdrawalFromFund) MarshalWithEncoder(encoder *ag_binary
 	if err != nil {
 		return err
 	}
-	// Serialize `BatchId` param:
-	err = encoder.Encode(obj.BatchId)
+	// Serialize `FundAccount` param:
+	err = encoder.Encode(obj.FundAccount)
 	if err != nil {
 		return err
 	}
-	// Serialize `RequestId` param:
-	err = encoder.Encode(obj.RequestId)
+	// Serialize `SupportedTokenMint` param (optional):
+	{
+		if obj.SupportedTokenMint == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `UpdatedUserRewardAccounts` param:
+	err = encoder.Encode(obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
@@ -2564,6 +6110,16 @@ func (obj UserRequestedWithdrawalFromFund) MarshalWithEncoder(encoder *ag_binary
 	if err != nil {
 		return err
 	}
+	// Serialize `BatchId` param:
+	err = encoder.Encode(obj.BatchId)
+	if err != nil {
+		return err
+	}
+	// Serialize `RequestId` param:
+	err = encoder.Encode(obj.RequestId)
+	if err != nil {
+		return err
+	}
 	// Serialize `RequestedReceiptTokenAmount` param:
 	err = encoder.Encode(obj.RequestedReceiptTokenAmount)
 	if err != nil {
@@ -2578,13 +6134,26 @@ func (obj *UserRequestedWithdrawalFromFund) UnmarshalWithDecoder(decoder *ag_bin
 	if err != nil {
 		return err
 	}
-	// Deserialize `BatchId`:
-	err = decoder.Decode(&obj.BatchId)
+	// Deserialize `FundAccount`:
+	err = decoder.Decode(&obj.FundAccount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `RequestId`:
-	err = decoder.Decode(&obj.RequestId)
+	// Deserialize `SupportedTokenMint` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `UpdatedUserRewardAccounts`:
+	err = decoder.Decode(&obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
@@ -2600,6 +6169,16 @@ func (obj *UserRequestedWithdrawalFromFund) UnmarshalWithDecoder(decoder *ag_bin
 	}
 	// Deserialize `UserFundAccount`:
 	err = decoder.Decode(&obj.UserFundAccount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `BatchId`:
+	err = decoder.Decode(&obj.BatchId)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RequestId`:
+	err = decoder.Decode(&obj.RequestId)
 	if err != nil {
 		return err
 	}
@@ -2710,50 +6289,6 @@ func (obj *UserRewardAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (
 	return nil
 }
 
-type UserRewardAccountUpdateInfo struct {
-	DataVersion            uint16
-	User                   ag_solanago.PublicKey
-	UpdatedUserRewardPools []UserRewardPoolInfo
-}
-
-func (obj UserRewardAccountUpdateInfo) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `DataVersion` param:
-	err = encoder.Encode(obj.DataVersion)
-	if err != nil {
-		return err
-	}
-	// Serialize `User` param:
-	err = encoder.Encode(obj.User)
-	if err != nil {
-		return err
-	}
-	// Serialize `UpdatedUserRewardPools` param:
-	err = encoder.Encode(obj.UpdatedUserRewardPools)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (obj *UserRewardAccountUpdateInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `DataVersion`:
-	err = decoder.Decode(&obj.DataVersion)
-	if err != nil {
-		return err
-	}
-	// Deserialize `User`:
-	err = decoder.Decode(&obj.User)
-	if err != nil {
-		return err
-	}
-	// Deserialize `UpdatedUserRewardPools`:
-	err = decoder.Decode(&obj.UpdatedUserRewardPools)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 type UserRewardPool struct {
 	TokenAllocatedAmount TokenAllocatedAmount
 	Contribution         ag_binary.Uint128
@@ -2853,72 +6388,6 @@ func (obj *UserRewardPool) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err
 	return nil
 }
 
-type UserRewardPoolInfo struct {
-	TokenAllocatedAmount TokenAllocatedAmount
-	Contribution         ag_binary.Uint128
-	UpdatedSlot          uint64
-	RewardPoolId         uint8
-	RewardSettlements    []UserRewardSettlement
-}
-
-func (obj UserRewardPoolInfo) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `TokenAllocatedAmount` param:
-	err = encoder.Encode(obj.TokenAllocatedAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `Contribution` param:
-	err = encoder.Encode(obj.Contribution)
-	if err != nil {
-		return err
-	}
-	// Serialize `UpdatedSlot` param:
-	err = encoder.Encode(obj.UpdatedSlot)
-	if err != nil {
-		return err
-	}
-	// Serialize `RewardPoolId` param:
-	err = encoder.Encode(obj.RewardPoolId)
-	if err != nil {
-		return err
-	}
-	// Serialize `RewardSettlements` param:
-	err = encoder.Encode(obj.RewardSettlements)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (obj *UserRewardPoolInfo) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `TokenAllocatedAmount`:
-	err = decoder.Decode(&obj.TokenAllocatedAmount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `Contribution`:
-	err = decoder.Decode(&obj.Contribution)
-	if err != nil {
-		return err
-	}
-	// Deserialize `UpdatedSlot`:
-	err = decoder.Decode(&obj.UpdatedSlot)
-	if err != nil {
-		return err
-	}
-	// Deserialize `RewardPoolId`:
-	err = decoder.Decode(&obj.RewardPoolId)
-	if err != nil {
-		return err
-	}
-	// Deserialize `RewardSettlements`:
-	err = decoder.Decode(&obj.RewardSettlements)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 type UserRewardSettlement struct {
 	RewardId            uint16
 	Padding             [6]uint8
@@ -2998,12 +6467,14 @@ func (obj *UserRewardSettlement) UnmarshalWithDecoder(decoder *ag_binary.Decoder
 
 type UserTransferredReceiptToken struct {
 	ReceiptTokenMint               ag_solanago.PublicKey
-	SourceReceiptTokenAccount      ag_solanago.PublicKey
-	SourceFundAccount              UserFundAccount
+	FundAccount                    ag_solanago.PublicKey
+	UpdatedUserRewardAccounts      []ag_solanago.PublicKey
 	Source                         ag_solanago.PublicKey
-	DestinationReceiptTokenAccount ag_solanago.PublicKey
-	DestinationFundAccount         UserFundAccount
+	SourceReceiptTokenAccount      ag_solanago.PublicKey
+	SourceFundAccount              *ag_solanago.PublicKey `bin:"optional"`
 	Destination                    ag_solanago.PublicKey
+	DestinationReceiptTokenAccount ag_solanago.PublicKey
+	DestinationFundAccount         *ag_solanago.PublicKey `bin:"optional"`
 	TransferredReceiptTokenAmount  uint64
 }
 
@@ -3013,13 +6484,13 @@ func (obj UserTransferredReceiptToken) MarshalWithEncoder(encoder *ag_binary.Enc
 	if err != nil {
 		return err
 	}
-	// Serialize `SourceReceiptTokenAccount` param:
-	err = encoder.Encode(obj.SourceReceiptTokenAccount)
+	// Serialize `FundAccount` param:
+	err = encoder.Encode(obj.FundAccount)
 	if err != nil {
 		return err
 	}
-	// Serialize `SourceFundAccount` param:
-	err = encoder.Encode(obj.SourceFundAccount)
+	// Serialize `UpdatedUserRewardAccounts` param:
+	err = encoder.Encode(obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
@@ -3028,20 +6499,56 @@ func (obj UserTransferredReceiptToken) MarshalWithEncoder(encoder *ag_binary.Enc
 	if err != nil {
 		return err
 	}
-	// Serialize `DestinationReceiptTokenAccount` param:
-	err = encoder.Encode(obj.DestinationReceiptTokenAccount)
+	// Serialize `SourceReceiptTokenAccount` param:
+	err = encoder.Encode(obj.SourceReceiptTokenAccount)
 	if err != nil {
 		return err
 	}
-	// Serialize `DestinationFundAccount` param:
-	err = encoder.Encode(obj.DestinationFundAccount)
-	if err != nil {
-		return err
+	// Serialize `SourceFundAccount` param (optional):
+	{
+		if obj.SourceFundAccount == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SourceFundAccount)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	// Serialize `Destination` param:
 	err = encoder.Encode(obj.Destination)
 	if err != nil {
 		return err
+	}
+	// Serialize `DestinationReceiptTokenAccount` param:
+	err = encoder.Encode(obj.DestinationReceiptTokenAccount)
+	if err != nil {
+		return err
+	}
+	// Serialize `DestinationFundAccount` param (optional):
+	{
+		if obj.DestinationFundAccount == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.DestinationFundAccount)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	// Serialize `TransferredReceiptTokenAmount` param:
 	err = encoder.Encode(obj.TransferredReceiptTokenAmount)
@@ -3057,13 +6564,13 @@ func (obj *UserTransferredReceiptToken) UnmarshalWithDecoder(decoder *ag_binary.
 	if err != nil {
 		return err
 	}
-	// Deserialize `SourceReceiptTokenAccount`:
-	err = decoder.Decode(&obj.SourceReceiptTokenAccount)
+	// Deserialize `FundAccount`:
+	err = decoder.Decode(&obj.FundAccount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `SourceFundAccount`:
-	err = decoder.Decode(&obj.SourceFundAccount)
+	// Deserialize `UpdatedUserRewardAccounts`:
+	err = decoder.Decode(&obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
@@ -3072,20 +6579,46 @@ func (obj *UserTransferredReceiptToken) UnmarshalWithDecoder(decoder *ag_binary.
 	if err != nil {
 		return err
 	}
-	// Deserialize `DestinationReceiptTokenAccount`:
-	err = decoder.Decode(&obj.DestinationReceiptTokenAccount)
+	// Deserialize `SourceReceiptTokenAccount`:
+	err = decoder.Decode(&obj.SourceReceiptTokenAccount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `DestinationFundAccount`:
-	err = decoder.Decode(&obj.DestinationFundAccount)
-	if err != nil {
-		return err
+	// Deserialize `SourceFundAccount` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SourceFundAccount)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	// Deserialize `Destination`:
 	err = decoder.Decode(&obj.Destination)
 	if err != nil {
 		return err
+	}
+	// Deserialize `DestinationReceiptTokenAccount`:
+	err = decoder.Decode(&obj.DestinationReceiptTokenAccount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `DestinationFundAccount` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.DestinationFundAccount)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	// Deserialize `TransferredReceiptTokenAmount`:
 	err = decoder.Decode(&obj.TransferredReceiptTokenAmount)
@@ -3096,8 +6629,8 @@ func (obj *UserTransferredReceiptToken) UnmarshalWithDecoder(decoder *ag_binary.
 }
 
 type UserUpdatedRewardPool struct {
-	ReceiptTokenMint ag_solanago.PublicKey
-	Updates          []UserRewardAccountUpdateInfo
+	ReceiptTokenMint          ag_solanago.PublicKey
+	UpdatedUserRewardAccounts []ag_solanago.PublicKey
 }
 
 func (obj UserUpdatedRewardPool) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
@@ -3106,8 +6639,8 @@ func (obj UserUpdatedRewardPool) MarshalWithEncoder(encoder *ag_binary.Encoder) 
 	if err != nil {
 		return err
 	}
-	// Serialize `Updates` param:
-	err = encoder.Encode(obj.Updates)
+	// Serialize `UpdatedUserRewardAccounts` param:
+	err = encoder.Encode(obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
@@ -3120,26 +6653,32 @@ func (obj *UserUpdatedRewardPool) UnmarshalWithDecoder(decoder *ag_binary.Decode
 	if err != nil {
 		return err
 	}
-	// Deserialize `Updates`:
-	err = decoder.Decode(&obj.Updates)
+	// Deserialize `UpdatedUserRewardAccounts`:
+	err = decoder.Decode(&obj.UpdatedUserRewardAccounts)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type UserWithdrewSOLFromFund struct {
-	ReceiptTokenMint        ag_solanago.PublicKey
-	FundAccount             FundAccountInfo
-	RequestId               uint64
-	UserFundAccount         UserFundAccount
-	User                    ag_solanago.PublicKey
-	BurntReceiptTokenAmount uint64
-	WithdrawnSolAmount      uint64
-	DeductedSolFeeAmount    uint64
+type UserWithdrewFromFund struct {
+	ReceiptTokenMint           ag_solanago.PublicKey
+	FundAccount                ag_solanago.PublicKey
+	SupportedTokenMint         *ag_solanago.PublicKey `bin:"optional"`
+	User                       ag_solanago.PublicKey
+	UserReceiptTokenAccount    ag_solanago.PublicKey
+	UserFundAccount            ag_solanago.PublicKey
+	UserSupportedTokenAccount  *ag_solanago.PublicKey `bin:"optional"`
+	FundWithdrawalBatchAccount ag_solanago.PublicKey
+	BatchId                    uint64
+	RequestId                  uint64
+	BurntReceiptTokenAmount    uint64
+	ReturnedReceiptTokenAmount uint64
+	WithdrawnAmount            uint64
+	DeductedFeeAmount          uint64
 }
 
-func (obj UserWithdrewSOLFromFund) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+func (obj UserWithdrewFromFund) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
 	// Serialize `ReceiptTokenMint` param:
 	err = encoder.Encode(obj.ReceiptTokenMint)
 	if err != nil {
@@ -3150,8 +6689,31 @@ func (obj UserWithdrewSOLFromFund) MarshalWithEncoder(encoder *ag_binary.Encoder
 	if err != nil {
 		return err
 	}
-	// Serialize `RequestId` param:
-	err = encoder.Encode(obj.RequestId)
+	// Serialize `SupportedTokenMint` param (optional):
+	{
+		if obj.SupportedTokenMint == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `User` param:
+	err = encoder.Encode(obj.User)
+	if err != nil {
+		return err
+	}
+	// Serialize `UserReceiptTokenAccount` param:
+	err = encoder.Encode(obj.UserReceiptTokenAccount)
 	if err != nil {
 		return err
 	}
@@ -3160,8 +6722,36 @@ func (obj UserWithdrewSOLFromFund) MarshalWithEncoder(encoder *ag_binary.Encoder
 	if err != nil {
 		return err
 	}
-	// Serialize `User` param:
-	err = encoder.Encode(obj.User)
+	// Serialize `UserSupportedTokenAccount` param (optional):
+	{
+		if obj.UserSupportedTokenAccount == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.UserSupportedTokenAccount)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `FundWithdrawalBatchAccount` param:
+	err = encoder.Encode(obj.FundWithdrawalBatchAccount)
+	if err != nil {
+		return err
+	}
+	// Serialize `BatchId` param:
+	err = encoder.Encode(obj.BatchId)
+	if err != nil {
+		return err
+	}
+	// Serialize `RequestId` param:
+	err = encoder.Encode(obj.RequestId)
 	if err != nil {
 		return err
 	}
@@ -3170,20 +6760,25 @@ func (obj UserWithdrewSOLFromFund) MarshalWithEncoder(encoder *ag_binary.Encoder
 	if err != nil {
 		return err
 	}
-	// Serialize `WithdrawnSolAmount` param:
-	err = encoder.Encode(obj.WithdrawnSolAmount)
+	// Serialize `ReturnedReceiptTokenAmount` param:
+	err = encoder.Encode(obj.ReturnedReceiptTokenAmount)
 	if err != nil {
 		return err
 	}
-	// Serialize `DeductedSolFeeAmount` param:
-	err = encoder.Encode(obj.DeductedSolFeeAmount)
+	// Serialize `WithdrawnAmount` param:
+	err = encoder.Encode(obj.WithdrawnAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `DeductedFeeAmount` param:
+	err = encoder.Encode(obj.DeductedFeeAmount)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (obj *UserWithdrewSOLFromFund) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+func (obj *UserWithdrewFromFund) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
 	// Deserialize `ReceiptTokenMint`:
 	err = decoder.Decode(&obj.ReceiptTokenMint)
 	if err != nil {
@@ -3194,8 +6789,26 @@ func (obj *UserWithdrewSOLFromFund) UnmarshalWithDecoder(decoder *ag_binary.Deco
 	if err != nil {
 		return err
 	}
-	// Deserialize `RequestId`:
-	err = decoder.Decode(&obj.RequestId)
+	// Deserialize `SupportedTokenMint` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `User`:
+	err = decoder.Decode(&obj.User)
+	if err != nil {
+		return err
+	}
+	// Deserialize `UserReceiptTokenAccount`:
+	err = decoder.Decode(&obj.UserReceiptTokenAccount)
 	if err != nil {
 		return err
 	}
@@ -3204,8 +6817,31 @@ func (obj *UserWithdrewSOLFromFund) UnmarshalWithDecoder(decoder *ag_binary.Deco
 	if err != nil {
 		return err
 	}
-	// Deserialize `User`:
-	err = decoder.Decode(&obj.User)
+	// Deserialize `UserSupportedTokenAccount` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.UserSupportedTokenAccount)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `FundWithdrawalBatchAccount`:
+	err = decoder.Decode(&obj.FundWithdrawalBatchAccount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `BatchId`:
+	err = decoder.Decode(&obj.BatchId)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RequestId`:
+	err = decoder.Decode(&obj.RequestId)
 	if err != nil {
 		return err
 	}
@@ -3214,13 +6850,84 @@ func (obj *UserWithdrewSOLFromFund) UnmarshalWithDecoder(decoder *ag_binary.Deco
 	if err != nil {
 		return err
 	}
-	// Deserialize `WithdrawnSolAmount`:
-	err = decoder.Decode(&obj.WithdrawnSolAmount)
+	// Deserialize `ReturnedReceiptTokenAmount`:
+	err = decoder.Decode(&obj.ReturnedReceiptTokenAmount)
 	if err != nil {
 		return err
 	}
-	// Deserialize `DeductedSolFeeAmount`:
-	err = decoder.Decode(&obj.DeductedSolFeeAmount)
+	// Deserialize `WithdrawnAmount`:
+	err = decoder.Decode(&obj.WithdrawnAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `DeductedFeeAmount`:
+	err = decoder.Decode(&obj.DeductedFeeAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type WithdrawalBatch struct {
+	BatchId            uint64
+	NumRequests        uint64
+	ReceiptTokenAmount uint64
+	EnqueuedAt         int64
+	Reserved           [32]uint8
+}
+
+func (obj WithdrawalBatch) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `BatchId` param:
+	err = encoder.Encode(obj.BatchId)
+	if err != nil {
+		return err
+	}
+	// Serialize `NumRequests` param:
+	err = encoder.Encode(obj.NumRequests)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenAmount` param:
+	err = encoder.Encode(obj.ReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `EnqueuedAt` param:
+	err = encoder.Encode(obj.EnqueuedAt)
+	if err != nil {
+		return err
+	}
+	// Serialize `Reserved` param:
+	err = encoder.Encode(obj.Reserved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *WithdrawalBatch) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `BatchId`:
+	err = decoder.Decode(&obj.BatchId)
+	if err != nil {
+		return err
+	}
+	// Deserialize `NumRequests`:
+	err = decoder.Decode(&obj.NumRequests)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ReceiptTokenAmount`:
+	err = decoder.Decode(&obj.ReceiptTokenAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `EnqueuedAt`:
+	err = decoder.Decode(&obj.EnqueuedAt)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Reserved`:
+	err = decoder.Decode(&obj.Reserved)
 	if err != nil {
 		return err
 	}
@@ -3228,11 +6935,13 @@ func (obj *UserWithdrewSOLFromFund) UnmarshalWithDecoder(decoder *ag_binary.Deco
 }
 
 type WithdrawalRequest struct {
-	BatchId            uint64
-	RequestId          uint64
-	ReceiptTokenAmount uint64
-	CreatedAt          int64
-	Reserved           [16]uint8
+	BatchId               uint64
+	RequestId             uint64
+	ReceiptTokenAmount    uint64
+	CreatedAt             int64
+	SupportedTokenMint    *ag_solanago.PublicKey `bin:"optional"`
+	SupportedTokenProgram *ag_solanago.PublicKey `bin:"optional"`
+	Reserved              [14]uint8
 }
 
 func (obj WithdrawalRequest) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
@@ -3255,6 +6964,42 @@ func (obj WithdrawalRequest) MarshalWithEncoder(encoder *ag_binary.Encoder) (err
 	err = encoder.Encode(obj.CreatedAt)
 	if err != nil {
 		return err
+	}
+	// Serialize `SupportedTokenMint` param (optional):
+	{
+		if obj.SupportedTokenMint == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `SupportedTokenProgram` param (optional):
+	{
+		if obj.SupportedTokenProgram == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenProgram)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	// Serialize `Reserved` param:
 	err = encoder.Encode(obj.Reserved)
@@ -3285,204 +7030,34 @@ func (obj *WithdrawalRequest) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (
 	if err != nil {
 		return err
 	}
+	// Deserialize `SupportedTokenMint` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `SupportedTokenProgram` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenProgram)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	// Deserialize `Reserved`:
 	err = decoder.Decode(&obj.Reserved)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type WithdrawalStatus struct {
-	NextBatchId                      uint64
-	NextRequestId                    uint64
-	NumWithdrawalRequestsInProgress  uint64
-	LastCompletedBatchId             uint64
-	LastBatchProcessingStartedAt     *int64 `bin:"optional"`
-	LastBatchProcessingCompletedAt   *int64 `bin:"optional"`
-	SolWithdrawalFeeRate             uint16
-	WithdrawalEnabledFlag            bool
-	BatchProcessingThresholdAmount   uint64
-	BatchProcessingThresholdDuration int64
-	PendingBatchWithdrawal           BatchWithdrawal
-	BatchWithdrawalsInProgress       []BatchWithdrawal
-	ReservedFund                     ReservedFund
-}
-
-func (obj WithdrawalStatus) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `NextBatchId` param:
-	err = encoder.Encode(obj.NextBatchId)
-	if err != nil {
-		return err
-	}
-	// Serialize `NextRequestId` param:
-	err = encoder.Encode(obj.NextRequestId)
-	if err != nil {
-		return err
-	}
-	// Serialize `NumWithdrawalRequestsInProgress` param:
-	err = encoder.Encode(obj.NumWithdrawalRequestsInProgress)
-	if err != nil {
-		return err
-	}
-	// Serialize `LastCompletedBatchId` param:
-	err = encoder.Encode(obj.LastCompletedBatchId)
-	if err != nil {
-		return err
-	}
-	// Serialize `LastBatchProcessingStartedAt` param (optional):
-	{
-		if obj.LastBatchProcessingStartedAt == nil {
-			err = encoder.WriteBool(false)
-			if err != nil {
-				return err
-			}
-		} else {
-			err = encoder.WriteBool(true)
-			if err != nil {
-				return err
-			}
-			err = encoder.Encode(obj.LastBatchProcessingStartedAt)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Serialize `LastBatchProcessingCompletedAt` param (optional):
-	{
-		if obj.LastBatchProcessingCompletedAt == nil {
-			err = encoder.WriteBool(false)
-			if err != nil {
-				return err
-			}
-		} else {
-			err = encoder.WriteBool(true)
-			if err != nil {
-				return err
-			}
-			err = encoder.Encode(obj.LastBatchProcessingCompletedAt)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Serialize `SolWithdrawalFeeRate` param:
-	err = encoder.Encode(obj.SolWithdrawalFeeRate)
-	if err != nil {
-		return err
-	}
-	// Serialize `WithdrawalEnabledFlag` param:
-	err = encoder.Encode(obj.WithdrawalEnabledFlag)
-	if err != nil {
-		return err
-	}
-	// Serialize `BatchProcessingThresholdAmount` param:
-	err = encoder.Encode(obj.BatchProcessingThresholdAmount)
-	if err != nil {
-		return err
-	}
-	// Serialize `BatchProcessingThresholdDuration` param:
-	err = encoder.Encode(obj.BatchProcessingThresholdDuration)
-	if err != nil {
-		return err
-	}
-	// Serialize `PendingBatchWithdrawal` param:
-	err = encoder.Encode(obj.PendingBatchWithdrawal)
-	if err != nil {
-		return err
-	}
-	// Serialize `BatchWithdrawalsInProgress` param:
-	err = encoder.Encode(obj.BatchWithdrawalsInProgress)
-	if err != nil {
-		return err
-	}
-	// Serialize `ReservedFund` param:
-	err = encoder.Encode(obj.ReservedFund)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (obj *WithdrawalStatus) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `NextBatchId`:
-	err = decoder.Decode(&obj.NextBatchId)
-	if err != nil {
-		return err
-	}
-	// Deserialize `NextRequestId`:
-	err = decoder.Decode(&obj.NextRequestId)
-	if err != nil {
-		return err
-	}
-	// Deserialize `NumWithdrawalRequestsInProgress`:
-	err = decoder.Decode(&obj.NumWithdrawalRequestsInProgress)
-	if err != nil {
-		return err
-	}
-	// Deserialize `LastCompletedBatchId`:
-	err = decoder.Decode(&obj.LastCompletedBatchId)
-	if err != nil {
-		return err
-	}
-	// Deserialize `LastBatchProcessingStartedAt` (optional):
-	{
-		ok, err := decoder.ReadBool()
-		if err != nil {
-			return err
-		}
-		if ok {
-			err = decoder.Decode(&obj.LastBatchProcessingStartedAt)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Deserialize `LastBatchProcessingCompletedAt` (optional):
-	{
-		ok, err := decoder.ReadBool()
-		if err != nil {
-			return err
-		}
-		if ok {
-			err = decoder.Decode(&obj.LastBatchProcessingCompletedAt)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Deserialize `SolWithdrawalFeeRate`:
-	err = decoder.Decode(&obj.SolWithdrawalFeeRate)
-	if err != nil {
-		return err
-	}
-	// Deserialize `WithdrawalEnabledFlag`:
-	err = decoder.Decode(&obj.WithdrawalEnabledFlag)
-	if err != nil {
-		return err
-	}
-	// Deserialize `BatchProcessingThresholdAmount`:
-	err = decoder.Decode(&obj.BatchProcessingThresholdAmount)
-	if err != nil {
-		return err
-	}
-	// Deserialize `BatchProcessingThresholdDuration`:
-	err = decoder.Decode(&obj.BatchProcessingThresholdDuration)
-	if err != nil {
-		return err
-	}
-	// Deserialize `PendingBatchWithdrawal`:
-	err = decoder.Decode(&obj.PendingBatchWithdrawal)
-	if err != nil {
-		return err
-	}
-	// Deserialize `BatchWithdrawalsInProgress`:
-	err = decoder.Decode(&obj.BatchWithdrawalsInProgress)
-	if err != nil {
-		return err
-	}
-	// Deserialize `ReservedFund`:
-	err = decoder.Decode(&obj.ReservedFund)
 	if err != nil {
 		return err
 	}

@@ -25,16 +25,19 @@ type FundManagerSettleReward struct {
 	// [3] = [] reward_token_mint
 	//
 	// [4] = [] reward_token_program
+	//
+	// [5] = [] event_authority
+	//
+	// [6] = [] program
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewFundManagerSettleRewardInstructionBuilder creates a new `FundManagerSettleReward` instruction builder.
 func NewFundManagerSettleRewardInstructionBuilder() *FundManagerSettleReward {
 	nd := &FundManagerSettleReward{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 5),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 7),
 	}
-	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"]).SIGNER()
-	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["FRAGSEthVFL7fdqM8hxfxkfCZzUvmg21cqPJVvC1qdbo"])
+	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"]).SIGNER()
 	return nd
 }
 
@@ -155,6 +158,70 @@ func (inst *FundManagerSettleReward) GetRewardTokenProgramAccount() *ag_solanago
 	return inst.AccountMetaSlice.Get(4)
 }
 
+// SetEventAuthorityAccount sets the "event_authority" account.
+func (inst *FundManagerSettleReward) SetEventAuthorityAccount(eventAuthority ag_solanago.PublicKey) *FundManagerSettleReward {
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(eventAuthority)
+	return inst
+}
+
+func (inst *FundManagerSettleReward) findFindEventAuthorityAddress(knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// const: __event_authority
+	seeds = append(seeds, []byte{byte(0x5f), byte(0x5f), byte(0x65), byte(0x76), byte(0x65), byte(0x6e), byte(0x74), byte(0x5f), byte(0x61), byte(0x75), byte(0x74), byte(0x68), byte(0x6f), byte(0x72), byte(0x69), byte(0x74), byte(0x79)})
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+	}
+	return
+}
+
+// FindEventAuthorityAddressWithBumpSeed calculates EventAuthority account address with given seeds and a known bump seed.
+func (inst *FundManagerSettleReward) FindEventAuthorityAddressWithBumpSeed(bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindEventAuthorityAddress(bumpSeed)
+	return
+}
+
+func (inst *FundManagerSettleReward) MustFindEventAuthorityAddressWithBumpSeed(bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindEventAuthorityAddress(bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindEventAuthorityAddress finds EventAuthority account address with given seeds.
+func (inst *FundManagerSettleReward) FindEventAuthorityAddress() (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindEventAuthorityAddress(0)
+	return
+}
+
+func (inst *FundManagerSettleReward) MustFindEventAuthorityAddress() (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindEventAuthorityAddress(0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// GetEventAuthorityAccount gets the "event_authority" account.
+func (inst *FundManagerSettleReward) GetEventAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(5)
+}
+
+// SetProgramAccount sets the "program" account.
+func (inst *FundManagerSettleReward) SetProgramAccount(program ag_solanago.PublicKey) *FundManagerSettleReward {
+	inst.AccountMetaSlice[6] = ag_solanago.Meta(program)
+	return inst
+}
+
+// GetProgramAccount gets the "program" account.
+func (inst *FundManagerSettleReward) GetProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(6)
+}
+
 func (inst FundManagerSettleReward) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
@@ -202,6 +269,12 @@ func (inst *FundManagerSettleReward) Validate() error {
 
 		// [4] = RewardTokenProgram is optional
 
+		if inst.AccountMetaSlice[5] == nil {
+			return errors.New("accounts.EventAuthority is not set")
+		}
+		if inst.AccountMetaSlice[6] == nil {
+			return errors.New("accounts.Program is not set")
+		}
 	}
 	return nil
 }
@@ -222,12 +295,14 @@ func (inst *FundManagerSettleReward) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=5]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Accounts[len=7]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("        fund_manager", inst.AccountMetaSlice.Get(0)))
 						accountsBranch.Child(ag_format.Meta("  receipt_token_mint", inst.AccountMetaSlice.Get(1)))
 						accountsBranch.Child(ag_format.Meta("             reward_", inst.AccountMetaSlice.Get(2)))
 						accountsBranch.Child(ag_format.Meta("   reward_token_mint", inst.AccountMetaSlice.Get(3)))
 						accountsBranch.Child(ag_format.Meta("reward_token_program", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("     event_authority", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(ag_format.Meta("             program", inst.AccountMetaSlice.Get(6)))
 					})
 				})
 		})
@@ -281,7 +356,9 @@ func NewFundManagerSettleRewardInstruction(
 	receiptTokenMint ag_solanago.PublicKey,
 	rewardAccount ag_solanago.PublicKey,
 	rewardTokenMint ag_solanago.PublicKey,
-	rewardTokenProgram ag_solanago.PublicKey) *FundManagerSettleReward {
+	rewardTokenProgram ag_solanago.PublicKey,
+	eventAuthority ag_solanago.PublicKey,
+	program ag_solanago.PublicKey) *FundManagerSettleReward {
 	return NewFundManagerSettleRewardInstructionBuilder().
 		SetRewardPoolId(reward_pool_id).
 		SetRewardId(reward_id).
@@ -290,5 +367,7 @@ func NewFundManagerSettleRewardInstruction(
 		SetReceiptTokenMintAccount(receiptTokenMint).
 		SetRewardAccountAccount(rewardAccount).
 		SetRewardTokenMintAccount(rewardTokenMint).
-		SetRewardTokenProgramAccount(rewardTokenProgram)
+		SetRewardTokenProgramAccount(rewardTokenProgram).
+		SetEventAuthorityAccount(eventAuthority).
+		SetProgramAccount(program)
 }

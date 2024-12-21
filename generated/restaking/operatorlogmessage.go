@@ -14,13 +14,16 @@ import (
 type OperatorLogMessage struct {
 	Message *string
 
+	// [0] = [] event_authority
+	//
+	// [1] = [] program
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewOperatorLogMessageInstructionBuilder creates a new `OperatorLogMessage` instruction builder.
 func NewOperatorLogMessageInstructionBuilder() *OperatorLogMessage {
 	nd := &OperatorLogMessage{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 0),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -29,6 +32,70 @@ func NewOperatorLogMessageInstructionBuilder() *OperatorLogMessage {
 func (inst *OperatorLogMessage) SetMessage(message string) *OperatorLogMessage {
 	inst.Message = &message
 	return inst
+}
+
+// SetEventAuthorityAccount sets the "event_authority" account.
+func (inst *OperatorLogMessage) SetEventAuthorityAccount(eventAuthority ag_solanago.PublicKey) *OperatorLogMessage {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(eventAuthority)
+	return inst
+}
+
+func (inst *OperatorLogMessage) findFindEventAuthorityAddress(knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// const: __event_authority
+	seeds = append(seeds, []byte{byte(0x5f), byte(0x5f), byte(0x65), byte(0x76), byte(0x65), byte(0x6e), byte(0x74), byte(0x5f), byte(0x61), byte(0x75), byte(0x74), byte(0x68), byte(0x6f), byte(0x72), byte(0x69), byte(0x74), byte(0x79)})
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+	}
+	return
+}
+
+// FindEventAuthorityAddressWithBumpSeed calculates EventAuthority account address with given seeds and a known bump seed.
+func (inst *OperatorLogMessage) FindEventAuthorityAddressWithBumpSeed(bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindEventAuthorityAddress(bumpSeed)
+	return
+}
+
+func (inst *OperatorLogMessage) MustFindEventAuthorityAddressWithBumpSeed(bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindEventAuthorityAddress(bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindEventAuthorityAddress finds EventAuthority account address with given seeds.
+func (inst *OperatorLogMessage) FindEventAuthorityAddress() (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindEventAuthorityAddress(0)
+	return
+}
+
+func (inst *OperatorLogMessage) MustFindEventAuthorityAddress() (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindEventAuthorityAddress(0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// GetEventAuthorityAccount gets the "event_authority" account.
+func (inst *OperatorLogMessage) GetEventAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetProgramAccount sets the "program" account.
+func (inst *OperatorLogMessage) SetProgramAccount(program ag_solanago.PublicKey) *OperatorLogMessage {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(program)
+	return inst
+}
+
+// GetProgramAccount gets the "program" account.
+func (inst *OperatorLogMessage) GetProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst OperatorLogMessage) Build() *Instruction {
@@ -58,6 +125,12 @@ func (inst *OperatorLogMessage) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
+		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.EventAuthority is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Program is not set")
+		}
 	}
 	return nil
 }
@@ -76,7 +149,10 @@ func (inst *OperatorLogMessage) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=0]").ParentFunc(func(accountsBranch ag_treeout.Branches) {})
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("event_authority", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("        program", inst.AccountMetaSlice.Get(1)))
+					})
 				})
 		})
 }
@@ -101,7 +177,12 @@ func (obj *OperatorLogMessage) UnmarshalWithDecoder(decoder *ag_binary.Decoder) 
 // NewOperatorLogMessageInstruction declares a new OperatorLogMessage instruction with the provided parameters and accounts.
 func NewOperatorLogMessageInstruction(
 	// Parameters:
-	message string) *OperatorLogMessage {
+	message string,
+	// Accounts:
+	eventAuthority ag_solanago.PublicKey,
+	program ag_solanago.PublicKey) *OperatorLogMessage {
 	return NewOperatorLogMessageInstructionBuilder().
-		SetMessage(message)
+		SetMessage(message).
+		SetEventAuthorityAccount(eventAuthority).
+		SetProgramAccount(program)
 }

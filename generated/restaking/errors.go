@@ -16,307 +16,463 @@ var (
 	_                      = errors.ErrUnsupported
 )
 var (
-	ErrInvalidSignatureError = &customErrorDef{
+	ErrCalculationArithmeticException = &customErrorDef{
 		code: 6000,
+		msg:  "calculation arithmetic exception",
+		name: "CalculationArithmeticException",
+	}
+	ErrIndexOutOfBoundsException = &customErrorDef{
+		code: 6001,
+		msg:  "index out of bounds exception",
+		name: "IndexOutOfBoundsException",
+	}
+	ErrUTF8DecodingException = &customErrorDef{
+		code: 6002,
+		msg:  "utf-8 decoding exception",
+		name: "UTF8DecodingException",
+	}
+	ErrInvalidSignatureError = &customErrorDef{
+		code: 6003,
 		msg:  "signature verification failed",
 		name: "InvalidSignatureError",
 	}
+	ErrInvalidAccountDataVersionError = &customErrorDef{
+		code: 6004,
+		msg:  "invalid account data version",
+		name: "InvalidAccountDataVersionError",
+	}
 	ErrTokenNotTransferableError = &customErrorDef{
-		code: 6001,
+		code: 6005,
 		msg:  "token is not transferable currently",
 		name: "TokenNotTransferableError",
 	}
 	ErrTokenNotTransferringException = &customErrorDef{
-		code: 6002,
+		code: 6006,
 		msg:  "token is not transferring currently",
 		name: "TokenNotTransferringException",
 	}
-	ErrCalculationArithmeticException = &customErrorDef{
-		code: 6003,
-		msg:  "calculation arithmetic exception",
-		name: "CalculationArithmeticException",
-	}
-	ErrDecodeInvalidUtf8FormatException = &customErrorDef{
-		code: 6004,
-		msg:  "decode invalid utf-8 format exception",
-		name: "DecodeInvalidUtf8FormatException",
-	}
-	ErrFundInvalidUpdateError = &customErrorDef{
-		code: 6005,
-		msg:  "fund: cannot apply invalid update",
-		name: "FundInvalidUpdateError",
-	}
-	ErrFundSOLTransferFailedException = &customErrorDef{
-		code: 6006,
-		msg:  "fund: sol transfer failed",
-		name: "FundSOLTransferFailedException",
-	}
-	ErrFundTokenTransferFailedException = &customErrorDef{
-		code: 6007,
-		msg:  "fund: token transfer failed",
-		name: "FundTokenTransferFailedException",
-	}
-	ErrFundAlreadySupportedTokenError = &customErrorDef{
-		code: 6008,
-		msg:  "fund: already supported token",
-		name: "FundAlreadySupportedTokenError",
-	}
-	ErrFundNotSupportedTokenError = &customErrorDef{
-		code: 6009,
-		msg:  "fund: not supported the token",
-		name: "FundNotSupportedTokenError",
-	}
-	ErrFundExceededSOLCapacityAmountError = &customErrorDef{
-		code: 6010,
-		msg:  "fund: exceeded sol capacity amount",
-		name: "FundExceededSOLCapacityAmountError",
-	}
-	ErrFundExceededTokenCapacityAmountError = &customErrorDef{
-		code: 6011,
-		msg:  "fund: exceeded token capacity amount",
-		name: "FundExceededTokenCapacityAmountError",
-	}
-	ErrFundExceededMaxWithdrawalRequestError = &customErrorDef{
-		code: 6012,
-		msg:  "fund: exceeded max withdrawal request per user",
-		name: "FundExceededMaxWithdrawalRequestError",
-	}
-	ErrFundOperationReservedSOLExhaustedException = &customErrorDef{
-		code: 6013,
-		msg:  "fund: operation reserved sol is exhausted",
-		name: "FundOperationReservedSOLExhaustedException",
-	}
-	ErrFundWithdrawalRequestNotFoundError = &customErrorDef{
-		code: 6014,
-		msg:  "fund: withdrawal request not found",
-		name: "FundWithdrawalRequestNotFoundError",
-	}
-	ErrFundPendingWithdrawalRequestError = &customErrorDef{
-		code: 6015,
-		msg:  "fund: withdrawal request not completed yet",
-		name: "FundPendingWithdrawalRequestError",
-	}
-	ErrFundWithdrawalReservedSOLExhaustedException = &customErrorDef{
-		code: 6016,
-		msg:  "fund: withdrawal reserved sol is exhausted",
-		name: "FundWithdrawalReservedSOLExhaustedException",
-	}
-	ErrFundWithdrawalDisabledError = &customErrorDef{
-		code: 6017,
-		msg:  "fund: withdrawal is currently disabled",
-		name: "FundWithdrawalDisabledError",
-	}
-	ErrFundProcessingWithdrawalRequestError = &customErrorDef{
-		code: 6018,
-		msg:  "fund: withdrawal request is already in progress",
-		name: "FundProcessingWithdrawalRequestError",
-	}
-	ErrFundTokenPricingSourceNotFoundException = &customErrorDef{
-		code: 6019,
-		msg:  "fund: token pricing source is not found",
-		name: "FundTokenPricingSourceNotFoundException",
-	}
-	ErrOperatorJobUnmetThresholdError = &customErrorDef{
-		code: 6020,
-		msg:  "operator: job unmet threshold",
-		name: "OperatorJobUnmetThresholdError",
-	}
 	ErrRewardInvalidTransferArgsException = &customErrorDef{
-		code: 6021,
+		code: 6007,
 		msg:  "reward: invalid token transfer args",
 		name: "RewardInvalidTransferArgsException",
 	}
 	ErrRewardInvalidMetadataNameLengthError = &customErrorDef{
-		code: 6022,
+		code: 6008,
 		msg:  "reward: invalid metadata name length",
 		name: "RewardInvalidMetadataNameLengthError",
 	}
 	ErrRewardInvalidMetadataDescriptionLengthError = &customErrorDef{
-		code: 6023,
+		code: 6009,
 		msg:  "reward: invalid metadata description length",
 		name: "RewardInvalidMetadataDescriptionLengthError",
 	}
-	ErrRewardInvalidRewardType = &customErrorDef{
-		code: 6024,
+	ErrRewardInvalidRewardTypeError = &customErrorDef{
+		code: 6010,
 		msg:  "reward: invalid reward type",
-		name: "RewardInvalidRewardType",
+		name: "RewardInvalidRewardTypeError",
 	}
 	ErrRewardAlreadyExistingHolderError = &customErrorDef{
-		code: 6025,
+		code: 6011,
 		msg:  "reward: already existing holder",
 		name: "RewardAlreadyExistingHolderError",
 	}
 	ErrRewardAlreadyExistingRewardError = &customErrorDef{
-		code: 6026,
+		code: 6012,
 		msg:  "reward: already existing reward",
 		name: "RewardAlreadyExistingRewardError",
 	}
 	ErrRewardAlreadyExistingPoolError = &customErrorDef{
-		code: 6027,
+		code: 6013,
 		msg:  "reward: already existing pool",
 		name: "RewardAlreadyExistingPoolError",
 	}
 	ErrRewardHolderNotFoundError = &customErrorDef{
-		code: 6028,
+		code: 6014,
 		msg:  "reward: holder not found",
 		name: "RewardHolderNotFoundError",
 	}
 	ErrRewardNotFoundError = &customErrorDef{
-		code: 6029,
+		code: 6015,
 		msg:  "reward: reward not found",
 		name: "RewardNotFoundError",
 	}
 	ErrRewardPoolNotFoundError = &customErrorDef{
-		code: 6030,
+		code: 6016,
 		msg:  "reward: pool not found",
 		name: "RewardPoolNotFoundError",
 	}
 	ErrRewardUserPoolNotFoundError = &customErrorDef{
-		code: 6031,
+		code: 6017,
 		msg:  "reward: user pool not found",
 		name: "RewardUserPoolNotFoundError",
 	}
 	ErrRewardPoolClosedError = &customErrorDef{
-		code: 6032,
+		code: 6018,
 		msg:  "reward: pool is closed",
 		name: "RewardPoolClosedError",
 	}
 	ErrRewardInvalidPoolConfigurationException = &customErrorDef{
-		code: 6033,
+		code: 6019,
 		msg:  "reward: invalid pool configuration",
 		name: "RewardInvalidPoolConfigurationException",
 	}
 	ErrRewardInvalidPoolAccessException = &customErrorDef{
-		code: 6034,
+		code: 6020,
 		msg:  "reward: invalid reward pool access",
 		name: "RewardInvalidPoolAccessException",
 	}
-	ErrRewardUnmetAccountReallocError = &customErrorDef{
-		code: 6035,
-		msg:  "reward: unmet account size reallocation",
-		name: "RewardUnmetAccountReallocError",
-	}
 	ErrRewardInvalidAccountingException = &customErrorDef{
-		code: 6036,
+		code: 6021,
 		msg:  "reward: incorrect accounting exception",
 		name: "RewardInvalidAccountingException",
 	}
 	ErrRewardInvalidAllocatedAmountDeltaException = &customErrorDef{
-		code: 6037,
+		code: 6022,
 		msg:  "reward: invalid amount or contribution accrual rate",
 		name: "RewardInvalidAllocatedAmountDeltaException",
 	}
-	ErrRewardExceededMaxHoldersException = &customErrorDef{
-		code: 6038,
+	ErrRewardExceededMaxHoldersError = &customErrorDef{
+		code: 6023,
 		msg:  "reward: exceeded max holders",
-		name: "RewardExceededMaxHoldersException",
+		name: "RewardExceededMaxHoldersError",
 	}
-	ErrRewardExceededMaxRewardsException = &customErrorDef{
-		code: 6039,
+	ErrRewardExceededMaxRewardsError = &customErrorDef{
+		code: 6024,
 		msg:  "reward: exceeded max rewards",
-		name: "RewardExceededMaxRewardsException",
+		name: "RewardExceededMaxRewardsError",
 	}
-	ErrRewardExceededMaxRewardPoolsException = &customErrorDef{
-		code: 6040,
+	ErrRewardExceededMaxRewardPoolsError = &customErrorDef{
+		code: 6025,
 		msg:  "reward: exceeded max reward pools",
-		name: "RewardExceededMaxRewardPoolsException",
+		name: "RewardExceededMaxRewardPoolsError",
 	}
-	ErrRewardExceededMaxUserRewardPoolsException = &customErrorDef{
-		code: 6041,
+	ErrRewardExceededMaxUserRewardPoolsError = &customErrorDef{
+		code: 6026,
 		msg:  "reward: exceeded max user reward pools",
-		name: "RewardExceededMaxUserRewardPoolsException",
+		name: "RewardExceededMaxUserRewardPoolsError",
 	}
-	ErrRewardExceededMaxHolderPubkeysException = &customErrorDef{
-		code: 6042,
+	ErrRewardExceededMaxHolderPubkeysError = &customErrorDef{
+		code: 6027,
 		msg:  "reward: exceeded max pubkeys per holder",
-		name: "RewardExceededMaxHolderPubkeysException",
+		name: "RewardExceededMaxHolderPubkeysError",
 	}
 	ErrRewardExceededMaxTokenAllocatedAmountRecordException = &customErrorDef{
-		code: 6043,
+		code: 6028,
 		msg:  "reward: exceeded max token allocated amount record",
 		name: "RewardExceededMaxTokenAllocatedAmountRecordException",
 	}
-	ErrRewardExceededMaxRewardSettlementException = &customErrorDef{
-		code: 6044,
+	ErrRewardExceededMaxRewardSettlementError = &customErrorDef{
+		code: 6029,
 		msg:  "reward: exceeded max reward settlements per pool",
-		name: "RewardExceededMaxRewardSettlementException",
+		name: "RewardExceededMaxRewardSettlementError",
 	}
 	ErrRewardStaleSettlementBlockNotExistError = &customErrorDef{
-		code: 6045,
+		code: 6030,
 		msg:  "reward: stale settlement block not exist",
 		name: "RewardStaleSettlementBlockNotExistError",
 	}
 	ErrRewardInvalidSettlementBlockHeightException = &customErrorDef{
-		code: 6046,
+		code: 6031,
 		msg:  "reward: invalid settlement block height",
 		name: "RewardInvalidSettlementBlockHeightException",
 	}
 	ErrRewardInvalidSettlementBlockContributionException = &customErrorDef{
-		code: 6047,
+		code: 6032,
 		msg:  "reward: invalid settlement block contribution",
 		name: "RewardInvalidSettlementBlockContributionException",
 	}
 	ErrRewardInvalidTotalUserSettledAmountException = &customErrorDef{
-		code: 6048,
+		code: 6033,
 		msg:  "reward: sum of user settled amount cannot exceed total amount",
 		name: "RewardInvalidTotalUserSettledAmountException",
 	}
 	ErrRewardInvalidTotalUserSettledContributionException = &customErrorDef{
-		code: 6049,
+		code: 6034,
 		msg:  "reward: sum of user settled contribution cannot exceed total contribution",
 		name: "RewardInvalidTotalUserSettledContributionException",
 	}
+	ErrRewardPoolCloseConditionError = &customErrorDef{
+		code: 6035,
+		msg:  "reward: cannot close the reward pool",
+		name: "RewardPoolCloseConditionError",
+	}
+	ErrTokenPricingSourceAccountNotFoundError = &customErrorDef{
+		code: 6036,
+		msg:  "pricing: token pricing source is not found",
+		name: "TokenPricingSourceAccountNotFoundError",
+	}
+	ErrFundInvalidConfigurationUpdateError = &customErrorDef{
+		code: 6037,
+		msg:  "fund: cannot apply invalid configuration update",
+		name: "FundInvalidConfigurationUpdateError",
+	}
+	ErrFundAlreadySupportedTokenError = &customErrorDef{
+		code: 6038,
+		msg:  "fund: already supported token",
+		name: "FundAlreadySupportedTokenError",
+	}
+	ErrFundNotSupportedTokenError = &customErrorDef{
+		code: 6039,
+		msg:  "fund: not supported token",
+		name: "FundNotSupportedTokenError",
+	}
+	ErrFundDepositDisabledError = &customErrorDef{
+		code: 6040,
+		msg:  "fund: deposit is currently disabled",
+		name: "FundDepositDisabledError",
+	}
+	ErrFundExceededDepositCapacityAmountError = &customErrorDef{
+		code: 6041,
+		msg:  "fund: exceeded deposit capacity amount",
+		name: "FundExceededDepositCapacityAmountError",
+	}
+	ErrFundDepositNotSupportedAsset = &customErrorDef{
+		code: 6042,
+		msg:  "fund: deposit is not supported for the given asset",
+		name: "FundDepositNotSupportedAsset",
+	}
+	ErrFundExceededMaxWithdrawalRequestError = &customErrorDef{
+		code: 6043,
+		msg:  "fund: exceeded max withdrawal request per user",
+		name: "FundExceededMaxWithdrawalRequestError",
+	}
+	ErrFundWithdrawalRequestNotFoundError = &customErrorDef{
+		code: 6044,
+		msg:  "fund: withdrawal request not found",
+		name: "FundWithdrawalRequestNotFoundError",
+	}
+	ErrFundWithdrawalRequestIncorrectBatchError = &customErrorDef{
+		code: 6045,
+		msg:  "fund: withdrawal request not belongs to the given batch",
+		name: "FundWithdrawalRequestIncorrectBatchError",
+	}
+	ErrFundWithdrawalDisabledError = &customErrorDef{
+		code: 6046,
+		msg:  "fund: withdrawal is currently disabled",
+		name: "FundWithdrawalDisabledError",
+	}
+	ErrFundWithdrawalNotSupportedAsset = &customErrorDef{
+		code: 6047,
+		msg:  "fund: withdrawal is not supported for the given asset",
+		name: "FundWithdrawalNotSupportedAsset",
+	}
+	ErrFundWithdrawalReserveExhaustedSupportedAsset = &customErrorDef{
+		code: 6048,
+		msg:  "fund: withdrawal reserve is exhausted for the given asset",
+		name: "FundWithdrawalReserveExhaustedSupportedAsset",
+	}
+	ErrFundWithdrawalRequestAlreadyQueuedError = &customErrorDef{
+		code: 6049,
+		msg:  "fund: withdrawal request is already in progress",
+		name: "FundWithdrawalRequestAlreadyQueuedError",
+	}
+	ErrFundDepositMetadataSignatureExpiredError = &customErrorDef{
+		code: 6050,
+		msg:  "fund: deposit metadata signature has expired",
+		name: "FundDepositMetadataSignatureExpiredError",
+	}
+	ErrFundExceededMaxSupportedTokensError = &customErrorDef{
+		code: 6051,
+		msg:  "fund: exceeded max supported tokens",
+		name: "FundExceededMaxSupportedTokensError",
+	}
+	ErrFundInvalidWithdrawalFeeRateError = &customErrorDef{
+		code: 6052,
+		msg:  "fund: invalid withdrawal fee rate",
+		name: "FundInvalidWithdrawalFeeRateError",
+	}
+	ErrFundNormalizedTokenAlreadySetError = &customErrorDef{
+		code: 6053,
+		msg:  "fund: normalized token already set",
+		name: "FundNormalizedTokenAlreadySetError",
+	}
+	ErrFundRestakingVaultAlreadyRegisteredError = &customErrorDef{
+		code: 6054,
+		msg:  "fund: restaking vault already registered",
+		name: "FundRestakingVaultAlreadyRegisteredError",
+	}
+	ErrFundExceededMaxRestakingVaultsError = &customErrorDef{
+		code: 6055,
+		msg:  "reward: exceeded max restaking vaults",
+		name: "FundExceededMaxRestakingVaultsError",
+	}
+	ErrFundRestakingNotSupportedVaultError = &customErrorDef{
+		code: 6056,
+		msg:  "fund: not supported restaking vault",
+		name: "FundRestakingNotSupportedVaultError",
+	}
+	ErrFundRestakingVaultNotFoundError = &customErrorDef{
+		code: 6057,
+		msg:  "fund: restaking vault not found",
+		name: "FundRestakingVaultNotFoundError",
+	}
+	ErrFundRestakingVaultOperatorNotFoundError = &customErrorDef{
+		code: 6058,
+		msg:  "fund: restaking vault operator not found",
+		name: "FundRestakingVaultOperatorNotFoundError",
+	}
+	ErrFundRestakingVaultOperatorAlreadyRegisteredError = &customErrorDef{
+		code: 6059,
+		msg:  "fund: restaking vault operator already registered",
+		name: "FundRestakingVaultOperatorAlreadyRegisteredError",
+	}
+	ErrFundExceededMaxRestakingVaultOperatorsError = &customErrorDef{
+		code: 6060,
+		msg:  "fund: exceeded max restaking vault operators",
+		name: "FundExceededMaxRestakingVaultOperatorsError",
+	}
+	ErrFundOperationUnauthorizedCommandError = &customErrorDef{
+		code: 6061,
+		msg:  "fund: unauhorized operation command",
+		name: "FundOperationUnauthorizedCommandError",
+	}
+	ErrFundOperationCommandAccountComputationException = &customErrorDef{
+		code: 6062,
+		msg:  "fund: failed to compute required accounts for the operation command",
+		name: "FundOperationCommandAccountComputationException",
+	}
+	ErrFundOperationCommandExecutionFailedException = &customErrorDef{
+		code: 6063,
+		msg:  "fund: failed to execute the operation command",
+		name: "FundOperationCommandExecutionFailedException",
+	}
+	ErrNormalizedTokenPoolNotSupportedTokenError = &customErrorDef{
+		code: 6064,
+		msg:  "normalization: not supported token",
+		name: "NormalizedTokenPoolNotSupportedTokenError",
+	}
+	ErrNormalizedTokenPoolAlreadySupportedTokenError = &customErrorDef{
+		code: 6065,
+		msg:  "normalization: already supported token",
+		name: "NormalizedTokenPoolAlreadySupportedTokenError",
+	}
+	ErrNormalizedTokenPoolExceededMaxSupportedTokensError = &customErrorDef{
+		code: 6066,
+		msg:  "normalization: exceeded max supported tokens",
+		name: "NormalizedTokenPoolExceededMaxSupportedTokensError",
+	}
+	ErrNormalizedTokenPoolNotEnoughSupportedTokenException = &customErrorDef{
+		code: 6067,
+		msg:  "normalization: not enough supported token in the pool",
+		name: "NormalizedTokenPoolNotEnoughSupportedTokenException",
+	}
+	ErrNormalizedTokenPoolAlreadySettledWithdrawalAccountError = &customErrorDef{
+		code: 6068,
+		msg:  "normalization: already settled withdrawal account",
+		name: "NormalizedTokenPoolAlreadySettledWithdrawalAccountError",
+	}
+	ErrNormalizedTokenPoolNonClaimableTokenError = &customErrorDef{
+		code: 6069,
+		msg:  "normalization: the token is non-claimable for the given withdrawal account",
+		name: "NormalizedTokenPoolNonClaimableTokenError",
+	}
+	ErrStakingUninitializedWithdrawTicketNotFoundException = &customErrorDef{
+		code: 6070,
+		msg:  "staking: failed to find uninitialized withdraw ticket",
+		name: "StakingUninitializedWithdrawTicketNotFoundException",
+	}
+	ErrStakingAccountNotMatchedException = &customErrorDef{
+		code: 6071,
+		msg:  "staking: account not matched",
+		name: "StakingAccountNotMatchedException",
+	}
+	ErrStakingSPLActiveStakeNotAvailableException = &customErrorDef{
+		code: 6072,
+		msg:  "staking: spl stake pool's active stake not available",
+		name: "StakingSPLActiveStakeNotAvailableException",
+	}
+	ErrRestakingVaultWithdrawalTicketsExhaustedError = &customErrorDef{
+		code: 6073,
+		msg:  "restaking: all withdrawal tickets are already in use",
+		name: "RestakingVaultWithdrawalTicketsExhaustedError",
+	}
+	ErrRestakingVaultWithdrawalTicketNotWithdrawableError = &customErrorDef{
+		code: 6074,
+		msg:  "restaking: withdrawal ticket is not withdrawable",
+		name: "RestakingVaultWithdrawalTicketNotWithdrawableError",
+	}
+	ErrRestakingVaultWithdrawalTicketAlreadyInitializedError = &customErrorDef{
+		code: 6075,
+		msg:  "restaking: withdrawal ticket is already initialized",
+		name: "RestakingVaultWithdrawalTicketAlreadyInitializedError",
+	}
 	Errors = map[int]CustomError{
-		6000: ErrInvalidSignatureError,
-		6001: ErrTokenNotTransferableError,
-		6002: ErrTokenNotTransferringException,
-		6003: ErrCalculationArithmeticException,
-		6004: ErrDecodeInvalidUtf8FormatException,
-		6005: ErrFundInvalidUpdateError,
-		6006: ErrFundSOLTransferFailedException,
-		6007: ErrFundTokenTransferFailedException,
-		6008: ErrFundAlreadySupportedTokenError,
-		6009: ErrFundNotSupportedTokenError,
-		6010: ErrFundExceededSOLCapacityAmountError,
-		6011: ErrFundExceededTokenCapacityAmountError,
-		6012: ErrFundExceededMaxWithdrawalRequestError,
-		6013: ErrFundOperationReservedSOLExhaustedException,
-		6014: ErrFundWithdrawalRequestNotFoundError,
-		6015: ErrFundPendingWithdrawalRequestError,
-		6016: ErrFundWithdrawalReservedSOLExhaustedException,
-		6017: ErrFundWithdrawalDisabledError,
-		6018: ErrFundProcessingWithdrawalRequestError,
-		6019: ErrFundTokenPricingSourceNotFoundException,
-		6020: ErrOperatorJobUnmetThresholdError,
-		6021: ErrRewardInvalidTransferArgsException,
-		6022: ErrRewardInvalidMetadataNameLengthError,
-		6023: ErrRewardInvalidMetadataDescriptionLengthError,
-		6024: ErrRewardInvalidRewardType,
-		6025: ErrRewardAlreadyExistingHolderError,
-		6026: ErrRewardAlreadyExistingRewardError,
-		6027: ErrRewardAlreadyExistingPoolError,
-		6028: ErrRewardHolderNotFoundError,
-		6029: ErrRewardNotFoundError,
-		6030: ErrRewardPoolNotFoundError,
-		6031: ErrRewardUserPoolNotFoundError,
-		6032: ErrRewardPoolClosedError,
-		6033: ErrRewardInvalidPoolConfigurationException,
-		6034: ErrRewardInvalidPoolAccessException,
-		6035: ErrRewardUnmetAccountReallocError,
-		6036: ErrRewardInvalidAccountingException,
-		6037: ErrRewardInvalidAllocatedAmountDeltaException,
-		6038: ErrRewardExceededMaxHoldersException,
-		6039: ErrRewardExceededMaxRewardsException,
-		6040: ErrRewardExceededMaxRewardPoolsException,
-		6041: ErrRewardExceededMaxUserRewardPoolsException,
-		6042: ErrRewardExceededMaxHolderPubkeysException,
-		6043: ErrRewardExceededMaxTokenAllocatedAmountRecordException,
-		6044: ErrRewardExceededMaxRewardSettlementException,
-		6045: ErrRewardStaleSettlementBlockNotExistError,
-		6046: ErrRewardInvalidSettlementBlockHeightException,
-		6047: ErrRewardInvalidSettlementBlockContributionException,
-		6048: ErrRewardInvalidTotalUserSettledAmountException,
-		6049: ErrRewardInvalidTotalUserSettledContributionException,
+		6000: ErrCalculationArithmeticException,
+		6001: ErrIndexOutOfBoundsException,
+		6002: ErrUTF8DecodingException,
+		6003: ErrInvalidSignatureError,
+		6004: ErrInvalidAccountDataVersionError,
+		6005: ErrTokenNotTransferableError,
+		6006: ErrTokenNotTransferringException,
+		6007: ErrRewardInvalidTransferArgsException,
+		6008: ErrRewardInvalidMetadataNameLengthError,
+		6009: ErrRewardInvalidMetadataDescriptionLengthError,
+		6010: ErrRewardInvalidRewardTypeError,
+		6011: ErrRewardAlreadyExistingHolderError,
+		6012: ErrRewardAlreadyExistingRewardError,
+		6013: ErrRewardAlreadyExistingPoolError,
+		6014: ErrRewardHolderNotFoundError,
+		6015: ErrRewardNotFoundError,
+		6016: ErrRewardPoolNotFoundError,
+		6017: ErrRewardUserPoolNotFoundError,
+		6018: ErrRewardPoolClosedError,
+		6019: ErrRewardInvalidPoolConfigurationException,
+		6020: ErrRewardInvalidPoolAccessException,
+		6021: ErrRewardInvalidAccountingException,
+		6022: ErrRewardInvalidAllocatedAmountDeltaException,
+		6023: ErrRewardExceededMaxHoldersError,
+		6024: ErrRewardExceededMaxRewardsError,
+		6025: ErrRewardExceededMaxRewardPoolsError,
+		6026: ErrRewardExceededMaxUserRewardPoolsError,
+		6027: ErrRewardExceededMaxHolderPubkeysError,
+		6028: ErrRewardExceededMaxTokenAllocatedAmountRecordException,
+		6029: ErrRewardExceededMaxRewardSettlementError,
+		6030: ErrRewardStaleSettlementBlockNotExistError,
+		6031: ErrRewardInvalidSettlementBlockHeightException,
+		6032: ErrRewardInvalidSettlementBlockContributionException,
+		6033: ErrRewardInvalidTotalUserSettledAmountException,
+		6034: ErrRewardInvalidTotalUserSettledContributionException,
+		6035: ErrRewardPoolCloseConditionError,
+		6036: ErrTokenPricingSourceAccountNotFoundError,
+		6037: ErrFundInvalidConfigurationUpdateError,
+		6038: ErrFundAlreadySupportedTokenError,
+		6039: ErrFundNotSupportedTokenError,
+		6040: ErrFundDepositDisabledError,
+		6041: ErrFundExceededDepositCapacityAmountError,
+		6042: ErrFundDepositNotSupportedAsset,
+		6043: ErrFundExceededMaxWithdrawalRequestError,
+		6044: ErrFundWithdrawalRequestNotFoundError,
+		6045: ErrFundWithdrawalRequestIncorrectBatchError,
+		6046: ErrFundWithdrawalDisabledError,
+		6047: ErrFundWithdrawalNotSupportedAsset,
+		6048: ErrFundWithdrawalReserveExhaustedSupportedAsset,
+		6049: ErrFundWithdrawalRequestAlreadyQueuedError,
+		6050: ErrFundDepositMetadataSignatureExpiredError,
+		6051: ErrFundExceededMaxSupportedTokensError,
+		6052: ErrFundInvalidWithdrawalFeeRateError,
+		6053: ErrFundNormalizedTokenAlreadySetError,
+		6054: ErrFundRestakingVaultAlreadyRegisteredError,
+		6055: ErrFundExceededMaxRestakingVaultsError,
+		6056: ErrFundRestakingNotSupportedVaultError,
+		6057: ErrFundRestakingVaultNotFoundError,
+		6058: ErrFundRestakingVaultOperatorNotFoundError,
+		6059: ErrFundRestakingVaultOperatorAlreadyRegisteredError,
+		6060: ErrFundExceededMaxRestakingVaultOperatorsError,
+		6061: ErrFundOperationUnauthorizedCommandError,
+		6062: ErrFundOperationCommandAccountComputationException,
+		6063: ErrFundOperationCommandExecutionFailedException,
+		6064: ErrNormalizedTokenPoolNotSupportedTokenError,
+		6065: ErrNormalizedTokenPoolAlreadySupportedTokenError,
+		6066: ErrNormalizedTokenPoolExceededMaxSupportedTokensError,
+		6067: ErrNormalizedTokenPoolNotEnoughSupportedTokenException,
+		6068: ErrNormalizedTokenPoolAlreadySettledWithdrawalAccountError,
+		6069: ErrNormalizedTokenPoolNonClaimableTokenError,
+		6070: ErrStakingUninitializedWithdrawTicketNotFoundException,
+		6071: ErrStakingAccountNotMatchedException,
+		6072: ErrStakingSPLActiveStakeNotAvailableException,
+		6073: ErrRestakingVaultWithdrawalTicketsExhaustedError,
+		6074: ErrRestakingVaultWithdrawalTicketNotWithdrawableError,
+		6075: ErrRestakingVaultWithdrawalTicketAlreadyInitializedError,
 	}
 )
 
