@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/fragmetric-labs/solana-anchor-go/sighash"
@@ -1351,6 +1352,12 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
 				}
 				code.Lit(int(v))
+			case "i64":
+				v, err := strconv.ParseInt(c.Value, 10, 64)
+				if err != nil {
+					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
+				}
+				code.Lit(int(v))
 			case "pubkey":
 				code.Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(c.Value))
 			default:
@@ -1529,7 +1536,11 @@ func genAccountGettersSetters(
 
 					for i, seedValue := range seedValues {
 						if seedValue != nil {
-							body.Commentf("const: %s", string(seedValue))
+							if utf8.Valid(seedValue) {
+								body.Commentf("const: %s", string(seedValue))
+							} else {
+								body.Commentf("const (raw): %+v", seedValue)
+							}
 							body.Add(Id("seeds").Op("=").Append(Id("seeds"), Index().Byte().ValuesFunc(func(group *Group) {
 								for _, v := range seedValue {
 									group.LitByte(v)
