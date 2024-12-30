@@ -14,6 +14,7 @@ func TestEncodeDecode_AdminUpdateRewardAccountIfNeeded(t *testing.T) {
 		t.Run("AdminUpdateRewardAccountIfNeeded"+strconv.Itoa(i), func(t *testing.T) {
 			{
 				params := new(AdminUpdateRewardAccountIfNeeded)
+				params.AccountMetaSlice = nil
 				buf := new(bytes.Buffer)
 				err := encodeT(*params, buf)
 				ag_require.NoError(t, err)

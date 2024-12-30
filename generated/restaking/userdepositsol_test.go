@@ -14,6 +14,7 @@ func TestEncodeDecode_UserDepositSol(t *testing.T) {
 		t.Run("UserDepositSol"+strconv.Itoa(i), func(t *testing.T) {
 			{
 				params := new(UserDepositSol)
+				params.AccountMetaSlice = nil
 				buf := new(bytes.Buffer)
 				err := encodeT(*params, buf)
 				ag_require.NoError(t, err)

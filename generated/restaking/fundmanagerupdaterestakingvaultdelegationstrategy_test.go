@@ -14,6 +14,7 @@ func TestEncodeDecode_FundManagerUpdateRestakingVaultDelegationStrategy(t *testi
 		t.Run("FundManagerUpdateRestakingVaultDelegationStrategy"+strconv.Itoa(i), func(t *testing.T) {
 			{
 				params := new(FundManagerUpdateRestakingVaultDelegationStrategy)
+				params.AccountMetaSlice = nil
 				buf := new(bytes.Buffer)
 				err := encodeT(*params, buf)
 				ag_require.NoError(t, err)

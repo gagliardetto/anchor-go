@@ -222,6 +222,7 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 }
 func genTestWithStruct(tFunGroup *Group, insExportedName string) {
 	tFunGroup.Id("params").Op(":=").New(Id(insExportedName))
+	tFunGroup.Id("params").Dot("AccountMetaSlice").Op("=").Nil()
 	tFunGroup.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
 	tFunGroup.Id("err").Op(":=").Id("encodeT").Call(Op("*").Id("params"), Id("buf"))
 	tFunGroup.Qual(PkgTestifyRequire, "NoError").Call(Id("t"), Err())

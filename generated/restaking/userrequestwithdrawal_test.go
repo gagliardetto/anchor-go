@@ -14,6 +14,7 @@ func TestEncodeDecode_UserRequestWithdrawal(t *testing.T) {
 		t.Run("UserRequestWithdrawal"+strconv.Itoa(i), func(t *testing.T) {
 			{
 				params := new(UserRequestWithdrawal)
+				params.AccountMetaSlice = nil
 				buf := new(bytes.Buffer)
 				err := encodeT(*params, buf)
 				ag_require.NoError(t, err)

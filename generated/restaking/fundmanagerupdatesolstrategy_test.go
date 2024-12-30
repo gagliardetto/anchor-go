@@ -14,6 +14,7 @@ func TestEncodeDecode_FundManagerUpdateSolStrategy(t *testing.T) {
 		t.Run("FundManagerUpdateSolStrategy"+strconv.Itoa(i), func(t *testing.T) {
 			{
 				params := new(FundManagerUpdateSolStrategy)
+				params.AccountMetaSlice = nil
 				buf := new(bytes.Buffer)
 				err := encodeT(*params, buf)
 				ag_require.NoError(t, err)
