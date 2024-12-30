@@ -209,23 +209,23 @@ func (inst *FundManagerUpdateRestakingVaultOperatorStrategy) SetProgramAccount(p
 func (inst *FundManagerUpdateRestakingVaultOperatorStrategy) GetProgramAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(4)
 }
-
-func (inst FundManagerUpdateRestakingVaultOperatorStrategy) Build() *Instruction {
-	return &Instruction{BaseVariant: ag_binary.BaseVariant{
-		Impl:   inst,
-		TypeID: Instruction_FundManagerUpdateRestakingVaultOperatorStrategy,
-	}}
-}
+//
+//func (inst FundManagerUpdateRestakingVaultOperatorStrategy) Build() *Instruction {
+//	return &Instruction{BaseVariant: ag_binary.BaseVariant{
+//		Impl:   inst,
+//		TypeID: Instruction_FundManagerUpdateRestakingVaultOperatorStrategy,
+//	}}
+//}
 
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst FundManagerUpdateRestakingVaultOperatorStrategy) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
-		return nil, err
-	}
-	return inst.Build(), nil
-}
+//func (inst FundManagerUpdateRestakingVaultOperatorStrategy) ValidateAndBuild() (*Instruction, error) {
+//	if err := inst.Validate(); err != nil {
+//		return nil, err
+//	}
+//	return inst.Build(), nil
+//}
 
 func (inst *FundManagerUpdateRestakingVaultOperatorStrategy) Validate() error {
 	// Check whether all (required) parameters are set:

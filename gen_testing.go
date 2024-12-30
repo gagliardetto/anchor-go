@@ -15,6 +15,15 @@ func isAnyFieldComplexEnum(envelopes ...IdlField) bool {
 	return false
 }
 
+func isAnyFieldOption(envelopes ...IdlField) bool {
+	for _, v := range envelopes {
+		if v.Type.IsIdlTypeOption() {
+			return true
+		}
+	}
+	return false
+}
+
 func countFieldComplexEnum(envelopes ...IdlField) int {
 	var count int
 	for _, v := range envelopes {
@@ -107,8 +116,9 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 				).
 				BlockFunc(func(body *Group) {
 					// Body:
-					body.Id("fu").Op(":=").Qual(PkgGoFuzz, "New").Call().Dot("NilChance").Call(Lit(0))
-
+					if !isAnyFieldOption(instruction.Args...) {
+						body.Id("fu").Op(":=").Qual(PkgGoFuzz, "New").Call().Dot("NilChance").Call(Lit(0))
+					}
 					body.For(
 						Id("i").Op(":=").Lit(0),
 						Id("i").Op("<").Lit(1),
@@ -119,14 +129,13 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 							DoGroup(func(fnGroup *Group) {
 								fnGroup.Func().Params(Id("t").Op("*").Qual("testing", "T")).Block(
 									BlockFunc(func(tFunGroup *Group) {
-
 										if isAnyFieldComplexEnum(instruction.Args...) {
 											genTestWithComplexEnum(tFunGroup, insExportedName, instruction, idl)
-											// TODO: populate complex enum
+										} else if isAnyFieldOption(instruction.Args...) {
+											genTestWithStruct(tFunGroup, insExportedName)
 										} else {
 											genTestNOComplexEnum(tFunGroup, insExportedName, instruction)
 										}
-
 									}),
 								)
 							}),
@@ -173,7 +182,6 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 			continue
 		}
 		exportedArgName := ToCamel(arg.Name)
-
 		tFunGroup.BlockFunc(func(enumBlock *Group) {
 
 			enumName := arg.Type.GetIdlTypeDefined().Defined.Name
@@ -211,4 +219,18 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 
 		})
 	}
+}
+func genTestWithStruct(tFunGroup *Group, insExportedName string) {
+	tFunGroup.Id("params").Op(":=").New(Id(insExportedName))
+	tFunGroup.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
+	tFunGroup.Id("err").Op(":=").Id("encodeT").Call(Op("*").Id("params"), Id("buf"))
+	tFunGroup.Qual(PkgTestifyRequire, "NoError").Call(Id("t"), Err())
+
+	tFunGroup.Comment("//")
+
+	tFunGroup.Id("got").Op(":=").New(Id(insExportedName))
+	tFunGroup.Id("err").Op("=").Id("decodeT").Call(Id("got"), Id("buf").Dot("Bytes").Call())
+	tFunGroup.Id("got").Dot("AccountMetaSlice").Op("=").Nil()
+	tFunGroup.Qual(PkgTestifyRequire, "NoError").Call(Id("t"), Err())
+	tFunGroup.Qual(PkgTestifyRequire, "Equal").Call(Id("t"), Id("params"), Id("got"))
 }

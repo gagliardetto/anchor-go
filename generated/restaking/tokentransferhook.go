@@ -253,22 +253,22 @@ func (inst *TokenTransferHook) GetRewardAccountAccount() *ag_solanago.AccountMet
 	return inst.AccountMetaSlice.Get(6)
 }
 
-func (inst TokenTransferHook) Build() *Instruction {
-	return &Instruction{BaseVariant: ag_binary.BaseVariant{
-		Impl:   inst,
-		TypeID: Instruction_TokenTransferHook,
-	}}
-}
-
-// ValidateAndBuild validates the instruction parameters and accounts;
-// if there is a validation error, it returns the error.
-// Otherwise, it builds and returns the instruction.
-func (inst TokenTransferHook) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
-		return nil, err
-	}
-	return inst.Build(), nil
-}
+//func (inst TokenTransferHook) Build() *Instruction {
+//	return &Instruction{BaseVariant: ag_binary.BaseVariant{
+//		Impl:   inst,
+//		TypeID: Instruction_TokenTransferHook,
+//	}}
+//}
+//
+//// ValidateAndBuild validates the instruction parameters and accounts;
+//// if there is a validation error, it returns the error.
+//// Otherwise, it builds and returns the instruction.
+//func (inst TokenTransferHook) ValidateAndBuild() (*Instruction, error) {
+//	if err := inst.Validate(); err != nil {
+//		return nil, err
+//	}
+//	return inst.Build(), nil
+//}
 
 func (inst *TokenTransferHook) Validate() error {
 	// Check whether all (required) parameters are set:
