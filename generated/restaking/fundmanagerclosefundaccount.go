@@ -15,7 +15,7 @@ type FundManagerCloseFundAccount struct {
 
 	// [0] = [WRITE, SIGNER] payer
 	//
-	// [1] = [SIGNER] admin
+	// [1] = [SIGNER] fund_manager
 	//
 	// [2] = [WRITE] fund_account
 	ag_solanago.AccountMetaSlice `bin:"-"`
@@ -26,7 +26,7 @@ func NewFundManagerCloseFundAccountInstructionBuilder() *FundManagerCloseFundAcc
 	nd := &FundManagerCloseFundAccount{
 		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
-	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"]).SIGNER()
+	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"]).SIGNER()
 	return nd
 }
 
@@ -41,14 +41,14 @@ func (inst *FundManagerCloseFundAccount) GetPayerAccount() *ag_solanago.AccountM
 	return inst.AccountMetaSlice.Get(0)
 }
 
-// SetAdminAccount sets the "admin" account.
-func (inst *FundManagerCloseFundAccount) SetAdminAccount(admin ag_solanago.PublicKey) *FundManagerCloseFundAccount {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(admin).SIGNER()
+// SetFundManagerAccount sets the "fund_manager" account.
+func (inst *FundManagerCloseFundAccount) SetFundManagerAccount(fundManager ag_solanago.PublicKey) *FundManagerCloseFundAccount {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(fundManager).SIGNER()
 	return inst
 }
 
-// GetAdminAccount gets the "admin" account.
-func (inst *FundManagerCloseFundAccount) GetAdminAccount() *ag_solanago.AccountMeta {
+// GetFundManagerAccount gets the "fund_manager" account.
+func (inst *FundManagerCloseFundAccount) GetFundManagerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(1)
 }
 
@@ -62,8 +62,8 @@ func (inst *FundManagerCloseFundAccount) findFindFundAccountAddress(knownBumpSee
 	var seeds [][]byte
 	// const: fund
 	seeds = append(seeds, []byte{byte(0x66), byte(0x75), byte(0x6e), byte(0x64)})
-	// const (raw): [176 64 228 130 214 123 80 76 100 178 192 192 179 126 147 60 234 167 167 116 119 133 49 140 60 54 168 166 57 242 137 226]
-	seeds = append(seeds, []byte{byte(0xb0), byte(0x40), byte(0xe4), byte(0x82), byte(0xd6), byte(0x7b), byte(0x50), byte(0x4c), byte(0x64), byte(0xb2), byte(0xc0), byte(0xc0), byte(0xb3), byte(0x7e), byte(0x93), byte(0x3c), byte(0xea), byte(0xa7), byte(0xa7), byte(0x74), byte(0x77), byte(0x85), byte(0x31), byte(0x8c), byte(0x3c), byte(0x36), byte(0xa8), byte(0xa6), byte(0x39), byte(0xf2), byte(0x89), byte(0xe2)})
+	// const (raw): [214 52 8 155 182 149 115 57 20 131 125 232 82 251 210 76 255 40 78 39 34 166 52 128 105 118 67 202 117 247 108 146]
+	seeds = append(seeds, []byte{byte(0xd6), byte(0x34), byte(0x8), byte(0x9b), byte(0xb6), byte(0x95), byte(0x73), byte(0x39), byte(0x14), byte(0x83), byte(0x7d), byte(0xe8), byte(0x52), byte(0xfb), byte(0xd2), byte(0x4c), byte(0xff), byte(0x28), byte(0x4e), byte(0x27), byte(0x22), byte(0xa6), byte(0x34), byte(0x80), byte(0x69), byte(0x76), byte(0x43), byte(0xca), byte(0x75), byte(0xf7), byte(0x6c), byte(0x92)})
 
 	if knownBumpSeed != 0 {
 		seeds = append(seeds, []byte{byte(bumpSeed)})
@@ -131,7 +131,7 @@ func (inst *FundManagerCloseFundAccount) Validate() error {
 			return errors.New("accounts.Payer is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.Admin is not set")
+			return errors.New("accounts.FundManager is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
 			return errors.New("accounts.FundAccount is not set")
@@ -153,9 +153,9 @@ func (inst *FundManagerCloseFundAccount) EncodeToTree(parent ag_treeout.Branches
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts[len=3]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("payer", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("admin", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("fund_", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("       payer", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("fund_manager", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("       fund_", inst.AccountMetaSlice.Get(2)))
 					})
 				})
 		})
@@ -172,10 +172,10 @@ func (obj *FundManagerCloseFundAccount) UnmarshalWithDecoder(decoder *ag_binary.
 func NewFundManagerCloseFundAccountInstruction(
 	// Accounts:
 	payer ag_solanago.PublicKey,
-	admin ag_solanago.PublicKey,
+	fundManager ag_solanago.PublicKey,
 	fundAccount ag_solanago.PublicKey) *FundManagerCloseFundAccount {
 	return NewFundManagerCloseFundAccountInstructionBuilder().
 		SetPayerAccount(payer).
-		SetAdminAccount(admin).
+		SetFundManagerAccount(fundManager).
 		SetFundAccountAccount(fundAccount)
 }

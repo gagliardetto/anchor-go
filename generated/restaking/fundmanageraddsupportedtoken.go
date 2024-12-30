@@ -38,7 +38,7 @@ func NewFundManagerAddSupportedTokenInstructionBuilder() *FundManagerAddSupporte
 	nd := &FundManagerAddSupportedToken{
 		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 8),
 	}
-	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"]).SIGNER()
+	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"]).SIGNER()
 	return nd
 }
 
@@ -373,6 +373,9 @@ func (obj FundManagerAddSupportedToken) MarshalWithEncoder(encoder *ag_binary.En
 		case *TokenPricingSourceFragmetricRestakingFundTuple:
 			tmp.Enum = 4
 			tmp.FragmetricRestakingFund = *realvalue
+		case *TokenPricingSourceOrcaDEXLiquidityPoolTuple:
+			tmp.Enum = 5
+			tmp.OrcaDEXLiquidityPool = *realvalue
 		}
 		err := encoder.Encode(tmp)
 		if err != nil {
@@ -400,6 +403,8 @@ func (obj *FundManagerAddSupportedToken) UnmarshalWithDecoder(decoder *ag_binary
 			obj.PricingSource = &tmp.FragmetricNormalizedTokenPool
 		case 4:
 			obj.PricingSource = &tmp.FragmetricRestakingFund
+		case 5:
+			obj.PricingSource = &tmp.OrcaDEXLiquidityPool
 		default:
 			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
 		}

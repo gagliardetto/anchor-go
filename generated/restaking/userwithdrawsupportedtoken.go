@@ -8,10 +8,12 @@ import (
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
+	ag_v5 "github.com/vmihailenco/msgpack/v5"
 )
 
 // UserWithdrawSupportedToken is the `user_withdraw_supported_token` instruction.
 type UserWithdrawSupportedToken struct {
+	BatchId   *uint64
 	RequestId *uint64
 
 	// [0] = [WRITE, SIGNER] user
@@ -35,8 +37,6 @@ type UserWithdrawSupportedToken struct {
 	// [9] = [WRITE] fund_withdrawal_batch_account
 	// ··········· Users can derive proper account address with target batch id for each withdrawal requests.
 	// ··········· And the batch id can be read from a user fund account which the withdrawal requests belong to.
-	// ··········· seeds = [FundWithdrawalBatchAccount::SEED, receipt_token_mint.key().as_ref(), supported_token_mint.key().as_ref(), &fund_withdrawal_batch_account.batch_id.to_le_bytes()],
-	// ··········· bump = fund_withdrawal_batch_account.get_bump(),
 	//
 	// [10] = [WRITE] fund_supported_token_reserve_account
 	//
@@ -65,6 +65,12 @@ func NewUserWithdrawSupportedTokenInstructionBuilder() *UserWithdrawSupportedTok
 	nd.AccountMetaSlice[2] = ag_solanago.Meta(Addresses["TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"])
 	nd.AccountMetaSlice[15] = ag_solanago.Meta(Addresses["Sysvar1nstructions1111111111111111111111111"])
 	return nd
+}
+
+// SetBatchId sets the "batch_id" parameter.
+func (inst *UserWithdrawSupportedToken) SetBatchId(batch_id uint64) *UserWithdrawSupportedToken {
+	inst.BatchId = &batch_id
+	return inst
 }
 
 // SetRequestId sets the "request_id" parameter.
@@ -267,18 +273,66 @@ func (inst *UserWithdrawSupportedToken) GetFundAccountAccount() *ag_solanago.Acc
 // SetFundWithdrawalBatchAccountAccount sets the "fund_withdrawal_batch_account" account.
 // Users can derive proper account address with target batch id for each withdrawal requests.
 // And the batch id can be read from a user fund account which the withdrawal requests belong to.
-// seeds = [FundWithdrawalBatchAccount::SEED, receipt_token_mint.key().as_ref(), supported_token_mint.key().as_ref(), &fund_withdrawal_batch_account.batch_id.to_le_bytes()],
-// bump = fund_withdrawal_batch_account.get_bump(),
 func (inst *UserWithdrawSupportedToken) SetFundWithdrawalBatchAccountAccount(fundWithdrawalBatchAccount ag_solanago.PublicKey) *UserWithdrawSupportedToken {
 	inst.AccountMetaSlice[9] = ag_solanago.Meta(fundWithdrawalBatchAccount).WRITE()
 	return inst
 }
 
+func (inst *UserWithdrawSupportedToken) findFindFundWithdrawalBatchAccountAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// const: withdrawal_batch
+	seeds = append(seeds, []byte{byte(0x77), byte(0x69), byte(0x74), byte(0x68), byte(0x64), byte(0x72), byte(0x61), byte(0x77), byte(0x61), byte(0x6c), byte(0x5f), byte(0x62), byte(0x61), byte(0x74), byte(0x63), byte(0x68)})
+	// path: receiptTokenMint
+	seeds = append(seeds, receiptTokenMint.Bytes())
+	// path: supportedTokenMint
+	seeds = append(seeds, supportedTokenMint.Bytes())
+	// arg: BatchId
+	batchIdSeed, err := ag_v5.Marshal(inst.BatchId)
+	if err != nil {
+		return
+	}
+	seeds = append(seeds, batchIdSeed)
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+	}
+	return
+}
+
+// FindFundWithdrawalBatchAccountAddressWithBumpSeed calculates FundWithdrawalBatchAccount account address with given seeds and a known bump seed.
+func (inst *UserWithdrawSupportedToken) FindFundWithdrawalBatchAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindFundWithdrawalBatchAccountAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
+	return
+}
+
+func (inst *UserWithdrawSupportedToken) MustFindFundWithdrawalBatchAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundWithdrawalBatchAccountAddress(receiptTokenMint, supportedTokenMint, bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindFundWithdrawalBatchAccountAddress finds FundWithdrawalBatchAccount account address with given seeds.
+func (inst *UserWithdrawSupportedToken) FindFundWithdrawalBatchAccountAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindFundWithdrawalBatchAccountAddress(receiptTokenMint, supportedTokenMint, 0)
+	return
+}
+
+func (inst *UserWithdrawSupportedToken) MustFindFundWithdrawalBatchAccountAddress(receiptTokenMint ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundWithdrawalBatchAccountAddress(receiptTokenMint, supportedTokenMint, 0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
 // GetFundWithdrawalBatchAccountAccount gets the "fund_withdrawal_batch_account" account.
 // Users can derive proper account address with target batch id for each withdrawal requests.
 // And the batch id can be read from a user fund account which the withdrawal requests belong to.
-// seeds = [FundWithdrawalBatchAccount::SEED, receipt_token_mint.key().as_ref(), supported_token_mint.key().as_ref(), &fund_withdrawal_batch_account.batch_id.to_le_bytes()],
-// bump = fund_withdrawal_batch_account.get_bump(),
 func (inst *UserWithdrawSupportedToken) GetFundWithdrawalBatchAccountAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(9)
 }
@@ -661,6 +715,9 @@ func (inst UserWithdrawSupportedToken) ValidateAndBuild() (*Instruction, error) 
 func (inst *UserWithdrawSupportedToken) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
+		if inst.BatchId == nil {
+			return errors.New("BatchId parameter is not set")
+		}
 		if inst.RequestId == nil {
 			return errors.New("RequestId parameter is not set")
 		}
@@ -735,7 +792,8 @@ func (inst *UserWithdrawSupportedToken) EncodeToTree(parent ag_treeout.Branches)
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=1]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Params[len=2]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+						paramsBranch.Child(ag_format.Param("   BatchId", *inst.BatchId))
 						paramsBranch.Child(ag_format.Param(" RequestId", *inst.RequestId))
 					})
 
@@ -765,6 +823,11 @@ func (inst *UserWithdrawSupportedToken) EncodeToTree(parent ag_treeout.Branches)
 }
 
 func (obj UserWithdrawSupportedToken) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `BatchId` param:
+	err = encoder.Encode(obj.BatchId)
+	if err != nil {
+		return err
+	}
 	// Serialize `RequestId` param:
 	err = encoder.Encode(obj.RequestId)
 	if err != nil {
@@ -773,6 +836,11 @@ func (obj UserWithdrawSupportedToken) MarshalWithEncoder(encoder *ag_binary.Enco
 	return nil
 }
 func (obj *UserWithdrawSupportedToken) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `BatchId`:
+	err = decoder.Decode(&obj.BatchId)
+	if err != nil {
+		return err
+	}
 	// Deserialize `RequestId`:
 	err = decoder.Decode(&obj.RequestId)
 	if err != nil {
@@ -784,6 +852,7 @@ func (obj *UserWithdrawSupportedToken) UnmarshalWithDecoder(decoder *ag_binary.D
 // NewUserWithdrawSupportedTokenInstruction declares a new UserWithdrawSupportedToken instruction with the provided parameters and accounts.
 func NewUserWithdrawSupportedTokenInstruction(
 	// Parameters:
+	batch_id uint64,
 	request_id uint64,
 	// Accounts:
 	user ag_solanago.PublicKey,
@@ -805,6 +874,7 @@ func NewUserWithdrawSupportedTokenInstruction(
 	eventAuthority ag_solanago.PublicKey,
 	program ag_solanago.PublicKey) *UserWithdrawSupportedToken {
 	return NewUserWithdrawSupportedTokenInstructionBuilder().
+		SetBatchId(batch_id).
 		SetRequestId(request_id).
 		SetUserAccount(user).
 		SetSystemProgramAccount(systemProgram).

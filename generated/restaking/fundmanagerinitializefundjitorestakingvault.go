@@ -50,7 +50,7 @@ func NewFundManagerInitializeFundJitoRestakingVaultInstructionBuilder() *FundMan
 	nd := &FundManagerInitializeFundJitoRestakingVault{
 		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 15),
 	}
-	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"]).SIGNER()
+	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"]).SIGNER()
 	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["11111111111111111111111111111111"])
 	nd.AccountMetaSlice[4] = ag_solanago.Meta(Addresses["Vau1t6sLNxnzB7ZDsef8TLbPLfyZMYXH8WTNqUdm9g8"])
 	nd.AccountMetaSlice[7] = ag_solanago.Meta(Addresses["TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"])

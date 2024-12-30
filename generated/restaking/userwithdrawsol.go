@@ -8,10 +8,12 @@ import (
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
+	ag_v5 "github.com/vmihailenco/msgpack/v5"
 )
 
 // UserWithdrawSol is the `user_withdraw_sol` instruction.
 type UserWithdrawSol struct {
+	BatchId   *uint64
 	RequestId *uint64
 
 	// [0] = [WRITE, SIGNER] user
@@ -26,13 +28,11 @@ type UserWithdrawSol struct {
 	//
 	// [5] = [WRITE] fund_account
 	//
-	// [6] = [WRITE] fund_withdrawal_batch_account
+	// [6] = [WRITE] fund_reserve_account
+	//
+	// [7] = [WRITE] fund_withdrawal_batch_account
 	// ··········· Users can derive proper account address with target batch id for each withdrawal requests.
 	// ··········· And the batch id can be read from a user fund account which the withdrawal requests belong to.
-	// ··········· seeds = [FundWithdrawalBatchAccount::SEED, receipt_token_mint.key().as_ref(), Pubkey::default().as_ref(), &fund_withdrawal_batch_account.batch_id.to_le_bytes()],
-	// ··········· bump = fund_withdrawal_batch_account.get_bump(),
-	//
-	// [7] = [WRITE] fund_reserve_account
 	//
 	// [8] = [WRITE] fund_treasury_account
 	//
@@ -56,6 +56,12 @@ func NewUserWithdrawSolInstructionBuilder() *UserWithdrawSol {
 	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["11111111111111111111111111111111"])
 	nd.AccountMetaSlice[2] = ag_solanago.Meta(Addresses["TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"])
 	return nd
+}
+
+// SetBatchId sets the "batch_id" parameter.
+func (inst *UserWithdrawSol) SetBatchId(batch_id uint64) *UserWithdrawSol {
+	inst.BatchId = &batch_id
+	return inst
 }
 
 // SetRequestId sets the "request_id" parameter.
@@ -222,28 +228,9 @@ func (inst *UserWithdrawSol) GetFundAccountAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(5)
 }
 
-// SetFundWithdrawalBatchAccountAccount sets the "fund_withdrawal_batch_account" account.
-// Users can derive proper account address with target batch id for each withdrawal requests.
-// And the batch id can be read from a user fund account which the withdrawal requests belong to.
-// seeds = [FundWithdrawalBatchAccount::SEED, receipt_token_mint.key().as_ref(), Pubkey::default().as_ref(), &fund_withdrawal_batch_account.batch_id.to_le_bytes()],
-// bump = fund_withdrawal_batch_account.get_bump(),
-func (inst *UserWithdrawSol) SetFundWithdrawalBatchAccountAccount(fundWithdrawalBatchAccount ag_solanago.PublicKey) *UserWithdrawSol {
-	inst.AccountMetaSlice[6] = ag_solanago.Meta(fundWithdrawalBatchAccount).WRITE()
-	return inst
-}
-
-// GetFundWithdrawalBatchAccountAccount gets the "fund_withdrawal_batch_account" account.
-// Users can derive proper account address with target batch id for each withdrawal requests.
-// And the batch id can be read from a user fund account which the withdrawal requests belong to.
-// seeds = [FundWithdrawalBatchAccount::SEED, receipt_token_mint.key().as_ref(), Pubkey::default().as_ref(), &fund_withdrawal_batch_account.batch_id.to_le_bytes()],
-// bump = fund_withdrawal_batch_account.get_bump(),
-func (inst *UserWithdrawSol) GetFundWithdrawalBatchAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(6)
-}
-
 // SetFundReserveAccountAccount sets the "fund_reserve_account" account.
 func (inst *UserWithdrawSol) SetFundReserveAccountAccount(fundReserveAccount ag_solanago.PublicKey) *UserWithdrawSol {
-	inst.AccountMetaSlice[7] = ag_solanago.Meta(fundReserveAccount).WRITE()
+	inst.AccountMetaSlice[6] = ag_solanago.Meta(fundReserveAccount).WRITE()
 	return inst
 }
 
@@ -293,6 +280,73 @@ func (inst *UserWithdrawSol) MustFindFundReserveAccountAddress(receiptTokenMint 
 
 // GetFundReserveAccountAccount gets the "fund_reserve_account" account.
 func (inst *UserWithdrawSol) GetFundReserveAccountAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(6)
+}
+
+// SetFundWithdrawalBatchAccountAccount sets the "fund_withdrawal_batch_account" account.
+// Users can derive proper account address with target batch id for each withdrawal requests.
+// And the batch id can be read from a user fund account which the withdrawal requests belong to.
+func (inst *UserWithdrawSol) SetFundWithdrawalBatchAccountAccount(fundWithdrawalBatchAccount ag_solanago.PublicKey) *UserWithdrawSol {
+	inst.AccountMetaSlice[7] = ag_solanago.Meta(fundWithdrawalBatchAccount).WRITE()
+	return inst
+}
+
+func (inst *UserWithdrawSol) findFindFundWithdrawalBatchAccountAddress(receiptTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// const: withdrawal_batch
+	seeds = append(seeds, []byte{byte(0x77), byte(0x69), byte(0x74), byte(0x68), byte(0x64), byte(0x72), byte(0x61), byte(0x77), byte(0x61), byte(0x6c), byte(0x5f), byte(0x62), byte(0x61), byte(0x74), byte(0x63), byte(0x68)})
+	// path: receiptTokenMint
+	seeds = append(seeds, receiptTokenMint.Bytes())
+	// const: Pubkey.Default{}
+	seeds = append(seeds, []byte{byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0), byte(0x0)})
+	// arg: BatchId
+	batchIdSeed, err := ag_v5.Marshal(inst.BatchId)
+	if err != nil {
+		return
+	}
+	seeds = append(seeds, batchIdSeed)
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+	}
+	return
+}
+
+// FindFundWithdrawalBatchAccountAddressWithBumpSeed calculates FundWithdrawalBatchAccount account address with given seeds and a known bump seed.
+func (inst *UserWithdrawSol) FindFundWithdrawalBatchAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindFundWithdrawalBatchAccountAddress(receiptTokenMint, bumpSeed)
+	return
+}
+
+func (inst *UserWithdrawSol) MustFindFundWithdrawalBatchAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundWithdrawalBatchAccountAddress(receiptTokenMint, bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindFundWithdrawalBatchAccountAddress finds FundWithdrawalBatchAccount account address with given seeds.
+func (inst *UserWithdrawSol) FindFundWithdrawalBatchAccountAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindFundWithdrawalBatchAccountAddress(receiptTokenMint, 0)
+	return
+}
+
+func (inst *UserWithdrawSol) MustFindFundWithdrawalBatchAccountAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundWithdrawalBatchAccountAddress(receiptTokenMint, 0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// GetFundWithdrawalBatchAccountAccount gets the "fund_withdrawal_batch_account" account.
+// Users can derive proper account address with target batch id for each withdrawal requests.
+// And the batch id can be read from a user fund account which the withdrawal requests belong to.
+func (inst *UserWithdrawSol) GetFundWithdrawalBatchAccountAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(7)
 }
 
@@ -604,6 +658,9 @@ func (inst UserWithdrawSol) ValidateAndBuild() (*Instruction, error) {
 func (inst *UserWithdrawSol) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
+		if inst.BatchId == nil {
+			return errors.New("BatchId parameter is not set")
+		}
 		if inst.RequestId == nil {
 			return errors.New("RequestId parameter is not set")
 		}
@@ -630,10 +687,10 @@ func (inst *UserWithdrawSol) Validate() error {
 			return errors.New("accounts.FundAccount is not set")
 		}
 		if inst.AccountMetaSlice[6] == nil {
-			return errors.New("accounts.FundWithdrawalBatchAccount is not set")
+			return errors.New("accounts.FundReserveAccount is not set")
 		}
 		if inst.AccountMetaSlice[7] == nil {
-			return errors.New("accounts.FundReserveAccount is not set")
+			return errors.New("accounts.FundWithdrawalBatchAccount is not set")
 		}
 		if inst.AccountMetaSlice[8] == nil {
 			return errors.New("accounts.FundTreasuryAccount is not set")
@@ -666,7 +723,8 @@ func (inst *UserWithdrawSol) EncodeToTree(parent ag_treeout.Branches) {
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=1]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Params[len=2]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+						paramsBranch.Child(ag_format.Param("   BatchId", *inst.BatchId))
 						paramsBranch.Child(ag_format.Param(" RequestId", *inst.RequestId))
 					})
 
@@ -678,8 +736,8 @@ func (inst *UserWithdrawSol) EncodeToTree(parent ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("    receipt_token_mint", inst.AccountMetaSlice.Get(3)))
 						accountsBranch.Child(ag_format.Meta("   user_receipt_token_", inst.AccountMetaSlice.Get(4)))
 						accountsBranch.Child(ag_format.Meta("                 fund_", inst.AccountMetaSlice.Get(5)))
-						accountsBranch.Child(ag_format.Meta("fund_withdrawal_batch_", inst.AccountMetaSlice.Get(6)))
-						accountsBranch.Child(ag_format.Meta("         fund_reserve_", inst.AccountMetaSlice.Get(7)))
+						accountsBranch.Child(ag_format.Meta("         fund_reserve_", inst.AccountMetaSlice.Get(6)))
+						accountsBranch.Child(ag_format.Meta("fund_withdrawal_batch_", inst.AccountMetaSlice.Get(7)))
 						accountsBranch.Child(ag_format.Meta("        fund_treasury_", inst.AccountMetaSlice.Get(8)))
 						accountsBranch.Child(ag_format.Meta("            user_fund_", inst.AccountMetaSlice.Get(9)))
 						accountsBranch.Child(ag_format.Meta("               reward_", inst.AccountMetaSlice.Get(10)))
@@ -692,6 +750,11 @@ func (inst *UserWithdrawSol) EncodeToTree(parent ag_treeout.Branches) {
 }
 
 func (obj UserWithdrawSol) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `BatchId` param:
+	err = encoder.Encode(obj.BatchId)
+	if err != nil {
+		return err
+	}
 	// Serialize `RequestId` param:
 	err = encoder.Encode(obj.RequestId)
 	if err != nil {
@@ -700,6 +763,11 @@ func (obj UserWithdrawSol) MarshalWithEncoder(encoder *ag_binary.Encoder) (err e
 	return nil
 }
 func (obj *UserWithdrawSol) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `BatchId`:
+	err = decoder.Decode(&obj.BatchId)
+	if err != nil {
+		return err
+	}
 	// Deserialize `RequestId`:
 	err = decoder.Decode(&obj.RequestId)
 	if err != nil {
@@ -711,6 +779,7 @@ func (obj *UserWithdrawSol) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (er
 // NewUserWithdrawSolInstruction declares a new UserWithdrawSol instruction with the provided parameters and accounts.
 func NewUserWithdrawSolInstruction(
 	// Parameters:
+	batch_id uint64,
 	request_id uint64,
 	// Accounts:
 	user ag_solanago.PublicKey,
@@ -719,8 +788,8 @@ func NewUserWithdrawSolInstruction(
 	receiptTokenMint ag_solanago.PublicKey,
 	userReceiptTokenAccount ag_solanago.PublicKey,
 	fundAccount ag_solanago.PublicKey,
-	fundWithdrawalBatchAccount ag_solanago.PublicKey,
 	fundReserveAccount ag_solanago.PublicKey,
+	fundWithdrawalBatchAccount ag_solanago.PublicKey,
 	fundTreasuryAccount ag_solanago.PublicKey,
 	userFundAccount ag_solanago.PublicKey,
 	rewardAccount ag_solanago.PublicKey,
@@ -728,6 +797,7 @@ func NewUserWithdrawSolInstruction(
 	eventAuthority ag_solanago.PublicKey,
 	program ag_solanago.PublicKey) *UserWithdrawSol {
 	return NewUserWithdrawSolInstructionBuilder().
+		SetBatchId(batch_id).
 		SetRequestId(request_id).
 		SetUserAccount(user).
 		SetSystemProgramAccount(systemProgram).
@@ -735,8 +805,8 @@ func NewUserWithdrawSolInstruction(
 		SetReceiptTokenMintAccount(receiptTokenMint).
 		SetUserReceiptTokenAccountAccount(userReceiptTokenAccount).
 		SetFundAccountAccount(fundAccount).
-		SetFundWithdrawalBatchAccountAccount(fundWithdrawalBatchAccount).
 		SetFundReserveAccountAccount(fundReserveAccount).
+		SetFundWithdrawalBatchAccountAccount(fundWithdrawalBatchAccount).
 		SetFundTreasuryAccountAccount(fundTreasuryAccount).
 		SetUserFundAccountAccount(userFundAccount).
 		SetRewardAccountAccount(rewardAccount).

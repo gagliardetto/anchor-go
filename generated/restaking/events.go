@@ -123,6 +123,126 @@ func (obj *FundManagerUpdatedRewardPoolEventData) UnmarshalWithDecoder(decoder *
 
 func (*FundManagerUpdatedRewardPoolEventData) isEventData() {}
 
+type OperatorDonatedToFundEventData struct {
+	ReceiptTokenMint          ag_solanago.PublicKey
+	FundAccount               ag_solanago.PublicKey
+	SupportedTokenMint        *ag_solanago.PublicKey `bin:"optional"`
+	DonatedAmount             uint64
+	DepositedAmount           uint64
+	OffsettedReceivableAmount uint64
+}
+
+var OperatorDonatedToFundEventDataDiscriminator = [8]byte{87, 48, 245, 185, 4, 76, 165, 242}
+
+func (obj OperatorDonatedToFundEventData) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Write account discriminator:
+	err = encoder.WriteBytes(OperatorDonatedToFundEventDataDiscriminator[:], false)
+	if err != nil {
+		return err
+	}
+	// Serialize `ReceiptTokenMint` param:
+	err = encoder.Encode(obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `FundAccount` param:
+	err = encoder.Encode(obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	// Serialize `SupportedTokenMint` param (optional):
+	{
+		if obj.SupportedTokenMint == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Serialize `DonatedAmount` param:
+	err = encoder.Encode(obj.DonatedAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `DepositedAmount` param:
+	err = encoder.Encode(obj.DepositedAmount)
+	if err != nil {
+		return err
+	}
+	// Serialize `OffsettedReceivableAmount` param:
+	err = encoder.Encode(obj.OffsettedReceivableAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperatorDonatedToFundEventData) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Read and check account discriminator:
+	{
+		discriminator, err := decoder.ReadTypeID()
+		if err != nil {
+			return err
+		}
+		if !discriminator.Equal(OperatorDonatedToFundEventDataDiscriminator[:]) {
+			return fmt.Errorf(
+				"wrong discriminator: wanted %s, got %s",
+				"[87 48 245 185 4 76 165 242]",
+				fmt.Sprint(discriminator[:]))
+		}
+	}
+	// Deserialize `ReceiptTokenMint`:
+	err = decoder.Decode(&obj.ReceiptTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `FundAccount`:
+	err = decoder.Decode(&obj.FundAccount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SupportedTokenMint` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Deserialize `DonatedAmount`:
+	err = decoder.Decode(&obj.DonatedAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `DepositedAmount`:
+	err = decoder.Decode(&obj.DepositedAmount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OffsettedReceivableAmount`:
+	err = decoder.Decode(&obj.OffsettedReceivableAmount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (*OperatorDonatedToFundEventData) isEventData() {}
+
 type OperatorRanFundCommandEventData struct {
 	ReceiptTokenMint ag_solanago.PublicKey
 	FundAccount      ag_solanago.PublicKey
@@ -167,42 +287,45 @@ func (obj OperatorRanFundCommandEventData) MarshalWithEncoder(encoder *ag_binary
 		case *OperationCommandInitializeTuple:
 			tmp.Enum = 0
 			tmp.Initialize = *realvalue
-		case *OperationCommandClaimUnstakedSOLTuple:
-			tmp.Enum = 1
-			tmp.ClaimUnstakedSOL = *realvalue
 		case *OperationCommandEnqueueWithdrawalBatchTuple:
-			tmp.Enum = 2
+			tmp.Enum = 1
 			tmp.EnqueueWithdrawalBatch = *realvalue
-		case *OperationCommandProcessWithdrawalBatchTuple:
-			tmp.Enum = 3
-			tmp.ProcessWithdrawalBatch = *realvalue
 		case *OperationCommandClaimUnrestakedVSTTuple:
-			tmp.Enum = 4
+			tmp.Enum = 2
 			tmp.ClaimUnrestakedVST = *realvalue
 		case *OperationCommandDenormalizeNTTuple:
-			tmp.Enum = 5
+			tmp.Enum = 3
 			tmp.DenormalizeNT = *realvalue
 		case *OperationCommandUndelegateVSTTuple:
-			tmp.Enum = 6
+			tmp.Enum = 4
 			tmp.UndelegateVST = *realvalue
 		case *OperationCommandUnrestakeVRTTuple:
-			tmp.Enum = 7
+			tmp.Enum = 5
 			tmp.UnrestakeVRT = *realvalue
+		case *OperationCommandClaimUnstakedSOLTuple:
+			tmp.Enum = 6
+			tmp.ClaimUnstakedSOL = *realvalue
 		case *OperationCommandUnstakeLSTTuple:
-			tmp.Enum = 8
+			tmp.Enum = 7
 			tmp.UnstakeLST = *realvalue
+		case *OperationCommandProcessWithdrawalBatchTuple:
+			tmp.Enum = 8
+			tmp.ProcessWithdrawalBatch = *realvalue
 		case *OperationCommandStakeSOLTuple:
 			tmp.Enum = 9
 			tmp.StakeSOL = *realvalue
-		case *OperationCommandNormalizeLSTTuple:
+		case *OperationCommandNormalizeSTTuple:
 			tmp.Enum = 10
-			tmp.NormalizeLST = *realvalue
+			tmp.NormalizeST = *realvalue
 		case *OperationCommandRestakeVSTTuple:
 			tmp.Enum = 11
 			tmp.RestakeVST = *realvalue
 		case *OperationCommandDelegateVSTTuple:
 			tmp.Enum = 12
 			tmp.DelegateVST = *realvalue
+		case *OperationCommandHarvestRewardTuple:
+			tmp.Enum = 13
+			tmp.HarvestReward = *realvalue
 		}
 		err := encoder.Encode(tmp)
 		if err != nil {
@@ -275,29 +398,31 @@ func (obj *OperatorRanFundCommandEventData) UnmarshalWithDecoder(decoder *ag_bin
 		case 0:
 			obj.Command = &tmp.Initialize
 		case 1:
-			obj.Command = &tmp.ClaimUnstakedSOL
-		case 2:
 			obj.Command = &tmp.EnqueueWithdrawalBatch
-		case 3:
-			obj.Command = &tmp.ProcessWithdrawalBatch
-		case 4:
+		case 2:
 			obj.Command = &tmp.ClaimUnrestakedVST
-		case 5:
+		case 3:
 			obj.Command = &tmp.DenormalizeNT
-		case 6:
+		case 4:
 			obj.Command = &tmp.UndelegateVST
-		case 7:
+		case 5:
 			obj.Command = &tmp.UnrestakeVRT
-		case 8:
+		case 6:
+			obj.Command = &tmp.ClaimUnstakedSOL
+		case 7:
 			obj.Command = &tmp.UnstakeLST
+		case 8:
+			obj.Command = &tmp.ProcessWithdrawalBatch
 		case 9:
 			obj.Command = &tmp.StakeSOL
 		case 10:
-			obj.Command = &tmp.NormalizeLST
+			obj.Command = &tmp.NormalizeST
 		case 11:
 			obj.Command = &tmp.RestakeVST
 		case 12:
 			obj.Command = &tmp.DelegateVST
+		case 13:
+			obj.Command = &tmp.HarvestReward
 		default:
 			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
 		}
@@ -1644,6 +1769,7 @@ func (*UserWithdrewFromFundEventData) isEventData() {}
 var eventTypes = map[[8]byte]reflect.Type{
 	FundManagerUpdatedFundEventDataDiscriminator:                   reflect.TypeOf(FundManagerUpdatedFundEventData{}),
 	FundManagerUpdatedRewardPoolEventDataDiscriminator:             reflect.TypeOf(FundManagerUpdatedRewardPoolEventData{}),
+	OperatorDonatedToFundEventDataDiscriminator:                    reflect.TypeOf(OperatorDonatedToFundEventData{}),
 	OperatorRanFundCommandEventDataDiscriminator:                   reflect.TypeOf(OperatorRanFundCommandEventData{}),
 	OperatorUpdatedFundPricesEventDataDiscriminator:                reflect.TypeOf(OperatorUpdatedFundPricesEventData{}),
 	OperatorUpdatedNormalizedTokenPoolPricesEventDataDiscriminator: reflect.TypeOf(OperatorUpdatedNormalizedTokenPoolPricesEventData{}),
@@ -1660,6 +1786,7 @@ var eventTypes = map[[8]byte]reflect.Type{
 var eventNames = map[[8]byte]string{
 	FundManagerUpdatedFundEventDataDiscriminator:                   "FundManagerUpdatedFund",
 	FundManagerUpdatedRewardPoolEventDataDiscriminator:             "FundManagerUpdatedRewardPool",
+	OperatorDonatedToFundEventDataDiscriminator:                    "OperatorDonatedToFund",
 	OperatorRanFundCommandEventDataDiscriminator:                   "OperatorRanFundCommand",
 	OperatorUpdatedFundPricesEventDataDiscriminator:                "OperatorUpdatedFundPrices",
 	OperatorUpdatedNormalizedTokenPoolPricesEventDataDiscriminator: "OperatorUpdatedNormalizedTokenPoolPrices",

@@ -39,7 +39,7 @@ type FundAccountAccount struct {
 	// underlying assets
 	Padding6           [15]uint8
 	NumSupportedTokens uint8
-	SupportedTokens    [10]SupportedToken
+	SupportedTokens    [30]SupportedToken
 
 	// optional basket of underlying assets
 	NormalizedToken NormalizedToken
@@ -47,7 +47,7 @@ type FundAccountAccount struct {
 	// investments
 	Padding7           [15]uint8
 	NumRestakingVaults uint8
-	RestakingVaults    [4]RestakingVault
+	RestakingVaults    [30]RestakingVault
 
 	// fund operation state
 	Operation OperationState

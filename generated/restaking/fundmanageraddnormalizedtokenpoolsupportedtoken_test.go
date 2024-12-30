@@ -117,6 +117,26 @@ func TestEncodeDecode_FundManagerAddNormalizedTokenPoolSupportedToken(t *testing
 						}
 						ag_require.Equal(t, params, got)
 					}
+					{
+						params := new(FundManagerAddNormalizedTokenPoolSupportedToken)
+						fu.Fuzz(params)
+						params.AccountMetaSlice = nil
+						tmp := new(TokenPricingSourceOrcaDEXLiquidityPoolTuple)
+						fu.Fuzz(tmp)
+						params.SetPricingSource(tmp)
+						buf := new(bytes.Buffer)
+						err := encodeT(*params, buf)
+						ag_require.NoError(t, err)
+						got := new(FundManagerAddNormalizedTokenPoolSupportedToken)
+						err = decodeT(got, buf.Bytes())
+						got.AccountMetaSlice = nil
+						ag_require.NoError(t, err)
+						// to prevent garbage buffer fill by fuzz
+						if reflect.TypeOf(*tmp).Kind() != reflect.Struct {
+							got.PricingSource = params.PricingSource
+						}
+						ag_require.Equal(t, params, got)
+					}
 				}
 			}
 		})

@@ -15,6 +15,7 @@ const (
 	PkgTreeout        = "github.com/gagliardetto/treeout"
 	PkgFormat         = "github.com/gagliardetto/solana-go/text/format"
 	PkgGoFuzz         = "github.com/gagliardetto/gofuzz"
+	PkgMsgpack        = "github.com/vmihailenco/msgpack/v5"
 	PkgTestifyRequire = "github.com/stretchr/testify/require"
 )
 

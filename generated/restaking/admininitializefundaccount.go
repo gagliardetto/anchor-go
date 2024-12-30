@@ -40,7 +40,7 @@ func NewAdminInitializeFundAccountInstructionBuilder() *AdminInitializeFundAccou
 	nd := &AdminInitializeFundAccount{
 		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 10),
 	}
-	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"]).SIGNER()
+	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"]).SIGNER()
 	nd.AccountMetaSlice[2] = ag_solanago.Meta(Addresses["11111111111111111111111111111111"])
 	nd.AccountMetaSlice[4] = ag_solanago.Meta(Addresses["TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"])
 	return nd

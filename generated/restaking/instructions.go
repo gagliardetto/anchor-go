@@ -54,6 +54,8 @@ var (
 
 	Instruction_FundManagerAddSupportedToken = ag_binary.TypeID([8]byte{0, 137, 153, 52, 179, 163, 4, 20})
 
+	Instruction_FundManagerClearUserSolWithdrawalRequests = ag_binary.TypeID([8]byte{229, 235, 96, 236, 74, 245, 85, 243})
+
 	Instruction_FundManagerCloseFundAccount = ag_binary.TypeID([8]byte{158, 192, 72, 180, 218, 61, 228, 156})
 
 	Instruction_FundManagerCloseRewardPool = ag_binary.TypeID([8]byte{159, 24, 238, 47, 253, 39, 6, 30})
@@ -66,7 +68,7 @@ var (
 
 	Instruction_FundManagerUpdateFundStrategy = ag_binary.TypeID([8]byte{66, 200, 217, 64, 201, 228, 239, 193})
 
-	Instruction_FundManagerUpdateRestakingVaultOperatorStrategy = ag_binary.TypeID([8]byte{206, 26, 208, 25, 192, 25, 98, 13})
+	Instruction_FundManagerUpdateRestakingVaultDelegationStrategy = ag_binary.TypeID([8]byte{54, 180, 250, 68, 121, 2, 143, 87})
 
 	Instruction_FundManagerUpdateRestakingVaultStrategy = ag_binary.TypeID([8]byte{131, 35, 217, 161, 90, 24, 63, 133})
 
@@ -91,8 +93,6 @@ var (
 	Instruction_SlasherInitializeNormalizedTokenWithdrawalAccount = ag_binary.TypeID([8]byte{180, 112, 136, 49, 174, 179, 50, 47})
 
 	Instruction_SlasherWithdrawNormalizedToken = ag_binary.TypeID([8]byte{30, 86, 7, 231, 47, 59, 162, 214})
-
-	Instruction_TokenTransferHook = ag_binary.TypeID([8]byte{105, 37, 101, 197, 75, 251, 102, 26})
 
 	Instruction_UserCancelWithdrawalRequest = ag_binary.TypeID([8]byte{187, 80, 45, 65, 239, 189, 78, 102})
 
@@ -148,6 +148,8 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 		return "FundManagerAddRewardPoolHolder"
 	case Instruction_FundManagerAddSupportedToken:
 		return "FundManagerAddSupportedToken"
+	case Instruction_FundManagerClearUserSolWithdrawalRequests:
+		return "FundManagerClearUserSolWithdrawalRequests"
 	case Instruction_FundManagerCloseFundAccount:
 		return "FundManagerCloseFundAccount"
 	case Instruction_FundManagerCloseRewardPool:
@@ -160,8 +162,8 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 		return "FundManagerSettleReward"
 	case Instruction_FundManagerUpdateFundStrategy:
 		return "FundManagerUpdateFundStrategy"
-	case Instruction_FundManagerUpdateRestakingVaultOperatorStrategy:
-		return "FundManagerUpdateRestakingVaultOperatorStrategy"
+	case Instruction_FundManagerUpdateRestakingVaultDelegationStrategy:
+		return "FundManagerUpdateRestakingVaultDelegationStrategy"
 	case Instruction_FundManagerUpdateRestakingVaultStrategy:
 		return "FundManagerUpdateRestakingVaultStrategy"
 	case Instruction_FundManagerUpdateSolStrategy:
@@ -186,8 +188,6 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 		return "SlasherInitializeNormalizedTokenWithdrawalAccount"
 	case Instruction_SlasherWithdrawNormalizedToken:
 		return "SlasherWithdrawNormalizedToken"
-	case Instruction_TokenTransferHook:
-		return "TokenTransferHook"
 	case Instruction_UserCancelWithdrawalRequest:
 		return "UserCancelWithdrawalRequest"
 	case Instruction_UserClaimRewards:
@@ -272,6 +272,9 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 			Name: "fund_manager_add_supported_token", Type: (*FundManagerAddSupportedToken)(nil),
 		},
 		{
+			Name: "fund_manager_clear_user_sol_withdrawal_requests", Type: (*FundManagerClearUserSolWithdrawalRequests)(nil),
+		},
+		{
 			Name: "fund_manager_close_fund_account", Type: (*FundManagerCloseFundAccount)(nil),
 		},
 		{
@@ -290,7 +293,7 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 			Name: "fund_manager_update_fund_strategy", Type: (*FundManagerUpdateFundStrategy)(nil),
 		},
 		{
-			Name: "fund_manager_update_restaking_vault_operator_strategy", Type: (*FundManagerUpdateRestakingVaultOperatorStrategy)(nil),
+			Name: "fund_manager_update_restaking_vault_delegation_strategy", Type: (*FundManagerUpdateRestakingVaultDelegationStrategy)(nil),
 		},
 		{
 			Name: "fund_manager_update_restaking_vault_strategy", Type: (*FundManagerUpdateRestakingVaultStrategy)(nil),
@@ -327,9 +330,6 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 		},
 		{
 			Name: "slasher_withdraw_normalized_token", Type: (*SlasherWithdrawNormalizedToken)(nil),
-		},
-		{
-			Name: "token_transfer_hook", Type: (*TokenTransferHook)(nil),
 		},
 		{
 			Name: "user_cancel_withdrawal_request", Type: (*UserCancelWithdrawalRequest)(nil),

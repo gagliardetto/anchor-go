@@ -12,7 +12,8 @@ import (
 
 // OperatorDonateSolToFund is the `operator_donate_sol_to_fund` instruction.
 type OperatorDonateSolToFund struct {
-	Amount *uint64
+	Amount           *uint64
+	OffsetReceivable *bool
 
 	// [0] = [WRITE, SIGNER] operator
 	//
@@ -45,6 +46,12 @@ func NewOperatorDonateSolToFundInstructionBuilder() *OperatorDonateSolToFund {
 // SetAmount sets the "amount" parameter.
 func (inst *OperatorDonateSolToFund) SetAmount(amount uint64) *OperatorDonateSolToFund {
 	inst.Amount = &amount
+	return inst
+}
+
+// SetOffsetReceivable sets the "offset_receivable" parameter.
+func (inst *OperatorDonateSolToFund) SetOffsetReceivable(offset_receivable bool) *OperatorDonateSolToFund {
+	inst.OffsetReceivable = &offset_receivable
 	return inst
 }
 
@@ -289,6 +296,9 @@ func (inst *OperatorDonateSolToFund) Validate() error {
 		if inst.Amount == nil {
 			return errors.New("Amount parameter is not set")
 		}
+		if inst.OffsetReceivable == nil {
+			return errors.New("OffsetReceivable parameter is not set")
+		}
 	}
 
 	// Check whether all (required) accounts are set:
@@ -330,8 +340,9 @@ func (inst *OperatorDonateSolToFund) EncodeToTree(parent ag_treeout.Branches) {
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=1]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Amount", *inst.Amount))
+					instructionBranch.Child("Params[len=2]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+						paramsBranch.Child(ag_format.Param("           Amount", *inst.Amount))
+						paramsBranch.Child(ag_format.Param(" OffsetReceivable", *inst.OffsetReceivable))
 					})
 
 					// Accounts of the instruction:
@@ -355,11 +366,21 @@ func (obj OperatorDonateSolToFund) MarshalWithEncoder(encoder *ag_binary.Encoder
 	if err != nil {
 		return err
 	}
+	// Serialize `OffsetReceivable` param:
+	err = encoder.Encode(obj.OffsetReceivable)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 func (obj *OperatorDonateSolToFund) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
 	// Deserialize `Amount`:
 	err = decoder.Decode(&obj.Amount)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OffsetReceivable`:
+	err = decoder.Decode(&obj.OffsetReceivable)
 	if err != nil {
 		return err
 	}
@@ -370,6 +391,7 @@ func (obj *OperatorDonateSolToFund) UnmarshalWithDecoder(decoder *ag_binary.Deco
 func NewOperatorDonateSolToFundInstruction(
 	// Parameters:
 	amount uint64,
+	offset_receivable bool,
 	// Accounts:
 	operator ag_solanago.PublicKey,
 	systemProgram ag_solanago.PublicKey,
@@ -381,6 +403,7 @@ func NewOperatorDonateSolToFundInstruction(
 	program ag_solanago.PublicKey) *OperatorDonateSolToFund {
 	return NewOperatorDonateSolToFundInstructionBuilder().
 		SetAmount(amount).
+		SetOffsetReceivable(offset_receivable).
 		SetOperatorAccount(operator).
 		SetSystemProgramAccount(systemProgram).
 		SetReceiptTokenMintAccount(receiptTokenMint).

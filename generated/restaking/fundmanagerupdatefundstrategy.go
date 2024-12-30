@@ -34,7 +34,7 @@ func NewFundManagerUpdateFundStrategyInstructionBuilder() *FundManagerUpdateFund
 	nd := &FundManagerUpdateFundStrategy{
 		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 5),
 	}
-	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"]).SIGNER()
+	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"]).SIGNER()
 	return nd
 }
 

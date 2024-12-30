@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -1485,6 +1486,7 @@ func genAccountGettersSetters(
 			// find seeds
 			seedValues := make([][]byte, len(account.PDA.Seeds))
 			seedRefs := make([]string, len(account.PDA.Seeds))
+			seedArgs := make([]string, len(account.PDA.Seeds))
 
 			var seedProgramValue *[]byte
 			if account.PDA.Program != nil {
@@ -1502,6 +1504,10 @@ func genAccountGettersSetters(
 					for _, acc := range accounts {
 						if acc.IdlAccount.Name == seedDef.Path {
 							seedRefs[i] = ToLowerCamel(acc.IdlAccount.Name)
+							continue OUTER
+						}
+						if seedDef.Kind == "arg" {
+							seedArgs[i] = ToCamel(seedDef.Path)
 							continue OUTER
 						}
 					}
@@ -1537,7 +1543,11 @@ func genAccountGettersSetters(
 					for i, seedValue := range seedValues {
 						if seedValue != nil {
 							if utf8.Valid(seedValue) {
-								body.Commentf("const: %s", string(seedValue))
+								if bytes.Equal(seedValue, make([]byte, len(seedValue))) {
+									body.Comment("const: Pubkey.Default{}")
+								} else {
+									body.Commentf("const: %s", string(seedValue))
+								}
 							} else {
 								body.Commentf("const (raw): %+v", seedValue)
 							}
@@ -1547,9 +1557,24 @@ func genAccountGettersSetters(
 								}
 							})))
 						} else {
+
 							seedRef := seedRefs[i]
-							body.Commentf("path: %s", seedRef)
-							body.Add(Id("seeds").Op("=").Append(Id("seeds"), Id(seedRef).Dot("Bytes").Call()))
+							if seedRef != "" {
+								body.Commentf("path: %s", seedRef)
+								body.Add(Id("seeds").Op("=").Append(Id("seeds"), Id(seedRef).Dot("Bytes").Call()))
+							}
+							seedArg := seedArgs[i]
+							if seedArg != "" {
+								body.Commentf("arg: %s", seedArg)
+								seedArgName := ToLowerCamel(seedArg + "Seed")
+								body.Add(Id(seedArgName).Op(",").Id("err").Op(":=").Qual(PkgMsgpack, "Marshal").Call(Id("inst").Op(".").Id(seedArg)))
+								body.If(
+									Err().Op("!=").Nil(),
+								).Block(
+									Return(),
+								)
+								body.Add(Id("seeds").Op("=").Append(Id("seeds"), Id(seedArgName)))
+							}
 						}
 					}
 

@@ -1,5 +1,5 @@
 {
-  "address": "4qEHCzsLFUnw8jmhmRSmAK5VhZVoSD1iVqukAf92yHi5",
+  "address": "frag9zfFME5u1SNhUYGa4cXLzMKgZXF3xwZ2Y1KCYTQ",
   "metadata": {
     "name": "restaking",
     "version": "0.3.3",
@@ -28,7 +28,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"
+          "address": "fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"
         },
         {
           "name": "system_program",
@@ -129,7 +129,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"
+          "address": "fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"
         },
         {
           "name": "system_program",
@@ -304,7 +304,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"
+          "address": "fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"
         },
         {
           "name": "system_program",
@@ -398,7 +398,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"
+          "address": "fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"
         },
         {
           "name": "system_program",
@@ -485,7 +485,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"
+          "address": "fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"
         },
         {
           "name": "receipt_token_mint"
@@ -582,7 +582,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"
+          "address": "fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"
         },
         {
           "name": "system_program",
@@ -703,7 +703,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"
+          "address": "fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"
         },
         {
           "name": "system_program",
@@ -799,7 +799,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"
+          "address": "fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"
         },
         {
           "name": "system_program",
@@ -889,7 +889,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "normalized_token_mint",
@@ -1047,7 +1047,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -1154,7 +1154,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -1251,7 +1251,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -1348,7 +1348,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -1484,6 +1484,152 @@
       ]
     },
     {
+      "name": "fund_manager_clear_user_sol_withdrawal_requests",
+      "discriminator": [
+        229,
+        235,
+        96,
+        236,
+        74,
+        245,
+        85,
+        243
+      ],
+      "accounts": [
+        {
+          "name": "fund_manager",
+          "signer": true,
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
+        },
+        {
+          "name": "fund_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  214,
+                  52,
+                  8,
+                  155,
+                  182,
+                  149,
+                  115,
+                  57,
+                  20,
+                  131,
+                  125,
+                  232,
+                  82,
+                  251,
+                  210,
+                  76,
+                  255,
+                  40,
+                  78,
+                  39,
+                  34,
+                  166,
+                  52,
+                  128,
+                  105,
+                  118,
+                  67,
+                  202,
+                  117,
+                  247,
+                  108,
+                  146
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_fund_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  214,
+                  52,
+                  8,
+                  155,
+                  182,
+                  149,
+                  115,
+                  57,
+                  20,
+                  131,
+                  125,
+                  232,
+                  82,
+                  251,
+                  210,
+                  76,
+                  255,
+                  40,
+                  78,
+                  39,
+                  34,
+                  166,
+                  52,
+                  128,
+                  105,
+                  118,
+                  67,
+                  202,
+                  117,
+                  247,
+                  108,
+                  146
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "_user",
+          "type": "pubkey"
+        },
+        {
+          "name": "num_expected_requests_left",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "fund_manager_close_fund_account",
       "discriminator": [
         158,
@@ -1502,9 +1648,9 @@
           "signer": true
         },
         {
-          "name": "admin",
+          "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "fund_account",
@@ -1523,38 +1669,38 @@
               {
                 "kind": "const",
                 "value": [
-                  176,
-                  64,
-                  228,
-                  130,
                   214,
-                  123,
-                  80,
-                  76,
-                  100,
-                  178,
-                  192,
-                  192,
-                  179,
-                  126,
-                  147,
-                  60,
-                  234,
-                  167,
-                  167,
-                  116,
-                  119,
-                  133,
-                  49,
-                  140,
-                  60,
-                  54,
-                  168,
-                  166,
+                  52,
+                  8,
+                  155,
+                  182,
+                  149,
+                  115,
                   57,
-                  242,
-                  137,
-                  226
+                  20,
+                  131,
+                  125,
+                  232,
+                  82,
+                  251,
+                  210,
+                  76,
+                  255,
+                  40,
+                  78,
+                  39,
+                  34,
+                  166,
+                  52,
+                  128,
+                  105,
+                  118,
+                  67,
+                  202,
+                  117,
+                  247,
+                  108,
+                  146
                 ]
               }
             ]
@@ -1579,7 +1725,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -1666,7 +1812,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "system_program",
@@ -1939,7 +2085,7 @@
         {
           "name": "admin",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "system_program",
@@ -2113,7 +2259,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -2216,7 +2362,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -2298,22 +2444,22 @@
       ]
     },
     {
-      "name": "fund_manager_update_restaking_vault_operator_strategy",
+      "name": "fund_manager_update_restaking_vault_delegation_strategy",
       "discriminator": [
-        206,
-        26,
-        208,
-        25,
-        192,
-        25,
-        98,
-        13
+        54,
+        180,
+        250,
+        68,
+        121,
+        2,
+        143,
+        87
       ],
       "accounts": [
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -2393,7 +2539,7 @@
           "type": "u64"
         },
         {
-          "name": "token_redelegation_amount",
+          "name": "token_redelegating_amount",
           "type": {
             "option": "u64"
           }
@@ -2416,7 +2562,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -2509,7 +2655,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -2616,7 +2762,7 @@
         {
           "name": "fund_manager",
           "signer": true,
-          "address": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+          "address": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
         },
         {
           "name": "receipt_token_mint",
@@ -2845,6 +2991,10 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "offset_receivable",
+          "type": "bool"
         }
       ]
     },
@@ -3002,6 +3152,10 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "offset_receivable",
+          "type": "bool"
         }
       ]
     },
@@ -3641,7 +3795,7 @@
           "name": "supported_token_program"
         },
         {
-          "name": "normalized_token_pool_supported_token_account",
+          "name": "normalized_token_pool_supported_token_reserve_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -3739,122 +3893,6 @@
         }
       ],
       "args": []
-    },
-    {
-      "name": "token_transfer_hook",
-      "discriminator": [
-        105,
-        37,
-        101,
-        197,
-        75,
-        251,
-        102,
-        26
-      ],
-      "accounts": [
-        {
-          "name": "source_receipt_token_account"
-        },
-        {
-          "name": "receipt_token_mint",
-          "relations": [
-            "fund_account",
-            "reward_account"
-          ]
-        },
-        {
-          "name": "destination_receipt_token_account"
-        },
-        {
-          "name": "owner"
-        },
-        {
-          "name": "extra_account_meta_list",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  101,
-                  120,
-                  116,
-                  114,
-                  97,
-                  45,
-                  97,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116,
-                  45,
-                  109,
-                  101,
-                  116,
-                  97,
-                  115
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "receipt_token_mint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "fund_account",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  102,
-                  117,
-                  110,
-                  100
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "receipt_token_mint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "reward_account",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  114,
-                  101,
-                  119,
-                  97,
-                  114,
-                  100
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "receipt_token_mint"
-              }
-            ]
-          }
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
     },
     {
       "name": "user_cancel_withdrawal_request",
@@ -6231,16 +6269,6 @@
           }
         },
         {
-          "name": "fund_withdrawal_batch_account",
-          "docs": [
-            "Users can derive proper account address with target batch id for each withdrawal requests.",
-            "And the batch id can be read from a user fund account which the withdrawal requests belong to.",
-            "seeds = [FundWithdrawalBatchAccount::SEED, receipt_token_mint.key().as_ref(), Pubkey::default().as_ref(), &fund_withdrawal_batch_account.batch_id.to_le_bytes()],",
-            "bump = fund_withdrawal_batch_account.get_bump(),"
-          ],
-          "writable": true
-        },
-        {
           "name": "fund_reserve_account",
           "writable": true,
           "pda": {
@@ -6265,6 +6293,84 @@
               {
                 "kind": "account",
                 "path": "receipt_token_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fund_withdrawal_batch_account",
+          "docs": [
+            "Users can derive proper account address with target batch id for each withdrawal requests.",
+            "And the batch id can be read from a user fund account which the withdrawal requests belong to."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  105,
+                  116,
+                  104,
+                  100,
+                  114,
+                  97,
+                  119,
+                  97,
+                  108,
+                  95,
+                  98,
+                  97,
+                  116,
+                  99,
+                  104
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "batch_id"
               }
             ]
           }
@@ -6417,6 +6523,10 @@
       ],
       "args": [
         {
+          "name": "batch_id",
+          "type": "u64"
+        },
+        {
           "name": "request_id",
           "type": "u64"
         }
@@ -6555,11 +6665,46 @@
           "name": "fund_withdrawal_batch_account",
           "docs": [
             "Users can derive proper account address with target batch id for each withdrawal requests.",
-            "And the batch id can be read from a user fund account which the withdrawal requests belong to.",
-            "seeds = [FundWithdrawalBatchAccount::SEED, receipt_token_mint.key().as_ref(), supported_token_mint.key().as_ref(), &fund_withdrawal_batch_account.batch_id.to_le_bytes()],",
-            "bump = fund_withdrawal_batch_account.get_bump(),"
+            "And the batch id can be read from a user fund account which the withdrawal requests belong to."
           ],
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  105,
+                  116,
+                  104,
+                  100,
+                  114,
+                  97,
+                  119,
+                  97,
+                  108,
+                  95,
+                  98,
+                  97,
+                  116,
+                  99,
+                  104
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receipt_token_mint"
+              },
+              {
+                "kind": "account",
+                "path": "supported_token_mint"
+              },
+              {
+                "kind": "arg",
+                "path": "batch_id"
+              }
+            ]
+          }
         },
         {
           "name": "fund_supported_token_reserve_account",
@@ -6772,6 +6917,10 @@
       ],
       "args": [
         {
+          "name": "batch_id",
+          "type": "u64"
+        },
+        {
           "name": "request_id",
           "type": "u64"
         }
@@ -6896,6 +7045,19 @@
         226,
         252,
         128
+      ]
+    },
+    {
+      "name": "OperatorDonatedToFund",
+      "discriminator": [
+        87,
+        48,
+        245,
+        185,
+        4,
+        76,
+        165,
+        242
       ]
     },
     {
@@ -7328,111 +7490,116 @@
     },
     {
       "code": 6054,
+      "name": "FundNormalizedTokenNotSetError",
+      "msg": "fund: normalized token is not set"
+    },
+    {
+      "code": 6055,
       "name": "FundRestakingVaultAlreadyRegisteredError",
       "msg": "fund: restaking vault already registered"
     },
     {
-      "code": 6055,
+      "code": 6056,
       "name": "FundExceededMaxRestakingVaultsError",
       "msg": "reward: exceeded max restaking vaults"
     },
     {
-      "code": 6056,
+      "code": 6057,
       "name": "FundRestakingNotSupportedVaultError",
       "msg": "fund: not supported restaking vault"
     },
     {
-      "code": 6057,
+      "code": 6058,
       "name": "FundRestakingVaultNotFoundError",
       "msg": "fund: restaking vault not found"
     },
     {
-      "code": 6058,
+      "code": 6059,
       "name": "FundRestakingVaultOperatorNotFoundError",
       "msg": "fund: restaking vault operator not found"
     },
     {
-      "code": 6059,
+      "code": 6060,
       "name": "FundRestakingVaultOperatorAlreadyRegisteredError",
       "msg": "fund: restaking vault operator already registered"
     },
     {
-      "code": 6060,
-      "name": "FundExceededMaxRestakingVaultOperatorsError",
-      "msg": "fund: exceeded max restaking vault operators"
+      "code": 6061,
+      "name": "FundExceededMaxRestakingVaultDelegationsError",
+      "msg": "fund: exceeded max restaking vault delegations"
     },
     {
-      "code": 6061,
+      "code": 6062,
       "name": "FundOperationUnauthorizedCommandError",
       "msg": "fund: unauhorized operation command"
     },
     {
-      "code": 6062,
+      "code": 6063,
       "name": "FundOperationCommandAccountComputationException",
       "msg": "fund: failed to compute required accounts for the operation command"
     },
     {
-      "code": 6063,
+      "code": 6064,
       "name": "FundOperationCommandExecutionFailedException",
       "msg": "fund: failed to execute the operation command"
     },
     {
-      "code": 6064,
+      "code": 6065,
       "name": "NormalizedTokenPoolNotSupportedTokenError",
       "msg": "normalization: not supported token"
     },
     {
-      "code": 6065,
+      "code": 6066,
       "name": "NormalizedTokenPoolAlreadySupportedTokenError",
       "msg": "normalization: already supported token"
     },
     {
-      "code": 6066,
+      "code": 6067,
       "name": "NormalizedTokenPoolExceededMaxSupportedTokensError",
       "msg": "normalization: exceeded max supported tokens"
     },
     {
-      "code": 6067,
+      "code": 6068,
       "name": "NormalizedTokenPoolNotEnoughSupportedTokenException",
       "msg": "normalization: not enough supported token in the pool"
     },
     {
-      "code": 6068,
+      "code": 6069,
       "name": "NormalizedTokenPoolAlreadySettledWithdrawalAccountError",
       "msg": "normalization: already settled withdrawal account"
     },
     {
-      "code": 6069,
+      "code": 6070,
       "name": "NormalizedTokenPoolNonClaimableTokenError",
       "msg": "normalization: the token is non-claimable for the given withdrawal account"
     },
     {
-      "code": 6070,
+      "code": 6071,
       "name": "StakingUninitializedWithdrawTicketNotFoundException",
       "msg": "staking: failed to find uninitialized withdraw ticket"
     },
     {
-      "code": 6071,
+      "code": 6072,
       "name": "StakingAccountNotMatchedException",
       "msg": "staking: account not matched"
     },
     {
-      "code": 6072,
+      "code": 6073,
       "name": "StakingSPLActiveStakeNotAvailableException",
       "msg": "staking: spl stake pool's active stake not available"
     },
     {
-      "code": 6073,
+      "code": 6074,
       "name": "RestakingVaultWithdrawalTicketsExhaustedError",
       "msg": "restaking: all withdrawal tickets are already in use"
     },
     {
-      "code": 6074,
+      "code": 6075,
       "name": "RestakingVaultWithdrawalTicketNotWithdrawableError",
       "msg": "restaking: withdrawal ticket is not withdrawable"
     },
     {
-      "code": 6075,
+      "code": 6076,
       "name": "RestakingVaultWithdrawalTicketAlreadyInitializedError",
       "msg": "restaking: withdrawal ticket is already initialized"
     }
@@ -7468,6 +7635,7 @@
     },
     {
       "name": "AssetPod",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -7512,6 +7680,7 @@
     },
     {
       "name": "AssetState",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -7637,9 +7806,9 @@
           {
             "name": "operation_receivable_amount",
             "docs": [
-              "asset: A receivable that the fund may charge the users requesting withdrawals.",
-              "It is accrued during either the preparation of the withdrawal obligation or rebalancing of LST (fee from unstaking, unrestaking).",
-              "And it shall be settled by the withdrawal fee normally. But it also can be written off by an authorized operation.",
+              "asset: receivable amount that the fund may charge the users requesting withdrawals.",
+              "It is accrued during either the preparation of the withdrawal obligation or rebalancing of LST like fees from (un)staking or (un)restaking.",
+              "And it shall be settled by the withdrawal fee normally. And it also can be written off by a donation operation.",
               "Then it costs the rebalancing expense to the capital of the fund itself as an operation cost instead of charging the users requesting withdrawals."
             ],
             "type": "u64"
@@ -7647,7 +7816,7 @@
           {
             "name": "operation_reserved_amount",
             "docs": [
-              "asset"
+              "asset: remaining asset for cash-in/out"
             ],
             "type": "u64"
           }
@@ -7950,6 +8119,10 @@
           {
             "name": "enqueued_receipt_token_amount",
             "type": "u64"
+          },
+          {
+            "name": "total_queued_receipt_token_amount",
+            "type": "u64"
           }
         ]
       }
@@ -8100,7 +8273,7 @@
                     "name": "SupportedToken"
                   }
                 },
-                10
+                30
               ]
             }
           },
@@ -8140,7 +8313,7 @@
                     "name": "RestakingVault"
                   }
                 },
-                4
+                30
               ]
             }
           },
@@ -8274,49 +8447,272 @@
       }
     },
     {
-      "name": "InitializeCommand",
+      "name": "HarvestRewardCommand",
       "type": {
         "kind": "struct",
         "fields": []
+      }
+    },
+    {
+      "name": "HarvestRewardCommandResult",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "InitializeCommand",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "InitializeCommandState"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeCommandRestakingVaultUpdateItem",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "delegations_updated_bitmap",
+            "type": {
+              "vec": "bool"
+            }
+          }
+        ]
       }
     },
     {
       "name": "InitializeCommandResult",
       "type": {
         "kind": "struct",
-        "fields": []
+        "fields": [
+          {
+            "name": "restaking_vault_updated",
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "InitializeCommandResultRestakingVaultUpdated"
+                }
+              }
+            }
+          }
+        ]
       }
     },
     {
-      "name": "NormalizeLSTCommand",
-      "type": {
-        "kind": "struct",
-        "fields": []
-      }
-    },
-    {
-      "name": "NormalizeLSTCommandResult",
-      "type": {
-        "kind": "struct",
-        "fields": []
-      }
-    },
-    {
-      "name": "NormalizeSupportedTokenAsset",
+      "name": "InitializeCommandResultRestakingVaultDelegationUpdate",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "operation_reserved_amount",
+            "name": "operator",
+            "type": "pubkey"
+          },
+          {
+            "name": "delegated_amount",
             "type": "u64"
           },
           {
-            "name": "token_mint",
+            "name": "undelegating_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeCommandResultRestakingVaultUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
             "type": "pubkey"
           },
           {
-            "name": "token_program",
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "finalized",
+            "type": "bool"
+          },
+          {
+            "name": "supported_token_mint",
             "type": "pubkey"
+          },
+          {
+            "name": "delegations",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "InitializeCommandResultRestakingVaultDelegationUpdate"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeCommandState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "New"
+          },
+          {
+            "name": "PrepareSingleRestakingVaultUpdate",
+            "fields": [
+              {
+                "name": "vault",
+                "type": "pubkey"
+              },
+              {
+                "name": "operator",
+                "type": "pubkey"
+              }
+            ]
+          },
+          {
+            "name": "PrepareRestakingVaultUpdate",
+            "fields": [
+              {
+                "name": "items",
+                "type": {
+                  "vec": {
+                    "defined": {
+                      "name": "InitializeCommandRestakingVaultUpdateItem"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "ExecuteRestakingVaultUpdate",
+            "fields": [
+              {
+                "name": "items",
+                "type": {
+                  "vec": {
+                    "defined": {
+                      "name": "InitializeCommandRestakingVaultUpdateItem"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "NormalizeSTCommand",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "NormalizeSTCommandState"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "NormalizeSTCommandItem",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "supported_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "allocated_token_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NormalizeSTCommandResult",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "supported_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "normalized_supported_token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "minted_token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "operation_reserved_token_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NormalizeSTCommandState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "New"
+          },
+          {
+            "name": "Prepare",
+            "fields": [
+              {
+                "name": "items",
+                "type": {
+                  "vec": {
+                    "defined": {
+                      "name": "NormalizeSTCommandItem"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Execute",
+            "fields": [
+              {
+                "name": "items",
+                "type": {
+                  "vec": {
+                    "defined": {
+                      "name": "NormalizeSTCommandItem"
+                    }
+                  }
+                }
+              }
+            ]
           }
         ]
       }
@@ -8359,7 +8755,7 @@
             "type": "pubkey"
           },
           {
-            "name": "lock_account",
+            "name": "reserve_account",
             "type": "pubkey"
           },
           {
@@ -8400,6 +8796,7 @@
     },
     {
       "name": "NormalizedToken",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -8597,31 +8994,11 @@
             ]
           },
           {
-            "name": "ClaimUnstakedSOL",
-            "fields": [
-              {
-                "defined": {
-                  "name": "ClaimUnstakedSOLCommand"
-                }
-              }
-            ]
-          },
-          {
             "name": "EnqueueWithdrawalBatch",
             "fields": [
               {
                 "defined": {
                   "name": "EnqueueWithdrawalBatchCommand"
-                }
-              }
-            ]
-          },
-          {
-            "name": "ProcessWithdrawalBatch",
-            "fields": [
-              {
-                "defined": {
-                  "name": "ProcessWithdrawalBatchCommand"
                 }
               }
             ]
@@ -8667,11 +9044,31 @@
             ]
           },
           {
+            "name": "ClaimUnstakedSOL",
+            "fields": [
+              {
+                "defined": {
+                  "name": "ClaimUnstakedSOLCommand"
+                }
+              }
+            ]
+          },
+          {
             "name": "UnstakeLST",
             "fields": [
               {
                 "defined": {
                   "name": "UnstakeLSTCommand"
+                }
+              }
+            ]
+          },
+          {
+            "name": "ProcessWithdrawalBatch",
+            "fields": [
+              {
+                "defined": {
+                  "name": "ProcessWithdrawalBatchCommand"
                 }
               }
             ]
@@ -8687,11 +9084,11 @@
             ]
           },
           {
-            "name": "NormalizeLST",
+            "name": "NormalizeST",
             "fields": [
               {
                 "defined": {
-                  "name": "NormalizeLSTCommand"
+                  "name": "NormalizeSTCommand"
                 }
               }
             ]
@@ -8712,6 +9109,16 @@
               {
                 "defined": {
                   "name": "DelegateVSTCommand"
+                }
+              }
+            ]
+          },
+          {
+            "name": "HarvestReward",
+            "fields": [
+              {
+                "defined": {
+                  "name": "HarvestRewardCommand"
                 }
               }
             ]
@@ -8737,6 +9144,7 @@
     },
     {
       "name": "OperationCommandAccountMetaPod",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -8791,6 +9199,7 @@
     },
     {
       "name": "OperationCommandEntryPod",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -8836,6 +9245,7 @@
     },
     {
       "name": "OperationCommandPod",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -8851,7 +9261,7 @@
             "type": {
               "array": [
                 "u8",
-                2023
+                2535
               ]
             }
           }
@@ -8874,31 +9284,11 @@
             ]
           },
           {
-            "name": "ClaimUnstakedSOL",
-            "fields": [
-              {
-                "defined": {
-                  "name": "ClaimUnstakedSOLCommandResult"
-                }
-              }
-            ]
-          },
-          {
             "name": "EnqueueWithdrawalBatch",
             "fields": [
               {
                 "defined": {
                   "name": "EnqueueWithdrawalBatchCommandResult"
-                }
-              }
-            ]
-          },
-          {
-            "name": "ProcessWithdrawalBatch",
-            "fields": [
-              {
-                "defined": {
-                  "name": "ProcessWithdrawalBatchCommandResult"
                 }
               }
             ]
@@ -8944,11 +9334,31 @@
             ]
           },
           {
+            "name": "ClaimUnstakedSOL",
+            "fields": [
+              {
+                "defined": {
+                  "name": "ClaimUnstakedSOLCommandResult"
+                }
+              }
+            ]
+          },
+          {
             "name": "UnstakeLST",
             "fields": [
               {
                 "defined": {
                   "name": "UnstakeLSTCommandResult"
+                }
+              }
+            ]
+          },
+          {
+            "name": "ProcessWithdrawalBatch",
+            "fields": [
+              {
+                "defined": {
+                  "name": "ProcessWithdrawalBatchCommandResult"
                 }
               }
             ]
@@ -8964,11 +9374,11 @@
             ]
           },
           {
-            "name": "NormalizeLST",
+            "name": "NormalizeST",
             "fields": [
               {
                 "defined": {
-                  "name": "NormalizeLSTCommandResult"
+                  "name": "NormalizeSTCommandResult"
                 }
               }
             ]
@@ -8992,28 +9402,23 @@
                 }
               }
             ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "OperationReservedRestakeToken",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "token_mint",
-            "type": "pubkey"
           },
           {
-            "name": "operation_reserved_amount",
-            "type": "u64"
+            "name": "HarvestReward",
+            "fields": [
+              {
+                "defined": {
+                  "name": "HarvestRewardCommandResult"
+                }
+              }
+            ]
           }
         ]
       }
     },
     {
       "name": "OperationState",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -9073,6 +9478,40 @@
                 128
               ]
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "OperatorDonatedToFund",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "receipt_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "fund_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "supported_token_mint",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "donated_amount",
+            "type": "u64"
+          },
+          {
+            "name": "deposited_amount",
+            "type": "u64"
+          },
+          {
+            "name": "offsetted_receivable_amount",
+            "type": "u64"
           }
         ]
       }
@@ -9193,12 +9632,6 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "supported_token_mint",
-            "type": {
-              "option": "pubkey"
-            }
-          },
-          {
             "name": "requested_receipt_token_amount",
             "type": "u64"
           },
@@ -9207,11 +9640,53 @@
             "type": "u64"
           },
           {
+            "name": "asset_token_mint",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
             "name": "reserved_asset_user_amount",
             "type": "u64"
           },
           {
             "name": "deducted_asset_fee_amount",
+            "type": "u64"
+          },
+          {
+            "name": "offsetted_asset_receivables",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "ProcessWithdrawalBatchCommandResultAssetReceivable"
+                }
+              }
+            }
+          },
+          {
+            "name": "transferred_asset_revenue_amount",
+            "type": "u64"
+          },
+          {
+            "name": "withdrawal_fee_rate_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProcessWithdrawalBatchCommandResultAssetReceivable",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset_token_mint",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "asset_amount",
             "type": "u64"
           }
         ]
@@ -9223,20 +9698,36 @@
         "kind": "enum",
         "variants": [
           {
-            "name": "New",
+            "name": "New"
+          },
+          {
+            "name": "Prepare",
             "fields": [
               {
-                "option": "pubkey"
+                "name": "asset_token_mint",
+                "type": {
+                  "option": "pubkey"
+                }
               }
             ]
           },
           {
-            "name": "Process",
+            "name": "Execute",
             "fields": [
               {
-                "option": "pubkey"
+                "name": "asset_token_mint",
+                "type": {
+                  "option": "pubkey"
+                }
               },
-              "u64"
+              {
+                "name": "num_processing_batches",
+                "type": "u8"
+              },
+              {
+                "name": "receipt_token_amount",
+                "type": "u64"
+              }
             ]
           }
         ]
@@ -9248,30 +9739,10 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "items",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "RestakeVSTCommandItem"
-                }
-              }
-            }
-          },
-          {
             "name": "state",
             "type": {
               "defined": {
                 "name": "RestakeVSTCommandState"
-              }
-            }
-          },
-          {
-            "name": "operation_reserved_restake_token",
-            "type": {
-              "option": {
-                "defined": {
-                  "name": "OperationReservedRestakeToken"
-                }
               }
             }
           }
@@ -9284,11 +9755,15 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "vault_address",
+            "name": "vault",
             "type": "pubkey"
           },
           {
-            "name": "sol_amount",
+            "name": "supported_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "allocated_token_amount",
             "type": "u64"
           }
         ]
@@ -9298,7 +9773,28 @@
       "name": "RestakeVSTCommandResult",
       "type": {
         "kind": "struct",
-        "fields": []
+        "fields": [
+          {
+            "name": "supported_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "deposited_supported_token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "deducted_supported_token_fee_amount",
+            "type": "u64"
+          },
+          {
+            "name": "minted_token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "operation_reserved_token_amount",
+            "type": "u64"
+          }
+        ]
       }
     },
     {
@@ -9307,37 +9803,35 @@
         "kind": "enum",
         "variants": [
           {
-            "name": "Init"
+            "name": "New"
           },
           {
-            "name": "SetupRestake"
-          },
-          {
-            "name": "SetupNormalize"
-          },
-          {
-            "name": "Normalize",
+            "name": "Prepare",
             "fields": [
               {
-                "vec": {
-                  "defined": {
-                    "name": "NormalizeSupportedTokenAsset"
+                "name": "items",
+                "type": {
+                  "vec": {
+                    "defined": {
+                      "name": "RestakeVSTCommandItem"
+                    }
                   }
                 }
               }
             ]
           },
           {
-            "name": "ReadVaultState"
-          },
-          {
-            "name": "Restake",
+            "name": "Execute",
             "fields": [
               {
-                "array": [
-                  "u64",
-                  2
-                ]
+                "name": "items",
+                "type": {
+                  "vec": {
+                    "defined": {
+                      "name": "RestakeVSTCommandItem"
+                    }
+                  }
+                }
               }
             ]
           }
@@ -9346,6 +9840,7 @@
     },
     {
       "name": "RestakingVault",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -9432,16 +9927,16 @@
             }
           },
           {
-            "name": "num_operators",
+            "name": "num_delegations",
             "type": "u8"
           },
           {
-            "name": "operators",
+            "name": "delegations",
             "type": {
               "array": [
                 {
                   "defined": {
-                    "name": "RestakingVaultOperator"
+                    "name": "RestakingVaultDelegation"
                   }
                 },
                 30
@@ -9449,7 +9944,7 @@
             }
           },
           {
-            "name": "compounding_token_mints",
+            "name": "compounding_reward_token_mints",
             "docs": [
               "auto-compounding"
             ],
@@ -9473,7 +9968,8 @@
       }
     },
     {
-      "name": "RestakingVaultOperator",
+      "name": "RestakingVaultDelegation",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -9498,12 +9994,16 @@
           {
             "name": "supported_token_delegated_amount",
             "docs": [
-              "just informative field"
+              "informative field; these values shall be synced from remote state periodically."
             ],
             "type": "u64"
           },
           {
-            "name": "supported_token_redelegation_amount",
+            "name": "supported_token_undelegating_amount",
+            "type": "u64"
+          },
+          {
+            "name": "supported_token_redelegating_amount",
             "docs": [
               "configuration: the amount requested to be undelegated as soon as possible regardless of current state, this value should be decreased by each undelegation requested amount."
             ],
@@ -9514,7 +10014,7 @@
             "type": {
               "array": [
                 "u8",
-                32
+                24
               ]
             }
           }
@@ -9526,6 +10026,7 @@
       "docs": [
         "Reward type."
       ],
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -9692,6 +10193,7 @@
     },
     {
       "name": "RewardPool",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -9789,6 +10291,7 @@
       "docs": [
         "Reward pool holder type."
       ],
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -9850,6 +10353,7 @@
     },
     {
       "name": "RewardSettlement",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -9933,6 +10437,7 @@
       "docs": [
         "Exact settlement block range: [`starting_slot`, `ending_slot`)"
       ],
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -10039,16 +10544,6 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "items",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "StakeSOLCommandItem"
-                }
-              }
-            }
-          },
-          {
             "name": "state",
             "type": {
               "defined": {
@@ -10065,11 +10560,11 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "mint",
+            "name": "token_mint",
             "type": "pubkey"
           },
           {
-            "name": "sol_amount",
+            "name": "allocated_sol_amount",
             "type": "u64"
           }
         ]
@@ -10079,7 +10574,28 @@
       "name": "StakeSOLCommandResult",
       "type": {
         "kind": "struct",
-        "fields": []
+        "fields": [
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "staked_sol_amount",
+            "type": "u64"
+          },
+          {
+            "name": "deducted_sol_fee_amount",
+            "type": "u64"
+          },
+          {
+            "name": "minted_token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "operation_reserved_token_amount",
+            "type": "u64"
+          }
+        ]
       }
     },
     {
@@ -10091,19 +10607,41 @@
             "name": "New"
           },
           {
-            "name": "Init"
+            "name": "Prepare",
+            "fields": [
+              {
+                "name": "items",
+                "type": {
+                  "vec": {
+                    "defined": {
+                      "name": "StakeSOLCommandItem"
+                    }
+                  }
+                }
+              }
+            ]
           },
           {
-            "name": "ReadPoolState"
-          },
-          {
-            "name": "Stake"
+            "name": "Execute",
+            "fields": [
+              {
+                "name": "items",
+                "type": {
+                  "vec": {
+                    "defined": {
+                      "name": "StakeSOLCommandItem"
+                    }
+                  }
+                }
+              }
+            ]
           }
         ]
       }
     },
     {
       "name": "SupportedToken",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -10189,6 +10727,7 @@
     },
     {
       "name": "TokenAllocatedAmount",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -10230,6 +10769,7 @@
     },
     {
       "name": "TokenAllocatedAmountRecord",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -10309,12 +10849,22 @@
                 "type": "pubkey"
               }
             ]
+          },
+          {
+            "name": "OrcaDEXLiquidityPool",
+            "fields": [
+              {
+                "name": "address",
+                "type": "pubkey"
+              }
+            ]
           }
         ]
       }
     },
     {
       "name": "TokenPricingSourcePod",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -10368,6 +10918,7 @@
     },
     {
       "name": "TokenValuePod",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -10383,7 +10934,7 @@
                     "name": "AssetPod"
                   }
                 },
-                17
+                33
               ]
             }
           },
@@ -10874,6 +11425,7 @@
     },
     {
       "name": "UserRewardPool",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -10940,6 +11492,7 @@
     },
     {
       "name": "UserRewardSettlement",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -11120,6 +11673,7 @@
     },
     {
       "name": "WithdrawalBatch",
+      "serialization": "bytemuck",
       "repr": {
         "kind": "c"
       },
@@ -11204,7 +11758,7 @@
     {
       "name": "ADMIN_PUBKEY",
       "type": "pubkey",
-      "value": "9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"
+      "value": "fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"
     },
     {
       "name": "DEVNET_BSOL_MINT_ADDRESS",
@@ -11239,36 +11793,36 @@
     {
       "name": "FRAGSOL_ADDRESS_LOOKUP_TABLE_ADDRESS",
       "type": "pubkey",
-      "value": "G45gQa12Uwvnrp2Yb9oWTSwZSEHZWL71QDWvyLz23bNc"
+      "value": "5i5ExdTT7j36gKyiyjhaEcqFWUESvi6maASJyxKVZLyU"
     },
     {
       "name": "FRAGSOL_JITO_VAULT_ACCOUNT_ADDRESS",
       "type": "pubkey",
-      "value": "9rNA5PpjRPGxexDSoffQ8yRhMBMvRQrffwSnDBcXJjwY"
+      "value": "BxhsigZDYjWTzXGgem9W3DsvJgFpEK5pM2RANP22bxBE"
     },
     {
       "name": "FRAGSOL_JITO_VAULT_RECEIPT_TOKEN_MINT_ADDRESS",
       "type": "pubkey",
-      "value": "J6AS6PFJip13cStdiuvRrLz2hDZiZvxdLhmsopN7YTDM"
+      "value": "7jff6VT8twUX3513HuhN7EF18DtUzBj2N1goWroZ29t"
     },
     {
       "name": "FRAGSOL_MINT_ADDRESS",
       "type": "pubkey",
-      "value": "Cs29UiPhAkM2v8fZW7qCJ1UjhF1UAhgrsKj61yGGYizD"
+      "value": "FRAGSEthVFL7fdqM8hxfxkfCZzUvmg21cqPJVvC1qdbo"
     },
     {
       "name": "FRAGSOL_NORMALIZED_TOKEN_MINT_ADDRESS",
       "type": "pubkey",
-      "value": "4noNmx2RpxK4zdr68Fq1CYM5VhN4yjgGZEFyuB7t2pBX"
+      "value": "nSoLnkrvh2aY792pgCNT6hzx84vYtkviRzxvhf3ws8e"
     },
     {
       "name": "FUND_ACCOUNT_CURRENT_VERSION",
       "docs": [
         "## Version History",
-        "* v4: migrate to new layout including new fields using bytemuck. (31248 ~= 31KB)"
+        "* v15: migrate to new layout including new fields using bytemuck. (150312 ~= 147KB)"
       ],
       "type": "u16",
-      "value": "4"
+      "value": "15"
     },
     {
       "name": "FUND_ACCOUNT_OPERATION_COMMAND_EXPIRATION_SECONDS",
@@ -11278,7 +11832,7 @@
     {
       "name": "FUND_MANAGER_PUBKEY",
       "type": "pubkey",
-      "value": "5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"
+      "value": "5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"
     },
     {
       "name": "JITO_VAULT_CONFIG_ADDRESS",
@@ -11288,7 +11842,7 @@
     {
       "name": "JITO_VAULT_PROGRAM_FEE_WALLET",
       "type": "pubkey",
-      "value": "5eosrve6LktMZgVNszYzebgmmC7BjLK8NoWyRQtcmGTF"
+      "value": "9eZbWiHsPRsxLSiHxzg2pkXsAuQMwAjQrda7C7e21Fw6"
     },
     {
       "name": "JITO_VAULT_PROGRAM_ID",
@@ -11370,7 +11924,7 @@
     {
       "name": "PROGRAM_REVENUE_ADDRESS",
       "type": "pubkey",
-      "value": "GuSruSKKCmAGuWMeMsiw3mbNhjeiRtNhnh9Eatgz33NA"
+      "value": "SRCMj3B7cYjvwTtqJxUSptgJPWkL8bHLrQme6q4zHn7"
     },
     {
       "name": "REWARD_ACCOUNT_CURRENT_VERSION",
@@ -11384,7 +11938,7 @@
     {
       "name": "TARGET",
       "type": "string",
-      "value": "\"local\""
+      "value": "\"devnet\""
     },
     {
       "name": "USER_REWARD_ACCOUNT_CURRENT_VERSION",

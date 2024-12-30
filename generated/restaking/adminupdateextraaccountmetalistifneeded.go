@@ -32,7 +32,7 @@ func NewAdminUpdateExtraAccountMetaListIfNeededInstructionBuilder() *AdminUpdate
 	nd := &AdminUpdateExtraAccountMetaListIfNeeded{
 		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 6),
 	}
-	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["9b2RSMDYskVvjVbwF4cVwEhZUaaaUgyYSxvESmnoS4LL"]).SIGNER()
+	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["fragkamrANLvuZYQPcmPsCATQAabkqNGH6gxqqPG3aP"]).SIGNER()
 	return nd
 }
 

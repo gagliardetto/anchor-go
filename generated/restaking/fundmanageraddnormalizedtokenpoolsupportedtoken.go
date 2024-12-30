@@ -40,7 +40,7 @@ func NewFundManagerAddNormalizedTokenPoolSupportedTokenInstructionBuilder() *Fun
 	nd := &FundManagerAddNormalizedTokenPoolSupportedToken{
 		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 9),
 	}
-	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5FjrErTQ9P1ThYVdY9RamrPUCQGTMCcczUjH21iKzbwx"]).SIGNER()
+	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"]).SIGNER()
 	nd.AccountMetaSlice[3] = ag_solanago.Meta(Addresses["TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"])
 	return nd
 }
@@ -391,6 +391,9 @@ func (obj FundManagerAddNormalizedTokenPoolSupportedToken) MarshalWithEncoder(en
 		case *TokenPricingSourceFragmetricRestakingFundTuple:
 			tmp.Enum = 4
 			tmp.FragmetricRestakingFund = *realvalue
+		case *TokenPricingSourceOrcaDEXLiquidityPoolTuple:
+			tmp.Enum = 5
+			tmp.OrcaDEXLiquidityPool = *realvalue
 		}
 		err := encoder.Encode(tmp)
 		if err != nil {
@@ -418,6 +421,8 @@ func (obj *FundManagerAddNormalizedTokenPoolSupportedToken) UnmarshalWithDecoder
 			obj.PricingSource = &tmp.FragmetricNormalizedTokenPool
 		case 4:
 			obj.PricingSource = &tmp.FragmetricRestakingFund
+		case 5:
+			obj.PricingSource = &tmp.OrcaDEXLiquidityPool
 		default:
 			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
 		}
