@@ -419,14 +419,12 @@ func DecodeEventsFromEmitCPI(InnerInstructions []ag_rpc.InnerInstruction, accoun
 			}
 
 			var ixData []byte
-			if ixData, err = ag_base58.Decode(string(ix.Data)); err != nil {
-				err = fmt.Errorf("failed to decode base58 emit cpi event: %s", string(ixData))
+			if ixData, err = ag_base58.Decode(ix.Data.String()); err != nil {
 				return
 			}
 			eventBase64 := base64.StdEncoding.EncodeToString(ixData[8:])
 			var eventBinary []byte
 			if eventBinary, err = base64.StdEncoding.DecodeString(eventBase64); err != nil {
-				err = fmt.Errorf("failed to decode base64 emit cpi event: %s", eventBase64)
 				return
 			}
 			eventBinaries = append(eventBinaries, eventBinary)
@@ -1557,7 +1555,6 @@ func genAccountGettersSetters(
 								}
 							})))
 						} else {
-
 							seedRef := seedRefs[i]
 							if seedRef != "" {
 								body.Commentf("path: %s", seedRef)
