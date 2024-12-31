@@ -11,7 +11,7 @@ import (
 )
 
 func TestEncodeDecode_OperatorRunFundCommand(t *testing.T) {
-	fu := ag_gofuzz.New().NilChance(0).NumElements(2, 5)
+	fu := ag_gofuzz.New().NilChance(0)
 	for i := 0; i < 1; i++ {
 		t.Run("OperatorRunFundCommand"+strconv.Itoa(i), func(t *testing.T) {
 			{
@@ -19,7 +19,7 @@ func TestEncodeDecode_OperatorRunFundCommand(t *testing.T) {
 				fu.Fuzz(params)
 				params.AccountMetaSlice = nil
 				buf := new(bytes.Buffer)
-				err := encodeT(params, buf)
+				err := encodeT(*params, buf)
 				ag_require.NoError(t, err)
 				got := new(OperatorRunFundCommand)
 				err = decodeT(got, buf.Bytes())

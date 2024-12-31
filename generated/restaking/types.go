@@ -2871,116 +2871,116 @@ type OperationCommandEntry struct {
 	Command          OperationCommand
 	RequiredAccounts []OperationCommandAccountMeta
 }
-//
-//func (obj OperationCommandEntry) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-//	// Serialize `Command` param:
-//	{
-//		tmp := operationCommandContainer{}
-//		switch realvalue := obj.Command.(type) {
-//		case *OperationCommandInitializeTuple:
-//			tmp.Enum = 0
-//			tmp.Initialize = *realvalue
-//		case *OperationCommandEnqueueWithdrawalBatchTuple:
-//			tmp.Enum = 1
-//			tmp.EnqueueWithdrawalBatch = *realvalue
-//		case *OperationCommandClaimUnrestakedVSTTuple:
-//			tmp.Enum = 2
-//			tmp.ClaimUnrestakedVST = *realvalue
-//		case *OperationCommandDenormalizeNTTuple:
-//			tmp.Enum = 3
-//			tmp.DenormalizeNT = *realvalue
-//		case *OperationCommandUndelegateVSTTuple:
-//			tmp.Enum = 4
-//			tmp.UndelegateVST = *realvalue
-//		case *OperationCommandUnrestakeVRTTuple:
-//			tmp.Enum = 5
-//			tmp.UnrestakeVRT = *realvalue
-//		case *OperationCommandClaimUnstakedSOLTuple:
-//			tmp.Enum = 6
-//			tmp.ClaimUnstakedSOL = *realvalue
-//		case *OperationCommandUnstakeLSTTuple:
-//			tmp.Enum = 7
-//			tmp.UnstakeLST = *realvalue
-//		case *OperationCommandProcessWithdrawalBatchTuple:
-//			tmp.Enum = 8
-//			tmp.ProcessWithdrawalBatch = *realvalue
-//		case *OperationCommandStakeSOLTuple:
-//			tmp.Enum = 9
-//			tmp.StakeSOL = *realvalue
-//		case *OperationCommandNormalizeSTTuple:
-//			tmp.Enum = 10
-//			tmp.NormalizeST = *realvalue
-//		case *OperationCommandRestakeVSTTuple:
-//			tmp.Enum = 11
-//			tmp.RestakeVST = *realvalue
-//		case *OperationCommandDelegateVSTTuple:
-//			tmp.Enum = 12
-//			tmp.DelegateVST = *realvalue
-//		case *OperationCommandHarvestRewardTuple:
-//			tmp.Enum = 13
-//			tmp.HarvestReward = *realvalue
-//		}
-//		err := encoder.Encode(tmp)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//	// Serialize `RequiredAccounts` param:
-//	err = encoder.Encode(obj.RequiredAccounts)
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
-//
-//func (obj *OperationCommandEntry) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-//	// Deserialize `Command`:
-//	{
-//		tmp := new(operationCommandContainer)
-//		err := decoder.Decode(tmp)
-//		if err != nil {
-//			return err
-//		}
-//		switch tmp.Enum {
-//		case 0:
-//			obj.Command = &tmp.Initialize
-//		case 1:
-//			obj.Command = &tmp.EnqueueWithdrawalBatch
-//		case 2:
-//			obj.Command = &tmp.ClaimUnrestakedVST
-//		case 3:
-//			obj.Command = &tmp.DenormalizeNT
-//		case 4:
-//			obj.Command = &tmp.UndelegateVST
-//		case 5:
-//			obj.Command = &tmp.UnrestakeVRT
-//		case 6:
-//			obj.Command = &tmp.ClaimUnstakedSOL
-//		case 7:
-//			obj.Command = &tmp.UnstakeLST
-//		case 8:
-//			obj.Command = &tmp.ProcessWithdrawalBatch
-//		case 9:
-//			obj.Command = &tmp.StakeSOL
-//		case 10:
-//			obj.Command = &tmp.NormalizeST
-//		case 11:
-//			obj.Command = &tmp.RestakeVST
-//		case 12:
-//			obj.Command = &tmp.DelegateVST
-//		case 13:
-//			obj.Command = &tmp.HarvestReward
-//		default:
-//			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
-//		}
-//	}
-//	// Deserialize `RequiredAccounts`:
-//	err = decoder.Decode(&obj.RequiredAccounts)
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
+
+func (obj OperationCommandEntry) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `Command` param:
+	{
+		tmp := operationCommandContainer{}
+		switch realvalue := obj.Command.(type) {
+		case *OperationCommandInitializeTuple:
+			tmp.Enum = 0
+			tmp.Initialize = *realvalue
+		case *OperationCommandEnqueueWithdrawalBatchTuple:
+			tmp.Enum = 1
+			tmp.EnqueueWithdrawalBatch = *realvalue
+		case *OperationCommandClaimUnrestakedVSTTuple:
+			tmp.Enum = 2
+			tmp.ClaimUnrestakedVST = *realvalue
+		case *OperationCommandDenormalizeNTTuple:
+			tmp.Enum = 3
+			tmp.DenormalizeNT = *realvalue
+		case *OperationCommandUndelegateVSTTuple:
+			tmp.Enum = 4
+			tmp.UndelegateVST = *realvalue
+		case *OperationCommandUnrestakeVRTTuple:
+			tmp.Enum = 5
+			tmp.UnrestakeVRT = *realvalue
+		case *OperationCommandClaimUnstakedSOLTuple:
+			tmp.Enum = 6
+			tmp.ClaimUnstakedSOL = *realvalue
+		case *OperationCommandUnstakeLSTTuple:
+			tmp.Enum = 7
+			tmp.UnstakeLST = *realvalue
+		case *OperationCommandProcessWithdrawalBatchTuple:
+			tmp.Enum = 8
+			tmp.ProcessWithdrawalBatch = *realvalue
+		case *OperationCommandStakeSOLTuple:
+			tmp.Enum = 9
+			tmp.StakeSOL = *realvalue
+		case *OperationCommandNormalizeSTTuple:
+			tmp.Enum = 10
+			tmp.NormalizeST = *realvalue
+		case *OperationCommandRestakeVSTTuple:
+			tmp.Enum = 11
+			tmp.RestakeVST = *realvalue
+		case *OperationCommandDelegateVSTTuple:
+			tmp.Enum = 12
+			tmp.DelegateVST = *realvalue
+		case *OperationCommandHarvestRewardTuple:
+			tmp.Enum = 13
+			tmp.HarvestReward = *realvalue
+		}
+		err := encoder.Encode(tmp)
+		if err != nil {
+			return err
+		}
+	}
+	// Serialize `RequiredAccounts` param:
+	err = encoder.Encode(obj.RequiredAccounts)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *OperationCommandEntry) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `Command`:
+	{
+		tmp := new(operationCommandContainer)
+		err := decoder.Decode(tmp)
+		if err != nil {
+			return err
+		}
+		switch tmp.Enum {
+		case 0:
+			obj.Command = &tmp.Initialize
+		case 1:
+			obj.Command = &tmp.EnqueueWithdrawalBatch
+		case 2:
+			obj.Command = &tmp.ClaimUnrestakedVST
+		case 3:
+			obj.Command = &tmp.DenormalizeNT
+		case 4:
+			obj.Command = &tmp.UndelegateVST
+		case 5:
+			obj.Command = &tmp.UnrestakeVRT
+		case 6:
+			obj.Command = &tmp.ClaimUnstakedSOL
+		case 7:
+			obj.Command = &tmp.UnstakeLST
+		case 8:
+			obj.Command = &tmp.ProcessWithdrawalBatch
+		case 9:
+			obj.Command = &tmp.StakeSOL
+		case 10:
+			obj.Command = &tmp.NormalizeST
+		case 11:
+			obj.Command = &tmp.RestakeVST
+		case 12:
+			obj.Command = &tmp.DelegateVST
+		case 13:
+			obj.Command = &tmp.HarvestReward
+		default:
+			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
+		}
+	}
+	// Deserialize `RequiredAccounts`:
+	err = decoder.Decode(&obj.RequiredAccounts)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 type OperationCommandEntryPod struct {
 	NumRequiredAccounts uint8
