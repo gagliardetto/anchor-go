@@ -1828,7 +1828,42 @@ type EventData interface {
 
 const eventLogPrefix = "Program data: "
 
-func DecodeEventsFromLogMessage(logMessages []string) (eventBinaries [][]byte, err error) {
+func DecodeEvents(txData *ag_rpc.GetTransactionResult, targetProgramId ag_solanago.PublicKey, getAddressTables func(altAddresses []ag_solanago.PublicKey) (tables map[ag_solanago.PublicKey]ag_solanago.PublicKeySlice, err error)) (evts []*Event, err error) {
+	var tx *ag_solanago.Transaction
+	if tx, err = txData.Transaction.GetTransaction(); err != nil {
+		return
+	}
+
+	altAddresses := make([]ag_solanago.PublicKey, len(tx.Message.AddressTableLookups))
+	for _, alt := range tx.Message.AddressTableLookups {
+		altAddresses = append(altAddresses, alt.AccountKey)
+	}
+	if len(altAddresses) > 0 {
+		var tables map[ag_solanago.PublicKey]ag_solanago.PublicKeySlice
+		if tables, err = getAddressTables(altAddresses); err != nil {
+			return
+		}
+		tx.Message.SetAddressTables(tables)
+	}
+
+	var base64Binaries [][]byte
+	logMessageEventBinaries, err := decodeEventsFromLogMessage(txData.Meta.LogMessages)
+	if err != nil {
+		return
+	}
+
+	emitedCPIEventBinaries, err := decodeEventsFromEmitCPI(txData.Meta.InnerInstructions, tx.Message.AccountKeys, targetProgramId)
+	if err != nil {
+		return
+	}
+
+	base64Binaries = append(base64Binaries, logMessageEventBinaries...)
+	base64Binaries = append(base64Binaries, emitedCPIEventBinaries...)
+	evts, err = parseEvents(base64Binaries)
+	return
+}
+
+func decodeEventsFromLogMessage(logMessages []string) (eventBinaries [][]byte, err error) {
 	for _, log := range logMessages {
 		if strings.HasPrefix(log, eventLogPrefix) {
 			eventBase64 := log[len(eventLogPrefix):]
@@ -1844,7 +1879,7 @@ func DecodeEventsFromLogMessage(logMessages []string) (eventBinaries [][]byte, e
 	return
 }
 
-func DecodeEventsFromEmitCPI(InnerInstructions []ag_rpc.InnerInstruction, accountKeys ag_solanago.PublicKeySlice, targetProgramId ag_solanago.PublicKey) (eventBinaries [][]byte, err error) {
+func decodeEventsFromEmitCPI(InnerInstructions []ag_rpc.InnerInstruction, accountKeys ag_solanago.PublicKeySlice, targetProgramId ag_solanago.PublicKey) (eventBinaries [][]byte, err error) {
 	for _, parsedIx := range InnerInstructions {
 		for _, ix := range parsedIx.Instructions {
 			if accountKeys[ix.ProgramIDIndex] != targetProgramId {
@@ -1866,29 +1901,7 @@ func DecodeEventsFromEmitCPI(InnerInstructions []ag_rpc.InnerInstruction, accoun
 	return
 }
 
-func DecodeEvents(txData *ag_rpc.GetTransactionResult, targetProgramId ag_solanago.PublicKey) (evts []*Event, err error) {
-	var tx *ag_solanago.Transaction
-	if tx, err = txData.Transaction.GetTransaction(); err != nil {
-		return
-	}
-
-	var base64Binaries [][]byte
-	logMessageEventBinaries, err := DecodeEventsFromLogMessage(txData.Meta.LogMessages)
-	if err != nil {
-		return
-	}
-	emitedCPIEventBinaries, err := DecodeEventsFromEmitCPI(txData.Meta.InnerInstructions, tx.Message.AccountKeys, targetProgramId)
-	if err != nil {
-		return
-	}
-
-	base64Binaries = append(base64Binaries, logMessageEventBinaries...)
-	base64Binaries = append(base64Binaries, emitedCPIEventBinaries...)
-	evts, err = ParseEvents(base64Binaries)
-	return
-}
-
-func ParseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
+func parseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
 	decoder := ag_binary.NewDecoderWithEncoding(nil, ag_binary.EncodingBorsh)
 
 	for _, eventBinary := range base64Binaries {
