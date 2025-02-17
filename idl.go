@@ -22,6 +22,9 @@ type IDL struct {
 	Constants    []IdlConstant    `json:"constants,omitempty"`
 
 	Metadata *IdlMetadata `json:"metadata,omitempty"` // NOTE: deprecated
+
+	// new fields
+	Address string `json:"address,omitempty"`
 }
 
 // TODO: write generator
@@ -32,7 +35,11 @@ type IdlConstant struct {
 }
 
 type IdlMetadata struct {
-	Address string `json:"address"`
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+	Spec        string `json:"spec"`
+	Description string `json:"description"`
+	Address 		string `json:"address"`
 }
 
 type IdlTypeDefSlice []IdlTypeDef
@@ -69,6 +76,9 @@ type IdlInstruction struct {
 	Docs     []string            `json:"docs"` // @custom
 	Accounts IdlAccountItemSlice `json:"accounts"`
 	Args     []IdlField          `json:"args"`
+
+	// new fields
+	Discriminator []uint8 `json:"discriminator,omitempty"`
 }
 
 type IdlAccountItemSlice []IdlAccountItem
@@ -190,13 +200,84 @@ func (env *IdlAccountItem) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type IdlPda struct {
+    Seeds []IdlSeed `json:"seeds"`
+}
+
+type IdlSeed struct {
+    Kind    string  `json:"kind"`
+    // Если kind == "const", то value – массив чисел (байтов)
+    Value   []int   `json:"value,omitempty"`
+    // Если kind == "account" или "arg", то используется поле path
+    Path    string  `json:"path,omitempty"`
+    // Иногда дополнительно может быть поле "account"
+    Account string  `json:"account,omitempty"`
+}
+
+
+
 type IdlAccount struct {
 	Docs     []string `json:"docs"` // @custom
 	Name     string   `json:"name"`
 	IsMut    bool     `json:"isMut"`
 	IsSigner bool     `json:"isSigner"`
 	Optional bool     `json:"optional"` // @custom
+	Pda      *IdlPda   `json:"pda,omitempty"`
 }
+
+func (a *IdlAccount) UnmarshalJSON(data []byte) error {
+    var aux map[string]interface{}
+    if err := json.Unmarshal(data, &aux); err != nil {
+        return err
+    }
+    if name, ok := aux["name"].(string); ok {
+        a.Name = name
+    }
+    if docs, ok := aux["docs"].([]interface{}); ok {
+        var strDocs []string
+        for _, d := range docs {
+            if s, ok := d.(string); ok {
+                strDocs = append(strDocs, s)
+            }
+        }
+        a.Docs = strDocs
+    }
+    if v, ok := aux["isMut"]; ok {
+        if b, ok := v.(bool); ok {
+            a.IsMut = b
+        }
+    } else if v, ok := aux["writable"]; ok {
+        if b, ok := v.(bool); ok {
+            a.IsMut = b
+        }
+    }
+    if v, ok := aux["isSigner"]; ok {
+        if b, ok := v.(bool); ok {
+            a.IsSigner = b
+        }
+    } else if v, ok := aux["signer"]; ok {
+        if b, ok := v.(bool); ok {
+            a.IsSigner = b
+        }
+    }
+    if v, ok := aux["optional"].(bool); ok {
+        a.Optional = v
+    }
+    // Новая логика для поля "pda"
+    if pdaRaw, ok := aux["pda"]; ok {
+        pdaBytes, err := json.Marshal(pdaRaw)
+        if err != nil {
+            return err
+        }
+        var pda IdlPda
+        if err := json.Unmarshal(pdaBytes, &pda); err != nil {
+            return err
+        }
+        a.Pda = &pda
+    }
+    return nil
+}
+
 
 // A nested/recursive version of IdlAccount.
 type IdlAccounts struct {
