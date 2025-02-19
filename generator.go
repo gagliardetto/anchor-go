@@ -52,7 +52,7 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 		stat.Index().Byte()
 	case IdlTypeString:
 		stat.String()
-	case IdlTypePublicKey:
+	case IdlTypePublicKey, IdlTypePubkey:
 		stat.Qual(PkgSolanaGo, "PublicKey")
 
 	// Custom:
@@ -139,6 +139,11 @@ func addTypeNameIsComplexEnum(name string) {
 }
 
 func registerComplexEnums(idl *IDL, def IdlTypeDef) {
+	// If there is no type definition, skip (this is for accounts in IDL 0.30)
+	if def.Type.Kind == "" {
+		return
+	}
+
 	switch def.Type.Kind {
 	case IdlTypeDefTyKindEnum:
 		enumTypeName := def.Name
@@ -149,6 +154,13 @@ func registerComplexEnums(idl *IDL, def IdlTypeDef) {
 }
 
 func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
+	// If there is no type definition (for example, accounts in IDL 0.30), generate an empty struct.
+	if def.Type.Kind == "" {
+		code := Empty()
+		code.Commentf("Account %s has no type definition in the IDL. Generating an empty struct.", def.Name)
+		code.Type().Id(def.Name).Struct()
+		return code
+	}
 
 	st := newStatement()
 	switch def.Type.Kind {
