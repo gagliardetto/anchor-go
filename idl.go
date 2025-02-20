@@ -206,11 +206,8 @@ type IdlPda struct {
 
 type IdlSeed struct {
     Kind    string  `json:"kind"`
-    // Если kind == "const", то value – массив чисел (байтов)
     Value   []int   `json:"value,omitempty"`
-    // Если kind == "account" или "arg", то используется поле path
     Path    string  `json:"path,omitempty"`
-    // Иногда дополнительно может быть поле "account"
     Account string  `json:"account,omitempty"`
 }
 
