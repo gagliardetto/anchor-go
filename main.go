@@ -1191,37 +1191,36 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 	{
 		// Instruction ID enum:
 		if conf.IDLVersion == "0.30" {
-			code := Empty()
-			code.Comment("Instruction identifiers (using discriminator from IDL 0.30)")
+		code := Empty()
+		// code.Comment("Instruction identifiers (using discriminator from IDL 0.30)")
 
-			code.Const().Parens(
-				DoGroup(func(gr *Group) {
-					for _, instruction := range idl.Instructions {
-						insExportedName := ToCamel(instruction.Name)
+		code.Var().Parens(
+			DoGroup(func(gr *Group) {
+				for _, instruction := range idl.Instructions {
+					insExportedName := ToCamel(instruction.Name)
+					if len(instruction.Discriminator) > 0 {
+						arr := Op("[8]byte{").ListFunc(func(byteGroup *Group) {
+							for _, b := range instruction.Discriminator {
+								byteGroup.Lit(int(b))
+							}
+						}).Op("}")
 
-						ins := Empty().Line()
-						for _, doc := range instruction.Docs {
-							ins.Comment(doc).Line()
-						}
-						ins.Id("Instruction_" + insExportedName)
+						gr.Id("Instruction_" + insExportedName).
+							Op("=").
+							Qual(PkgDfuseBinary, "TypeID").
+							Call(arr)
 
-						if len(instruction.Discriminator) > 0 {
-							ins.Op("=").Qual(PkgDfuseBinary, "TypeID").Call(
-								Index(Lit(8)).Byte().Op("[8]byte{").ListFunc(func(byteGroup *Group) {
-									for _, byteVal := range instruction.Discriminator {
-										byteGroup.Lit(int(byteVal))
-									}
-								}).Op("}"),
-							)
-						} else {
-							// Fallback: if discriminator is missing, use iota
-							gr.Id("Instruction_" + insExportedName).Op("=").Iota().Line()
-						}
+						gr.Line()
+					} else {
+						gr.Id("Instruction_" + insExportedName).Op("=").Iota().Line()
 					}
-				}),
-			)
-			file.Add(code.Line())
-		} else {
+				}
+			}),
+		)
+
+		file.Add(code.Line())
+
+} else {
 			// For IDL 0.29, use existing logic
 			GetConfig().TypeID.
 				On(
