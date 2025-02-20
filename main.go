@@ -333,9 +333,10 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 				}
 				file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc_suffix))
 			} else {
-				panic(`not implemented - only IDL from ("anchor": ">=0.30.0") is availavle`)
+				file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc))
 			}
 		}
+
 		files = append(files, &FileWrapper{
 			Name: "accounts",
 			File: file,
