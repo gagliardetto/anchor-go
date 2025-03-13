@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gagliardetto/solana-go"
 	"io/ioutil"
 	"os"
 	"path"
@@ -13,9 +15,6 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
-
-	"github.com/davecgh/go-spew/spew"
-	"github.com/gagliardetto/solana-go"
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/fragmetric-labs/solana-anchor-go/sighash"
