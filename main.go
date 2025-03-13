@@ -1806,12 +1806,19 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		// ProgramID variable:
 		code := Empty()
 
-		hasAddress := idl.Metadata != nil && idl.Metadata.Address != ""
+		var programAddress string
+		if idl.Metadata != nil && idl.Metadata.Address != "" {
+			programAddress = idl.Metadata.Address // version < 0.29
+		} else {
+			programAddress = idl.Address
+		}
+
+		hasAddress := programAddress != ""
 		code.Var().Id("ProgramID").Qual(PkgSolanaGo, "PublicKey").
 			Add(
 				func() Code {
 					if hasAddress {
-						return Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(idl.Metadata.Address))
+						return Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(programAddress))
 					}
 					return nil
 				}(),
