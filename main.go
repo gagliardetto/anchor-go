@@ -47,6 +47,7 @@ func main() {
 	flag.StringVar((*string)(&conf.TypeID), "type-id", string(TypeIDAnchor), "Choose typeID kind")
 	flag.StringVar(&conf.ModPath, "mod", "", "Generate a go.mod file with the necessary dependencies, and this module")
 	flag.StringVar(&conf.PkgName, "pkg", "", "Override default package name from idl.Name")
+	flag.StringVar(&conf.ProgramID, "program-id", "", "Default Program ID to assign to the package")
 	flag.Parse()
 
 	if err := conf.Validate(); err != nil {
@@ -1101,11 +1102,15 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		code := Empty()
 
 		hasAddress := idl.Metadata != nil && idl.Metadata.Address != ""
+		hasProgramID := GetConfig().ProgramID != ""
 		code.Var().Id("ProgramID").Qual(PkgSolanaGo, "PublicKey").
 			Add(
 				func() Code {
 					if hasAddress {
 						return Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(idl.Metadata.Address))
+					}
+					if hasProgramID {
+						return Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(GetConfig().ProgramID))
 					}
 					return nil
 				}(),
