@@ -15,6 +15,7 @@ type Config struct {
 	Debug               bool
 	DstDir              string
 	ModPath             string
+	PkgName             string
 	RemoveAccountSuffix bool
 }
 

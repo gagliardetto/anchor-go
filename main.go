@@ -25,11 +25,19 @@ const generatedDir = "generated"
 // - tests where type has field that is a complex enum (represented as an interface): assign a random concrete value from the possible enum variants.
 // - when printing tree, check for len before accessing array indexes.
 
+var filenames = FlagStringArray{}
+
+func determinePackageName(idlName string) string {
+	if conf.PkgName != "" {
+		return conf.PkgName
+	}
+	return sighash.ToRustSnakeCase(idlName)
+}
+
 func main() {
 	conf.Encoding = EncodingBorsh
 	conf.TypeID = TypeIDAnchor
 
-	filenames := FlagStringArray{}
 	flag.Var(&filenames, "src", "Path to source; can use multiple times.")
 	flag.StringVar(&conf.DstDir, "dst", generatedDir, "Destination folder")
 	flag.BoolVar(&conf.Debug, "debug", false, "debug mode")
@@ -38,6 +46,7 @@ func main() {
 	flag.StringVar((*string)(&conf.Encoding), "codec", string(EncodingBorsh), "Choose codec")
 	flag.StringVar((*string)(&conf.TypeID), "type-id", string(TypeIDAnchor), "Choose typeID kind")
 	flag.StringVar(&conf.ModPath, "mod", "", "Generate a go.mod file with the necessary dependencies, and this module")
+	flag.StringVar(&conf.PkgName, "pkg", "", "Override default package name from idl.Name")
 	flag.Parse()
 
 	if err := conf.Validate(); err != nil {
@@ -274,7 +283,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 	}
 
 	{
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(determinePackageName(idl.Name), true)
 		// Declare types from IDL:
 		for _, typ := range idl.Types {
 			file.Add(genTypeDef(&idl, false, typ))
@@ -286,7 +295,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 	}
 
 	{
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(determinePackageName(idl.Name), true)
 		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
 			// generate type definition:
@@ -300,7 +309,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 	// Instructions:
 	for _, instruction := range idl.Instructions {
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(determinePackageName(idl.Name), true)
 		insExportedName := ToCamel(instruction.Name)
 
 		// fmt.Println(RedBG(instruction.Name))
@@ -1091,7 +1100,7 @@ func genAccountGettersSetters(
 }
 
 func genProgramBoilerplate(idl IDL) (*File, error) {
-	file := NewGoFile(idl.Name, true)
+	file := NewGoFile(determinePackageName(idl.Name), true)
 	for _, programDoc := range idl.Docs {
 		file.HeaderComment(programDoc)
 	}
