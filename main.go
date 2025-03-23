@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/gagliardetto/solana-go"
 	"io/ioutil"
 	"os"
 	"path"
@@ -15,6 +13,9 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gagliardetto/solana-go"
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/fragmetric-labs/solana-anchor-go/sighash"
@@ -43,6 +44,7 @@ func main() {
 	flag.StringVar((*string)(&conf.Encoding), "codec", string(EncodingBorsh), "Choose codec")
 	flag.StringVar((*string)(&conf.TypeID), "type-id", string(TypeIDAnchor), "Choose typeID kind")
 	flag.StringVar(&conf.ModPath, "mod", "", "Generate a go.mod file with the necessary dependencies, and this module")
+	flag.StringVar(&conf.ProgramID, "program-id", "", "Default Program ID to assign to the package")
 	flag.Parse()
 
 	if err := conf.Validate(); err != nil {
@@ -1820,7 +1822,9 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		code := Empty()
 
 		var programAddress string
-		if idl.Metadata != nil && idl.Metadata.Address != "" {
+		if GetConfig().ProgramID != "" {
+			programAddress = GetConfig().ProgramID
+		} else if idl.Metadata != nil && idl.Metadata.Address != "" {
 			programAddress = idl.Metadata.Address // version < 0.29
 		} else {
 			programAddress = idl.Address
