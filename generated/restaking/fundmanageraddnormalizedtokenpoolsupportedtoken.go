@@ -4,7 +4,6 @@ package restaking
 
 import (
 	"errors"
-	"fmt"
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -13,7 +12,7 @@ import (
 
 // FundManagerAddNormalizedTokenPoolSupportedToken is the `fund_manager_add_normalized_token_pool_supported_token` instruction.
 type FundManagerAddNormalizedTokenPoolSupportedToken struct {
-	PricingSource TokenPricingSource
+	PricingSource *TokenPricingSource
 
 	// [0] = [SIGNER] fund_manager
 	//
@@ -47,7 +46,7 @@ func NewFundManagerAddNormalizedTokenPoolSupportedTokenInstructionBuilder() *Fun
 
 // SetPricingSource sets the "pricing_source" parameter.
 func (inst *FundManagerAddNormalizedTokenPoolSupportedToken) SetPricingSource(pricing_source TokenPricingSource) *FundManagerAddNormalizedTokenPoolSupportedToken {
-	inst.PricingSource = pricing_source
+	inst.PricingSource = &pricing_source
 	return inst
 }
 
@@ -373,59 +372,17 @@ func (inst *FundManagerAddNormalizedTokenPoolSupportedToken) EncodeToTree(parent
 
 func (obj FundManagerAddNormalizedTokenPoolSupportedToken) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
 	// Serialize `PricingSource` param:
-	{
-		tmp := tokenPricingSourceContainer{}
-		switch realvalue := obj.PricingSource.(type) {
-		case *TokenPricingSourceSPLStakePoolTuple:
-			tmp.Enum = 0
-			tmp.SPLStakePool = *realvalue
-		case *TokenPricingSourceMarinadeStakePoolTuple:
-			tmp.Enum = 1
-			tmp.MarinadeStakePool = *realvalue
-		case *TokenPricingSourceJitoRestakingVaultTuple:
-			tmp.Enum = 2
-			tmp.JitoRestakingVault = *realvalue
-		case *TokenPricingSourceFragmetricNormalizedTokenPoolTuple:
-			tmp.Enum = 3
-			tmp.FragmetricNormalizedTokenPool = *realvalue
-		case *TokenPricingSourceFragmetricRestakingFundTuple:
-			tmp.Enum = 4
-			tmp.FragmetricRestakingFund = *realvalue
-		case *TokenPricingSourceOrcaDEXLiquidityPoolTuple:
-			tmp.Enum = 5
-			tmp.OrcaDEXLiquidityPool = *realvalue
-		}
-		err := encoder.Encode(tmp)
-		if err != nil {
-			return err
-		}
+	err = encoder.Encode(obj.PricingSource)
+	if err != nil {
+		return err
 	}
 	return nil
 }
 func (obj *FundManagerAddNormalizedTokenPoolSupportedToken) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
 	// Deserialize `PricingSource`:
-	{
-		tmp := new(tokenPricingSourceContainer)
-		err := decoder.Decode(tmp)
-		if err != nil {
-			return err
-		}
-		switch tmp.Enum {
-		case 0:
-			obj.PricingSource = &tmp.SPLStakePool
-		case 1:
-			obj.PricingSource = &tmp.MarinadeStakePool
-		case 2:
-			obj.PricingSource = &tmp.JitoRestakingVault
-		case 3:
-			obj.PricingSource = &tmp.FragmetricNormalizedTokenPool
-		case 4:
-			obj.PricingSource = &tmp.FragmetricRestakingFund
-		case 5:
-			obj.PricingSource = &tmp.OrcaDEXLiquidityPool
-		default:
-			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
-		}
+	err = decoder.Decode(&obj.PricingSource)
+	if err != nil {
+		return err
 	}
 	return nil
 }

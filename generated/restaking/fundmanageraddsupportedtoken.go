@@ -4,7 +4,6 @@ package restaking
 
 import (
 	"errors"
-	"fmt"
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -13,7 +12,7 @@ import (
 
 // FundManagerAddSupportedToken is the `fund_manager_add_supported_token` instruction.
 type FundManagerAddSupportedToken struct {
-	PricingSource TokenPricingSource
+	PricingSource *TokenPricingSource
 
 	// [0] = [SIGNER] fund_manager
 	//
@@ -21,22 +20,28 @@ type FundManagerAddSupportedToken struct {
 	//
 	// [2] = [WRITE] fund_account
 	//
-	// [3] = [] supported_token_mint
+	// [3] = [] fund_reserve_account
 	//
-	// [4] = [] supported_token_program
+	// [4] = [] fund_treasury_account
 	//
-	// [5] = [] supported_token_account
+	// [5] = [] supported_token_mint
 	//
-	// [6] = [] event_authority
+	// [6] = [] supported_token_program
 	//
-	// [7] = [] program
+	// [7] = [] supported_token_reserve_account
+	//
+	// [8] = [] supported_token_treasury_account
+	//
+	// [9] = [] event_authority
+	//
+	// [10] = [] program
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewFundManagerAddSupportedTokenInstructionBuilder creates a new `FundManagerAddSupportedToken` instruction builder.
 func NewFundManagerAddSupportedTokenInstructionBuilder() *FundManagerAddSupportedToken {
 	nd := &FundManagerAddSupportedToken{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 8),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 11),
 	}
 	nd.AccountMetaSlice[0] = ag_solanago.Meta(Addresses["5UpLTLA7Wjqp7qdfjuTtPcUw3aVtbqFA5Mgm34mxPNg2"]).SIGNER()
 	return nd
@@ -44,7 +49,7 @@ func NewFundManagerAddSupportedTokenInstructionBuilder() *FundManagerAddSupporte
 
 // SetPricingSource sets the "pricing_source" parameter.
 func (inst *FundManagerAddSupportedToken) SetPricingSource(pricing_source TokenPricingSource) *FundManagerAddSupportedToken {
-	inst.PricingSource = pricing_source
+	inst.PricingSource = &pricing_source
 	return inst
 }
 
@@ -125,38 +130,148 @@ func (inst *FundManagerAddSupportedToken) GetFundAccountAccount() *ag_solanago.A
 	return inst.AccountMetaSlice.Get(2)
 }
 
+// SetFundReserveAccountAccount sets the "fund_reserve_account" account.
+func (inst *FundManagerAddSupportedToken) SetFundReserveAccountAccount(fundReserveAccount ag_solanago.PublicKey) *FundManagerAddSupportedToken {
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(fundReserveAccount)
+	return inst
+}
+
+func (inst *FundManagerAddSupportedToken) findFindFundReserveAccountAddress(receiptTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// const: fund_reserve
+	seeds = append(seeds, []byte{byte(0x66), byte(0x75), byte(0x6e), byte(0x64), byte(0x5f), byte(0x72), byte(0x65), byte(0x73), byte(0x65), byte(0x72), byte(0x76), byte(0x65)})
+	// path: receiptTokenMint
+	seeds = append(seeds, receiptTokenMint.Bytes())
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+	}
+	return
+}
+
+// FindFundReserveAccountAddressWithBumpSeed calculates FundReserveAccount account address with given seeds and a known bump seed.
+func (inst *FundManagerAddSupportedToken) FindFundReserveAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindFundReserveAccountAddress(receiptTokenMint, bumpSeed)
+	return
+}
+
+func (inst *FundManagerAddSupportedToken) MustFindFundReserveAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundReserveAccountAddress(receiptTokenMint, bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindFundReserveAccountAddress finds FundReserveAccount account address with given seeds.
+func (inst *FundManagerAddSupportedToken) FindFundReserveAccountAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindFundReserveAccountAddress(receiptTokenMint, 0)
+	return
+}
+
+func (inst *FundManagerAddSupportedToken) MustFindFundReserveAccountAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundReserveAccountAddress(receiptTokenMint, 0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// GetFundReserveAccountAccount gets the "fund_reserve_account" account.
+func (inst *FundManagerAddSupportedToken) GetFundReserveAccountAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(3)
+}
+
+// SetFundTreasuryAccountAccount sets the "fund_treasury_account" account.
+func (inst *FundManagerAddSupportedToken) SetFundTreasuryAccountAccount(fundTreasuryAccount ag_solanago.PublicKey) *FundManagerAddSupportedToken {
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(fundTreasuryAccount)
+	return inst
+}
+
+func (inst *FundManagerAddSupportedToken) findFindFundTreasuryAccountAddress(receiptTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// const: fund_treasury
+	seeds = append(seeds, []byte{byte(0x66), byte(0x75), byte(0x6e), byte(0x64), byte(0x5f), byte(0x74), byte(0x72), byte(0x65), byte(0x61), byte(0x73), byte(0x75), byte(0x72), byte(0x79)})
+	// path: receiptTokenMint
+	seeds = append(seeds, receiptTokenMint.Bytes())
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+	}
+	return
+}
+
+// FindFundTreasuryAccountAddressWithBumpSeed calculates FundTreasuryAccount account address with given seeds and a known bump seed.
+func (inst *FundManagerAddSupportedToken) FindFundTreasuryAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindFundTreasuryAccountAddress(receiptTokenMint, bumpSeed)
+	return
+}
+
+func (inst *FundManagerAddSupportedToken) MustFindFundTreasuryAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundTreasuryAccountAddress(receiptTokenMint, bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindFundTreasuryAccountAddress finds FundTreasuryAccount account address with given seeds.
+func (inst *FundManagerAddSupportedToken) FindFundTreasuryAccountAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindFundTreasuryAccountAddress(receiptTokenMint, 0)
+	return
+}
+
+func (inst *FundManagerAddSupportedToken) MustFindFundTreasuryAccountAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundTreasuryAccountAddress(receiptTokenMint, 0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// GetFundTreasuryAccountAccount gets the "fund_treasury_account" account.
+func (inst *FundManagerAddSupportedToken) GetFundTreasuryAccountAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(4)
+}
+
 // SetSupportedTokenMintAccount sets the "supported_token_mint" account.
 func (inst *FundManagerAddSupportedToken) SetSupportedTokenMintAccount(supportedTokenMint ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(supportedTokenMint)
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(supportedTokenMint)
 	return inst
 }
 
 // GetSupportedTokenMintAccount gets the "supported_token_mint" account.
 func (inst *FundManagerAddSupportedToken) GetSupportedTokenMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(3)
+	return inst.AccountMetaSlice.Get(5)
 }
 
 // SetSupportedTokenProgramAccount sets the "supported_token_program" account.
 func (inst *FundManagerAddSupportedToken) SetSupportedTokenProgramAccount(supportedTokenProgram ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(supportedTokenProgram)
+	inst.AccountMetaSlice[6] = ag_solanago.Meta(supportedTokenProgram)
 	return inst
 }
 
 // GetSupportedTokenProgramAccount gets the "supported_token_program" account.
 func (inst *FundManagerAddSupportedToken) GetSupportedTokenProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(4)
+	return inst.AccountMetaSlice.Get(6)
 }
 
-// SetSupportedTokenAccountAccount sets the "supported_token_account" account.
-func (inst *FundManagerAddSupportedToken) SetSupportedTokenAccountAccount(supportedTokenAccount ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[5] = ag_solanago.Meta(supportedTokenAccount)
+// SetSupportedTokenReserveAccountAccount sets the "supported_token_reserve_account" account.
+func (inst *FundManagerAddSupportedToken) SetSupportedTokenReserveAccountAccount(supportedTokenReserveAccount ag_solanago.PublicKey) *FundManagerAddSupportedToken {
+	inst.AccountMetaSlice[7] = ag_solanago.Meta(supportedTokenReserveAccount)
 	return inst
 }
 
-func (inst *FundManagerAddSupportedToken) findFindSupportedTokenAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+func (inst *FundManagerAddSupportedToken) findFindSupportedTokenReserveAccountAddress(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
 	var seeds [][]byte
-	// path: fundAccount
-	seeds = append(seeds, fundAccount.Bytes())
+	// path: fundReserveAccount
+	seeds = append(seeds, fundReserveAccount.Bytes())
 	// path: supportedTokenProgram
 	seeds = append(seeds, supportedTokenProgram.Bytes())
 	// path: supportedTokenMint
@@ -173,42 +288,101 @@ func (inst *FundManagerAddSupportedToken) findFindSupportedTokenAccountAddress(f
 	return
 }
 
-// FindSupportedTokenAccountAddressWithBumpSeed calculates SupportedTokenAccount account address with given seeds and a known bump seed.
-func (inst *FundManagerAddSupportedToken) FindSupportedTokenAccountAddressWithBumpSeed(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
-	pda, _, err = inst.findFindSupportedTokenAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
+// FindSupportedTokenReserveAccountAddressWithBumpSeed calculates SupportedTokenReserveAccount account address with given seeds and a known bump seed.
+func (inst *FundManagerAddSupportedToken) FindSupportedTokenReserveAccountAddressWithBumpSeed(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindSupportedTokenReserveAccountAddress(fundReserveAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
 	return
 }
 
-func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAccountAddressWithBumpSeed(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
+func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenReserveAccountAddressWithBumpSeed(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindSupportedTokenReserveAccountAddress(fundReserveAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
 	if err != nil {
 		panic(err)
 	}
 	return
 }
 
-// FindSupportedTokenAccountAddress finds SupportedTokenAccount account address with given seeds.
-func (inst *FundManagerAddSupportedToken) FindSupportedTokenAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	pda, bumpSeed, err = inst.findFindSupportedTokenAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, 0)
+// FindSupportedTokenReserveAccountAddress finds SupportedTokenReserveAccount account address with given seeds.
+func (inst *FundManagerAddSupportedToken) FindSupportedTokenReserveAccountAddress(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindSupportedTokenReserveAccountAddress(fundReserveAccount, supportedTokenProgram, supportedTokenMint, 0)
 	return
 }
 
-func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindSupportedTokenAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, 0)
+func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenReserveAccountAddress(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindSupportedTokenReserveAccountAddress(fundReserveAccount, supportedTokenProgram, supportedTokenMint, 0)
 	if err != nil {
 		panic(err)
 	}
 	return
 }
 
-// GetSupportedTokenAccountAccount gets the "supported_token_account" account.
-func (inst *FundManagerAddSupportedToken) GetSupportedTokenAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(5)
+// GetSupportedTokenReserveAccountAccount gets the "supported_token_reserve_account" account.
+func (inst *FundManagerAddSupportedToken) GetSupportedTokenReserveAccountAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(7)
+}
+
+// SetSupportedTokenTreasuryAccountAccount sets the "supported_token_treasury_account" account.
+func (inst *FundManagerAddSupportedToken) SetSupportedTokenTreasuryAccountAccount(supportedTokenTreasuryAccount ag_solanago.PublicKey) *FundManagerAddSupportedToken {
+	inst.AccountMetaSlice[8] = ag_solanago.Meta(supportedTokenTreasuryAccount)
+	return inst
+}
+
+func (inst *FundManagerAddSupportedToken) findFindSupportedTokenTreasuryAccountAddress(fundTreasuryAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// path: fundTreasuryAccount
+	seeds = append(seeds, fundTreasuryAccount.Bytes())
+	// path: supportedTokenProgram
+	seeds = append(seeds, supportedTokenProgram.Bytes())
+	// path: supportedTokenMint
+	seeds = append(seeds, supportedTokenMint.Bytes())
+
+	programID := Addresses["ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"]
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, programID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, programID)
+	}
+	return
+}
+
+// FindSupportedTokenTreasuryAccountAddressWithBumpSeed calculates SupportedTokenTreasuryAccount account address with given seeds and a known bump seed.
+func (inst *FundManagerAddSupportedToken) FindSupportedTokenTreasuryAccountAddressWithBumpSeed(fundTreasuryAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindSupportedTokenTreasuryAccountAddress(fundTreasuryAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
+	return
+}
+
+func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenTreasuryAccountAddressWithBumpSeed(fundTreasuryAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindSupportedTokenTreasuryAccountAddress(fundTreasuryAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindSupportedTokenTreasuryAccountAddress finds SupportedTokenTreasuryAccount account address with given seeds.
+func (inst *FundManagerAddSupportedToken) FindSupportedTokenTreasuryAccountAddress(fundTreasuryAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindSupportedTokenTreasuryAccountAddress(fundTreasuryAccount, supportedTokenProgram, supportedTokenMint, 0)
+	return
+}
+
+func (inst *FundManagerAddSupportedToken) MustFindSupportedTokenTreasuryAccountAddress(fundTreasuryAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindSupportedTokenTreasuryAccountAddress(fundTreasuryAccount, supportedTokenProgram, supportedTokenMint, 0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// GetSupportedTokenTreasuryAccountAccount gets the "supported_token_treasury_account" account.
+func (inst *FundManagerAddSupportedToken) GetSupportedTokenTreasuryAccountAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(8)
 }
 
 // SetEventAuthorityAccount sets the "event_authority" account.
 func (inst *FundManagerAddSupportedToken) SetEventAuthorityAccount(eventAuthority ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[6] = ag_solanago.Meta(eventAuthority)
+	inst.AccountMetaSlice[9] = ag_solanago.Meta(eventAuthority)
 	return inst
 }
 
@@ -256,18 +430,18 @@ func (inst *FundManagerAddSupportedToken) MustFindEventAuthorityAddress() (pda a
 
 // GetEventAuthorityAccount gets the "event_authority" account.
 func (inst *FundManagerAddSupportedToken) GetEventAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(6)
+	return inst.AccountMetaSlice.Get(9)
 }
 
 // SetProgramAccount sets the "program" account.
 func (inst *FundManagerAddSupportedToken) SetProgramAccount(program ag_solanago.PublicKey) *FundManagerAddSupportedToken {
-	inst.AccountMetaSlice[7] = ag_solanago.Meta(program)
+	inst.AccountMetaSlice[10] = ag_solanago.Meta(program)
 	return inst
 }
 
 // GetProgramAccount gets the "program" account.
 func (inst *FundManagerAddSupportedToken) GetProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(7)
+	return inst.AccountMetaSlice.Get(10)
 }
 
 func (inst FundManagerAddSupportedToken) Build() *Instruction {
@@ -307,18 +481,27 @@ func (inst *FundManagerAddSupportedToken) Validate() error {
 			return errors.New("accounts.FundAccount is not set")
 		}
 		if inst.AccountMetaSlice[3] == nil {
-			return errors.New("accounts.SupportedTokenMint is not set")
+			return errors.New("accounts.FundReserveAccount is not set")
 		}
 		if inst.AccountMetaSlice[4] == nil {
-			return errors.New("accounts.SupportedTokenProgram is not set")
+			return errors.New("accounts.FundTreasuryAccount is not set")
 		}
 		if inst.AccountMetaSlice[5] == nil {
-			return errors.New("accounts.SupportedTokenAccount is not set")
+			return errors.New("accounts.SupportedTokenMint is not set")
 		}
 		if inst.AccountMetaSlice[6] == nil {
-			return errors.New("accounts.EventAuthority is not set")
+			return errors.New("accounts.SupportedTokenProgram is not set")
 		}
 		if inst.AccountMetaSlice[7] == nil {
+			return errors.New("accounts.SupportedTokenReserveAccount is not set")
+		}
+		if inst.AccountMetaSlice[8] == nil {
+			return errors.New("accounts.SupportedTokenTreasuryAccount is not set")
+		}
+		if inst.AccountMetaSlice[9] == nil {
+			return errors.New("accounts.EventAuthority is not set")
+		}
+		if inst.AccountMetaSlice[10] == nil {
 			return errors.New("accounts.Program is not set")
 		}
 	}
@@ -339,15 +522,18 @@ func (inst *FundManagerAddSupportedToken) EncodeToTree(parent ag_treeout.Branche
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=8]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("           fund_manager", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("     receipt_token_mint", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("                  fund_", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(ag_format.Meta("   supported_token_mint", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(ag_format.Meta("supported_token_program", inst.AccountMetaSlice.Get(4)))
-						accountsBranch.Child(ag_format.Meta("       supported_token_", inst.AccountMetaSlice.Get(5)))
-						accountsBranch.Child(ag_format.Meta("        event_authority", inst.AccountMetaSlice.Get(6)))
-						accountsBranch.Child(ag_format.Meta("                program", inst.AccountMetaSlice.Get(7)))
+					instructionBranch.Child("Accounts[len=11]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("             fund_manager", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("       receipt_token_mint", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("                    fund_", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("            fund_reserve_", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("           fund_treasury_", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("     supported_token_mint", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(ag_format.Meta("  supported_token_program", inst.AccountMetaSlice.Get(6)))
+						accountsBranch.Child(ag_format.Meta(" supported_token_reserve_", inst.AccountMetaSlice.Get(7)))
+						accountsBranch.Child(ag_format.Meta("supported_token_treasury_", inst.AccountMetaSlice.Get(8)))
+						accountsBranch.Child(ag_format.Meta("          event_authority", inst.AccountMetaSlice.Get(9)))
+						accountsBranch.Child(ag_format.Meta("                  program", inst.AccountMetaSlice.Get(10)))
 					})
 				})
 		})
@@ -355,59 +541,17 @@ func (inst *FundManagerAddSupportedToken) EncodeToTree(parent ag_treeout.Branche
 
 func (obj FundManagerAddSupportedToken) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
 	// Serialize `PricingSource` param:
-	{
-		tmp := tokenPricingSourceContainer{}
-		switch realvalue := obj.PricingSource.(type) {
-		case *TokenPricingSourceSPLStakePoolTuple:
-			tmp.Enum = 0
-			tmp.SPLStakePool = *realvalue
-		case *TokenPricingSourceMarinadeStakePoolTuple:
-			tmp.Enum = 1
-			tmp.MarinadeStakePool = *realvalue
-		case *TokenPricingSourceJitoRestakingVaultTuple:
-			tmp.Enum = 2
-			tmp.JitoRestakingVault = *realvalue
-		case *TokenPricingSourceFragmetricNormalizedTokenPoolTuple:
-			tmp.Enum = 3
-			tmp.FragmetricNormalizedTokenPool = *realvalue
-		case *TokenPricingSourceFragmetricRestakingFundTuple:
-			tmp.Enum = 4
-			tmp.FragmetricRestakingFund = *realvalue
-		case *TokenPricingSourceOrcaDEXLiquidityPoolTuple:
-			tmp.Enum = 5
-			tmp.OrcaDEXLiquidityPool = *realvalue
-		}
-		err := encoder.Encode(tmp)
-		if err != nil {
-			return err
-		}
+	err = encoder.Encode(obj.PricingSource)
+	if err != nil {
+		return err
 	}
 	return nil
 }
 func (obj *FundManagerAddSupportedToken) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
 	// Deserialize `PricingSource`:
-	{
-		tmp := new(tokenPricingSourceContainer)
-		err := decoder.Decode(tmp)
-		if err != nil {
-			return err
-		}
-		switch tmp.Enum {
-		case 0:
-			obj.PricingSource = &tmp.SPLStakePool
-		case 1:
-			obj.PricingSource = &tmp.MarinadeStakePool
-		case 2:
-			obj.PricingSource = &tmp.JitoRestakingVault
-		case 3:
-			obj.PricingSource = &tmp.FragmetricNormalizedTokenPool
-		case 4:
-			obj.PricingSource = &tmp.FragmetricRestakingFund
-		case 5:
-			obj.PricingSource = &tmp.OrcaDEXLiquidityPool
-		default:
-			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
-		}
+	err = decoder.Decode(&obj.PricingSource)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -420,9 +564,12 @@ func NewFundManagerAddSupportedTokenInstruction(
 	fundManager ag_solanago.PublicKey,
 	receiptTokenMint ag_solanago.PublicKey,
 	fundAccount ag_solanago.PublicKey,
+	fundReserveAccount ag_solanago.PublicKey,
+	fundTreasuryAccount ag_solanago.PublicKey,
 	supportedTokenMint ag_solanago.PublicKey,
 	supportedTokenProgram ag_solanago.PublicKey,
-	supportedTokenAccount ag_solanago.PublicKey,
+	supportedTokenReserveAccount ag_solanago.PublicKey,
+	supportedTokenTreasuryAccount ag_solanago.PublicKey,
 	eventAuthority ag_solanago.PublicKey,
 	program ag_solanago.PublicKey) *FundManagerAddSupportedToken {
 	return NewFundManagerAddSupportedTokenInstructionBuilder().
@@ -430,9 +577,12 @@ func NewFundManagerAddSupportedTokenInstruction(
 		SetFundManagerAccount(fundManager).
 		SetReceiptTokenMintAccount(receiptTokenMint).
 		SetFundAccountAccount(fundAccount).
+		SetFundReserveAccountAccount(fundReserveAccount).
+		SetFundTreasuryAccountAccount(fundTreasuryAccount).
 		SetSupportedTokenMintAccount(supportedTokenMint).
 		SetSupportedTokenProgramAccount(supportedTokenProgram).
-		SetSupportedTokenAccountAccount(supportedTokenAccount).
+		SetSupportedTokenReserveAccountAccount(supportedTokenReserveAccount).
+		SetSupportedTokenTreasuryAccountAccount(supportedTokenTreasuryAccount).
 		SetEventAuthorityAccount(eventAuthority).
 		SetProgramAccount(program)
 }

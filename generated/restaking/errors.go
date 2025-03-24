@@ -326,80 +326,120 @@ var (
 		msg:  "fund: exceeded max restaking vault delegations",
 		name: "FundExceededMaxRestakingVaultDelegationsError",
 	}
-	ErrFundOperationUnauthorizedCommandError = &customErrorDef{
+	ErrFundRestakingVaultCompoundingRewardTokenAlreadyRegisteredError = &customErrorDef{
 		code: 6062,
+		msg:  "fund: restaking vault compounding reward token already registered",
+		name: "FundRestakingVaultCompoundingRewardTokenAlreadyRegisteredError",
+	}
+	ErrFundExceededMaxRestakingVaultCompoundingRewardTokensError = &customErrorDef{
+		code: 6063,
+		msg:  "fund: exceeded max restaking vault compounding reward tokens",
+		name: "FundExceededMaxRestakingVaultCompoundingRewardTokensError",
+	}
+	ErrFundOperationUnauthorizedCommandError = &customErrorDef{
+		code: 6064,
 		msg:  "fund: unauhorized operation command",
 		name: "FundOperationUnauthorizedCommandError",
 	}
 	ErrFundOperationCommandAccountComputationException = &customErrorDef{
-		code: 6063,
+		code: 6065,
 		msg:  "fund: failed to compute required accounts for the operation command",
 		name: "FundOperationCommandAccountComputationException",
 	}
 	ErrFundOperationCommandExecutionFailedException = &customErrorDef{
-		code: 6064,
+		code: 6066,
 		msg:  "fund: failed to execute the operation command",
 		name: "FundOperationCommandExecutionFailedException",
 	}
 	ErrNormalizedTokenPoolNotSupportedTokenError = &customErrorDef{
-		code: 6065,
+		code: 6067,
 		msg:  "normalization: not supported token",
 		name: "NormalizedTokenPoolNotSupportedTokenError",
 	}
 	ErrNormalizedTokenPoolAlreadySupportedTokenError = &customErrorDef{
-		code: 6066,
+		code: 6068,
 		msg:  "normalization: already supported token",
 		name: "NormalizedTokenPoolAlreadySupportedTokenError",
 	}
 	ErrNormalizedTokenPoolExceededMaxSupportedTokensError = &customErrorDef{
-		code: 6067,
+		code: 6069,
 		msg:  "normalization: exceeded max supported tokens",
 		name: "NormalizedTokenPoolExceededMaxSupportedTokensError",
 	}
 	ErrNormalizedTokenPoolNotEnoughSupportedTokenException = &customErrorDef{
-		code: 6068,
+		code: 6070,
 		msg:  "normalization: not enough supported token in the pool",
 		name: "NormalizedTokenPoolNotEnoughSupportedTokenException",
 	}
 	ErrNormalizedTokenPoolAlreadySettledWithdrawalAccountError = &customErrorDef{
-		code: 6069,
+		code: 6071,
 		msg:  "normalization: already settled withdrawal account",
 		name: "NormalizedTokenPoolAlreadySettledWithdrawalAccountError",
 	}
 	ErrNormalizedTokenPoolNonClaimableTokenError = &customErrorDef{
-		code: 6070,
+		code: 6072,
 		msg:  "normalization: the token is non-claimable for the given withdrawal account",
 		name: "NormalizedTokenPoolNonClaimableTokenError",
 	}
 	ErrStakingUninitializedWithdrawTicketNotFoundException = &customErrorDef{
-		code: 6071,
+		code: 6073,
 		msg:  "staking: failed to find uninitialized withdraw ticket",
 		name: "StakingUninitializedWithdrawTicketNotFoundException",
 	}
 	ErrStakingAccountNotMatchedException = &customErrorDef{
-		code: 6072,
+		code: 6074,
 		msg:  "staking: account not matched",
 		name: "StakingAccountNotMatchedException",
 	}
 	ErrStakingSPLActiveStakeNotAvailableException = &customErrorDef{
-		code: 6073,
+		code: 6075,
 		msg:  "staking: spl stake pool's active stake not available",
 		name: "StakingSPLActiveStakeNotAvailableException",
 	}
 	ErrRestakingVaultWithdrawalTicketsExhaustedError = &customErrorDef{
-		code: 6074,
+		code: 6076,
 		msg:  "restaking: all withdrawal tickets are already in use",
 		name: "RestakingVaultWithdrawalTicketsExhaustedError",
 	}
 	ErrRestakingVaultWithdrawalTicketNotWithdrawableError = &customErrorDef{
-		code: 6075,
+		code: 6077,
 		msg:  "restaking: withdrawal ticket is not withdrawable",
 		name: "RestakingVaultWithdrawalTicketNotWithdrawableError",
 	}
 	ErrRestakingVaultWithdrawalTicketAlreadyInitializedError = &customErrorDef{
-		code: 6076,
+		code: 6078,
 		msg:  "restaking: withdrawal ticket is already initialized",
 		name: "RestakingVaultWithdrawalTicketAlreadyInitializedError",
+	}
+	ErrFundDonationDisabledError = &customErrorDef{
+		code: 6079,
+		msg:  "fund: donation is currently disabled",
+		name: "FundDonationDisabledError",
+	}
+	ErrFundWrappedTokenAlreadySetError = &customErrorDef{
+		code: 6080,
+		msg:  "fund: wrapped token already set",
+		name: "FundWrappedTokenAlreadySetError",
+	}
+	ErrFundWrappedTokenNotSetError = &customErrorDef{
+		code: 6081,
+		msg:  "fund: wrapped token is not set",
+		name: "FundWrappedTokenNotSetError",
+	}
+	ErrFundTokenSwapStrategyAlreadyRegistered = &customErrorDef{
+		code: 6082,
+		msg:  "fund: token swap strategy already registered",
+		name: "FundTokenSwapStrategyAlreadyRegistered",
+	}
+	ErrFundExceededMaxTokenSwapStrategiesError = &customErrorDef{
+		code: 6083,
+		msg:  "fund: exceeded max token swap strategies",
+		name: "FundExceededMaxTokenSwapStrategiesError",
+	}
+	ErrFundTokenSwapStrategyNotFoundError = &customErrorDef{
+		code: 6084,
+		msg:  "fund: token swap strategy not found",
+		name: "FundTokenSwapStrategyNotFoundError",
 	}
 	Errors = map[int]CustomError{
 		6000: ErrCalculationArithmeticException,
@@ -464,21 +504,29 @@ var (
 		6059: ErrFundRestakingVaultOperatorNotFoundError,
 		6060: ErrFundRestakingVaultOperatorAlreadyRegisteredError,
 		6061: ErrFundExceededMaxRestakingVaultDelegationsError,
-		6062: ErrFundOperationUnauthorizedCommandError,
-		6063: ErrFundOperationCommandAccountComputationException,
-		6064: ErrFundOperationCommandExecutionFailedException,
-		6065: ErrNormalizedTokenPoolNotSupportedTokenError,
-		6066: ErrNormalizedTokenPoolAlreadySupportedTokenError,
-		6067: ErrNormalizedTokenPoolExceededMaxSupportedTokensError,
-		6068: ErrNormalizedTokenPoolNotEnoughSupportedTokenException,
-		6069: ErrNormalizedTokenPoolAlreadySettledWithdrawalAccountError,
-		6070: ErrNormalizedTokenPoolNonClaimableTokenError,
-		6071: ErrStakingUninitializedWithdrawTicketNotFoundException,
-		6072: ErrStakingAccountNotMatchedException,
-		6073: ErrStakingSPLActiveStakeNotAvailableException,
-		6074: ErrRestakingVaultWithdrawalTicketsExhaustedError,
-		6075: ErrRestakingVaultWithdrawalTicketNotWithdrawableError,
-		6076: ErrRestakingVaultWithdrawalTicketAlreadyInitializedError,
+		6062: ErrFundRestakingVaultCompoundingRewardTokenAlreadyRegisteredError,
+		6063: ErrFundExceededMaxRestakingVaultCompoundingRewardTokensError,
+		6064: ErrFundOperationUnauthorizedCommandError,
+		6065: ErrFundOperationCommandAccountComputationException,
+		6066: ErrFundOperationCommandExecutionFailedException,
+		6067: ErrNormalizedTokenPoolNotSupportedTokenError,
+		6068: ErrNormalizedTokenPoolAlreadySupportedTokenError,
+		6069: ErrNormalizedTokenPoolExceededMaxSupportedTokensError,
+		6070: ErrNormalizedTokenPoolNotEnoughSupportedTokenException,
+		6071: ErrNormalizedTokenPoolAlreadySettledWithdrawalAccountError,
+		6072: ErrNormalizedTokenPoolNonClaimableTokenError,
+		6073: ErrStakingUninitializedWithdrawTicketNotFoundException,
+		6074: ErrStakingAccountNotMatchedException,
+		6075: ErrStakingSPLActiveStakeNotAvailableException,
+		6076: ErrRestakingVaultWithdrawalTicketsExhaustedError,
+		6077: ErrRestakingVaultWithdrawalTicketNotWithdrawableError,
+		6078: ErrRestakingVaultWithdrawalTicketAlreadyInitializedError,
+		6079: ErrFundDonationDisabledError,
+		6080: ErrFundWrappedTokenAlreadySetError,
+		6081: ErrFundWrappedTokenNotSetError,
+		6082: ErrFundTokenSwapStrategyAlreadyRegistered,
+		6083: ErrFundExceededMaxTokenSwapStrategiesError,
+		6084: ErrFundTokenSwapStrategyNotFoundError,
 	}
 )
 

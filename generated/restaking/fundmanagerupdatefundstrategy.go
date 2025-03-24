@@ -13,7 +13,9 @@ import (
 // FundManagerUpdateFundStrategy is the `fund_manager_update_fund_strategy` instruction.
 type FundManagerUpdateFundStrategy struct {
 	DepositEnabled                  *bool
+	DonationEnabled                 *bool
 	WithdrawalEnabled               *bool
+	TransferEnabled                 *bool
 	WithdrawalFeeRateBps            *uint16
 	WithdrawalBatchThresholdSeconds *int64
 
@@ -44,9 +46,21 @@ func (inst *FundManagerUpdateFundStrategy) SetDepositEnabled(deposit_enabled boo
 	return inst
 }
 
+// SetDonationEnabled sets the "donation_enabled" parameter.
+func (inst *FundManagerUpdateFundStrategy) SetDonationEnabled(donation_enabled bool) *FundManagerUpdateFundStrategy {
+	inst.DonationEnabled = &donation_enabled
+	return inst
+}
+
 // SetWithdrawalEnabled sets the "withdrawal_enabled" parameter.
 func (inst *FundManagerUpdateFundStrategy) SetWithdrawalEnabled(withdrawal_enabled bool) *FundManagerUpdateFundStrategy {
 	inst.WithdrawalEnabled = &withdrawal_enabled
+	return inst
+}
+
+// SetTransferEnabled sets the "transfer_enabled" parameter.
+func (inst *FundManagerUpdateFundStrategy) SetTransferEnabled(transfer_enabled bool) *FundManagerUpdateFundStrategy {
+	inst.TransferEnabled = &transfer_enabled
 	return inst
 }
 
@@ -226,8 +240,14 @@ func (inst *FundManagerUpdateFundStrategy) Validate() error {
 		if inst.DepositEnabled == nil {
 			return errors.New("DepositEnabled parameter is not set")
 		}
+		if inst.DonationEnabled == nil {
+			return errors.New("DonationEnabled parameter is not set")
+		}
 		if inst.WithdrawalEnabled == nil {
 			return errors.New("WithdrawalEnabled parameter is not set")
+		}
+		if inst.TransferEnabled == nil {
+			return errors.New("TransferEnabled parameter is not set")
 		}
 		if inst.WithdrawalFeeRateBps == nil {
 			return errors.New("WithdrawalFeeRateBps parameter is not set")
@@ -267,9 +287,11 @@ func (inst *FundManagerUpdateFundStrategy) EncodeToTree(parent ag_treeout.Branch
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=4]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Params[len=6]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
 						paramsBranch.Child(ag_format.Param("                    DepositEnabled", *inst.DepositEnabled))
+						paramsBranch.Child(ag_format.Param("                   DonationEnabled", *inst.DonationEnabled))
 						paramsBranch.Child(ag_format.Param("                 WithdrawalEnabled", *inst.WithdrawalEnabled))
+						paramsBranch.Child(ag_format.Param("                   TransferEnabled", *inst.TransferEnabled))
 						paramsBranch.Child(ag_format.Param("              WithdrawalFeeRateBps", *inst.WithdrawalFeeRateBps))
 						paramsBranch.Child(ag_format.Param("   WithdrawalBatchThresholdSeconds", *inst.WithdrawalBatchThresholdSeconds))
 					})
@@ -292,8 +314,18 @@ func (obj FundManagerUpdateFundStrategy) MarshalWithEncoder(encoder *ag_binary.E
 	if err != nil {
 		return err
 	}
+	// Serialize `DonationEnabled` param:
+	err = encoder.Encode(obj.DonationEnabled)
+	if err != nil {
+		return err
+	}
 	// Serialize `WithdrawalEnabled` param:
 	err = encoder.Encode(obj.WithdrawalEnabled)
+	if err != nil {
+		return err
+	}
+	// Serialize `TransferEnabled` param:
+	err = encoder.Encode(obj.TransferEnabled)
 	if err != nil {
 		return err
 	}
@@ -315,8 +347,18 @@ func (obj *FundManagerUpdateFundStrategy) UnmarshalWithDecoder(decoder *ag_binar
 	if err != nil {
 		return err
 	}
+	// Deserialize `DonationEnabled`:
+	err = decoder.Decode(&obj.DonationEnabled)
+	if err != nil {
+		return err
+	}
 	// Deserialize `WithdrawalEnabled`:
 	err = decoder.Decode(&obj.WithdrawalEnabled)
+	if err != nil {
+		return err
+	}
+	// Deserialize `TransferEnabled`:
+	err = decoder.Decode(&obj.TransferEnabled)
 	if err != nil {
 		return err
 	}
@@ -337,7 +379,9 @@ func (obj *FundManagerUpdateFundStrategy) UnmarshalWithDecoder(decoder *ag_binar
 func NewFundManagerUpdateFundStrategyInstruction(
 	// Parameters:
 	deposit_enabled bool,
+	donation_enabled bool,
 	withdrawal_enabled bool,
+	transfer_enabled bool,
 	withdrawal_fee_rate_bps uint16,
 	withdrawal_batch_threshold_seconds int64,
 	// Accounts:
@@ -348,7 +392,9 @@ func NewFundManagerUpdateFundStrategyInstruction(
 	program ag_solanago.PublicKey) *FundManagerUpdateFundStrategy {
 	return NewFundManagerUpdateFundStrategyInstructionBuilder().
 		SetDepositEnabled(deposit_enabled).
+		SetDonationEnabled(donation_enabled).
 		SetWithdrawalEnabled(withdrawal_enabled).
+		SetTransferEnabled(transfer_enabled).
 		SetWithdrawalFeeRateBps(withdrawal_fee_rate_bps).
 		SetWithdrawalBatchThresholdSeconds(withdrawal_batch_threshold_seconds).
 		SetFundManagerAccount(fundManager).

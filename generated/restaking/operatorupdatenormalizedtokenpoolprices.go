@@ -15,7 +15,7 @@ type OperatorUpdateNormalizedTokenPoolPrices struct {
 
 	// [0] = [SIGNER] operator
 	//
-	// [1] = [WRITE] normalized_token_mint
+	// [1] = [] normalized_token_mint
 	//
 	// [2] = [WRITE] normalized_token_pool_account
 	//
@@ -49,7 +49,7 @@ func (inst *OperatorUpdateNormalizedTokenPoolPrices) GetOperatorAccount() *ag_so
 
 // SetNormalizedTokenMintAccount sets the "normalized_token_mint" account.
 func (inst *OperatorUpdateNormalizedTokenPoolPrices) SetNormalizedTokenMintAccount(normalizedTokenMint ag_solanago.PublicKey) *OperatorUpdateNormalizedTokenPoolPrices {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(normalizedTokenMint).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(normalizedTokenMint)
 	return inst
 }
 

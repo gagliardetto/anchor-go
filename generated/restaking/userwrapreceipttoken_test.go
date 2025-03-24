@@ -10,18 +10,18 @@ import (
 	"testing"
 )
 
-func TestEncodeDecode_FundManagerCloseFundAccount(t *testing.T) {
+func TestEncodeDecode_UserWrapReceiptToken(t *testing.T) {
 	fu := ag_gofuzz.New().NilChance(0)
 	for i := 0; i < 1; i++ {
-		t.Run("FundManagerCloseFundAccount"+strconv.Itoa(i), func(t *testing.T) {
+		t.Run("UserWrapReceiptToken"+strconv.Itoa(i), func(t *testing.T) {
 			{
-				params := new(FundManagerCloseFundAccount)
+				params := new(UserWrapReceiptToken)
 				fu.Fuzz(params)
 				params.AccountMetaSlice = nil
 				buf := new(bytes.Buffer)
 				err := encodeT(*params, buf)
 				ag_require.NoError(t, err)
-				got := new(FundManagerCloseFundAccount)
+				got := new(UserWrapReceiptToken)
 				err = decodeT(got, buf.Bytes())
 				got.AccountMetaSlice = nil
 				ag_require.NoError(t, err)

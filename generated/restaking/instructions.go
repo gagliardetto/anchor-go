@@ -12,7 +12,7 @@ import (
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-var ProgramID ag_solanago.PublicKey
+var ProgramID ag_solanago.PublicKey = ag_solanago.MustPublicKeyFromBase58("frag9zfFME5u1SNhUYGa4cXLzMKgZXF3xwZ2Y1KCYTQ")
 
 func SetProgramID(PublicKey ag_solanago.PublicKey) {
 	ProgramID = PublicKey
@@ -32,19 +32,27 @@ var (
 
 	Instruction_AdminInitializeFundAccount = ag_binary.TypeID([8]byte{83, 184, 197, 143, 118, 192, 56, 15})
 
+	Instruction_AdminInitializeFundWrapAccountRewardAccount = ag_binary.TypeID([8]byte{154, 148, 28, 186, 34, 182, 115, 216})
+
 	Instruction_AdminInitializeNormalizedTokenPoolAccount = ag_binary.TypeID([8]byte{36, 90, 87, 197, 124, 174, 14, 225})
 
 	Instruction_AdminInitializeRewardAccount = ag_binary.TypeID([8]byte{208, 48, 70, 171, 86, 38, 29, 149})
 
+	Instruction_AdminSetAddressLookupTableAccount = ag_binary.TypeID([8]byte{169, 151, 1, 89, 5, 207, 119, 136})
+
 	Instruction_AdminUpdateExtraAccountMetaListIfNeeded = ag_binary.TypeID([8]byte{113, 124, 72, 210, 237, 164, 96, 241})
 
 	Instruction_AdminUpdateFundAccountIfNeeded = ag_binary.TypeID([8]byte{53, 204, 67, 56, 198, 113, 243, 34})
+
+	Instruction_AdminUpdateFundWrapAccountRewardAccountIfNeeded = ag_binary.TypeID([8]byte{3, 62, 36, 3, 185, 70, 34, 146})
 
 	Instruction_AdminUpdateNormalizedTokenPoolAccountIfNeeded = ag_binary.TypeID([8]byte{117, 212, 78, 133, 31, 164, 123, 241})
 
 	Instruction_AdminUpdateRewardAccountIfNeeded = ag_binary.TypeID([8]byte{113, 211, 75, 86, 235, 248, 240, 2})
 
 	Instruction_FundManagerAddNormalizedTokenPoolSupportedToken = ag_binary.TypeID([8]byte{173, 135, 121, 96, 30, 138, 56, 27})
+
+	Instruction_FundManagerAddRestakingVaultCompoundingRewardToken = ag_binary.TypeID([8]byte{70, 54, 67, 157, 194, 6, 105, 141})
 
 	Instruction_FundManagerAddReward = ag_binary.TypeID([8]byte{26, 6, 104, 77, 57, 237, 13, 5})
 
@@ -54,15 +62,17 @@ var (
 
 	Instruction_FundManagerAddSupportedToken = ag_binary.TypeID([8]byte{0, 137, 153, 52, 179, 163, 4, 20})
 
-	Instruction_FundManagerClearUserSolWithdrawalRequests = ag_binary.TypeID([8]byte{229, 235, 96, 236, 74, 245, 85, 243})
-
-	Instruction_FundManagerCloseFundAccount = ag_binary.TypeID([8]byte{158, 192, 72, 180, 218, 61, 228, 156})
+	Instruction_FundManagerAddTokenSwapStrategy = ag_binary.TypeID([8]byte{14, 59, 222, 151, 4, 112, 133, 184})
 
 	Instruction_FundManagerCloseRewardPool = ag_binary.TypeID([8]byte{159, 24, 238, 47, 253, 39, 6, 30})
 
 	Instruction_FundManagerInitializeFundJitoRestakingVault = ag_binary.TypeID([8]byte{94, 33, 145, 222, 177, 170, 211, 74})
 
+	Instruction_FundManagerInitializeFundJitoRestakingVaultDelegation = ag_binary.TypeID([8]byte{163, 134, 58, 94, 165, 249, 166, 82})
+
 	Instruction_FundManagerInitializeFundNormalizedToken = ag_binary.TypeID([8]byte{210, 163, 184, 165, 127, 40, 122, 23})
+
+	Instruction_FundManagerInitializeFundWrappedToken = ag_binary.TypeID([8]byte{21, 83, 102, 87, 81, 163, 36, 71})
 
 	Instruction_FundManagerSettleReward = ag_binary.TypeID([8]byte{105, 92, 118, 15, 173, 135, 98, 86})
 
@@ -98,6 +108,10 @@ var (
 
 	Instruction_UserClaimRewards = ag_binary.TypeID([8]byte{8, 211, 145, 71, 169, 22, 80, 33})
 
+	Instruction_UserCreateFundAccountIdempotent = ag_binary.TypeID([8]byte{18, 13, 182, 219, 153, 232, 60, 152})
+
+	Instruction_UserCreateRewardAccountIdempotent = ag_binary.TypeID([8]byte{143, 244, 109, 23, 228, 116, 145, 26})
+
 	Instruction_UserDepositSol = ag_binary.TypeID([8]byte{9, 201, 63, 79, 105, 75, 147, 47})
 
 	Instruction_UserDepositSupportedToken = ag_binary.TypeID([8]byte{139, 84, 137, 218, 229, 151, 183, 154})
@@ -108,6 +122,8 @@ var (
 
 	Instruction_UserRequestWithdrawal = ag_binary.TypeID([8]byte{147, 199, 177, 14, 195, 86, 62, 134})
 
+	Instruction_UserUnwrapReceiptToken = ag_binary.TypeID([8]byte{86, 95, 41, 69, 120, 184, 110, 223})
+
 	Instruction_UserUpdateFundAccountIfNeeded = ag_binary.TypeID([8]byte{22, 10, 103, 174, 223, 166, 182, 76})
 
 	Instruction_UserUpdateRewardAccountIfNeeded = ag_binary.TypeID([8]byte{156, 78, 23, 8, 238, 177, 204, 173})
@@ -117,6 +133,10 @@ var (
 	Instruction_UserWithdrawSol = ag_binary.TypeID([8]byte{214, 13, 137, 164, 194, 105, 183, 252})
 
 	Instruction_UserWithdrawSupportedToken = ag_binary.TypeID([8]byte{95, 90, 176, 21, 252, 231, 133, 99})
+
+	Instruction_UserWrapReceiptToken = ag_binary.TypeID([8]byte{206, 52, 33, 7, 205, 206, 195, 24})
+
+	Instruction_UserWrapReceiptTokenIfNeeded = ag_binary.TypeID([8]byte{243, 23, 65, 33, 102, 133, 41, 135})
 )
 
 // InstructionIDToName returns the name of the instruction given its ID.
@@ -126,20 +146,28 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 		return "AdminInitializeExtraAccountMetaList"
 	case Instruction_AdminInitializeFundAccount:
 		return "AdminInitializeFundAccount"
+	case Instruction_AdminInitializeFundWrapAccountRewardAccount:
+		return "AdminInitializeFundWrapAccountRewardAccount"
 	case Instruction_AdminInitializeNormalizedTokenPoolAccount:
 		return "AdminInitializeNormalizedTokenPoolAccount"
 	case Instruction_AdminInitializeRewardAccount:
 		return "AdminInitializeRewardAccount"
+	case Instruction_AdminSetAddressLookupTableAccount:
+		return "AdminSetAddressLookupTableAccount"
 	case Instruction_AdminUpdateExtraAccountMetaListIfNeeded:
 		return "AdminUpdateExtraAccountMetaListIfNeeded"
 	case Instruction_AdminUpdateFundAccountIfNeeded:
 		return "AdminUpdateFundAccountIfNeeded"
+	case Instruction_AdminUpdateFundWrapAccountRewardAccountIfNeeded:
+		return "AdminUpdateFundWrapAccountRewardAccountIfNeeded"
 	case Instruction_AdminUpdateNormalizedTokenPoolAccountIfNeeded:
 		return "AdminUpdateNormalizedTokenPoolAccountIfNeeded"
 	case Instruction_AdminUpdateRewardAccountIfNeeded:
 		return "AdminUpdateRewardAccountIfNeeded"
 	case Instruction_FundManagerAddNormalizedTokenPoolSupportedToken:
 		return "FundManagerAddNormalizedTokenPoolSupportedToken"
+	case Instruction_FundManagerAddRestakingVaultCompoundingRewardToken:
+		return "FundManagerAddRestakingVaultCompoundingRewardToken"
 	case Instruction_FundManagerAddReward:
 		return "FundManagerAddReward"
 	case Instruction_FundManagerAddRewardPool:
@@ -148,16 +176,18 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 		return "FundManagerAddRewardPoolHolder"
 	case Instruction_FundManagerAddSupportedToken:
 		return "FundManagerAddSupportedToken"
-	case Instruction_FundManagerClearUserSolWithdrawalRequests:
-		return "FundManagerClearUserSolWithdrawalRequests"
-	case Instruction_FundManagerCloseFundAccount:
-		return "FundManagerCloseFundAccount"
+	case Instruction_FundManagerAddTokenSwapStrategy:
+		return "FundManagerAddTokenSwapStrategy"
 	case Instruction_FundManagerCloseRewardPool:
 		return "FundManagerCloseRewardPool"
 	case Instruction_FundManagerInitializeFundJitoRestakingVault:
 		return "FundManagerInitializeFundJitoRestakingVault"
+	case Instruction_FundManagerInitializeFundJitoRestakingVaultDelegation:
+		return "FundManagerInitializeFundJitoRestakingVaultDelegation"
 	case Instruction_FundManagerInitializeFundNormalizedToken:
 		return "FundManagerInitializeFundNormalizedToken"
+	case Instruction_FundManagerInitializeFundWrappedToken:
+		return "FundManagerInitializeFundWrappedToken"
 	case Instruction_FundManagerSettleReward:
 		return "FundManagerSettleReward"
 	case Instruction_FundManagerUpdateFundStrategy:
@@ -192,6 +222,10 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 		return "UserCancelWithdrawalRequest"
 	case Instruction_UserClaimRewards:
 		return "UserClaimRewards"
+	case Instruction_UserCreateFundAccountIdempotent:
+		return "UserCreateFundAccountIdempotent"
+	case Instruction_UserCreateRewardAccountIdempotent:
+		return "UserCreateRewardAccountIdempotent"
 	case Instruction_UserDepositSol:
 		return "UserDepositSol"
 	case Instruction_UserDepositSupportedToken:
@@ -202,6 +236,8 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 		return "UserInitializeRewardAccount"
 	case Instruction_UserRequestWithdrawal:
 		return "UserRequestWithdrawal"
+	case Instruction_UserUnwrapReceiptToken:
+		return "UserUnwrapReceiptToken"
 	case Instruction_UserUpdateFundAccountIfNeeded:
 		return "UserUpdateFundAccountIfNeeded"
 	case Instruction_UserUpdateRewardAccountIfNeeded:
@@ -212,6 +248,10 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 		return "UserWithdrawSol"
 	case Instruction_UserWithdrawSupportedToken:
 		return "UserWithdrawSupportedToken"
+	case Instruction_UserWrapReceiptToken:
+		return "UserWrapReceiptToken"
+	case Instruction_UserWrapReceiptTokenIfNeeded:
+		return "UserWrapReceiptTokenIfNeeded"
 	default:
 		return ""
 	}
@@ -239,16 +279,25 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 			Name: "admin_initialize_fund_account", Type: (*AdminInitializeFundAccount)(nil),
 		},
 		{
+			Name: "admin_initialize_fund_wrap_account_reward_account", Type: (*AdminInitializeFundWrapAccountRewardAccount)(nil),
+		},
+		{
 			Name: "admin_initialize_normalized_token_pool_account", Type: (*AdminInitializeNormalizedTokenPoolAccount)(nil),
 		},
 		{
 			Name: "admin_initialize_reward_account", Type: (*AdminInitializeRewardAccount)(nil),
 		},
 		{
+			Name: "admin_set_address_lookup_table_account", Type: (*AdminSetAddressLookupTableAccount)(nil),
+		},
+		{
 			Name: "admin_update_extra_account_meta_list_if_needed", Type: (*AdminUpdateExtraAccountMetaListIfNeeded)(nil),
 		},
 		{
 			Name: "admin_update_fund_account_if_needed", Type: (*AdminUpdateFundAccountIfNeeded)(nil),
+		},
+		{
+			Name: "admin_update_fund_wrap_account_reward_account_if_needed", Type: (*AdminUpdateFundWrapAccountRewardAccountIfNeeded)(nil),
 		},
 		{
 			Name: "admin_update_normalized_token_pool_account_if_needed", Type: (*AdminUpdateNormalizedTokenPoolAccountIfNeeded)(nil),
@@ -258,6 +307,9 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 		},
 		{
 			Name: "fund_manager_add_normalized_token_pool_supported_token", Type: (*FundManagerAddNormalizedTokenPoolSupportedToken)(nil),
+		},
+		{
+			Name: "fund_manager_add_restaking_vault_compounding_reward_token", Type: (*FundManagerAddRestakingVaultCompoundingRewardToken)(nil),
 		},
 		{
 			Name: "fund_manager_add_reward", Type: (*FundManagerAddReward)(nil),
@@ -272,10 +324,7 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 			Name: "fund_manager_add_supported_token", Type: (*FundManagerAddSupportedToken)(nil),
 		},
 		{
-			Name: "fund_manager_clear_user_sol_withdrawal_requests", Type: (*FundManagerClearUserSolWithdrawalRequests)(nil),
-		},
-		{
-			Name: "fund_manager_close_fund_account", Type: (*FundManagerCloseFundAccount)(nil),
+			Name: "fund_manager_add_token_swap_strategy", Type: (*FundManagerAddTokenSwapStrategy)(nil),
 		},
 		{
 			Name: "fund_manager_close_reward_pool", Type: (*FundManagerCloseRewardPool)(nil),
@@ -284,7 +333,13 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 			Name: "fund_manager_initialize_fund_jito_restaking_vault", Type: (*FundManagerInitializeFundJitoRestakingVault)(nil),
 		},
 		{
+			Name: "fund_manager_initialize_fund_jito_restaking_vault_delegation", Type: (*FundManagerInitializeFundJitoRestakingVaultDelegation)(nil),
+		},
+		{
 			Name: "fund_manager_initialize_fund_normalized_token", Type: (*FundManagerInitializeFundNormalizedToken)(nil),
+		},
+		{
+			Name: "fund_manager_initialize_fund_wrapped_token", Type: (*FundManagerInitializeFundWrappedToken)(nil),
 		},
 		{
 			Name: "fund_manager_settle_reward", Type: (*FundManagerSettleReward)(nil),
@@ -338,6 +393,12 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 			Name: "user_claim_rewards", Type: (*UserClaimRewards)(nil),
 		},
 		{
+			Name: "user_create_fund_account_idempotent", Type: (*UserCreateFundAccountIdempotent)(nil),
+		},
+		{
+			Name: "user_create_reward_account_idempotent", Type: (*UserCreateRewardAccountIdempotent)(nil),
+		},
+		{
 			Name: "user_deposit_sol", Type: (*UserDepositSol)(nil),
 		},
 		{
@@ -353,6 +414,9 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 			Name: "user_request_withdrawal", Type: (*UserRequestWithdrawal)(nil),
 		},
 		{
+			Name: "user_unwrap_receipt_token", Type: (*UserUnwrapReceiptToken)(nil),
+		},
+		{
 			Name: "user_update_fund_account_if_needed", Type: (*UserUpdateFundAccountIfNeeded)(nil),
 		},
 		{
@@ -366,6 +430,12 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 		},
 		{
 			Name: "user_withdraw_supported_token", Type: (*UserWithdrawSupportedToken)(nil),
+		},
+		{
+			Name: "user_wrap_receipt_token", Type: (*UserWrapReceiptToken)(nil),
+		},
+		{
+			Name: "user_wrap_receipt_token_if_needed", Type: (*UserWrapReceiptTokenIfNeeded)(nil),
 		},
 	},
 )

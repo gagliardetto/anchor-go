@@ -19,7 +19,7 @@ type OperatorDonateSolToFund struct {
 	//
 	// [1] = [] system_program
 	//
-	// [2] = [WRITE] receipt_token_mint
+	// [2] = [] receipt_token_mint
 	//
 	// [3] = [] receipt_token_program
 	//
@@ -79,7 +79,7 @@ func (inst *OperatorDonateSolToFund) GetSystemProgramAccount() *ag_solanago.Acco
 
 // SetReceiptTokenMintAccount sets the "receipt_token_mint" account.
 func (inst *OperatorDonateSolToFund) SetReceiptTokenMintAccount(receiptTokenMint ag_solanago.PublicKey) *OperatorDonateSolToFund {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(receiptTokenMint).WRITE()
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(receiptTokenMint)
 	return inst
 }
 

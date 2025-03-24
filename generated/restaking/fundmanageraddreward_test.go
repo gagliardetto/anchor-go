@@ -23,7 +23,7 @@ func TestEncodeDecode_FundManagerAddReward(t *testing.T) {
 						params.AccountMetaSlice = nil
 						tmp := new(RewardTypePointTuple)
 						fu.Fuzz(tmp)
-						params.SetRewardType(tmp)
+						params.SetRewardType(RewardType{*tmp})
 						buf := new(bytes.Buffer)
 						err := encodeT(*params, buf)
 						ag_require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestEncodeDecode_FundManagerAddReward(t *testing.T) {
 						params.AccountMetaSlice = nil
 						tmp := new(RewardTypeTokenTuple)
 						fu.Fuzz(tmp)
-						params.SetRewardType(tmp)
+						params.SetRewardType(RewardType{*tmp})
 						buf := new(bytes.Buffer)
 						err := encodeT(*params, buf)
 						ag_require.NoError(t, err)
@@ -63,7 +63,7 @@ func TestEncodeDecode_FundManagerAddReward(t *testing.T) {
 						params.AccountMetaSlice = nil
 						tmp := new(RewardTypeSOLTuple)
 						fu.Fuzz(tmp)
-						params.SetRewardType(tmp)
+						params.SetRewardType(RewardType{*tmp})
 						buf := new(bytes.Buffer)
 						err := encodeT(*params, buf)
 						ag_require.NoError(t, err)

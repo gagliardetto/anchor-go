@@ -25,5 +25,5 @@ $ make restaking
 - [x] types
 - [x] events
 - [x] errors
-- [ ] handle tuple types
-- [ ] constants (?)
+- [x] handle tuple types
+- [x] constants

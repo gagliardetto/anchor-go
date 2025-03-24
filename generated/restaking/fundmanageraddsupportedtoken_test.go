@@ -23,7 +23,7 @@ func TestEncodeDecode_FundManagerAddSupportedToken(t *testing.T) {
 						params.AccountMetaSlice = nil
 						tmp := new(TokenPricingSourceSPLStakePoolTuple)
 						fu.Fuzz(tmp)
-						params.SetPricingSource(tmp)
+						params.SetPricingSource(TokenPricingSource{*tmp})
 						buf := new(bytes.Buffer)
 						err := encodeT(*params, buf)
 						ag_require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestEncodeDecode_FundManagerAddSupportedToken(t *testing.T) {
 						params.AccountMetaSlice = nil
 						tmp := new(TokenPricingSourceMarinadeStakePoolTuple)
 						fu.Fuzz(tmp)
-						params.SetPricingSource(tmp)
+						params.SetPricingSource(TokenPricingSource{*tmp})
 						buf := new(bytes.Buffer)
 						err := encodeT(*params, buf)
 						ag_require.NoError(t, err)
@@ -63,7 +63,7 @@ func TestEncodeDecode_FundManagerAddSupportedToken(t *testing.T) {
 						params.AccountMetaSlice = nil
 						tmp := new(TokenPricingSourceJitoRestakingVaultTuple)
 						fu.Fuzz(tmp)
-						params.SetPricingSource(tmp)
+						params.SetPricingSource(TokenPricingSource{*tmp})
 						buf := new(bytes.Buffer)
 						err := encodeT(*params, buf)
 						ag_require.NoError(t, err)
@@ -83,7 +83,7 @@ func TestEncodeDecode_FundManagerAddSupportedToken(t *testing.T) {
 						params.AccountMetaSlice = nil
 						tmp := new(TokenPricingSourceFragmetricNormalizedTokenPoolTuple)
 						fu.Fuzz(tmp)
-						params.SetPricingSource(tmp)
+						params.SetPricingSource(TokenPricingSource{*tmp})
 						buf := new(bytes.Buffer)
 						err := encodeT(*params, buf)
 						ag_require.NoError(t, err)
@@ -103,7 +103,7 @@ func TestEncodeDecode_FundManagerAddSupportedToken(t *testing.T) {
 						params.AccountMetaSlice = nil
 						tmp := new(TokenPricingSourceFragmetricRestakingFundTuple)
 						fu.Fuzz(tmp)
-						params.SetPricingSource(tmp)
+						params.SetPricingSource(TokenPricingSource{*tmp})
 						buf := new(bytes.Buffer)
 						err := encodeT(*params, buf)
 						ag_require.NoError(t, err)
@@ -123,7 +123,27 @@ func TestEncodeDecode_FundManagerAddSupportedToken(t *testing.T) {
 						params.AccountMetaSlice = nil
 						tmp := new(TokenPricingSourceOrcaDEXLiquidityPoolTuple)
 						fu.Fuzz(tmp)
-						params.SetPricingSource(tmp)
+						params.SetPricingSource(TokenPricingSource{*tmp})
+						buf := new(bytes.Buffer)
+						err := encodeT(*params, buf)
+						ag_require.NoError(t, err)
+						got := new(FundManagerAddSupportedToken)
+						err = decodeT(got, buf.Bytes())
+						got.AccountMetaSlice = nil
+						ag_require.NoError(t, err)
+						// to prevent garbage buffer fill by fuzz
+						if reflect.TypeOf(*tmp).Kind() != reflect.Struct {
+							got.PricingSource = params.PricingSource
+						}
+						ag_require.Equal(t, params, got)
+					}
+					{
+						params := new(FundManagerAddSupportedToken)
+						fu.Fuzz(params)
+						params.AccountMetaSlice = nil
+						tmp := new(TokenPricingSourceSanctumSingleValidatorSPLStakePoolTuple)
+						fu.Fuzz(tmp)
+						params.SetPricingSource(TokenPricingSource{*tmp})
 						buf := new(bytes.Buffer)
 						err := encodeT(*params, buf)
 						ag_require.NoError(t, err)

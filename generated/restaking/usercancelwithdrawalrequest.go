@@ -12,7 +12,8 @@ import (
 
 // UserCancelWithdrawalRequest is the `user_cancel_withdrawal_request` instruction.
 type UserCancelWithdrawalRequest struct {
-	RequestId *uint64
+	RequestId          *uint64
+	SupportedTokenMint *ag_solanago.PublicKey `bin:"optional"`
 
 	// [0] = [WRITE, SIGNER] user
 	//
@@ -58,6 +59,12 @@ func NewUserCancelWithdrawalRequestInstructionBuilder() *UserCancelWithdrawalReq
 // SetRequestId sets the "request_id" parameter.
 func (inst *UserCancelWithdrawalRequest) SetRequestId(request_id uint64) *UserCancelWithdrawalRequest {
 	inst.RequestId = &request_id
+	return inst
+}
+
+// SetSupportedTokenMint sets the "supported_token_mint" parameter.
+func (inst *UserCancelWithdrawalRequest) SetSupportedTokenMint(supported_token_mint ag_solanago.PublicKey) *UserCancelWithdrawalRequest {
+	inst.SupportedTokenMint = &supported_token_mint
 	return inst
 }
 
@@ -659,8 +666,9 @@ func (inst *UserCancelWithdrawalRequest) EncodeToTree(parent ag_treeout.Branches
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=1]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param(" RequestId", *inst.RequestId))
+					instructionBranch.Child("Params[len=2]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+						paramsBranch.Child(ag_format.Param("           RequestId", *inst.RequestId))
+						paramsBranch.Child(ag_format.Param("  SupportedTokenMint (OPT)", inst.SupportedTokenMint))
 					})
 
 					// Accounts of the instruction:
@@ -690,6 +698,24 @@ func (obj UserCancelWithdrawalRequest) MarshalWithEncoder(encoder *ag_binary.Enc
 	if err != nil {
 		return err
 	}
+	// Serialize `SupportedTokenMint` param (optional):
+	{
+		if obj.SupportedTokenMint == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.Encode(obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 func (obj *UserCancelWithdrawalRequest) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
@@ -698,6 +724,19 @@ func (obj *UserCancelWithdrawalRequest) UnmarshalWithDecoder(decoder *ag_binary.
 	if err != nil {
 		return err
 	}
+	// Deserialize `SupportedTokenMint` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.SupportedTokenMint)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -705,6 +744,7 @@ func (obj *UserCancelWithdrawalRequest) UnmarshalWithDecoder(decoder *ag_binary.
 func NewUserCancelWithdrawalRequestInstruction(
 	// Parameters:
 	request_id uint64,
+	supported_token_mint ag_solanago.PublicKey,
 	// Accounts:
 	user ag_solanago.PublicKey,
 	systemProgram ag_solanago.PublicKey,
@@ -722,6 +762,7 @@ func NewUserCancelWithdrawalRequestInstruction(
 	program ag_solanago.PublicKey) *UserCancelWithdrawalRequest {
 	return NewUserCancelWithdrawalRequestInstructionBuilder().
 		SetRequestId(request_id).
+		SetSupportedTokenMint(supported_token_mint).
 		SetUserAccount(user).
 		SetSystemProgramAccount(systemProgram).
 		SetReceiptTokenProgramAccount(receiptTokenProgram).

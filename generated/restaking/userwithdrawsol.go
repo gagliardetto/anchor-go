@@ -58,9 +58,9 @@ func NewUserWithdrawSolInstructionBuilder() *UserWithdrawSol {
 	return nd
 }
 
-// SetBatchId sets the "batch_id" parameter.
-func (inst *UserWithdrawSol) SetBatchId(batch_id uint64) *UserWithdrawSol {
-	inst.BatchId = &batch_id
+// SetBatchId sets the "_batch_id" parameter.
+func (inst *UserWithdrawSol) SetBatchId(_batch_id uint64) *UserWithdrawSol {
+	inst.BatchId = &_batch_id
 	return inst
 }
 
@@ -779,7 +779,7 @@ func (obj *UserWithdrawSol) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (er
 // NewUserWithdrawSolInstruction declares a new UserWithdrawSol instruction with the provided parameters and accounts.
 func NewUserWithdrawSolInstruction(
 	// Parameters:
-	batch_id uint64,
+	_batch_id uint64,
 	request_id uint64,
 	// Accounts:
 	user ag_solanago.PublicKey,
@@ -797,7 +797,7 @@ func NewUserWithdrawSolInstruction(
 	eventAuthority ag_solanago.PublicKey,
 	program ag_solanago.PublicKey) *UserWithdrawSol {
 	return NewUserWithdrawSolInstructionBuilder().
-		SetBatchId(batch_id).
+		SetBatchId(_batch_id).
 		SetRequestId(request_id).
 		SetUserAccount(user).
 		SetSystemProgramAccount(systemProgram).

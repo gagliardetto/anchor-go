@@ -4,7 +4,6 @@ package restaking
 
 import (
 	"errors"
-	"fmt"
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -15,7 +14,7 @@ import (
 type FundManagerAddReward struct {
 	Name        *string
 	Description *string
-	RewardType  RewardType
+	RewardType  *RewardType
 
 	// [0] = [SIGNER] fund_manager
 	//
@@ -56,7 +55,7 @@ func (inst *FundManagerAddReward) SetDescription(description string) *FundManage
 
 // SetRewardType sets the "reward_type" parameter.
 func (inst *FundManagerAddReward) SetRewardType(reward_type RewardType) *FundManagerAddReward {
-	inst.RewardType = reward_type
+	inst.RewardType = &reward_type
 	return inst
 }
 
@@ -321,23 +320,9 @@ func (obj FundManagerAddReward) MarshalWithEncoder(encoder *ag_binary.Encoder) (
 		return err
 	}
 	// Serialize `RewardType` param:
-	{
-		tmp := rewardTypeContainer{}
-		switch realvalue := obj.RewardType.(type) {
-		case *RewardTypePointTuple:
-			tmp.Enum = 0
-			tmp.Point = *realvalue
-		case *RewardTypeTokenTuple:
-			tmp.Enum = 1
-			tmp.Token = *realvalue
-		case *RewardTypeSOLTuple:
-			tmp.Enum = 2
-			tmp.SOL = *realvalue
-		}
-		err := encoder.Encode(tmp)
-		if err != nil {
-			return err
-		}
+	err = encoder.Encode(obj.RewardType)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -353,22 +338,9 @@ func (obj *FundManagerAddReward) UnmarshalWithDecoder(decoder *ag_binary.Decoder
 		return err
 	}
 	// Deserialize `RewardType`:
-	{
-		tmp := new(rewardTypeContainer)
-		err := decoder.Decode(tmp)
-		if err != nil {
-			return err
-		}
-		switch tmp.Enum {
-		case 0:
-			obj.RewardType = &tmp.Point
-		case 1:
-			obj.RewardType = &tmp.Token
-		case 2:
-			obj.RewardType = (*RewardTypeSOLTuple)(&tmp.Enum)
-		default:
-			return fmt.Errorf("unknown enum index: %v", tmp.Enum)
-		}
+	err = decoder.Decode(&obj.RewardType)
+	if err != nil {
+		return err
 	}
 	return nil
 }

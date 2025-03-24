@@ -10,18 +10,18 @@ import (
 	"testing"
 )
 
-func TestEncodeDecode_FundManagerClearUserSolWithdrawalRequests(t *testing.T) {
+func TestEncodeDecode_UserWrapReceiptTokenIfNeeded(t *testing.T) {
 	fu := ag_gofuzz.New().NilChance(0)
 	for i := 0; i < 1; i++ {
-		t.Run("FundManagerClearUserSolWithdrawalRequests"+strconv.Itoa(i), func(t *testing.T) {
+		t.Run("UserWrapReceiptTokenIfNeeded"+strconv.Itoa(i), func(t *testing.T) {
 			{
-				params := new(FundManagerClearUserSolWithdrawalRequests)
+				params := new(UserWrapReceiptTokenIfNeeded)
 				fu.Fuzz(params)
 				params.AccountMetaSlice = nil
 				buf := new(bytes.Buffer)
 				err := encodeT(*params, buf)
 				ag_require.NoError(t, err)
-				got := new(FundManagerClearUserSolWithdrawalRequests)
+				got := new(UserWrapReceiptTokenIfNeeded)
 				err = decodeT(got, buf.Bytes())
 				got.AccountMetaSlice = nil
 				ag_require.NoError(t, err)

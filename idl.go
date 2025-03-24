@@ -389,6 +389,21 @@ func (env *IdlType) GetIdlTypeDefined() *IdlTypeDefined {
 func (env *IdlType) GetArray() *IdlTypeArray {
 	return env.asIdlTypeArray
 }
+func (env *IdlType) GetDefinedFieldName() *string {
+	if env.IsIdlTypeDefined() {
+		return &env.asIdlTypeDefined.Defined.Name
+	}
+	if env.IsIdlTypeVec() {
+		return env.asIdlTypeVec.Vec.GetDefinedFieldName()
+	}
+	if env.IsIdlTypeOption() {
+		return env.asIdlTypeOption.Option.GetDefinedFieldName()
+	}
+	if env.IsArray() {
+		return env.asIdlTypeArray.Elem.GetDefinedFieldName()
+	}
+	return nil
+}
 
 type IdlTypeDef struct {
 	Name          string       `json:"name"`
@@ -425,6 +440,15 @@ func (slice IdlEnumVariantSlice) IsAllUint8() bool {
 
 func (slice IdlEnumVariantSlice) IsSimpleEnum() bool {
 	return slice.IsAllUint8()
+}
+
+func (slice IdlEnumVariantSlice) GetEnumVariantTypeName() []string {
+	var result []string
+	for _, variant := range slice {
+		result = append(result, variant.Name)
+
+	}
+	return result
 }
 
 type IdlTypeDefStruct = []IdlField

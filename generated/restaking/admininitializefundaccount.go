@@ -20,6 +20,9 @@ type AdminInitializeFundAccount struct {
 	// [2] = [] system_program
 	//
 	// [3] = [WRITE] receipt_token_mint
+	// ··········· Mint authority must be admin or fund account,
+	// ··········· otherwise `set_authority` CPI will fail.
+	// ··········· Therefore, no extra constraint is needed.
 	//
 	// [4] = [] receipt_token_program
 	//
@@ -80,12 +83,18 @@ func (inst *AdminInitializeFundAccount) GetSystemProgramAccount() *ag_solanago.A
 }
 
 // SetReceiptTokenMintAccount sets the "receipt_token_mint" account.
+// Mint authority must be admin or fund account,
+// otherwise `set_authority` CPI will fail.
+// Therefore, no extra constraint is needed.
 func (inst *AdminInitializeFundAccount) SetReceiptTokenMintAccount(receiptTokenMint ag_solanago.PublicKey) *AdminInitializeFundAccount {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(receiptTokenMint).WRITE()
 	return inst
 }
 
 // GetReceiptTokenMintAccount gets the "receipt_token_mint" account.
+// Mint authority must be admin or fund account,
+// otherwise `set_authority` CPI will fail.
+// Therefore, no extra constraint is needed.
 func (inst *AdminInitializeFundAccount) GetReceiptTokenMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(3)
 }

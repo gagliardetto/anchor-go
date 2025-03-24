@@ -15,7 +15,7 @@ type SlasherWithdrawNormalizedToken struct {
 
 	// [0] = [WRITE, SIGNER] slasher
 	//
-	// [1] = [WRITE] normalized_token_mint
+	// [1] = [] normalized_token_mint
 	//
 	// [2] = [WRITE] normalized_token_pool_account
 	//
@@ -61,7 +61,7 @@ func (inst *SlasherWithdrawNormalizedToken) GetSlasherAccount() *ag_solanago.Acc
 
 // SetNormalizedTokenMintAccount sets the "normalized_token_mint" account.
 func (inst *SlasherWithdrawNormalizedToken) SetNormalizedTokenMintAccount(normalizedTokenMint ag_solanago.PublicKey) *SlasherWithdrawNormalizedToken {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(normalizedTokenMint).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(normalizedTokenMint)
 	return inst
 }
 

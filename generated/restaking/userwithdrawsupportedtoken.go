@@ -34,42 +34,44 @@ type UserWithdrawSupportedToken struct {
 	//
 	// [8] = [WRITE] fund_account
 	//
-	// [9] = [WRITE] fund_withdrawal_batch_account
+	// [9] = [] fund_reserve_account
+	//
+	// [10] = [WRITE] fund_withdrawal_batch_account
 	// ··········· Users can derive proper account address with target batch id for each withdrawal requests.
 	// ··········· And the batch id can be read from a user fund account which the withdrawal requests belong to.
 	//
-	// [10] = [WRITE] fund_supported_token_reserve_account
+	// [11] = [WRITE] fund_supported_token_reserve_account
 	//
-	// [11] = [WRITE] fund_treasury_account
+	// [12] = [WRITE] fund_treasury_account
 	//
-	// [12] = [WRITE] user_fund_account
+	// [13] = [WRITE] user_fund_account
 	//
-	// [13] = [WRITE] reward_account
+	// [14] = [WRITE] reward_account
 	//
-	// [14] = [WRITE] user_reward_account
+	// [15] = [WRITE] user_reward_account
 	//
-	// [15] = [] instructions_sysvar
+	// [16] = [] instructions_sysvar
 	//
-	// [16] = [] event_authority
+	// [17] = [] event_authority
 	//
-	// [17] = [] program
+	// [18] = [] program
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewUserWithdrawSupportedTokenInstructionBuilder creates a new `UserWithdrawSupportedToken` instruction builder.
 func NewUserWithdrawSupportedTokenInstructionBuilder() *UserWithdrawSupportedToken {
 	nd := &UserWithdrawSupportedToken{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 18),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 19),
 	}
 	nd.AccountMetaSlice[1] = ag_solanago.Meta(Addresses["11111111111111111111111111111111"])
 	nd.AccountMetaSlice[2] = ag_solanago.Meta(Addresses["TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"])
-	nd.AccountMetaSlice[15] = ag_solanago.Meta(Addresses["Sysvar1nstructions1111111111111111111111111"])
+	nd.AccountMetaSlice[16] = ag_solanago.Meta(Addresses["Sysvar1nstructions1111111111111111111111111"])
 	return nd
 }
 
-// SetBatchId sets the "batch_id" parameter.
-func (inst *UserWithdrawSupportedToken) SetBatchId(batch_id uint64) *UserWithdrawSupportedToken {
-	inst.BatchId = &batch_id
+// SetBatchId sets the "_batch_id" parameter.
+func (inst *UserWithdrawSupportedToken) SetBatchId(_batch_id uint64) *UserWithdrawSupportedToken {
+	inst.BatchId = &_batch_id
 	return inst
 }
 
@@ -270,11 +272,66 @@ func (inst *UserWithdrawSupportedToken) GetFundAccountAccount() *ag_solanago.Acc
 	return inst.AccountMetaSlice.Get(8)
 }
 
+// SetFundReserveAccountAccount sets the "fund_reserve_account" account.
+func (inst *UserWithdrawSupportedToken) SetFundReserveAccountAccount(fundReserveAccount ag_solanago.PublicKey) *UserWithdrawSupportedToken {
+	inst.AccountMetaSlice[9] = ag_solanago.Meta(fundReserveAccount)
+	return inst
+}
+
+func (inst *UserWithdrawSupportedToken) findFindFundReserveAccountAddress(receiptTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	var seeds [][]byte
+	// const: fund_reserve
+	seeds = append(seeds, []byte{byte(0x66), byte(0x75), byte(0x6e), byte(0x64), byte(0x5f), byte(0x72), byte(0x65), byte(0x73), byte(0x65), byte(0x72), byte(0x76), byte(0x65)})
+	// path: receiptTokenMint
+	seeds = append(seeds, receiptTokenMint.Bytes())
+
+	if knownBumpSeed != 0 {
+		seeds = append(seeds, []byte{byte(bumpSeed)})
+		pda, err = ag_solanago.CreateProgramAddress(seeds, ProgramID)
+	} else {
+		pda, bumpSeed, err = ag_solanago.FindProgramAddress(seeds, ProgramID)
+	}
+	return
+}
+
+// FindFundReserveAccountAddressWithBumpSeed calculates FundReserveAccount account address with given seeds and a known bump seed.
+func (inst *UserWithdrawSupportedToken) FindFundReserveAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindFundReserveAccountAddress(receiptTokenMint, bumpSeed)
+	return
+}
+
+func (inst *UserWithdrawSupportedToken) MustFindFundReserveAccountAddressWithBumpSeed(receiptTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundReserveAccountAddress(receiptTokenMint, bumpSeed)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// FindFundReserveAccountAddress finds FundReserveAccount account address with given seeds.
+func (inst *UserWithdrawSupportedToken) FindFundReserveAccountAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindFundReserveAccountAddress(receiptTokenMint, 0)
+	return
+}
+
+func (inst *UserWithdrawSupportedToken) MustFindFundReserveAccountAddress(receiptTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundReserveAccountAddress(receiptTokenMint, 0)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// GetFundReserveAccountAccount gets the "fund_reserve_account" account.
+func (inst *UserWithdrawSupportedToken) GetFundReserveAccountAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(9)
+}
+
 // SetFundWithdrawalBatchAccountAccount sets the "fund_withdrawal_batch_account" account.
 // Users can derive proper account address with target batch id for each withdrawal requests.
 // And the batch id can be read from a user fund account which the withdrawal requests belong to.
 func (inst *UserWithdrawSupportedToken) SetFundWithdrawalBatchAccountAccount(fundWithdrawalBatchAccount ag_solanago.PublicKey) *UserWithdrawSupportedToken {
-	inst.AccountMetaSlice[9] = ag_solanago.Meta(fundWithdrawalBatchAccount).WRITE()
+	inst.AccountMetaSlice[10] = ag_solanago.Meta(fundWithdrawalBatchAccount).WRITE()
 	return inst
 }
 
@@ -334,19 +391,19 @@ func (inst *UserWithdrawSupportedToken) MustFindFundWithdrawalBatchAccountAddres
 // Users can derive proper account address with target batch id for each withdrawal requests.
 // And the batch id can be read from a user fund account which the withdrawal requests belong to.
 func (inst *UserWithdrawSupportedToken) GetFundWithdrawalBatchAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(9)
+	return inst.AccountMetaSlice.Get(10)
 }
 
 // SetFundSupportedTokenReserveAccountAccount sets the "fund_supported_token_reserve_account" account.
 func (inst *UserWithdrawSupportedToken) SetFundSupportedTokenReserveAccountAccount(fundSupportedTokenReserveAccount ag_solanago.PublicKey) *UserWithdrawSupportedToken {
-	inst.AccountMetaSlice[10] = ag_solanago.Meta(fundSupportedTokenReserveAccount).WRITE()
+	inst.AccountMetaSlice[11] = ag_solanago.Meta(fundSupportedTokenReserveAccount).WRITE()
 	return inst
 }
 
-func (inst *UserWithdrawSupportedToken) findFindFundSupportedTokenReserveAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+func (inst *UserWithdrawSupportedToken) findFindFundSupportedTokenReserveAccountAddress(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, knownBumpSeed uint8) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
 	var seeds [][]byte
-	// path: fundAccount
-	seeds = append(seeds, fundAccount.Bytes())
+	// path: fundReserveAccount
+	seeds = append(seeds, fundReserveAccount.Bytes())
 	// path: supportedTokenProgram
 	seeds = append(seeds, supportedTokenProgram.Bytes())
 	// path: supportedTokenMint
@@ -364,13 +421,13 @@ func (inst *UserWithdrawSupportedToken) findFindFundSupportedTokenReserveAccount
 }
 
 // FindFundSupportedTokenReserveAccountAddressWithBumpSeed calculates FundSupportedTokenReserveAccount account address with given seeds and a known bump seed.
-func (inst *UserWithdrawSupportedToken) FindFundSupportedTokenReserveAccountAddressWithBumpSeed(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
-	pda, _, err = inst.findFindFundSupportedTokenReserveAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
+func (inst *UserWithdrawSupportedToken) FindFundSupportedTokenReserveAccountAddressWithBumpSeed(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey, err error) {
+	pda, _, err = inst.findFindFundSupportedTokenReserveAccountAddress(fundReserveAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
 	return
 }
 
-func (inst *UserWithdrawSupportedToken) MustFindFundSupportedTokenReserveAccountAddressWithBumpSeed(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindFundSupportedTokenReserveAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
+func (inst *UserWithdrawSupportedToken) MustFindFundSupportedTokenReserveAccountAddressWithBumpSeed(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey, bumpSeed uint8) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundSupportedTokenReserveAccountAddress(fundReserveAccount, supportedTokenProgram, supportedTokenMint, bumpSeed)
 	if err != nil {
 		panic(err)
 	}
@@ -378,13 +435,13 @@ func (inst *UserWithdrawSupportedToken) MustFindFundSupportedTokenReserveAccount
 }
 
 // FindFundSupportedTokenReserveAccountAddress finds FundSupportedTokenReserveAccount account address with given seeds.
-func (inst *UserWithdrawSupportedToken) FindFundSupportedTokenReserveAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
-	pda, bumpSeed, err = inst.findFindFundSupportedTokenReserveAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, 0)
+func (inst *UserWithdrawSupportedToken) FindFundSupportedTokenReserveAccountAddress(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey, bumpSeed uint8, err error) {
+	pda, bumpSeed, err = inst.findFindFundSupportedTokenReserveAccountAddress(fundReserveAccount, supportedTokenProgram, supportedTokenMint, 0)
 	return
 }
 
-func (inst *UserWithdrawSupportedToken) MustFindFundSupportedTokenReserveAccountAddress(fundAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
-	pda, _, err := inst.findFindFundSupportedTokenReserveAccountAddress(fundAccount, supportedTokenProgram, supportedTokenMint, 0)
+func (inst *UserWithdrawSupportedToken) MustFindFundSupportedTokenReserveAccountAddress(fundReserveAccount ag_solanago.PublicKey, supportedTokenProgram ag_solanago.PublicKey, supportedTokenMint ag_solanago.PublicKey) (pda ag_solanago.PublicKey) {
+	pda, _, err := inst.findFindFundSupportedTokenReserveAccountAddress(fundReserveAccount, supportedTokenProgram, supportedTokenMint, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -393,12 +450,12 @@ func (inst *UserWithdrawSupportedToken) MustFindFundSupportedTokenReserveAccount
 
 // GetFundSupportedTokenReserveAccountAccount gets the "fund_supported_token_reserve_account" account.
 func (inst *UserWithdrawSupportedToken) GetFundSupportedTokenReserveAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(10)
+	return inst.AccountMetaSlice.Get(11)
 }
 
 // SetFundTreasuryAccountAccount sets the "fund_treasury_account" account.
 func (inst *UserWithdrawSupportedToken) SetFundTreasuryAccountAccount(fundTreasuryAccount ag_solanago.PublicKey) *UserWithdrawSupportedToken {
-	inst.AccountMetaSlice[11] = ag_solanago.Meta(fundTreasuryAccount).WRITE()
+	inst.AccountMetaSlice[12] = ag_solanago.Meta(fundTreasuryAccount).WRITE()
 	return inst
 }
 
@@ -448,12 +505,12 @@ func (inst *UserWithdrawSupportedToken) MustFindFundTreasuryAccountAddress(recei
 
 // GetFundTreasuryAccountAccount gets the "fund_treasury_account" account.
 func (inst *UserWithdrawSupportedToken) GetFundTreasuryAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(11)
+	return inst.AccountMetaSlice.Get(12)
 }
 
 // SetUserFundAccountAccount sets the "user_fund_account" account.
 func (inst *UserWithdrawSupportedToken) SetUserFundAccountAccount(userFundAccount ag_solanago.PublicKey) *UserWithdrawSupportedToken {
-	inst.AccountMetaSlice[12] = ag_solanago.Meta(userFundAccount).WRITE()
+	inst.AccountMetaSlice[13] = ag_solanago.Meta(userFundAccount).WRITE()
 	return inst
 }
 
@@ -505,12 +562,12 @@ func (inst *UserWithdrawSupportedToken) MustFindUserFundAccountAddress(receiptTo
 
 // GetUserFundAccountAccount gets the "user_fund_account" account.
 func (inst *UserWithdrawSupportedToken) GetUserFundAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(12)
+	return inst.AccountMetaSlice.Get(13)
 }
 
 // SetRewardAccountAccount sets the "reward_account" account.
 func (inst *UserWithdrawSupportedToken) SetRewardAccountAccount(rewardAccount ag_solanago.PublicKey) *UserWithdrawSupportedToken {
-	inst.AccountMetaSlice[13] = ag_solanago.Meta(rewardAccount).WRITE()
+	inst.AccountMetaSlice[14] = ag_solanago.Meta(rewardAccount).WRITE()
 	return inst
 }
 
@@ -560,12 +617,12 @@ func (inst *UserWithdrawSupportedToken) MustFindRewardAccountAddress(receiptToke
 
 // GetRewardAccountAccount gets the "reward_account" account.
 func (inst *UserWithdrawSupportedToken) GetRewardAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(13)
+	return inst.AccountMetaSlice.Get(14)
 }
 
 // SetUserRewardAccountAccount sets the "user_reward_account" account.
 func (inst *UserWithdrawSupportedToken) SetUserRewardAccountAccount(userRewardAccount ag_solanago.PublicKey) *UserWithdrawSupportedToken {
-	inst.AccountMetaSlice[14] = ag_solanago.Meta(userRewardAccount).WRITE()
+	inst.AccountMetaSlice[15] = ag_solanago.Meta(userRewardAccount).WRITE()
 	return inst
 }
 
@@ -617,23 +674,23 @@ func (inst *UserWithdrawSupportedToken) MustFindUserRewardAccountAddress(receipt
 
 // GetUserRewardAccountAccount gets the "user_reward_account" account.
 func (inst *UserWithdrawSupportedToken) GetUserRewardAccountAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(14)
+	return inst.AccountMetaSlice.Get(15)
 }
 
 // SetInstructionsSysvarAccount sets the "instructions_sysvar" account.
 func (inst *UserWithdrawSupportedToken) SetInstructionsSysvarAccount(instructionsSysvar ag_solanago.PublicKey) *UserWithdrawSupportedToken {
-	inst.AccountMetaSlice[15] = ag_solanago.Meta(instructionsSysvar)
+	inst.AccountMetaSlice[16] = ag_solanago.Meta(instructionsSysvar)
 	return inst
 }
 
 // GetInstructionsSysvarAccount gets the "instructions_sysvar" account.
 func (inst *UserWithdrawSupportedToken) GetInstructionsSysvarAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(15)
+	return inst.AccountMetaSlice.Get(16)
 }
 
 // SetEventAuthorityAccount sets the "event_authority" account.
 func (inst *UserWithdrawSupportedToken) SetEventAuthorityAccount(eventAuthority ag_solanago.PublicKey) *UserWithdrawSupportedToken {
-	inst.AccountMetaSlice[16] = ag_solanago.Meta(eventAuthority)
+	inst.AccountMetaSlice[17] = ag_solanago.Meta(eventAuthority)
 	return inst
 }
 
@@ -681,18 +738,18 @@ func (inst *UserWithdrawSupportedToken) MustFindEventAuthorityAddress() (pda ag_
 
 // GetEventAuthorityAccount gets the "event_authority" account.
 func (inst *UserWithdrawSupportedToken) GetEventAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(16)
+	return inst.AccountMetaSlice.Get(17)
 }
 
 // SetProgramAccount sets the "program" account.
 func (inst *UserWithdrawSupportedToken) SetProgramAccount(program ag_solanago.PublicKey) *UserWithdrawSupportedToken {
-	inst.AccountMetaSlice[17] = ag_solanago.Meta(program)
+	inst.AccountMetaSlice[18] = ag_solanago.Meta(program)
 	return inst
 }
 
 // GetProgramAccount gets the "program" account.
 func (inst *UserWithdrawSupportedToken) GetProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(17)
+	return inst.AccountMetaSlice.Get(18)
 }
 
 func (inst UserWithdrawSupportedToken) Build() *Instruction {
@@ -753,30 +810,33 @@ func (inst *UserWithdrawSupportedToken) Validate() error {
 			return errors.New("accounts.FundAccount is not set")
 		}
 		if inst.AccountMetaSlice[9] == nil {
-			return errors.New("accounts.FundWithdrawalBatchAccount is not set")
+			return errors.New("accounts.FundReserveAccount is not set")
 		}
 		if inst.AccountMetaSlice[10] == nil {
-			return errors.New("accounts.FundSupportedTokenReserveAccount is not set")
+			return errors.New("accounts.FundWithdrawalBatchAccount is not set")
 		}
 		if inst.AccountMetaSlice[11] == nil {
-			return errors.New("accounts.FundTreasuryAccount is not set")
+			return errors.New("accounts.FundSupportedTokenReserveAccount is not set")
 		}
 		if inst.AccountMetaSlice[12] == nil {
-			return errors.New("accounts.UserFundAccount is not set")
+			return errors.New("accounts.FundTreasuryAccount is not set")
 		}
 		if inst.AccountMetaSlice[13] == nil {
-			return errors.New("accounts.RewardAccount is not set")
+			return errors.New("accounts.UserFundAccount is not set")
 		}
 		if inst.AccountMetaSlice[14] == nil {
-			return errors.New("accounts.UserRewardAccount is not set")
+			return errors.New("accounts.RewardAccount is not set")
 		}
 		if inst.AccountMetaSlice[15] == nil {
-			return errors.New("accounts.InstructionsSysvar is not set")
+			return errors.New("accounts.UserRewardAccount is not set")
 		}
 		if inst.AccountMetaSlice[16] == nil {
-			return errors.New("accounts.EventAuthority is not set")
+			return errors.New("accounts.InstructionsSysvar is not set")
 		}
 		if inst.AccountMetaSlice[17] == nil {
+			return errors.New("accounts.EventAuthority is not set")
+		}
+		if inst.AccountMetaSlice[18] == nil {
 			return errors.New("accounts.Program is not set")
 		}
 	}
@@ -798,7 +858,7 @@ func (inst *UserWithdrawSupportedToken) EncodeToTree(parent ag_treeout.Branches)
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=18]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Accounts[len=19]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("                         user", inst.AccountMetaSlice.Get(0)))
 						accountsBranch.Child(ag_format.Meta("               system_program", inst.AccountMetaSlice.Get(1)))
 						accountsBranch.Child(ag_format.Meta("        receipt_token_program", inst.AccountMetaSlice.Get(2)))
@@ -808,15 +868,16 @@ func (inst *UserWithdrawSupportedToken) EncodeToTree(parent ag_treeout.Branches)
 						accountsBranch.Child(ag_format.Meta("         supported_token_mint", inst.AccountMetaSlice.Get(6)))
 						accountsBranch.Child(ag_format.Meta("        user_supported_token_", inst.AccountMetaSlice.Get(7)))
 						accountsBranch.Child(ag_format.Meta("                        fund_", inst.AccountMetaSlice.Get(8)))
-						accountsBranch.Child(ag_format.Meta("       fund_withdrawal_batch_", inst.AccountMetaSlice.Get(9)))
-						accountsBranch.Child(ag_format.Meta("fund_supported_token_reserve_", inst.AccountMetaSlice.Get(10)))
-						accountsBranch.Child(ag_format.Meta("               fund_treasury_", inst.AccountMetaSlice.Get(11)))
-						accountsBranch.Child(ag_format.Meta("                   user_fund_", inst.AccountMetaSlice.Get(12)))
-						accountsBranch.Child(ag_format.Meta("                      reward_", inst.AccountMetaSlice.Get(13)))
-						accountsBranch.Child(ag_format.Meta("                 user_reward_", inst.AccountMetaSlice.Get(14)))
-						accountsBranch.Child(ag_format.Meta("          instructions_sysvar", inst.AccountMetaSlice.Get(15)))
-						accountsBranch.Child(ag_format.Meta("              event_authority", inst.AccountMetaSlice.Get(16)))
-						accountsBranch.Child(ag_format.Meta("                      program", inst.AccountMetaSlice.Get(17)))
+						accountsBranch.Child(ag_format.Meta("                fund_reserve_", inst.AccountMetaSlice.Get(9)))
+						accountsBranch.Child(ag_format.Meta("       fund_withdrawal_batch_", inst.AccountMetaSlice.Get(10)))
+						accountsBranch.Child(ag_format.Meta("fund_supported_token_reserve_", inst.AccountMetaSlice.Get(11)))
+						accountsBranch.Child(ag_format.Meta("               fund_treasury_", inst.AccountMetaSlice.Get(12)))
+						accountsBranch.Child(ag_format.Meta("                   user_fund_", inst.AccountMetaSlice.Get(13)))
+						accountsBranch.Child(ag_format.Meta("                      reward_", inst.AccountMetaSlice.Get(14)))
+						accountsBranch.Child(ag_format.Meta("                 user_reward_", inst.AccountMetaSlice.Get(15)))
+						accountsBranch.Child(ag_format.Meta("          instructions_sysvar", inst.AccountMetaSlice.Get(16)))
+						accountsBranch.Child(ag_format.Meta("              event_authority", inst.AccountMetaSlice.Get(17)))
+						accountsBranch.Child(ag_format.Meta("                      program", inst.AccountMetaSlice.Get(18)))
 					})
 				})
 		})
@@ -852,7 +913,7 @@ func (obj *UserWithdrawSupportedToken) UnmarshalWithDecoder(decoder *ag_binary.D
 // NewUserWithdrawSupportedTokenInstruction declares a new UserWithdrawSupportedToken instruction with the provided parameters and accounts.
 func NewUserWithdrawSupportedTokenInstruction(
 	// Parameters:
-	batch_id uint64,
+	_batch_id uint64,
 	request_id uint64,
 	// Accounts:
 	user ag_solanago.PublicKey,
@@ -864,6 +925,7 @@ func NewUserWithdrawSupportedTokenInstruction(
 	supportedTokenMint ag_solanago.PublicKey,
 	userSupportedTokenAccount ag_solanago.PublicKey,
 	fundAccount ag_solanago.PublicKey,
+	fundReserveAccount ag_solanago.PublicKey,
 	fundWithdrawalBatchAccount ag_solanago.PublicKey,
 	fundSupportedTokenReserveAccount ag_solanago.PublicKey,
 	fundTreasuryAccount ag_solanago.PublicKey,
@@ -874,7 +936,7 @@ func NewUserWithdrawSupportedTokenInstruction(
 	eventAuthority ag_solanago.PublicKey,
 	program ag_solanago.PublicKey) *UserWithdrawSupportedToken {
 	return NewUserWithdrawSupportedTokenInstructionBuilder().
-		SetBatchId(batch_id).
+		SetBatchId(_batch_id).
 		SetRequestId(request_id).
 		SetUserAccount(user).
 		SetSystemProgramAccount(systemProgram).
@@ -885,6 +947,7 @@ func NewUserWithdrawSupportedTokenInstruction(
 		SetSupportedTokenMintAccount(supportedTokenMint).
 		SetUserSupportedTokenAccountAccount(userSupportedTokenAccount).
 		SetFundAccountAccount(fundAccount).
+		SetFundReserveAccountAccount(fundReserveAccount).
 		SetFundWithdrawalBatchAccountAccount(fundWithdrawalBatchAccount).
 		SetFundSupportedTokenReserveAccountAccount(fundSupportedTokenReserveAccount).
 		SetFundTreasuryAccountAccount(fundTreasuryAccount).

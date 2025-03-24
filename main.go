@@ -808,7 +808,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 						body.Id("inst").Dot(exportedArgName).Op("=").
 							Add(func() Code {
 								if isComplexEnum(arg.Type) {
-									return nil
+									return Op("&")
 								}
 								return Op("&")
 							}()).
@@ -1362,17 +1362,23 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 				}
 				code.Lit(v)
 			case "u16":
-				v, err := strconv.ParseInt(c.Value, 10, 16)
+				v, err := strconv.ParseUint(c.Value, 10, 16)
 				if err != nil {
 					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
 				}
-				code.Lit(int(v))
+				code.Lit(v)
+			case "u64":
+				v, err := strconv.ParseUint(c.Value, 10, 64)
+				if err != nil {
+					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
+				}
+				code.Lit(v)
 			case "i64":
 				v, err := strconv.ParseInt(c.Value, 10, 64)
 				if err != nil {
 					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
 				}
-				code.Lit(int(v))
+				code.Lit(v)
 			case "pubkey":
 				code.Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(c.Value))
 			default:
