@@ -2244,6 +2244,10 @@ func parseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
 	decoder := ag_binary.NewDecoderWithEncoding(nil, ag_binary.EncodingBorsh)
 
 	for _, eventBinary := range base64Binaries {
+		if len(eventBinary) < 8 {
+			continue
+		}
+
 		eventDiscriminator := ag_binary.TypeID(eventBinary[:8])
 		if eventType, ok := eventTypes[eventDiscriminator]; ok {
 			eventData := reflect.New(eventType).Interface().(EventData)
