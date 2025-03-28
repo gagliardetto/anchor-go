@@ -460,6 +460,10 @@ func decodeEventsFromEmitCPI(InnerInstructions []ag_rpc.InnerInstruction, accoun
 			if ixData, err = ag_base58.Decode(ix.Data.String()); err != nil {
 				return
 			}
+			if len(ixData) < 8 {
+				continue
+			}
+
 			eventBase64 := base64.StdEncoding.EncodeToString(ixData[8:])
 			var eventBinary []byte
 			if eventBinary, err = base64.StdEncoding.DecodeString(eventBase64); err != nil {
@@ -475,6 +479,9 @@ func parseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
 	decoder := ag_binary.NewDecoderWithEncoding(nil, ag_binary.EncodingBorsh)
 
 	for _, eventBinary := range base64Binaries {
+		if len(eventBinary) < 8 {
+			continue
+		}
 		eventDiscriminator := ag_binary.TypeID(eventBinary[:8])
 		if eventType, ok := eventTypes[eventDiscriminator]; ok {
 			eventData := reflect.New(eventType).Interface().(EventData)
