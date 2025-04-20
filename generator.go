@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
 	bin "github.com/gagliardetto/binary"
@@ -498,6 +499,13 @@ func genTypeDef(idl *IDL, withDiscriminator *[8]byte, def IdlTypeDef) Code {
 
 			st.Add(code.Line().Line())
 		}
+
+	case IdlTypeDefTyKindAlias:
+		code := newStatement()
+		aliasTypeName := def.Name
+
+		code.Type().Id(aliasTypeName).Add(genTypeName(*def.Type.Value))
+		st.Add(code.Line())
 
 		// panic(Sf("not implemented: %s", spew.Sdump(def)))
 	default:

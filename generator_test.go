@@ -23,6 +23,10 @@ func Test_genTypeName(t *testing.T) {
 			"var thing solanago.PublicKey",
 		},
 		{
+			`{"type": "publicKey"}`,
+			"var thing solanago.PublicKey",
+		},
+		{
 			`{"type": "bool"}`,
 			"var thing bool",
 		},
