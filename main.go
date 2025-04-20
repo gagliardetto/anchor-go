@@ -130,7 +130,12 @@ func main() {
 		// spew.Dump(idl)
 
 		// Create subfolder for package for generated assets:
-		packageAssetFolderName := sighash.ToRustSnakeCase(idl.Metadata.Name)
+		packageAssetFolderName := ""
+		if idl.Metadata != nil && idl.Metadata.Name != "" {
+			packageAssetFolderName = sighash.ToRustSnakeCase(idl.Metadata.Name)
+		} else if idl.Name != "" {
+			packageAssetFolderName = sighash.ToRustSnakeCase(idl.Name)
+		}
 		var dstDirForFiles string
 		if GetConfig().Debug {
 			packageAssetFolderPath := path.Join(GetConfig().DstDir, packageAssetFolderName)
@@ -244,11 +249,14 @@ func FormatSighash(buf []byte) string {
 }
 
 func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
-	if idl.Address == "" {
+	if idl.Address == "" && idl.Metadata != nil && idl.Metadata.Address != "" {
 		idl.Address = idl.Metadata.Address
 	}
 
 	if GetConfig().Package != "" {
+		if idl.Metadata == nil {
+			idl.Metadata = &IdlMetadata{}
+		}
 		idl.Metadata.Name = GetConfig().Package
 	}
 

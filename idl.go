@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
@@ -21,6 +22,7 @@ type IDL struct {
 	Constants    []IdlConstant    `json:"constants,omitempty"`
 
 	Address  string       `json:"address,omitempty"`
+	Name     string       `json:"name,omitempty"`
 	Metadata *IdlMetadata `json:"metadata,omitempty"` // NOTE: deprecated
 }
 
@@ -225,22 +227,23 @@ type IdlField struct {
 type IdlTypeAsString string
 
 const (
-	IdlTypeBool   IdlTypeAsString = "bool"
-	IdlTypeU8     IdlTypeAsString = "u8"
-	IdlTypeI8     IdlTypeAsString = "i8"
-	IdlTypeU16    IdlTypeAsString = "u16"
-	IdlTypeI16    IdlTypeAsString = "i16"
-	IdlTypeU32    IdlTypeAsString = "u32"
-	IdlTypeI32    IdlTypeAsString = "i32"
-	IdlTypeU64    IdlTypeAsString = "u64"
-	IdlTypeI64    IdlTypeAsString = "i64"
-	IdlTypeU128   IdlTypeAsString = "u128"
-	IdlTypeI128   IdlTypeAsString = "i128"
-	IdlTypeBytes  IdlTypeAsString = "bytes"
-	IdlTypeString IdlTypeAsString = "string"
-	IdlTypePubkey IdlTypeAsString = "pubkey"
-	IdlTypeF32    IdlTypeAsString = "f32"
-	IdlTypeF64    IdlTypeAsString = "f64"
+	IdlTypeBool      IdlTypeAsString = "bool"
+	IdlTypeU8        IdlTypeAsString = "u8"
+	IdlTypeI8        IdlTypeAsString = "i8"
+	IdlTypeU16       IdlTypeAsString = "u16"
+	IdlTypeI16       IdlTypeAsString = "i16"
+	IdlTypeU32       IdlTypeAsString = "u32"
+	IdlTypeI32       IdlTypeAsString = "i32"
+	IdlTypeU64       IdlTypeAsString = "u64"
+	IdlTypeI64       IdlTypeAsString = "i64"
+	IdlTypeU128      IdlTypeAsString = "u128"
+	IdlTypeI128      IdlTypeAsString = "i128"
+	IdlTypeBytes     IdlTypeAsString = "bytes"
+	IdlTypeString    IdlTypeAsString = "string"
+	IdlTypePubkey    IdlTypeAsString = "pubkey"
+	IdlTypePublickey IdlTypeAsString = "publicKey"
+	IdlTypeF32       IdlTypeAsString = "f32"
+	IdlTypeF64       IdlTypeAsString = "f64"
 
 	// Custom additions:
 	IdlTypeUnixTimestamp IdlTypeAsString = "unixTimestamp"
@@ -262,6 +265,25 @@ type IdlTypeOption struct {
 
 type IdLTypeDefinedName struct {
 	Name string `json:"name"`
+}
+
+func (env *IdLTypeDefinedName) UnmarshalJSON(data []byte) error {
+	type TmpAlias IdLTypeDefinedName
+	var (
+		a                TmpAlias
+		unmarshalTypeErr *json.UnmarshalTypeError
+	)
+	err := json.Unmarshal(data, &a)
+	if errors.As(err, &unmarshalTypeErr) {
+		err = json.Unmarshal(data, &a.Name)
+	}
+	if err != nil {
+		return err
+	}
+
+	*env = IdLTypeDefinedName(a)
+
+	return nil
 }
 
 // User defined type.

@@ -54,7 +54,7 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 		stat.Index().Byte()
 	case IdlTypeString:
 		stat.String()
-	case IdlTypePubkey:
+	case IdlTypePubkey, IdlTypePublickey:
 		stat.Qual(PkgSolanaGo, "PublicKey")
 	case IdlTypeF32:
 		stat.Float32()
