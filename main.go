@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/gagliardetto/solana-go"
 	"io/ioutil"
 	"os"
 	"path"
@@ -15,6 +13,9 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gagliardetto/solana-go"
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/fragmetric-labs/solana-anchor-go/sighash"
@@ -1518,12 +1519,17 @@ func genAccountGettersSetters(
 			var seedProgramValue *[]byte
 			if account.PDA.Program != nil {
 				if account.PDA.Program.Value == nil {
-					panic("cannot handle non-const type program value in PDA seeds")
+					if account.PDA.Program.Kind == "account" && account.PDA.Program.Path == "program" {
+						fmt.Println("Using program account reference instead of const value")
+					} else {
+						fmt.Printf("Warning: non-const program value in PDA seeds, using default ProgramID: %s\n", account.PDA.Program.Path)
+					}
+				} else {
+					seedProgramValue = &account.PDA.Program.Value
 				}
-				seedProgramValue = &account.PDA.Program.Value
 			}
 
-		OUTER:
+	OUTER:
 			for i, seedDef := range account.PDA.Seeds {
 				if seedDef.Value != nil { // type: const
 					seedValues[i] = seedDef.Value
@@ -1617,15 +1623,23 @@ func genAccountGettersSetters(
 						address := solana.PublicKeyFromBytes(*seedProgramValue).String()
 						body.Add(Id("programID").Op(":=").Id("Addresses").Index(Lit(address)))
 						addresses[address] = address
+					} else if account.PDA.Program != nil && account.PDA.Program.Kind == "account" && account.PDA.Program.Path == "program" {
+						for _, acc := range accounts {
+							if acc.IdlAccount.Name == "program" {
+								body.Add(Id("programID").Op(":=").Id("program"))
+								seedProgramRef = Id("programID")
+								break
+							}
+						}
 					}
 
 					body.Line()
 
 					body.Add(
 						If(Id("knownBumpSeed").Op("!=").Lit(0)).BlockFunc(func(group *Group) {
-							group.Add(Id("seeds").Op("=").Append(Id("seeds"), Index().Byte().Values(Byte().Call(Id("bumpSeed")))))
-							group.Add(List(Id("pda"), Id("err")).Op("=").Add(Qual(PkgSolanaGo, "CreateProgramAddress").Call(Id("seeds"), seedProgramRef)))
-						}).
+								group.Add(Id("seeds").Op("=").Append(Id("seeds"), Index().Byte().Values(Byte().Call(Id("bumpSeed")))))
+								group.Add(List(Id("pda"), Id("err")).Op("=").Add(Qual(PkgSolanaGo, "CreateProgramAddress").Call(Id("seeds"), seedProgramRef)))
+							}).
 							Else().BlockFunc(func(group *Group) {
 							group.Add(List(Id("pda"), Id("bumpSeed"), Id("err")).Op("=").Add(Qual(PkgSolanaGo, "FindProgramAddress").Call(Id("seeds"), seedProgramRef)))
 						}),
