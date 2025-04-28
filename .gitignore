@@ -4,7 +4,6 @@ anchor-go
 .vscode
 .idea
 .anchor
-generated/
 idl.json
 .cursorindexingignore
 .specstory
