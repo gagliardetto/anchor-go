@@ -1340,21 +1340,6 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 		})
 	}
 
-	// add configurable address map file
-	{
-		file := NewGoFile(idl.Metadata.Name, false)
-		code := Empty().Var().Id("Addresses").Op("=").Map(String()).Qual(PkgSolanaGo, "PublicKey").Values(DictFunc(func(dict Dict) {
-			for address, _ := range addresses {
-				dict[Lit(address)] = Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(address))
-			}
-		}))
-		file.Add(code)
-		files = append(files, &FileWrapper{
-			Name: "Addresses",
-			File: file,
-		})
-	}
-
 	// add constants file
 	{
 		file := NewGoFile(idl.Metadata.Name, false)
