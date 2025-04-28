@@ -264,30 +264,6 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			return nil, err
 		}
 
-		file.Add(Empty().Id(`
-func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instruction, err error) {
-	for _, ins := range message.Instructions {
-		var programID ag_solanago.PublicKey
-		if programID, err = message.Program(ins.ProgramIDIndex); err != nil {
-			return
-		}
-		if !programID.Equals(ProgramID) {
-			continue
-		}
-		var accounts []*ag_solanago.AccountMeta
-		if accounts, err = ins.ResolveInstructionAccounts(message); err != nil {
-			return
-		}
-		var insDecoded *Instruction
-		if insDecoded, err = decodeInstruction(accounts, ins.Data); err != nil {
-			return
-		}
-		instructions = append(instructions, insDecoded)
-	}
-	return
-}
-`))
-
 		files = append(files, &FileWrapper{
 			Name: "Instructions",
 			File: file,
@@ -565,7 +541,7 @@ func parseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
 									"bin": "optional",
 								})
 							}
-							return nil
+	return nil
 						}())
 				}
 
