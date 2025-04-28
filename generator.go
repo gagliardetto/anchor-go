@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
 	bin "github.com/gagliardetto/binary"
@@ -78,7 +79,7 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 
 func genField(field IdlField, pointer bool) Code {
 	st := newStatement()
-	st.Id(ToCamel(field.Name)).
+	st.Id(ToPascal(field.Name)).
 		Add(func() Code {
 			if isComplexEnum(field.Type) {
 				return Op("*")
@@ -192,7 +193,7 @@ func genTypeDef(idl *IDL, withDiscriminator *[8]byte, def IdlTypeDef) Code {
 			// generate encoder and decoder methods (for borsh):
 			if GetConfig().Encoding == EncodingBorsh {
 				code := Empty()
-				exportedAccountName := ToCamel(def.Name)
+				exportedAccountName := ToPascal(def.Name)
 
 				//toBeHashed := ToCamel(def.Name)
 
@@ -340,7 +341,7 @@ func genTypeDef(idl *IDL, withDiscriminator *[8]byte, def IdlTypeDef) Code {
 					})
 
 					for _, variant := range *def.Type.Variants {
-						structGroup.Id(ToCamel(variant.Name)).Id(formatComplexEnumVariantTypeName(enumTypeName, variant.Name))
+						structGroup.Id(ToPascal(variant.Name)).Id(formatComplexEnumVariantTypeName(enumTypeName, variant.Name))
 					}
 				},
 			).Line().Line()
@@ -510,8 +511,8 @@ func formatEnumContainerName(enumTypeName string) string {
 	return ToLowerCamel(enumTypeName) + "Container"
 }
 
-func formatInterfaceMethodName(enumTypeName string) string {
-	return "is" + ToCamel(enumTypeName)
+func formatInterfaceMethodName(enumName string) string {
+	return "is" + ToPascal(enumName)
 }
 
 func formatBuilderFuncName(insExportedName string) string {
@@ -545,7 +546,7 @@ func genMarshalWithEncoder_enum(
 							switchGroup.Case(Id(formatComplexEnumVariantTypeName(receiverTypeName, variant))).
 								BlockFunc(func(caseGroup *Group) {
 									caseGroup.Id("tmp").Dot("Enum").Op("=").Lit(variantIndex)
-									caseGroup.Id("tmp").Dot(ToCamel(variant)).Op("=").Id("realvalue")
+									caseGroup.Id("tmp").Dot(ToPascal(variant)).Op("=").Id("realvalue")
 								})
 						}
 					}
@@ -587,7 +588,7 @@ func genUnmarshalWithDecoder_enum(
 					for variantIndex, variantName := range variants.GetEnumVariantTypeName() {
 						switchGroup.Case(Lit(variantIndex)).
 							BlockFunc(func(caseGroup *Group) {
-								caseGroup.Id("obj").Dot("Value").Op("=").Id("tmp").Dot(ToCamel(variantName))
+								caseGroup.Id("obj").Dot("Value").Op("=").Id("tmp").Dot(ToPascal(variantName))
 							})
 					}
 					switchGroup.Default().
@@ -636,7 +637,7 @@ func genMarshalWithEncoder_struct(
 				}
 
 				for _, field := range fields {
-					exportedArgName := ToCamel(field.Name)
+					exportedArgName := ToPascal(field.Name)
 					if field.Type.IsIdlTypeOption() {
 						body.Commentf("Serialize `%s` param (optional):", exportedArgName)
 					} else {
@@ -646,7 +647,7 @@ func genMarshalWithEncoder_struct(
 						if checkNil {
 							body.BlockFunc(func(optGroup *Group) {
 								// if nil:
-								optGroup.If(Id("obj").Dot(ToCamel(field.Name)).Op("==").Nil()).Block(
+								optGroup.If(Id("obj").Dot(ToPascal(field.Name)).Op("==").Nil()).Block(
 									Err().Op("=").Id("encoder").Dot("WriteBool").Call(False()),
 									If(Err().Op("!=").Nil()).Block(
 										Return(Err()),
@@ -737,7 +738,7 @@ func genUnmarshalWithDecoder_struct(
 				}
 
 				for _, field := range fields {
-					exportedArgName := ToCamel(field.Name)
+					exportedArgName := ToPascal(field.Name)
 					if field.Type.IsIdlTypeOption() {
 						body.Commentf("Deserialize `%s` (optional):", exportedArgName)
 					} else {
@@ -772,9 +773,9 @@ func genUnmarshalWithDecoder_struct(
 }
 
 func formatComplexEnumVariantTypeName(enumTypeName string, variantName string) string {
-	return ToCamel(Sf("%s_%s_Tuple", enumTypeName, variantName))
+	return ToPascal(Sf("%s_%s_Tuple", enumTypeName, variantName))
 }
 
 func formatSimpleEnumVariantName(variantName string, enumTypeName string) string {
-	return ToCamel(Sf("%s_%s", enumTypeName, variantName))
+	return ToPascal(Sf("%s_%s", enumTypeName, variantName))
 }

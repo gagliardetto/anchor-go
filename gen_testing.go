@@ -2,8 +2,6 @@ package main
 
 import (
 	. "github.com/dave/jennifer/jen"
-	. "github.com/gagliardetto/utilz"
-	"strings"
 )
 
 func isInsFieldComplexEnum(envelopes ...IdlField) bool {
@@ -101,13 +99,13 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 		}
 		////
 		files = append(files, &FileWrapper{
-			Name: "testing_utils",
+			Name: "TestingUtils",
 			File: file,
 		})
 	}
 	for _, instruction := range idl.Instructions {
 		file := NewGoFile(idl.Metadata.Name, true)
-		insExportedName := ToCamel(instruction.Name)
+		insExportedName := ToPascal(instruction.Name)
 		{
 			// Declare test: encode, decode:
 			code := Empty()
@@ -156,7 +154,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 		}
 		////
 		files = append(files, &FileWrapper{
-			Name: strings.ToLower(insExportedName) + "_test",
+			Name: ToPascal(instruction.Name) + "_Test",
 			File: file,
 		})
 	}
@@ -189,7 +187,7 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 		if !isComplexEnum(arg.Type) {
 			continue
 		}
-		exportedArgName := ToCamel(arg.Name)
+		exportedArgName := ToPascal(arg.Name)
 		tFunGroup.BlockFunc(func(enumBlock *Group) {
 
 			enumName := arg.Type.GetIdlTypeDefined().Defined.Name
@@ -239,7 +237,7 @@ func genTestWithDeepComplexEnum(tFunGroup *Group, insExportedName string, instru
 		if isComplexEnum(arg.Type) {
 			continue
 		}
-		exportedArgName := ToCamel(arg.Name)
+		exportedArgName := ToPascal(arg.Name)
 		tFunGroup.Id("params").Dot(exportedArgName).Op("=").Nil()
 	}
 

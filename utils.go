@@ -11,6 +11,11 @@ import (
 	. "github.com/gagliardetto/utilz"
 )
 
+// ToPascal converts a string to PascalCase
+func ToPascal(s string) string {
+	return ToCamel(s)
+}
+
 func ToPackageName(s string) string {
 	return sighash.ToRustSnakeCase(ToCamel(s))
 }

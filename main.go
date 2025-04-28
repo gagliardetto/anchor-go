@@ -292,7 +292,7 @@ func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instructi
 `))
 
 		files = append(files, &FileWrapper{
-			Name: "instructions",
+			Name: "Instructions",
 			File: file,
 		})
 	}
@@ -318,7 +318,7 @@ func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instructi
 			}))
 		}
 		files = append(files, &FileWrapper{
-			Name: "types",
+			Name: "Types",
 			File: file,
 		})
 	}
@@ -337,7 +337,7 @@ func DecodeInstructions(message *ag_solanago.Message) (instructions []*Instructi
 			}
 		}
 		files = append(files, &FileWrapper{
-			Name: "accounts",
+			Name: "Accounts",
 			File: file,
 		})
 	}
@@ -502,7 +502,7 @@ func parseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
 `))
 
 		files = append(files, &FileWrapper{
-			Name: "events",
+			Name: "Events",
 			File: file,
 		})
 	}
@@ -522,7 +522,7 @@ func parseEvents(base64Binaries [][]byte) (evts []*Event, err error) {
 		file.Add(Var().DefsFunc(func(group *Group) {
 			errDict := Dict{}
 			for _, errDef := range idl.Errors {
-				name := "Err" + ToCamel(errDef.Name)
+				name := "Err" + ToPascal(errDef.Name)
 				group.Add(Id(name).Op("=").Op("&").Id("customErrorDef").Values(Dict{
 					Id("code"): Lit(errDef.Code),
 					Id("name"): Lit(errDef.Name),
@@ -599,7 +599,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 `))
 
 		files = append(files, &FileWrapper{
-			Name: "errors",
+			Name: "Errors",
 			File: file,
 		})
 	}
@@ -607,7 +607,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 	// Instructions:
 	for _, instruction := range idl.Instructions {
 		file := NewGoFile(idl.Metadata.Name, true)
-		insExportedName := ToCamel(instruction.Name)
+		insExportedName := ToPascal(instruction.Name)
 		var args []IdlField
 		for _, arg := range instruction.Args {
 			idlFieldArg := IdlField{
@@ -789,7 +789,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 			// Declare methods that set the parameters of the instruction:
 			code := Empty()
 			for _, arg := range args {
-				exportedArgName := ToCamel(arg.Name)
+				exportedArgName := ToPascal(arg.Name)
 
 				code.Line().Line()
 				name := "Set" + exportedArgName
@@ -835,7 +835,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 			declaredReceivers := []string{}
 			groupMemberIndex := 0
 			instruction.Accounts.Walk("", nil, nil, func(parentGroupPath string, index int, parentGroup *IdlAccounts, account *IdlAccount) bool {
-				builderStructName := insExportedName + ToCamel(parentGroupPath) + "AccountsBuilder"
+				builderStructName := insExportedName + ToPascal(parentGroupPath) + "AccountsBuilder"
 				hasNestedParent := parentGroupPath != ""
 				isDeclaredReceiver := SliceContains(declaredReceivers, parentGroupPath)
 
@@ -867,7 +867,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 						}).Line().Line()
 
 					// Method on intruction builder that accepts the accounts group builder, and copies the accounts:
-					code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Set" + ToCamel(parentGroup.Name) + "AccountsFromBuilder").
+					code.Line().Line().Func().Params(Id("inst").Op("*").Id(insExportedName)).Id("Set" + ToPascal(parentGroup.Name) + "AccountsFromBuilder").
 						Params(
 							ListFunc(func(st *Group) {
 								// Parameters:
@@ -887,7 +887,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 							// spew.Dump(parentGroup)
 							for _, subAccount := range parentGroup.Accounts {
 								if subAccount.IdlAccount != nil {
-									exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
+									exportedAccountName := ToPascal(subAccount.IdlAccount.Name)
 
 									def := Id("inst").Dot("AccountMetaSlice").Index(Lit(tpIndex)).
 										Op("=").Id(ToLowerCamel(builderStructName)).Dot(formatAccountAccessorName("Get", exportedAccountName)).Call()
@@ -902,7 +902,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 				}
 
 				{
-					exportedAccountName := ToCamel(account.Name)
+					exportedAccountName := ToPascal(account.Name)
 					lowerAccountName := ToLowerCamel(account.Name)
 
 					var receiverTypeName string
@@ -1064,7 +1064,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 
 						body.BlockFunc(func(paramVerifyBody *Group) {
 							for _, arg := range args {
-								exportedArgName := ToCamel(arg.Name)
+								exportedArgName := ToPascal(arg.Name)
 
 								// Optional params can be empty.
 								if arg.Type.IsIdlTypeOption() {
@@ -1084,7 +1084,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 					body.Comment("Check whether all (required) accounts are set:")
 					body.BlockFunc(func(accountValidationBlock *Group) {
 						instruction.Accounts.Walk("", nil, nil, func(groupPath string, accountIndex int, parentGroup *IdlAccounts, ia *IdlAccount) bool {
-							exportedAccountName := ToCamel(filepath.Join(groupPath, ia.Name))
+							exportedAccountName := ToPascal(filepath.Join(groupPath, ia.Name))
 
 							if ia.Optional {
 								accountValidationBlock.Line().Commentf(
@@ -1139,7 +1139,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 									instructionBranchGroup.Id("instructionBranch").Dot("Child").Call(Lit(Sf("Params[len=%v]", len(args)))).Dot("ParentFunc").Parens(Func().Parens(Id("paramsBranch").Qual(PkgTreeout, "Branches")).BlockFunc(func(paramsBranchGroup *Group) {
 										longest := treeFindLongestNameFromFields(args)
 										for _, arg := range args {
-											exportedArgName := ToCamel(arg.Name)
+											exportedArgName := ToPascal(arg.Name)
 											paramsBranchGroup.Id("paramsBranch").Dot("Child").
 												Call(
 													Qual(PkgFormat, "Param").Call(
@@ -1264,7 +1264,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 					builder := body.Return().Id(formatBuilderFuncName(insExportedName)).Call()
 					{
 						for _, arg := range args {
-							exportedArgName := ToCamel(arg.Name)
+							exportedArgName := ToPascal(arg.Name)
 							builder.Op(".").Line().Id("Set" + exportedArgName).Call(Id(arg.Name))
 						}
 					}
@@ -1287,20 +1287,20 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 								accountName = accountName + "Account"
 							}
 
-							builderStructName := insExportedName + ToCamel(parentGroupPath) + "AccountsBuilder"
+							builderStructName := insExportedName + ToPascal(parentGroupPath) + "AccountsBuilder"
 							hasNestedParent := parentGroupPath != ""
 							isDeclaredReceiver := SliceContains(declaredReceivers, parentGroupPath)
 
 							if hasNestedParent && !isDeclaredReceiver {
 								declaredReceivers = append(declaredReceivers, parentGroupPath)
-								builder.Op(".").Line().Id("Set" + ToCamel(parentGroup.Name) + "AccountsFromBuilder").Call(
+								builder.Op(".").Line().Id("Set" + ToPascal(parentGroup.Name) + "AccountsFromBuilder").Call(
 									Line().Id("New" + builderStructName).Call().
 										Add(
 											DoGroup(func(gr *Group) {
 												// Body:
 												for subIndex, subAccount := range parentGroup.Accounts {
 													if subAccount.IdlAccount != nil {
-														exportedAccountName := ToCamel(subAccount.IdlAccount.Name)
+														exportedAccountName := ToPascal(subAccount.IdlAccount.Name)
 														accountName = ToLowerCamel(parentGroupPath + "/" + ToLowerCamel(exportedAccountName))
 
 														gr.Op(".").Add(func() Code {
@@ -1321,7 +1321,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 							}
 
 							if !hasNestedParent {
-								builder.Op(".").Line().Id(formatAccountAccessorName("Set", ToCamel(account.Name))).Call(Id(accountName))
+								builder.Op(".").Line().Id(formatAccountAccessorName("Set", ToPascal(account.Name))).Call(Id(accountName))
 							}
 
 							return true
@@ -1335,7 +1335,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 		}
 		////
 		files = append(files, &FileWrapper{
-			Name: strings.ToLower(insExportedName),
+			Name: ToPascal(instruction.Name),
 			File: file,
 		})
 	}
@@ -1350,7 +1350,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 		}))
 		file.Add(code)
 		files = append(files, &FileWrapper{
-			Name: "addresses",
+			Name: "Addresses",
 			File: file,
 		})
 	}
@@ -1396,7 +1396,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 		}
 		file.Add(code)
 		files = append(files, &FileWrapper{
-			Name: "constants",
+			Name: "Constants",
 			File: file,
 		})
 	}
@@ -1540,7 +1540,7 @@ func genAccountGettersSetters(
 							continue OUTER
 						}
 						if seedDef.Kind == "arg" {
-							seedArgs[i] = ToCamel(seedDef.Path)
+							seedArgs[i] = ToPascal(seedDef.Path)
 							continue OUTER
 						}
 					}
@@ -1864,7 +1864,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 	{
 		// ProgramName variable:
 		code := Empty()
-		programName := ToCamel(idl.Metadata.Name)
+		programName := ToPascal(idl.Metadata.Name)
 		code.Const().Id("ProgramName").Op("=").Lit(programName)
 		file.Add(code.Line())
 	}
@@ -1897,7 +1897,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 					code.Const().Parens(
 						DoGroup(func(gr *Group) {
 							for instructionIndex, instruction := range idl.Instructions {
-								insExportedName := ToCamel(instruction.Name)
+								insExportedName := ToPascal(instruction.Name)
 
 								ins := Empty().Line()
 								for _, doc := range instruction.Docs {
@@ -1930,7 +1930,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 					code.Var().Parens(
 						DoGroup(func(gr *Group) {
 							for _, instruction := range idl.Instructions {
-								insExportedName := ToCamel(instruction.Name)
+								insExportedName := ToPascal(instruction.Name)
 
 								ins := Empty().Line()
 								for _, doc := range instruction.Docs {
@@ -1997,7 +1997,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 						BlockFunc(func(body *Group) {
 							body.Switch(Id("id")).BlockFunc(func(switchBlock *Group) {
 								for _, instruction := range idl.Instructions {
-									insExportedName := ToCamel(instruction.Name)
+									insExportedName := ToPascal(instruction.Name)
 									switchBlock.Case(Id("Instruction_" + insExportedName)).Line().Return(Lit(insExportedName))
 								}
 								switchBlock.Default().Line().Return(Lit(""))
@@ -2021,7 +2021,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 						BlockFunc(func(body *Group) {
 							body.Switch(Id("id")).BlockFunc(func(switchBlock *Group) {
 								for _, instruction := range idl.Instructions {
-									insExportedName := ToCamel(instruction.Name)
+									insExportedName := ToPascal(instruction.Name)
 									switchBlock.Case(Id("Instruction_" + insExportedName)).Line().Return(Lit(insExportedName))
 								}
 								switchBlock.Default().Line().Return(Lit(""))
@@ -2097,8 +2097,8 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 									BlockFunc(func(variantBlock *Group) {
 										for _, instruction := range idl.Instructions {
 											// NOTE: using `ToCamel` here:
-											insName := ToCamel(instruction.Name)
-											insExportedName := ToCamel(instruction.Name)
+											insName := ToPascal(instruction.Name)
+											insExportedName := ToPascal(instruction.Name)
 											variantBlock.Block(
 												List(Lit(insName), Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
 											).Op(",")
@@ -2125,7 +2125,7 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 										for _, instruction := range idl.Instructions {
 											// NOTE: using `ToSnakeForSighash` here (necessary for sighash computing from instruction name)
 											insName := sighash.ToSnakeForSighash(instruction.Name)
-											insExportedName := ToCamel(instruction.Name)
+											insExportedName := ToPascal(instruction.Name)
 											variantBlock.Block(
 												List(Id("Name").Op(":").Lit(insName), Id("Type").Op(":").Parens(Op("*").Id(insExportedName)).Parens(Nil())).Op(","),
 											).Op(",")
