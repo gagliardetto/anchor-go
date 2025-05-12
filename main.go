@@ -1527,7 +1527,15 @@ func genAccountGettersSetters(
 
 			var seedProgramValue *[]byte
 			if account.PDA.Program != nil {
-				if account.PDA.Program.Value == nil {
+				if account.PDA.Program.Path != "" {
+					for _, acc := range accounts {
+						if acc.IdlAccount.Name == account.PDA.Program.Path {
+							addressBytes := []byte(acc.IdlAccount.Address)
+							seedProgramValue = &addressBytes
+						}
+					}
+				}
+				if seedProgramValue == nil && account.PDA.Program.Value == nil {
 					panic("cannot handle non-const type program value in PDA seeds")
 				}
 				seedProgramValue = &account.PDA.Program.Value
@@ -1539,13 +1547,20 @@ func genAccountGettersSetters(
 					seedValues[i] = seedDef.Value
 				} else {
 					for _, acc := range accounts {
-						if acc.IdlAccount.Name == seedDef.Path {
-							seedRefs[i] = ToLowerCamel(acc.IdlAccount.Name)
-							continue OUTER
-						}
 						if seedDef.Kind == "arg" {
 							seedArgs[i] = ToCamel(seedDef.Path)
 							continue OUTER
+						}
+						if seedDef.Kind == "account" {
+							if acc.IdlAccount.Name == seedDef.Path {
+								seedRefs[i] = ToLowerCamel(acc.IdlAccount.Name)
+								continue OUTER
+							}
+							if strings.HasPrefix(seedDef.Path, acc.IdlAccount.Name+".") {
+								parts := strings.Split(seedDef.Path, ".")
+								seedRefs[i] = ToLowerCamel(parts[0]) + "_" + ToLowerCamel(parts[1])
+								continue OUTER
+							}
 						}
 					}
 					panic("cannot find related account path " + seedDef.Path)
