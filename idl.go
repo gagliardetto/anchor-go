@@ -92,12 +92,19 @@ func (slice IdlAccountItemSlice) Walk(
 	parentGroup *IdlAccounts,
 	callback func(string, int, *IdlAccounts, *IdlAccount) bool,
 ) {
+	// Initialize index counter if not provided
 	defaultVal := -1
+
 	if previousIndex == nil {
 		previousIndex = &defaultVal
 	}
+
+	// Process each item in the slice
 	for _, item := range slice {
-		item.Walk(parentGroupPath, previousIndex, parentGroup, callback)
+		// Stop walking if callback returns false
+		if !item.Walk(parentGroupPath, previousIndex, parentGroup, callback) {
+			return
+		}
 	}
 }
 
@@ -119,28 +126,34 @@ func (item *IdlAccountItem) Walk(
 	previousIndex *int,
 	parentGroup *IdlAccounts,
 	callback func(string, int, *IdlAccounts, *IdlAccount) bool,
-) {
-	defaultVal := -1
+) bool {
+	// Initialize index counter if not provided
 	if previousIndex == nil {
+		defaultVal := -1
 		previousIndex = &defaultVal
 	}
+
+	// Process single account
 	if item.IdlAccount != nil {
 		*previousIndex++
-		doContinue := callback(parentGroupPath, *previousIndex, parentGroup, item.IdlAccount)
-		if !doContinue {
-			return
+		if !callback(parentGroupPath, *previousIndex, parentGroup, item.IdlAccount) {
+			return false
 		}
 	}
 
+	// Process nested accounts group
 	if item.IdlAccounts != nil {
-		var thisGroupName string
-		if parentGroupPath == "" {
-			thisGroupName = item.IdlAccounts.Name
-		} else {
-			thisGroupName = parentGroupPath + "/" + item.IdlAccounts.Name
+		// Create new group path for nested accounts
+		nestedGroupPath := item.IdlAccounts.Name
+		if parentGroupPath != "" {
+			nestedGroupPath = parentGroupPath + "/" + item.IdlAccounts.Name
 		}
-		item.IdlAccounts.Accounts.Walk(thisGroupName, previousIndex, item.IdlAccounts, callback)
+
+		// Walk through all accounts in the nested group
+		item.IdlAccounts.Accounts.Walk(nestedGroupPath, previousIndex, item.IdlAccounts, callback)
 	}
+
+	return true
 }
 
 // TODO: verify with examples
@@ -170,7 +183,10 @@ func (item *IdlAccountItem) UnmarshalJSON(data []byte) error {
 				if err := TranscodeJSON(temp, &item.IdlAccounts); err != nil {
 					return err
 				}
+				// If it has both accounts and a name, it's a group - don't process it as a single account
+				return nil
 			}
+
 			// Single account:
 			// TODO: check both writable and signer
 			_, signer := v["signer"]
