@@ -189,7 +189,7 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 					variantBlock.Id("params").Dot("AccountMetaSlice").Op("=").Nil()
 					variantBlock.Id("tmp").Op(":=").New(Id(formatComplexEnumVariantTypeName(enumName, variant.Name)))
 					variantBlock.Id("fu").Dot("Fuzz").Call(Id("tmp"))
-					variantBlock.Id("params").Dot("Set" + exportedArgName).Call(Id(enumName).Op("{").Op("*").Id("tmp").Op("}"))
+					variantBlock.Id("params").Dot("Set" + exportedArgName).Call(Id("tmp"))
 
 					variantBlock.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
 					variantBlock.Id("err").Op(":=").Id("encodeT").Call(Op("*").Id("params"), Id("buf"))
