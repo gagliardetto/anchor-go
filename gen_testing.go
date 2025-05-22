@@ -28,7 +28,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 
 	files := make([]*FileWrapper, 0)
 	{
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(determinePackageName(idl.Name), true)
 		// Declare testing tools:
 		{
 			code := Empty()
@@ -87,7 +87,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 		})
 	}
 	for _, instruction := range idl.Instructions {
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(determinePackageName(idl.Name), true)
 		insExportedName := ToCamel(instruction.Name)
 		{
 			// Declare test: encode, decode:
@@ -172,7 +172,6 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 			continue
 		}
 		exportedArgName := ToCamel(arg.Name)
-
 		tFunGroup.BlockFunc(func(enumBlock *Group) {
 
 			enumName := arg.Type.GetIdlTypeDefined().Defined
@@ -184,8 +183,7 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 
 					variantBlock.Id("fu").Dot("Fuzz").Call(Id("params"))
 					variantBlock.Id("params").Dot("AccountMetaSlice").Op("=").Nil()
-
-					variantBlock.Id("tmp").Op(":=").New(Id(ToCamel(variant.Name)))
+					variantBlock.Id("tmp").Op(":=").New(Id(formatComplexEnumVariantTypeName(enumName, variant.Name)))
 					variantBlock.Id("fu").Dot("Fuzz").Call(Id("tmp"))
 					variantBlock.Id("params").Dot("Set" + exportedArgName).Call(Id("tmp"))
 
@@ -199,6 +197,12 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 					variantBlock.Id("err").Op("=").Id("decodeT").Call(Id("got"), Id("buf").Dot("Bytes").Call())
 					variantBlock.Id("got").Dot("AccountMetaSlice").Op("=").Nil()
 					variantBlock.Qual(PkgTestifyRequire, "NoError").Call(Id("t"), Err())
+
+					variantBlock.Comment("to prevent garbage buffer fill by fuzz")
+					variantBlock.If(Qual("reflect", "TypeOf").Call(Op("*").Id("tmp")).Dot("Kind").Call().Op("!=").Qual("reflect", "Struct")).Block(
+						Id("got").Dot(exportedArgName).Op("=").Id("params").Dot(exportedArgName),
+					)
+
 					variantBlock.Qual(PkgTestifyRequire, "Equal").Call(Id("t"), Id("params"), Id("got"))
 				})
 			}

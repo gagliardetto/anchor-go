@@ -6,14 +6,15 @@ import (
 	"strings"
 
 	. "github.com/dave/jennifer/jen"
-	"github.com/gagliardetto/anchor-go/sighash"
 	"github.com/gagliardetto/solana-go"
 	. "github.com/gagliardetto/utilz"
+	"github.com/xprotocol-org/anchor-go/sighash"
 )
 
 func ToPackageName(s string) string {
 	return sighash.ToRustSnakeCase(ToCamel(s))
 }
+
 func NewGoFile(programName string, includeBoilerplace bool) *File {
 	file := NewFile(ToPackageName(programName))
 	// Set a prefix to avoid collision between variable names and packages:
