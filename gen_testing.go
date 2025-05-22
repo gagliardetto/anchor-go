@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	. "github.com/dave/jennifer/jen"
 	. "github.com/gagliardetto/utilz"
 )
@@ -177,9 +175,7 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 		tFunGroup.BlockFunc(func(enumBlock *Group) {
 
 			enumName := arg.Type.GetIdlTypeDefined().Defined
-			fmt.Println("enumName", enumName)
 			interfaceType := idl.Types.GetByName(enumName)
-			fmt.Println("interfaceType", interfaceType)
 			for _, variant := range interfaceType.Type.Variants {
 
 				enumBlock.BlockFunc(func(variantBlock *Group) {
