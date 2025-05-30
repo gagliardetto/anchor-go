@@ -1390,7 +1390,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
 				}
 				code.Lit(v)
-			case "i32":
+			case IdlTypeI32:
 				v, err := strconv.ParseInt(c.Value, 10, 32)
 				if err != nil {
 					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
@@ -1405,7 +1405,20 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 			case "pubkey":
 				code.Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(c.Value))
 			default:
-				panic(fmt.Sprintf("unsupportd constant: %s", spew.Sdump(c)))
+				definedTypeName := c.Type.GetDefinedFieldName()
+				if definedTypeName != nil {
+					switch *definedTypeName {
+					case "usize":
+						v, err := strconv.ParseUint(c.Value, 10, 64)
+						if err != nil {
+							panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
+						}
+						code.Lit(v)
+					default:
+						panic(fmt.Sprintf("unsupported constant: %s", spew.Sdump(c)))
+					}
+				}
+				panic(fmt.Sprintf("unsupported idl type: %s", spew.Sdump(c)))
 			}
 
 		}
