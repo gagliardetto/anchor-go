@@ -1391,7 +1391,7 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 				}
 				code.Lit(v)
 			case IdlTypeI32:
-				v, err := strconv.ParseInt(c.Value, 10, 32)
+				v, err := strconv.ParseInt(strings.TrimSpace(c.Value), 10, 32)
 				if err != nil {
 					panic(fmt.Sprintf("failed to parse constant: %s", spew.Sdump(c)))
 				}
