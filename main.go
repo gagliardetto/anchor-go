@@ -1417,8 +1417,9 @@ func decodeErrorCode(rpcErr error) (errorCode int, ok bool) {
 					default:
 						panic(fmt.Sprintf("unsupported constant: %s", spew.Sdump(c)))
 					}
+				} else {
+					panic(fmt.Sprintf("unsupported idl type: %s", spew.Sdump(c)))
 				}
-				panic(fmt.Sprintf("unsupported idl type: %s", spew.Sdump(c)))
 			}
 
 		}
