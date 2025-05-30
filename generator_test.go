@@ -6,8 +6,8 @@ import (
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_genTypeName(t *testing.T) {
@@ -18,6 +18,10 @@ func Test_genTypeName(t *testing.T) {
 
 	tests := []jsonToSource{
 		//
+		{
+			`{"type": "pubkey"}`,
+			"var thing solanago.PublicKey",
+		},
 		{
 			`{"type": "publicKey"}`,
 			"var thing solanago.PublicKey",
@@ -76,17 +80,17 @@ func Test_genTypeName(t *testing.T) {
 			"var thing string",
 		},
 		{
-			`{"type": "publicKey"}`,
+			`{"type": "pubkey"}`,
 			"var thing solanago.PublicKey",
 		},
 
 		// "defined"
 		{
-			`{"type": {"defined":"Foo"}}`,
+			`{"type": {"defined":{"name": "Foo"}}}`,
 			"var thing Foo",
 		},
 		{
-			`{"type": {"defined":"bar"}}`,
+			`{"type": {"defined":{"name": "bar"}}}`,
 			"var thing bar",
 		},
 
@@ -96,7 +100,7 @@ func Test_genTypeName(t *testing.T) {
 			"var thing [280]uint8",
 		},
 		{
-			`{"type": {"array":[{"defined":"Message"},33607]}}`,
+			`{"type": {"array":[{"defined":{ "name": "Message" }},33607]}}`,
 			"var thing [33607]Message",
 		},
 		{
@@ -104,17 +108,17 @@ func Test_genTypeName(t *testing.T) {
 			"var thing [33607][280]uint8",
 		},
 		{
-			`{"type": {"array":[{"array":[{"defined":"Message"},123]},33607]}}`,
+			`{"type": {"array":[{"array":[{"defined": { "name": "Message" }},123]},33607]}}`,
 			"var thing [33607][123]Message",
 		},
 
 		// "vec":
 		{
-			`{"type": {"vec": "publicKey"}}`,
+			`{"type": {"vec": "pubkey"}}`,
 			"var thing []solanago.PublicKey",
 		},
 		{
-			`{"type": {"vec": {"defined": "TransactionAccount"}}}`,
+			`{"type": {"vec": {"defined": { "name": "TransactionAccount" }}}}`,
 			"var thing []TransactionAccount",
 		},
 		{
@@ -122,7 +126,7 @@ func Test_genTypeName(t *testing.T) {
 			"var thing []bool",
 		},
 		{
-			`{"type": {"vec": {"array":[{"array":[{"defined":"Message"},123]},33607]}}}`,
+			`{"type": {"vec": {"array":[{"array":[{"defined":{ "name": "Message" }},123]},33607]}}}`,
 			"var thing [][33607][123]Message",
 		},
 
@@ -132,11 +136,11 @@ func Test_genTypeName(t *testing.T) {
 			"var thing string",
 		},
 		{
-			`{"type": {"option": {"vec": {"array":[{"array":[{"defined":"Message"},123]},33607]}}}}`,
+			`{"type": {"option": {"vec": {"array":[{"array":[{"defined":{ "name": "Message" }},123]},33607]}}}}`,
 			"var thing [][33607][123]Message",
 		},
 		{
-			`{"type": {"option": {"defined": "TransactionAccount"}}}`,
+			`{"type": {"option": {"defined": { "name": "TransactionAccount" }}}}`,
 			"var thing TransactionAccount",
 		},
 	}
@@ -166,7 +170,7 @@ func Test_genField(t *testing.T) {
 			"var thing struct {\n	Space uint64\n}",
 		},
 		{
-			`{"name":"space","type": {"option": {"vec": {"array":[{"array":[{"defined":"Message"},123]},33607]}}}}`,
+			`{"name":"space","type": {"option": {"vec": {"array":[{"array":[{"defined":{"name": "Message"}},123]},33607]}}}}`,
 			"var thing struct {\n	Space [][33607][123]Message\n}",
 		},
 	}
@@ -188,47 +192,41 @@ func Test_genField(t *testing.T) {
 
 func Test_IdlAccountItemSlice_Walk(t *testing.T) {
 	data := `[
-        {
-          "name": "authorityBefore",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "marketGroup",
-          "accounts": [
-            {
-              "name": "marketMarket",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "foo",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "subMarket",
-              "accounts": [
-                {
-                  "name": "subMarketMarket",
-                  "isMut": true,
-                  "isSigner": false
-                },
-                {
-                  "name": "openOrders",
-                  "isMut": true,
-                  "isSigner": false
-                } 
-              ]
-            }
-          ]
-        },
-        {
-          "name": "authorityAfter",
-          "isMut": false,
-          "isSigner": true
-        }
-      ]`
+		{
+			"name": "authorityBefore",
+			"signer": true
+		},
+		{
+			"name": "marketGroup",
+			"accounts": [
+				{
+					"name": "marketMarket",
+					"writable": true
+				},
+				{
+					"name": "foo",
+					"writable": true
+				},
+				{
+					"name": "subMarket",
+					"accounts": [
+						{
+							"name": "subMarketMarket",
+							"writable": true
+						},
+						{
+							"name": "openOrders",
+							"writable": true
+						} 
+					]
+				}
+			]
+		},
+		{
+			"name": "authorityAfter",
+			"writable": true
+		}
+	]`
 	var target IdlAccountItemSlice
 	err := json.Unmarshal([]byte(data), &target)
 	if err != nil {

@@ -1,1 +1,6 @@
-generated/
+# generated/
+solana-anchor-go
+anchor-go
+.vscode
+.idea
+.anchor

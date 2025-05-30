@@ -12,8 +12,10 @@ var conf = &Config{}
 type Config struct {
 	Encoding            EncoderName
 	TypeID              TypeIDName
+	ProgramID           string
 	Debug               bool
 	DstDir              string
+	Package             string
 	ModPath             string
 	RemoveAccountSuffix bool
 }
