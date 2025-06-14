@@ -14,6 +14,7 @@ type Config struct {
 	TypeID              TypeIDName
 	Debug               bool
 	DstDir              string
+	Package             string
 	ModPath             string
 	RemoveAccountSuffix bool
 }

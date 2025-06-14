@@ -11,7 +11,6 @@ import (
 // https://github.com/project-serum/anchor/blob/97e9e03fb041b8b888a9876a7c0676d9bb4736f3/ts/src/idl.ts
 type IDL struct {
 	Version      string           `json:"version"`
-	Name         string           `json:"name"`
 	Docs         []string         `json:"docs"` // @custom
 	Instructions []IdlInstruction `json:"instructions"`
 	State        *IdlState        `json:"state,omitempty"`
@@ -21,6 +20,7 @@ type IDL struct {
 	Errors       []IdlErrorCode   `json:"errors,omitempty"`
 	Constants    []IdlConstant    `json:"constants,omitempty"`
 
+	Address  string       `json:"address,omitempty"`
 	Metadata *IdlMetadata `json:"metadata,omitempty"` // NOTE: deprecated
 }
 
@@ -32,6 +32,7 @@ type IdlConstant struct {
 }
 
 type IdlMetadata struct {
+	Name    string `json:"name"`
 	Address string `json:"address"`
 }
 
@@ -54,21 +55,16 @@ func (idl *IDL) Validate() error {
 }
 
 type IdlEvent struct {
-	Name   string          `json:"name"`
-	Fields []IdlEventField `json:"fields"`
-}
-
-type IdlEventField struct {
-	Name  string  `json:"name"`
-	Type  IdlType `json:"type"`
-	Index bool    `json:"index"`
+	Name          string   `json:"name"`
+	Discriminator *[8]byte `json:"discriminator,omitempty"`
 }
 
 type IdlInstruction struct {
-	Name     string              `json:"name"`
-	Docs     []string            `json:"docs"` // @custom
-	Accounts IdlAccountItemSlice `json:"accounts"`
-	Args     []IdlField          `json:"args"`
+	Name          string              `json:"name"`
+	Discriminator *[8]byte            `json:"discriminator,omitempty"`
+	Docs          []string            `json:"docs"` // @custom
+	Accounts      IdlAccountItemSlice `json:"accounts"`
+	Args          []IdlField          `json:"args"`
 }
 
 type IdlAccountItemSlice []IdlAccountItem
@@ -110,13 +106,13 @@ type IdlState struct {
 
 type IdlStateMethod = IdlInstruction
 
-// type IdlAccountItem = IdlAccount | IdlAccounts;
+// IdlAccountItem is of type IdlAccountItem = IdlAccount | IdlAccounts;
 type IdlAccountItem struct {
 	IdlAccount  *IdlAccount
 	IdlAccounts *IdlAccounts
 }
 
-func (item IdlAccountItem) Walk(
+func (item *IdlAccountItem) Walk(
 	parentGroupPath string,
 	previousIndex *int,
 	parentGroup *IdlAccounts,
@@ -146,7 +142,7 @@ func (item IdlAccountItem) Walk(
 }
 
 // TODO: verify with examples
-func (env *IdlAccountItem) UnmarshalJSON(data []byte) error {
+func (item *IdlAccountItem) UnmarshalJSON(data []byte) error {
 
 	var temp interface{}
 	if err := json.Unmarshal(data, &temp); err != nil {
@@ -154,7 +150,7 @@ func (env *IdlAccountItem) UnmarshalJSON(data []byte) error {
 	}
 
 	if temp == nil {
-		return fmt.Errorf("envelope is nil: %v", env)
+		return fmt.Errorf("envelope is nil: %v", item)
 	}
 
 	switch v := temp.(type) {
@@ -169,36 +165,51 @@ func (env *IdlAccountItem) UnmarshalJSON(data []byte) error {
 
 			// Multiple accounts:
 			if _, ok := v["accounts"]; ok {
-				if err := TranscodeJSON(temp, &env.IdlAccounts); err != nil {
+				if err := TranscodeJSON(temp, &item.IdlAccounts); err != nil {
 					return err
 				}
 			}
 			// Single account:
-			// TODO: check both isMut and isSigner
-			if _, ok := v["isMut"]; ok {
-				if err := TranscodeJSON(temp, &env.IdlAccount); err != nil {
+			// TODO: check both writable and signer
+			_, signer := v["signer"]
+			_, writable := v["writable"]
+			if signer || writable || v["address"] != "" {
+				if err := TranscodeJSON(temp, &item.IdlAccount); err != nil {
 					return err
 				}
+			} else {
+				panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
 			}
-
-			// panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
 		}
 	default:
-		return fmt.Errorf("Unknown kind: %s", spew.Sdump(temp))
+		return fmt.Errorf("unknown kind: %s", spew.Sdump(temp))
 	}
 
 	return nil
 }
 
 type IdlAccount struct {
-	Docs     []string `json:"docs"` // @custom
-	Name     string   `json:"name"`
-	IsMut    bool     `json:"isMut"`
-	IsSigner bool     `json:"isSigner"`
-	Optional bool     `json:"optional"` // @custom
+	Docs     []string       `json:"docs"` // @custom
+	Name     string         `json:"name"`
+	Signer   bool           `json:"signer"`
+	Writable bool           `json:"writable"`
+	Optional bool           `json:"optional"`          // @custom
+	Address  string         `json:"address,omitempty"` // constant address
+	PDA      *idlAccountPDA `json:"pda,omitempty"`
 }
 
-// A nested/recursive version of IdlAccount.
+type idlAccountPDA struct {
+	Seeds   []idlAccountPDASeed `json:"seeds"`
+	Program *idlAccountPDASeed  `json:"program,omitempty"`
+}
+
+type idlAccountPDASeed struct {
+	Kind  string `json:"kind"`  // const or account
+	Value []byte `json:"value"` // const
+	Path  string `json:"path,omitempty"`
+}
+
+// IdlAccounts is a nested/recursive version of IdlAccount.
 type IdlAccounts struct {
 	Name     string              `json:"name"`
 	Docs     []string            `json:"docs"` // @custom
@@ -214,20 +225,22 @@ type IdlField struct {
 type IdlTypeAsString string
 
 const (
-	IdlTypeBool      IdlTypeAsString = "bool"
-	IdlTypeU8        IdlTypeAsString = "u8"
-	IdlTypeI8        IdlTypeAsString = "i8"
-	IdlTypeU16       IdlTypeAsString = "u16"
-	IdlTypeI16       IdlTypeAsString = "i16"
-	IdlTypeU32       IdlTypeAsString = "u32"
-	IdlTypeI32       IdlTypeAsString = "i32"
-	IdlTypeU64       IdlTypeAsString = "u64"
-	IdlTypeI64       IdlTypeAsString = "i64"
-	IdlTypeU128      IdlTypeAsString = "u128"
-	IdlTypeI128      IdlTypeAsString = "i128"
-	IdlTypeBytes     IdlTypeAsString = "bytes"
-	IdlTypeString    IdlTypeAsString = "string"
-	IdlTypePublicKey IdlTypeAsString = "publicKey"
+	IdlTypeBool   IdlTypeAsString = "bool"
+	IdlTypeU8     IdlTypeAsString = "u8"
+	IdlTypeI8     IdlTypeAsString = "i8"
+	IdlTypeU16    IdlTypeAsString = "u16"
+	IdlTypeI16    IdlTypeAsString = "i16"
+	IdlTypeU32    IdlTypeAsString = "u32"
+	IdlTypeI32    IdlTypeAsString = "i32"
+	IdlTypeU64    IdlTypeAsString = "u64"
+	IdlTypeI64    IdlTypeAsString = "i64"
+	IdlTypeU128   IdlTypeAsString = "u128"
+	IdlTypeI128   IdlTypeAsString = "i128"
+	IdlTypeBytes  IdlTypeAsString = "bytes"
+	IdlTypeString IdlTypeAsString = "string"
+	IdlTypePubkey IdlTypeAsString = "pubkey"
+	IdlTypeF32    IdlTypeAsString = "f32"
+	IdlTypeF64    IdlTypeAsString = "f64"
 
 	// Custom additions:
 	IdlTypeUnixTimestamp IdlTypeAsString = "unixTimestamp"
@@ -247,15 +260,19 @@ type IdlTypeOption struct {
 	Option IdlType `json:"option"`
 }
 
-// User defined type.
-type IdlTypeDefined struct {
-	Defined string `json:"defined"`
+type IdLTypeDefinedName struct {
+	Name string `json:"name"`
 }
 
-// Wrapper type:
+// User defined type.
+type IdlTypeDefined struct {
+	Defined IdLTypeDefinedName `json:"defined"`
+}
+
+// IdlTypeArray is a Wrapper type:
 type IdlTypeArray struct {
-	Thing IdlType
-	Num   int
+	Elem IdlType
+	Num  int
 }
 
 func (env *IdlType) UnmarshalJSON(data []byte) error {
@@ -314,7 +331,7 @@ func (env *IdlType) UnmarshalJSON(data []byte) error {
 					panic(Sf("array is not of expected length:\n%s", spew.Sdump(got)))
 				}
 				var target IdlTypeArray
-				if err := TranscodeJSON(arrVal[0], &target.Thing); err != nil {
+				if err := TranscodeJSON(arrVal[0], &target.Elem); err != nil {
 					return err
 				}
 
@@ -325,13 +342,13 @@ func (env *IdlType) UnmarshalJSON(data []byte) error {
 			// panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
 		}
 	default:
-		return fmt.Errorf("Unknown kind: %s", spew.Sdump(temp))
+		return fmt.Errorf("unknown kind: %s", spew.Sdump(temp))
 	}
 
 	return nil
 }
 
-// Wrapper type:
+// IdlType is a Wrapper type:
 type IdlType struct {
 	asString         IdlTypeAsString
 	asIdlTypeVec     *IdlTypeVec
@@ -372,10 +389,33 @@ func (env *IdlType) GetIdlTypeDefined() *IdlTypeDefined {
 func (env *IdlType) GetArray() *IdlTypeArray {
 	return env.asIdlTypeArray
 }
+func (env *IdlType) GetDefinedFieldName() *string {
+	if env.IsIdlTypeDefined() {
+		return &env.asIdlTypeDefined.Defined.Name
+	}
+	if env.IsIdlTypeVec() {
+		return env.asIdlTypeVec.Vec.GetDefinedFieldName()
+	}
+	if env.IsIdlTypeOption() {
+		return env.asIdlTypeOption.Option.GetDefinedFieldName()
+	}
+	if env.IsArray() {
+		return env.asIdlTypeArray.Elem.GetDefinedFieldName()
+	}
+	return nil
+}
 
 type IdlTypeDef struct {
-	Name string       `json:"name"`
-	Type IdlTypeDefTy `json:"type"`
+	Name          string       `json:"name"`
+	Type          IdlTypeDefTy `json:"type"`
+	Docs          []string     `json:"docs,omitempty"`
+	Discriminator *[8]byte     `json:"discriminator,omitempty"`
+}
+
+type IdlTypeDefTy struct {
+	Kind     IdlTypeDefTyKind     `json:"kind"`
+	Fields   *IdlStructFieldSlice `json:"fields,omitempty"`
+	Variants *IdlEnumVariantSlice `json:"variants,omitempty"`
 }
 
 type IdlTypeDefTyKind string
@@ -385,26 +425,7 @@ const (
 	IdlTypeDefTyKindEnum   IdlTypeDefTyKind = "enum"
 )
 
-// TODO:
-type IdlTypeDefTyStruct struct {
-	Kind IdlTypeDefTyKind `json:"kind"` // == "struct"
-
-	Fields *IdlTypeDefStruct `json:"fields,omitempty"`
-}
-
-// TODO:
-type IdlTypeDefTyEnum struct {
-	Kind IdlTypeDefTyKind `json:"kind"` // == "enum"
-
-	Variants IdlEnumVariantSlice `json:"variants,omitempty"`
-}
-
-type IdlTypeDefTy struct {
-	Kind IdlTypeDefTyKind `json:"kind"`
-
-	Fields   *IdlTypeDefStruct   `json:"fields,omitempty"`
-	Variants IdlEnumVariantSlice `json:"variants,omitempty"`
-}
+type IdlStructFieldSlice []IdlField
 
 type IdlEnumVariantSlice []IdlEnumVariant
 
@@ -419,6 +440,15 @@ func (slice IdlEnumVariantSlice) IsAllUint8() bool {
 
 func (slice IdlEnumVariantSlice) IsSimpleEnum() bool {
 	return slice.IsAllUint8()
+}
+
+func (slice IdlEnumVariantSlice) GetEnumVariantTypeName() []string {
+	var result []string
+	for _, variant := range slice {
+		result = append(result, variant.Name)
+
+	}
+	return result
 }
 
 type IdlTypeDefStruct = []IdlField
@@ -447,45 +477,35 @@ type IdlEnumFieldsTuple []IdlType
 
 // TODO: verify with examples
 func (env *IdlEnumFields) UnmarshalJSON(data []byte) error {
-
-	var temp interface{}
-	if err := json.Unmarshal(data, &temp); err != nil {
+	var tmp interface{}
+	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
 
-	if temp == nil {
+	if tmp == nil {
 		return fmt.Errorf("envelope is nil: %v", env)
 	}
 
-	switch v := temp.(type) {
-	case []interface{}:
-		{
-			// Ln(LimeBG("::IdlEnumFields"))
-			// spew.Dump(v)
-
-			if len(v) == 0 {
-				return nil
-			}
-
-			firstItem := v[0]
-
-			if _, ok := firstItem.(map[string]interface{})["name"]; ok {
-				// TODO:
-				// If has `name` field, then it's most likely a IdlEnumFieldsNamed.
-				if err := TranscodeJSON(temp, &env.IdlEnumFieldsNamed); err != nil {
-					return err
-				}
-			} else {
-				if err := TranscodeJSON(temp, &env.IdlEnumFieldsTuple); err != nil {
-					return err
-				}
-			}
-
-			// panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
-		}
-	default:
-		return fmt.Errorf("Unknown kind: %s", spew.Sdump(temp))
+	fields, ok := tmp.([]interface{})
+	if !ok {
+		return fmt.Errorf("fields must be a slice")
 	}
+
+	if len(fields) == 0 {
+		return nil
+	}
+	if m, ok := fields[0].(map[string]interface{}); ok && m["name"] != nil {
+		// If has `name` field, then it's most likely a IdlEnumFieldsNamed.
+		if err := TranscodeJSON(tmp, &env.IdlEnumFieldsNamed); err != nil {
+			return err
+		}
+	} else {
+		if err := TranscodeJSON(tmp, &env.IdlEnumFieldsTuple); err != nil {
+			return err
+		}
+	}
+
+	// panic(Sf("what is this?:\n%s", spew.Sdump(temp)))
 
 	return nil
 }

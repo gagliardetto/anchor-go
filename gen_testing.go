@@ -2,13 +2,30 @@ package main
 
 import (
 	. "github.com/dave/jennifer/jen"
-	. "github.com/gagliardetto/utilz"
 )
 
-func isAnyFieldComplexEnum(envelopes ...IdlField) bool {
+func isInsFieldComplexEnum(envelopes ...IdlField) bool {
 	for _, v := range envelopes {
 		if isComplexEnum(v.Type) {
 			return true
+		}
+	}
+	return false
+}
+
+func isInsDeepFieldComplexEnum(idl IDL, envelopes ...IdlField) bool {
+	for _, v := range envelopes {
+		definedTypeName := v.Type.GetDefinedFieldName()
+		if definedTypeName != nil {
+			derivedType := idl.Types.GetByName(*definedTypeName).Type
+			if derivedType.Fields != nil {
+				for _, field := range *derivedType.Fields {
+					if isComplexEnum(field.Type) {
+						return true
+					}
+				}
+			}
+
 		}
 	}
 	return false
@@ -28,7 +45,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 
 	files := make([]*FileWrapper, 0)
 	{
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(idl.Metadata.Name, true)
 		// Declare testing tools:
 		{
 			code := Empty()
@@ -82,13 +99,13 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 		}
 		////
 		files = append(files, &FileWrapper{
-			Name: "testing_utils",
+			Name: "TestingUtils",
 			File: file,
 		})
 	}
 	for _, instruction := range idl.Instructions {
-		file := NewGoFile(idl.Name, true)
-		insExportedName := ToCamel(instruction.Name)
+		file := NewGoFile(idl.Metadata.Name, true)
+		insExportedName := ToPascal(instruction.Name)
 		{
 			// Declare test: encode, decode:
 			code := Empty()
@@ -107,7 +124,6 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 				BlockFunc(func(body *Group) {
 					// Body:
 					body.Id("fu").Op(":=").Qual(PkgGoFuzz, "New").Call().Dot("NilChance").Call(Lit(0))
-
 					body.For(
 						Id("i").Op(":=").Lit(0),
 						Id("i").Op("<").Lit(1),
@@ -119,13 +135,13 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 								fnGroup.Func().Params(Id("t").Op("*").Qual("testing", "T")).Block(
 									BlockFunc(func(tFunGroup *Group) {
 
-										if isAnyFieldComplexEnum(instruction.Args...) {
+										if isInsFieldComplexEnum(instruction.Args...) {
 											genTestWithComplexEnum(tFunGroup, insExportedName, instruction, idl)
-											// TODO: populate complex enum
+										} else if isInsDeepFieldComplexEnum(idl, instruction.Args...) {
+											genTestWithDeepComplexEnum(tFunGroup, insExportedName, instruction, idl)
 										} else {
 											genTestNOComplexEnum(tFunGroup, insExportedName, instruction)
 										}
-
 									}),
 								)
 							}),
@@ -138,7 +154,7 @@ func genTestingFuncs(idl IDL) ([]*FileWrapper, error) {
 		}
 		////
 		files = append(files, &FileWrapper{
-			Name: insExportedName + "_test",
+			Name: ToPascal(instruction.Name) + "_Test",
 			File: file,
 		})
 	}
@@ -171,23 +187,21 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 		if !isComplexEnum(arg.Type) {
 			continue
 		}
-		exportedArgName := ToCamel(arg.Name)
-
+		exportedArgName := ToPascal(arg.Name)
 		tFunGroup.BlockFunc(func(enumBlock *Group) {
 
-			enumName := arg.Type.GetIdlTypeDefined().Defined
+			enumName := arg.Type.GetIdlTypeDefined().Defined.Name
 			interfaceType := idl.Types.GetByName(enumName)
-			for _, variant := range interfaceType.Type.Variants {
+			for _, variant := range *interfaceType.Type.Variants {
 
 				enumBlock.BlockFunc(func(variantBlock *Group) {
 					variantBlock.Id("params").Op(":=").New(Id(insExportedName))
 
 					variantBlock.Id("fu").Dot("Fuzz").Call(Id("params"))
 					variantBlock.Id("params").Dot("AccountMetaSlice").Op("=").Nil()
-
-					variantBlock.Id("tmp").Op(":=").New(Id(ToCamel(variant.Name)))
+					variantBlock.Id("tmp").Op(":=").New(Id(formatComplexEnumVariantTypeName(enumName, variant.Name)))
 					variantBlock.Id("fu").Dot("Fuzz").Call(Id("tmp"))
-					variantBlock.Id("params").Dot("Set" + exportedArgName).Call(Id("tmp"))
+					variantBlock.Id("params").Dot("Set" + exportedArgName).Call(Id(enumName).Op("{").Op("*").Id("tmp").Op("}"))
 
 					variantBlock.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
 					variantBlock.Id("err").Op(":=").Id("encodeT").Call(Op("*").Id("params"), Id("buf"))
@@ -199,10 +213,43 @@ func genTestWithComplexEnum(tFunGroup *Group, insExportedName string, instructio
 					variantBlock.Id("err").Op("=").Id("decodeT").Call(Id("got"), Id("buf").Dot("Bytes").Call())
 					variantBlock.Id("got").Dot("AccountMetaSlice").Op("=").Nil()
 					variantBlock.Qual(PkgTestifyRequire, "NoError").Call(Id("t"), Err())
+
+					variantBlock.Comment("to prevent garbage buffer fill by fuzz")
+					variantBlock.If(Qual("reflect", "TypeOf").Call(Op("*").Id("tmp")).Dot("Kind").Call().Op("!=").Qual("reflect", "Struct")).Block(
+						Id("got").Dot(exportedArgName).Op("=").Id("params").Dot(exportedArgName),
+					)
+
 					variantBlock.Qual(PkgTestifyRequire, "Equal").Call(Id("t"), Id("params"), Id("got"))
 				})
 			}
 
 		})
 	}
+}
+
+func genTestWithDeepComplexEnum(tFunGroup *Group, insExportedName string, instruction IdlInstruction, idl IDL) {
+	tFunGroup.Id("params").Op(":=").New(Id(insExportedName))
+	tFunGroup.Id("fu").Dot("Fuzz").Call(Id("params"))
+	tFunGroup.Id("params").Dot("AccountMetaSlice").Op("=").Nil()
+
+	// Bypass testing for structs containing enum fields
+	for _, arg := range instruction.Args {
+		if isComplexEnum(arg.Type) {
+			continue
+		}
+		exportedArgName := ToPascal(arg.Name)
+		tFunGroup.Id("params").Dot(exportedArgName).Op("=").Nil()
+	}
+
+	tFunGroup.Id("buf").Op(":=").New(Qual("bytes", "Buffer"))
+	tFunGroup.Id("err").Op(":=").Id("encodeT").Call(Op("*").Id("params"), Id("buf"))
+	tFunGroup.Qual(PkgTestifyRequire, "NoError").Call(Id("t"), Err())
+
+	tFunGroup.Comment("//")
+
+	tFunGroup.Id("got").Op(":=").New(Id(insExportedName))
+	tFunGroup.Id("err").Op("=").Id("decodeT").Call(Id("got"), Id("buf").Dot("Bytes").Call())
+	tFunGroup.Id("got").Dot("AccountMetaSlice").Op("=").Nil()
+	tFunGroup.Qual(PkgTestifyRequire, "NoError").Call(Id("t"), Err())
+	tFunGroup.Qual(PkgTestifyRequire, "Equal").Call(Id("t"), Id("params"), Id("got"))
 }

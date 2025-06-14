@@ -6,10 +6,15 @@ import (
 	"strings"
 
 	. "github.com/dave/jennifer/jen"
-	"github.com/gagliardetto/anchor-go/sighash"
+	"github.com/fragmetric-labs/solana-anchor-go/sighash"
 	"github.com/gagliardetto/solana-go"
 	. "github.com/gagliardetto/utilz"
 )
+
+// ToPascal converts a string to PascalCase
+func ToPascal(s string) string {
+	return ToCamel(s)
+}
 
 func ToPackageName(s string) string {
 	return sighash.ToRustSnakeCase(ToCamel(s))
