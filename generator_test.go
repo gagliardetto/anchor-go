@@ -6,9 +6,14 @@ import (
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+type jsonToSource struct {
+	from     string
+	expected string
+}
 
 func Test_genTypeName(t *testing.T) {
 	type jsonToSource struct {
@@ -155,10 +160,6 @@ func Test_genTypeName(t *testing.T) {
 }
 
 func Test_genField(t *testing.T) {
-	type jsonToSource struct {
-		from     string
-		expected string
-	}
 
 	tests := []jsonToSource{
 		{
@@ -179,6 +180,77 @@ func Test_genField(t *testing.T) {
 			}
 			code := Var().Id("thing").Struct(
 				genField(target, false),
+			)
+			got := codeToString(code)
+			require.Equal(t, scenario.expected, got)
+		}
+	}
+}
+
+func Test_genAccountField(t *testing.T) {
+	basicTest := `{
+          "name": "authorityBefore",
+          "isMut": false,
+          "isSigner": true
+        }`
+	optionalTest := `{
+          "name": "authorityBefore",
+          "isMut": false,
+          "isSigner": true,
+          "optional": true
+        }`
+	compositeTest := `{
+          "name": "marketGroup",
+          "accounts": [
+            {
+              "name": "marketMarket",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "foo",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "subMarket",
+              "accounts": [
+                {
+                  "name": "subMarketMarket",
+                  "isMut": true,
+                  "isSigner": false
+                },
+                {
+                  "name": "openOrders",
+                  "isMut": true,
+                  "isSigner": false
+                } 
+              ]
+            }
+          ]
+        }`
+
+	tests := []jsonToSource{
+		{
+			basicTest,
+			"var thing struct {\n\tAuthorityBefore solanago.PublicKey\n}",
+		},
+		{
+			optionalTest,
+			"var thing struct {\n\tAuthorityBefore solanago.PublicKey `bin:\"optional\"`\n}",
+		},
+		{
+			compositeTest,
+			"var thing struct {\n\tMarketGroup struct {\n\t\tMarketMarket solanago.PublicKey\n\t\tFoo          solanago.PublicKey\n\t\tSubMarket    struct {\n\t\t\tSubMarketMarket solanago.PublicKey\n\t\t\tOpenOrders      solanago.PublicKey\n\t\t}\n\t}\n}",
+		},
+	}
+	{
+		for _, scenario := range tests {
+			var target IdlAccountItem
+			err := json.Unmarshal([]byte(scenario.from), &target)
+			require.NoError(t, err)
+			code := Var().Id("thing").Struct(
+				genAccountField(target),
 			)
 			got := codeToString(code)
 			require.Equal(t, scenario.expected, got)

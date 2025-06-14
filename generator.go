@@ -86,6 +86,30 @@ func genField(field IdlField, pointer bool) Code {
 	return st
 }
 
+func genAccountField(field IdlAccountItem) Code {
+	st := newStatement()
+	if field.IdlAccount != nil {
+		st.Id(ToCamel(field.IdlAccount.Name)).
+			Add(typeStringToType(IdlTypePublicKey)).
+			Add(func() Code {
+				if field.IdlAccount.Optional {
+					return Tag(map[string]string{
+						"bin": "optional",
+					})
+				}
+				return nil
+			}())
+	}
+	if field.IdlAccounts != nil {
+		st.Id(ToCamel(field.IdlAccounts.Name)).StructFunc(func(group *Group) {
+			for _, idlAccountItem := range field.IdlAccounts.Accounts {
+				group.Add(genAccountField(idlAccountItem))
+			}
+		})
+	}
+	return st
+}
+
 func genTypeName(idlTypeEnv IdlType) Code {
 	st := newStatement()
 	switch {
