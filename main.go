@@ -25,9 +25,24 @@ const generatedDir = "generated"
 // - tests where type has field that is a complex enum (represented as an interface): assign a random concrete value from the possible enum variants.
 // - when printing tree, check for len before accessing array indexes.
 
+func getPkgName(idl IDL) string {
+	if idl.Name != "" {
+		return idl.Name
+	}
+
+	if idl.Metadata != nil && idl.Metadata.Name != "" {
+		return idl.Metadata.Name
+	}
+
+	return "program"
+}
+
 func main() {
 	conf.Encoding = EncodingBorsh
 	conf.TypeID = TypeIDAnchor
+
+	//flag for new idl
+	flag.StringVar(&conf.IDLVersion, "idl-version", "0.29", "Specify IDL version: 0.29 or 0.30")
 
 	filenames := FlagStringArray{}
 	flag.Var(&filenames, "src", "Path to source; can use multiple times.")
@@ -39,6 +54,9 @@ func main() {
 	flag.StringVar((*string)(&conf.TypeID), "type-id", string(TypeIDAnchor), "Choose typeID kind")
 	flag.StringVar(&conf.ModPath, "mod", "", "Generate a go.mod file with the necessary dependencies, and this module")
 	flag.Parse()
+
+	// Print IDL version to log for debugging
+	Sfln("Using IDL version: %s", conf.IDLVersion)
 
 	if err := conf.Validate(); err != nil {
 		panic(fmt.Errorf("error while validating config: %w", err))
@@ -102,6 +120,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
 		{
 			if idl.State != nil {
 				Sfln(
@@ -132,13 +151,15 @@ func main() {
 		// spew.Dump(idl)
 
 		// Create subfolder for package for generated assets:
-		packageAssetFolderName := sighash.ToRustSnakeCase(idl.Name)
+		pkgName := getPkgName(idl)
+		packageAssetFolderName := sighash.ToRustSnakeCase(pkgName)
 		var dstDirForFiles string
+
 		if GetConfig().Debug {
 			packageAssetFolderPath := path.Join(GetConfig().DstDir, packageAssetFolderName)
 			MustCreateFolderIfNotExists(packageAssetFolderPath, os.ModePerm)
 			// Create folder for assets generated during this run:
-			thisRunAssetFolderName := ToLowerCamel(idl.Name) + "_" + ts.Format(FilenameTimeFormat)
+			thisRunAssetFolderName := ToLowerCamel(pkgName) + "_" + ts.Format(FilenameTimeFormat)
 			thisRunAssetFolderPath := path.Join(packageAssetFolderPath, thisRunAssetFolderName)
 			// Create a new assets folder inside the main assets folder:
 			MustCreateFolderIfNotExists(thisRunAssetFolderPath, os.ModePerm)
@@ -153,6 +174,7 @@ func main() {
 		MustCreateFolderIfNotExists(dstDirForFiles, os.ModePerm)
 
 		files, err := GenerateClientFromProgramIDL(idl)
+		fmt.Println("files: %v", files)
 		if err != nil {
 			panic(err)
 		}
@@ -255,6 +277,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		// Create and populate Go file that holds all the basic
 		// elements of an instruction client:
 		file, err := genProgramBoilerplate(idl)
+
 		if err != nil {
 			return nil, err
 		}
@@ -273,11 +296,18 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 	}
 
+	defs := make(map[string]IdlTypeDef)
 	{
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(getPkgName(idl), true)
 		// Declare types from IDL:
 		for _, typ := range idl.Types {
-			file.Add(genTypeDef(&idl, false, typ))
+			defs[typ.Name] = typ
+			typ_suffix := IdlTypeDef{
+				Name: typ.Name + "Type",
+				Type: typ.Type,
+			}
+
+			file.Add(genTypeDef(&idl, false, typ_suffix))
 		}
 		files = append(files, &FileWrapper{
 			Name: "types",
@@ -286,12 +316,21 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 	}
 
 	{
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(getPkgName(idl), true)
 		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
 			// generate type definition:
-			file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc))
+						if _, ok := defs[acc.Name]; ok {
+				acc_suffix := IdlTypeDef{
+					Name: defs[acc.Name].Name + "Account",
+					Type: defs[acc.Name].Type,
+				}
+				file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc_suffix))
+			} else {
+				file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc))
+			}
 		}
+
 		files = append(files, &FileWrapper{
 			Name: "accounts",
 			File: file,
@@ -300,7 +339,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 
 	// Instructions:
 	for _, instruction := range idl.Instructions {
-		file := NewGoFile(idl.Name, true)
+		file := NewGoFile(getPkgName(idl), true)
 		insExportedName := ToCamel(instruction.Name)
 
 		// fmt.Println(RedBG(instruction.Name))
@@ -1091,27 +1130,32 @@ func genAccountGettersSetters(
 }
 
 func genProgramBoilerplate(idl IDL) (*File, error) {
-	file := NewGoFile(idl.Name, true)
+	pkgName := getPkgName(idl)
+	file := NewGoFile(pkgName, true)
+
 	for _, programDoc := range idl.Docs {
 		file.HeaderComment(programDoc)
 	}
 
 	{
-		// ProgramID variable:
-		code := Empty()
+		// ProgramID variable -> program address:
+		hasAddress := (idl.Metadata != nil && idl.Metadata.Address != "") || idl.Address != ""
 
-		hasAddress := idl.Metadata != nil && idl.Metadata.Address != ""
+		code := Empty()
 		code.Var().Id("ProgramID").Qual(PkgSolanaGo, "PublicKey").
-			Add(
-				func() Code {
-					if hasAddress {
+			Add(func() Code {
+				if hasAddress {
+					if idl.Metadata != nil && idl.Metadata.Address != "" {
 						return Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(idl.Metadata.Address))
 					}
-					return nil
-				}(),
-			)
+					return Op("=").Qual(PkgSolanaGo, "MustPublicKeyFromBase58").Call(Lit(idl.Address))
+				}
+				return nil
+			}())
+
 		file.Add(code.Line())
 	}
+
 	{
 		// `SetProgramID` func:
 		code := Empty()
@@ -1121,13 +1165,15 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 		)
 		file.Add(code.Line())
 	}
+
 	{
 		// ProgramName variable:
 		code := Empty()
-		programName := ToCamel(idl.Name)
+		programName := ToCamel(pkgName)
 		code.Const().Id("ProgramName").Op("=").Lit(programName)
 		file.Add(code.Line())
 	}
+
 	{
 		// register decoder:
 		code := Empty()
@@ -1144,42 +1190,70 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 
 	{
 		// Instruction ID enum:
-		GetConfig().TypeID.
-			On(
-				TypeIDNameSlice{
-					TypeIDUvarint32,
-					TypeIDUint32,
-					TypeIDUint8,
-				},
-				func() {
+		if conf.IDLVersion == "0.30" {
+		code := Empty()
+		// code.Comment("Instruction identifiers (using discriminator from IDL 0.30)")
 
-					code := Empty()
-					code.Const().Parens(
-						DoGroup(func(gr *Group) {
-							for instructionIndex, instruction := range idl.Instructions {
-								insExportedName := ToCamel(instruction.Name)
-
-								ins := Empty().Line()
-								for _, doc := range instruction.Docs {
-									ins.Comment(doc).Line()
-								}
-								ins.Id("Instruction_" + insExportedName)
-
-								if instructionIndex == 0 {
-									switch GetConfig().TypeID {
-									case TypeIDUvarint32, TypeIDUint32:
-										ins.Uint32().Op("=").Iota().Line()
-									case TypeIDUint8:
-										ins.Uint8().Op("=").Iota().Line()
-									}
-								}
-								gr.Add(ins.Line().Line())
+		code.Var().Parens(
+			DoGroup(func(gr *Group) {
+				for _, instruction := range idl.Instructions {
+					insExportedName := ToCamel(instruction.Name)
+					if len(instruction.Discriminator) > 0 {
+						arr := Op("[8]byte{").ListFunc(func(byteGroup *Group) {
+							for _, b := range instruction.Discriminator {
+								byteGroup.Lit(int(b))
 							}
-						}),
-					)
-					file.Add(code.Line())
+						}).Op("}")
 
-				},
+						gr.Id("Instruction_" + insExportedName).
+							Op("=").
+							Qual(PkgDfuseBinary, "TypeID").
+							Call(arr)
+
+						gr.Line()
+					} else {
+						gr.Id("Instruction_" + insExportedName).Op("=").Iota().Line()
+					}
+				}
+			}),
+		)
+
+		file.Add(code.Line())
+
+} else {
+			// For IDL 0.29, use existing logic
+			GetConfig().TypeID.
+				On(
+					TypeIDNameSlice{
+						TypeIDUvarint32,
+						TypeIDUint32,
+						TypeIDUint8,
+					},
+					func() {
+						code := Empty()
+						code.Const().Parens(
+							DoGroup(func(gr *Group) {
+								for instructionIndex, instruction := range idl.Instructions {
+									insExportedName := ToCamel(instruction.Name)
+									ins := Empty().Line()
+									for _, doc := range instruction.Docs {
+										ins.Comment(doc).Line()
+									}
+									ins.Id("Instruction_" + insExportedName)
+									if instructionIndex == 0 {
+										switch GetConfig().TypeID {
+										case TypeIDUvarint32, TypeIDUint32:
+											ins.Uint32().Op("=").Iota().Line()
+										case TypeIDUint8:
+											ins.Uint8().Op("=").Iota().Line()
+										}
+									}
+									gr.Add(ins.Line().Line())
+								}
+							}),
+						)
+						file.Add(code.Line())
+					},
 			).
 			On(
 				TypeIDNameSlice{
@@ -1216,16 +1290,10 @@ func genProgramBoilerplate(idl IDL) (*File, error) {
 					)
 					file.Add(code.Line())
 				},
-			).
-			On(
-				TypeIDNameSlice{
-					TypeIDNoType,
-				},
-				func() {
-					// TODO
-				},
 			)
+		}
 	}
+
 	{
 		// Declare `InstructionIDToName` function:
 		GetConfig().TypeID.

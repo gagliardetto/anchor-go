@@ -52,7 +52,7 @@ func typeStringToType(ts IdlTypeAsString) *Statement {
 		stat.Index().Byte()
 	case IdlTypeString:
 		stat.String()
-	case IdlTypePublicKey:
+	case IdlTypePublicKey, IdlTypePubkey:
 		stat.Qual(PkgSolanaGo, "PublicKey")
 
 	// Custom:
@@ -149,7 +149,6 @@ func registerComplexEnums(idl *IDL, def IdlTypeDef) {
 }
 
 func genTypeDef(idl *IDL, withDiscriminator bool, def IdlTypeDef) Code {
-
 	st := newStatement()
 	switch def.Type.Kind {
 	case IdlTypeDefTyKindStruct:

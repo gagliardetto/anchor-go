@@ -1,0 +1,1988 @@
+{
+  "address": "JPEGsCrzrEwi4UiWwqBakBYK1XkGmN5AeUBCrmrJK6b",
+  "metadata": {
+    "name": "jpegsfun",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "buy",
+      "discriminator": [
+        102,
+        6,
+        61,
+        18,
+        1,
+        218,
+        235,
+        234
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ticket_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  99,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection_mint"
+              },
+              {
+                "kind": "account",
+                "path": "buyer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "collection_mint",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "buyer",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fee_address",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "buy_and_mint",
+      "discriminator": [
+        252,
+        0,
+        61,
+        186,
+        214,
+        231,
+        159,
+        121
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "collection_mint",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "buyer",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fee_address",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "mpl_core_program",
+          "docs": [
+            "CHECK"
+          ],
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "close_ticket_account",
+      "discriminator": [
+        186,
+        174,
+        90,
+        210,
+        91,
+        168,
+        31,
+        77
+      ],
+      "accounts": [
+        {
+          "name": "ticket_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  99,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "collection_mint"
+              },
+              {
+                "kind": "account",
+                "path": "payer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "collection_mint",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "create_collection",
+      "discriminator": [
+        156,
+        251,
+        92,
+        54,
+        233,
+        2,
+        16,
+        82
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "mpl_core_program",
+          "docs": [
+            "CHECK"
+          ],
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "name": "is_royalties",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "finalize_admin_transfer",
+      "discriminator": [
+        196,
+        248,
+        117,
+        214,
+        247,
+        100,
+        40,
+        48
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "new_admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "uri",
+          "type": {
+            "option": "string"
+          }
+        },
+        {
+          "name": "total_supply",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "total_sale_token_amount",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "bonding_k",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "bonding_a",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "bonding_x0",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "fee_bps",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "royalty_bps",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "creator_reward",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "migration_cost",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "fee_address",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "migrator",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "migrate_pool_owner",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "migration_program",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "is_locked",
+          "type": {
+            "option": "bool"
+          }
+        }
+      ]
+    },
+    {
+      "name": "initiate_admin_transfer",
+      "discriminator": [
+        232,
+        132,
+        133,
+        116,
+        184,
+        197,
+        17,
+        67
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "current_admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_admin",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "migrate_mint",
+      "discriminator": [
+        44,
+        219,
+        122,
+        235,
+        251,
+        138,
+        113,
+        150
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "collection_mint",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "migrator",
+          "docs": [
+            "CHECK"
+          ],
+          "signer": true
+        },
+        {
+          "name": "migrate_pool_owner",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "mpl_core_program",
+          "docs": [
+            "CHECK"
+          ],
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "migrate_withdraw",
+      "discriminator": [
+        58,
+        97,
+        105,
+        243,
+        61,
+        109,
+        190,
+        232
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true
+        },
+        {
+          "name": "migrator",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "migrate_pool_owner",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mint",
+      "discriminator": [
+        51,
+        57,
+        225,
+        47,
+        182,
+        146,
+        137,
+        166
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ticket_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  99,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection_mint"
+              },
+              {
+                "kind": "account",
+                "path": "buyer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "asset_account",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "collection_mint",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "buyer",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "mpl_core_program",
+          "docs": [
+            "CHECK"
+          ],
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "sell",
+      "discriminator": [
+        51,
+        230,
+        133,
+        164,
+        1,
+        127,
+        131,
+        173
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ticket_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  99,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection_mint"
+              },
+              {
+                "kind": "account",
+                "path": "seller"
+              }
+            ]
+          }
+        },
+        {
+          "name": "seller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fee_address",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "collection_mint",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "sell_and_burn",
+      "discriminator": [
+        124,
+        244,
+        131,
+        225,
+        247,
+        11,
+        16,
+        173
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "seller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fee_address",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "collection_mint",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true
+        },
+        {
+          "name": "mpl_core_program",
+          "docs": [
+            "CHECK"
+          ],
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "set_lock",
+      "discriminator": [
+        74,
+        45,
+        137,
+        132,
+        11,
+        86,
+        213,
+        242
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bonding_curve.mint",
+                "account": "BondingCurve"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "is_locked",
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BondingCurve",
+      "discriminator": [
+        23,
+        183,
+        248,
+        55,
+        96,
+        216,
+        172,
+        96
+      ]
+    },
+    {
+      "name": "Market",
+      "discriminator": [
+        219,
+        190,
+        213,
+        55,
+        0,
+        227,
+        198,
+        154
+      ]
+    },
+    {
+      "name": "TicketAccount",
+      "discriminator": [
+        231,
+        93,
+        13,
+        18,
+        239,
+        66,
+        21,
+        45
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "BuyAndMintEvent",
+      "discriminator": [
+        194,
+        249,
+        223,
+        224,
+        25,
+        154,
+        89,
+        102
+      ]
+    },
+    {
+      "name": "BuyEvent",
+      "discriminator": [
+        103,
+        244,
+        82,
+        31,
+        44,
+        245,
+        119,
+        119
+      ]
+    },
+    {
+      "name": "CreateEvent",
+      "discriminator": [
+        27,
+        114,
+        169,
+        77,
+        222,
+        235,
+        99,
+        118
+      ]
+    },
+    {
+      "name": "MigrationMintEvent",
+      "discriminator": [
+        44,
+        170,
+        148,
+        66,
+        126,
+        176,
+        230,
+        235
+      ]
+    },
+    {
+      "name": "MigrationWithdrawEvent",
+      "discriminator": [
+        144,
+        100,
+        101,
+        63,
+        77,
+        161,
+        233,
+        11
+      ]
+    },
+    {
+      "name": "MintEvent",
+      "discriminator": [
+        197,
+        144,
+        146,
+        149,
+        66,
+        164,
+        95,
+        16
+      ]
+    },
+    {
+      "name": "SellAndBurnEvent",
+      "discriminator": [
+        151,
+        248,
+        173,
+        182,
+        143,
+        215,
+        233,
+        191
+      ]
+    },
+    {
+      "name": "SellEvent",
+      "discriminator": [
+        62,
+        47,
+        55,
+        10,
+        165,
+        3,
+        220,
+        42
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidSystemProgram",
+      "msg": "Invalid system program"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidMplCoreProgram",
+      "msg": "Invalid MPL Core program"
+    },
+    {
+      "code": 6003,
+      "name": "RequiredForFirstInitialization",
+      "msg": "Required for first initialization"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidUriLength",
+      "msg": "Invalid uri length"
+    },
+    {
+      "code": 6005,
+      "name": "InsufficientSupply",
+      "msg": "Insufficient supply"
+    },
+    {
+      "code": 6006,
+      "name": "InsufficientBalance",
+      "msg": "Insufficient balance for trade"
+    },
+    {
+      "code": 6007,
+      "name": "InsufficientTokenBalance",
+      "msg": "Insufficient token balance"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidAssetAccountsNumber",
+      "msg": "Invalid asset accounts number"
+    },
+    {
+      "code": 6009,
+      "name": "MintAlreadyInitialized",
+      "msg": "Mint account is already initialized"
+    },
+    {
+      "code": 6010,
+      "name": "InvalidFeeAddress",
+      "msg": "Invalid fee address"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidMigratePoolOwnerAddress",
+      "msg": "Invalid migrate pool owner address"
+    },
+    {
+      "code": 6012,
+      "name": "BondingCurveCompleted",
+      "msg": "Trade is completed on the bonding curve"
+    },
+    {
+      "code": 6013,
+      "name": "NotTimeToMigrate",
+      "msg": "Not time to migrate"
+    },
+    {
+      "code": 6014,
+      "name": "MigrationMintDone",
+      "msg": "Migration mint has done"
+    },
+    {
+      "code": 6015,
+      "name": "NameTooLong",
+      "msg": "Name too long"
+    },
+    {
+      "code": 6016,
+      "name": "SymbolTooLong",
+      "msg": "Symbol too long"
+    },
+    {
+      "code": 6017,
+      "name": "InvalidFeeBps",
+      "msg": "Invalid fee bps: fee_bps must be less than or equal to 10%"
+    },
+    {
+      "code": 6018,
+      "name": "InvalidRoyaltyBps",
+      "msg": "Invalid royalty bps: royalty_bps must be less than or equal to 10%"
+    },
+    {
+      "code": 6019,
+      "name": "InvalidAmount",
+      "msg": "Invalid amount"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidCreatorReward",
+      "msg": "Invalid creator reward"
+    },
+    {
+      "code": 6021,
+      "name": "InvalidMigrationCost",
+      "msg": "Invalid migration cost"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidCreator",
+      "msg": "Invalid creator"
+    },
+    {
+      "code": 6023,
+      "name": "TicketAccountNotEmpty",
+      "msg": "Ticket account is not empty"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidTotalSupply",
+      "msg": "Invalid total supply"
+    },
+    {
+      "code": 6025,
+      "name": "InvalidTotalSaleTokenAmount",
+      "msg": "Invalid total sale token amount"
+    },
+    {
+      "code": 6026,
+      "name": "MigrationFundAmountNotMatched",
+      "msg": "Fund amount not matched. It might be not time to withdraw."
+    },
+    {
+      "code": 6027,
+      "name": "MigrationWithdrawAlreadyDone",
+      "msg": "Migration withdraw already done"
+    },
+    {
+      "code": 6028,
+      "name": "NotEnoughLamportsToWithdraw",
+      "msg": "Not enough lamports to withdraw"
+    },
+    {
+      "code": 6029,
+      "name": "BondingCurveLocked",
+      "msg": "Bonding curve is locked"
+    }
+  ],
+  "types": [
+    {
+      "name": "BondingCurve",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "total_supply",
+            "type": "u64"
+          },
+          {
+            "name": "total_sale_token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "current_supply",
+            "type": "u64"
+          },
+          {
+            "name": "sol_reserved",
+            "type": "u64"
+          },
+          {
+            "name": "total_minted",
+            "type": "u64"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonding_k",
+            "type": "u64"
+          },
+          {
+            "name": "bonding_a",
+            "type": "u64"
+          },
+          {
+            "name": "bonding_x0",
+            "type": "u64"
+          },
+          {
+            "name": "total_trade_amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_fee_amount",
+            "type": "u64"
+          },
+          {
+            "name": "is_migrate_withdraw",
+            "type": "bool"
+          },
+          {
+            "name": "is_locked",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BuyAndMintEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_index",
+            "type": "u64"
+          },
+          {
+            "name": "sol_amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_sol_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BuyEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_index_begin",
+            "type": "u64"
+          },
+          {
+            "name": "token_index_end",
+            "type": "u64"
+          },
+          {
+            "name": "sol_amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_sol_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "bonding_curve",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_supply",
+            "type": "u64"
+          },
+          {
+            "name": "total_sale_token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonding_k",
+            "type": "u64"
+          },
+          {
+            "name": "bonding_a",
+            "type": "u64"
+          },
+          {
+            "name": "bonding_x0",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Market",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "collection_count",
+            "type": "u64"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "total_supply",
+            "type": "u64"
+          },
+          {
+            "name": "total_sale_token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "bonding_k",
+            "type": "u64"
+          },
+          {
+            "name": "bonding_a",
+            "type": "u64"
+          },
+          {
+            "name": "bonding_x0",
+            "type": "u64"
+          },
+          {
+            "name": "fee_bps",
+            "type": "u64"
+          },
+          {
+            "name": "fee_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "migrator",
+            "type": "pubkey"
+          },
+          {
+            "name": "royalty_bps",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "migrate_pool_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "pending_admin",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "creator_reward",
+            "type": "u64"
+          },
+          {
+            "name": "migration_cost",
+            "type": "u64"
+          },
+          {
+            "name": "is_locked",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MigrationMintEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "bonding_curve",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_index",
+            "type": "u64"
+          },
+          {
+            "name": "current_supply",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MigrationWithdrawEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonding_curve",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SellAndBurnEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "sol_amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_sol_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SellEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "sol_amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_sol_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TicketAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -16,6 +16,7 @@ type Config struct {
 	DstDir              string
 	ModPath             string
 	RemoveAccountSuffix bool
+	IDLVersion          string
 }
 
 func GetConfig() *Config {
