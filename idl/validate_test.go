@@ -19,8 +19,9 @@ func TestValidate(t *testing.T) {
 
 	for _, path := range list {
 		t.Run(filepath.Base(path), func(t *testing.T) {
-			if internal.IsKnownBrokenIdl(filepath.Base(path)) {
+			if internal.IsKnownBrokenIdlForTests(filepath.Base(path)) {
 				t.Skip("Skipping known broken IDL", filepath.Base(path))
+				return
 			}
 			src, err := os.ReadFile(path)
 			require.NoError(t, err, string(src))

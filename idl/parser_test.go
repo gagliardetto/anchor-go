@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/gagliardetto/anchor-go/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,6 +27,10 @@ func TestIdlParse(t *testing.T) {
 
 	for _, path := range list {
 		t.Run(filepath.Base(path), func(t *testing.T) {
+			if internal.IsKnownBrokenIdlForTests(filepath.Base(path)) {
+				t.Skip("Skipping known broken IDL", filepath.Base(path))
+				return
+			}
 			fmt.Println(path)
 			src, err := os.ReadFile(path)
 			require.NoError(t, err, string(src))
