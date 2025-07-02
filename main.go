@@ -28,10 +28,10 @@ func main() {
 	var modPath string
 	var pathToIdl string
 	var programIDOverride solana.PublicKey
-	flag.Var(&programIDOverride, "program-id", "Program ID to use in the generated code (optional)")
+	flag.Var(&programIDOverride, "program-id", "Program ID to use in the generated code (optional; must be a valid Solana public key). If not provided, it will be derived from the IDL metadata.address field if available.")
 	flag.StringVar(&outputDir, "output", "", "Directory to write the generated code to")
-	flag.StringVar(&programName, "name", defaultProgramName, "Name of the program for the generated code")
-	flag.StringVar(&modPath, "mod-path", "", "Module path for the generated code (optional)")
+	flag.StringVar(&programName, "name", defaultProgramName, "Name of the program for the generated code (optional; example: myprogram). If not provided, it will be derived from the IDL metadata.name field.")
+	flag.StringVar(&modPath, "mod-path", "", "Module path for the generated code (optional; example: github.com/gagliardetto/mysolana-program-go)")
 	flag.StringVar(&pathToIdl, "idl", "", "Path to the IDL file (required)")
 	var skipGoMod bool
 	flag.BoolVar(&skipGoMod, "no-go-mod", false, "Skip generating the go.mod file (useful for testing)")
