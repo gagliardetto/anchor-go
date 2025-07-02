@@ -19,6 +19,10 @@ import (
 const defaultProgramName = "myprogram"
 
 func main() {
+	if askingForVersion() {
+		printVersion()
+		return
+	}
 	var outputDir string
 	var programName string
 	var modPath string
