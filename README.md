@@ -4,51 +4,30 @@
 
 ## usage
 
-```bash
-anchor-go --src=/path/to/idl.json
+```
+# Install anchor-go
+go install github.com/gagliardetto/anchor-go@latest
+
+# Generate code from an IDL file
+anchor-go --idl /path/to/idl.json --output ./generated --program-id 0123456789abcdef0123456789abcdef0123456789
 ```
 
-Generated Code will be generated and saved to `./generated/`.
-
-## TODO
+## Features
 
 - [x] instructions
 - [x] accounts
+- [x] events
 - [x] types
-- [ ] events
-- [ ] errors
-- [ ] handle tuple types
-- [ ] constants
+- [x] handle tuple types
+- [x] constants
+- [ ] error parsing
 
-## Future Development
-
-TBD
 
 ## what is anchor-go?
 
-`anchor-go` generates Go clients for [Solana](https://solana.com/) programs (smart contracts) written using the [anchor](https://github.com/project-serum/anchor) framework.
+`anchor-go` generates Go clients for [Solana](https://solana.com/) programs (smart contracts) written using the [anchor](https://github.com/solana-foundation/anchor) framework.
 
-## what is anchor?
+This version of `anchor-go` only supports the IDL format of anchor starting with version 0.30.0.
 
-Link: https://github.com/project-serum/anchor
+If you have an older version of anchor, you can use `anchor idl convert <my-old-idl.json>` to convert it to the new format.
 
-```
-Anchor is a framework for Solana's Sealevel runtime providing several convenient developer tools for writing smart contracts.
-```
-
-## I have an anchor program; how do I generate a Go client for it? (step by step)
-
-### example 1: metaplex nft candy machine
-
-```bash
-git clone https://github.com/metaplex-foundation/metaplex-program-library.git
-cd metaplex-program-library
-anchor idl parse -f candy-machine/program/src/lib.rs -o nft_candy_machine_v2.json
-anchor-go --src=nft_candy_machine_v2.json
-```
-
-Note
-----
-
-- anchor-go is in active development, so all APIs are subject to change.
-- This code is unaudited. Use at your own risk.
