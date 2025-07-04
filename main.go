@@ -23,6 +23,10 @@ func main() {
 		printVersion()
 		return
 	}
+	if !hasCommand("go") {
+		panic("Please install Go (https://go.dev/doc/install) and ensure it is in your PATH.\n" +
+			"Go is required to format the generated code, and tidy up the go.mod/go.sum files correctly.\n")
+	}
 	var outputDir string
 	var programName string
 	var modPath string
@@ -204,4 +208,9 @@ func executeCmd(dir string, name string, arg ...string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func hasCommand(name string) bool {
+	_, err := exec.LookPath(name)
+	return err == nil
 }
