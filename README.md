@@ -1,6 +1,8 @@
 # anchor-go
 
-![logo](logo.png)
+<p align="center">
+  <img src="logo.png" alt="logo" width="120">
+</p>
 
 ## usage
 
