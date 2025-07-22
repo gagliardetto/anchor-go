@@ -618,7 +618,7 @@ func (g *Generator) gen_instructionType(instruction idl.IdlInstruction) (Code, e
 							block.Id("index").Op("=").Uint8().Call(Lit(0))
 							block.List(Err()).Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("index"))
 							block.If(Err().Op("!=").Nil()).Block(
-								Return(Nil(), Qual("fmt", "Errorf").Call(Lit("failed to decode %s account index: %%w"), Lit(acc.Name), Err())),
+								Return(Nil(), Qual("fmt", "Errorf").Call(Lit("failed to decode %s account index: %w"), Lit(acc.Name), Err())),
 							)
 							block.Id("indices").Op("=").Append(Id("indices"), Id("index"))
 						}
