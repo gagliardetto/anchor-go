@@ -97,144 +97,143 @@ func (g *Generator) gen_instructions() (*OutputFile, error) {
 					ParamsFunc(func(returnsCode *Group) {
 						returnsCode.Qual(PkgSolanaGo, "Instruction")
 						returnsCode.Error()
-					}).BlockFunc(
-					func(body *Group) {
-						if len(instruction.Args) > 0 {
-							body.Id("buf__").Op(":=").New(Qual("bytes", "Buffer"))
-							body.Id("enc__").Op(":=").Qual(PkgBinary, "NewBorshEncoder").Call(Id("buf__"))
+					}).BlockFunc(func(body *Group) {
+					if len(instruction.Args) > 0 {
+						body.Id("buf__").Op(":=").New(Qual("bytes", "Buffer"))
+						body.Id("enc__").Op(":=").Qual(PkgBinary, "NewBorshEncoder").Call(Id("buf__"))
 
-							{
-								// write the discriminator
-								body.Line().Comment("Encode the instruction discriminator.")
-								discriminatorName := FormatInstructionDiscriminatorName(instruction.Name)
-								body.Err().Op(":=").Id("enc__").Dot("WriteBytes").Call(Id(discriminatorName).Index(Op(":")), False())
-								body.If(Err().Op("!=").Nil()).Block(
-									Return(
-										Nil(),
-										Qual("fmt", "Errorf").Call(Lit("failed to write instruction discriminator: %w"), Err()),
-									),
-								)
-							}
-							// for _, param := range instruction.Args {
-							// 	paramName := formatParamName(param.Name)
-							// 	isComplexEnum(param.Ty)
-
-							// 	body.Line().Commentf("Encode the parameter: %s", paramName)
-							// 	body.Block(
-							// 		Err().Op(":=").Id("enc__").Dot("Encode").Call(Id(paramName)),
-							// 		If(Err().Op("!=").Nil()).Block(
-							// 			Return(
-							// 				Nil(),
-							// 				Qual(PkgAnchorGoErrors, "NewField").Call(
-							// 					Lit(paramName),
-							// 					Err(),
-							// 				),
-							// 			),
-							// 		),
-							// 	)
-							// }
-							checkNil := true
-							body.BlockFunc(func(g *Group) {
-								gen_marshal_DefinedFieldsNamed(
-									g,
-									instruction.Args,
-									checkNil,
-									func(param idl.IdlField) *Statement {
-										return Id(formatParamName(param.Name))
-									},
-									"enc__",
-									true, // returnNilErr
-									func(param idl.IdlField) string {
-										return formatParamName(param.Name)
-									},
-								)
-							})
-						}
-						body.Id("accounts__").Op(":=").Qual(PkgSolanaGo, "AccountMetaSlice").Block()
-						if len(instruction.Accounts) > 0 {
-							body.Line().Comment("Add the accounts to the instruction.")
-
-							body.Block(
-								DoGroup(func(body *Group) {
-									for ai, account := range instruction.Accounts {
-										switch acc := account.(type) {
-										case *idl.IdlInstructionAccount:
-											{
-												if ai > 0 {
-													body.Line()
-												}
-												body.Comment(formatAccountCommentDocs(ai, acc))
-												body.Line()
-												{
-													// add comment for the account
-													if len(acc.Docs) > 0 {
-														for _, doc := range acc.Docs {
-															body.Comment(doc).Line()
-														}
-													}
-												}
-												accountName := formatAccountNameParam(acc.Name)
-												body.Id("accounts__").Dot("Append").Call(
-													Qual(PkgSolanaGo, "NewAccountMeta").Call(
-														Id(accountName),
-														Lit(acc.Writable),
-														Lit(acc.Signer),
-													),
-												)
-											}
-
-										case *idl.IdlInstructionAccounts:
-											{
-												panic(fmt.Errorf("Accounts groups are not supported yet: %s", acc.Name))
-												// if ai > 0 {
-												// 	body.Line()
-												// }
-												// body.Commentf("Accounts group: %s", acc.Name)
-												// body.Line()
-												// accs := acc.Accounts
-												// for acci, acc := range accs {
-												// 	acc := acc.(*idl.IdlInstructionAccount)
-												// 	body.Comment(formatAccountCommentDocs(acci, acc))
-												// 	body.Line()
-												// 	accountName := formatAccountNameParam(acc.Name)
-												// 	body.Id("accounts__").Dot("Append").Call(
-												// 		Qual(PkgSolanaGo, "NewAccountMeta").Call(
-												// 			Id(accountName),
-												// 			Lit(acc.Writable),
-												// 			Lit(acc.Signer),
-												// 		),
-												// 	)
-												// }
-											}
-										default:
-											panic("unknown account type: " + spew.Sdump(account))
-										}
-									}
-								}),
+						{
+							// write the discriminator
+							body.Line().Comment("Encode the instruction discriminator.")
+							discriminatorName := FormatInstructionDiscriminatorName(instruction.Name)
+							body.Err().Op(":=").Id("enc__").Dot("WriteBytes").Call(Id(discriminatorName).Index(Op(":")), False())
+							body.If(Err().Op("!=").Nil()).Block(
+								Return(
+									Nil(),
+									Qual("fmt", "Errorf").Call(Lit("failed to write instruction discriminator: %w"), Err()),
+								),
 							)
 						}
+						// for _, param := range instruction.Args {
+						// 	paramName := formatParamName(param.Name)
+						// 	isComplexEnum(param.Ty)
 
-						// create the return instruction
-						body.Line().Comment("Create the instruction.")
-						body.Return(
-							Qual(PkgSolanaGo, "NewInstruction").CallFunc(
-								func(g *Group) {
-									g.Add(
-										ListMultiline(func(gg *Group) {
-											gg.Id("ProgramID")
-											gg.Id("accounts__")
-											if len(instruction.Args) > 0 {
-												gg.Id("buf__").Dot("Bytes").Call()
-											} else {
-												gg.Nil() // No arguments to encode.
-											}
-										}),
-									)
+						// 	body.Line().Commentf("Encode the parameter: %s", paramName)
+						// 	body.Block(
+						// 		Err().Op(":=").Id("enc__").Dot("Encode").Call(Id(paramName)),
+						// 		If(Err().Op("!=").Nil()).Block(
+						// 			Return(
+						// 				Nil(),
+						// 				Qual(PkgAnchorGoErrors, "NewField").Call(
+						// 					Lit(paramName),
+						// 					Err(),
+						// 				),
+						// 			),
+						// 		),
+						// 	)
+						// }
+						checkNil := true
+						body.BlockFunc(func(g *Group) {
+							gen_marshal_DefinedFieldsNamed(
+								g,
+								instruction.Args,
+								checkNil,
+								func(param idl.IdlField) *Statement {
+									return Id(formatParamName(param.Name))
 								},
-							),
-							Nil(), // No error
+								"enc__",
+								true, // returnNilErr
+								func(param idl.IdlField) string {
+									return formatParamName(param.Name)
+								},
+							)
+						})
+					}
+					body.Id("accounts__").Op(":=").Qual(PkgSolanaGo, "AccountMetaSlice").Block()
+					if len(instruction.Accounts) > 0 {
+						body.Line().Comment("Add the accounts to the instruction.")
+
+						body.Block(
+							DoGroup(func(body *Group) {
+								for ai, account := range instruction.Accounts {
+									switch acc := account.(type) {
+									case *idl.IdlInstructionAccount:
+										{
+											if ai > 0 {
+												body.Line()
+											}
+											body.Comment(formatAccountCommentDocs(ai, acc))
+											body.Line()
+											{
+												// add comment for the account
+												if len(acc.Docs) > 0 {
+													for _, doc := range acc.Docs {
+														body.Comment(doc).Line()
+													}
+												}
+											}
+											accountName := formatAccountNameParam(acc.Name)
+											body.Id("accounts__").Dot("Append").Call(
+												Qual(PkgSolanaGo, "NewAccountMeta").Call(
+													Id(accountName),
+													Lit(acc.Writable),
+													Lit(acc.Signer),
+												),
+											)
+										}
+
+									case *idl.IdlInstructionAccounts:
+										{
+											panic(fmt.Errorf("Accounts groups are not supported yet: %s", acc.Name))
+											// if ai > 0 {
+											// 	body.Line()
+											// }
+											// body.Commentf("Accounts group: %s", acc.Name)
+											// body.Line()
+											// accs := acc.Accounts
+											// for acci, acc := range accs {
+											// 	acc := acc.(*idl.IdlInstructionAccount)
+											// 	body.Comment(formatAccountCommentDocs(acci, acc))
+											// 	body.Line()
+											// 	accountName := formatAccountNameParam(acc.Name)
+											// 	body.Id("accounts__").Dot("Append").Call(
+											// 		Qual(PkgSolanaGo, "NewAccountMeta").Call(
+											// 			Id(accountName),
+											// 			Lit(acc.Writable),
+											// 			Lit(acc.Signer),
+											// 		),
+											// 	)
+											// }
+										}
+									default:
+										panic("unknown account type: " + spew.Sdump(account))
+									}
+								}
+							}),
 						)
-					})
+					}
+
+					// create the return instruction
+					body.Line().Comment("Create the instruction.")
+					body.Return(
+						Qual(PkgSolanaGo, "NewInstruction").CallFunc(
+							func(g *Group) {
+								g.Add(
+									ListMultiline(func(gg *Group) {
+										gg.Id("ProgramID")
+										gg.Id("accounts__")
+										if len(instruction.Args) > 0 {
+											gg.Id("buf__").Dot("Bytes").Call()
+										} else {
+											gg.Nil() // No arguments to encode.
+										}
+									}),
+								)
+							},
+						),
+						Nil(), // No error
+					)
+				})
 			}
 			file.Add(ixCode)
 		}
@@ -245,7 +244,15 @@ func (g *Generator) gen_instructions() (*OutputFile, error) {
 		typeNames := []string{}
 		discriminatorNames := []string{}
 		for _, instruction := range g.idl.Instructions {
-			typeNames = append(typeNames, tools.ToCamelUpper(instruction.Name)+"Instruction")
+			// Check if the instruction name already ends with "instruction" (case-insensitive)
+			instructionNameLower := strings.ToLower(instruction.Name)
+			if strings.HasSuffix(instructionNameLower, "instruction") {
+				// Already has "instruction" suffix, don't add it again
+				typeNames = append(typeNames, tools.ToCamelUpper(instruction.Name))
+			} else {
+				// Add "Instruction" suffix
+				typeNames = append(typeNames, tools.ToCamelUpper(instruction.Name)+"Instruction")
+			}
 			discriminatorNames = append(discriminatorNames, tools.ToCamelUpper(instruction.Name))
 		}
 
@@ -299,7 +306,15 @@ func formatParamName(paramName string) string {
 }
 
 func newInstructionFuncName(instructionName string) string {
-	return "New" + tools.ToCamelUpper(instructionName) + "Instruction"
+	// Check if the instruction name already ends with "instruction" (case-insensitive)
+	instructionNameLower := strings.ToLower(instructionName)
+	if strings.HasSuffix(instructionNameLower, "instruction") {
+		// Already has "instruction" suffix, don't add it again
+		return "New" + tools.ToCamelUpper(instructionName)
+	} else {
+		// Add "Instruction" suffix
+		return "New" + tools.ToCamelUpper(instructionName) + "Instruction"
+	}
 }
 
 func formatAccountCommentDocs(index int, account *idl.IdlInstructionAccount) string {
@@ -330,187 +345,424 @@ func formatAccountCommentDocs(index int, account *idl.IdlInstructionAccount) str
 
 func (g *Generator) gen_instructionParser(typeNames []string, discriminatorNames []string) (Code, error) {
 	code := Empty()
-	{
-		code.Func().Id("ParseAnyInstruction").
-			Params(Id("instructionData").Index().Byte()).
-			Params(Any(), Error()).
-			BlockFunc(func(block *Group) {
-				block.Id("decoder").Op(":=").Qual(PkgBinary, "NewBorshDecoder").Call(Id("instructionData"))
-				block.List(Id("discriminator"), Err()).Op(":=").Id("decoder").Dot("ReadDiscriminator").Call()
 
-				block.If(Err().Op("!=").Nil()).Block(
-					Return(
-						Nil(),
-						Qual("fmt", "Errorf").Call(Lit("failed to peek instruction discriminator: %w"), Err()),
-					),
-				)
+	// Generate Instruction interface
+	code.Line().Line()
+	code.Comment("Instruction interface defines common methods for all instruction types")
+	code.Line()
+	code.Type().Id("Instruction").Interface(
+		Id("GetDiscriminator").Params().Params(Index().Byte()),
+		Line(),
+		Id("UnmarshalWithDecoder").Params(Id("decoder").Op("*").Qual(PkgBinary, "Decoder")).Params(Error()),
+		Line(),
+		Id("UnmarshalAccountIndices").Params(Id("buf").Index().Byte()).Params(Index().Uint8(), Error()),
+		Line(),
+		Id("PopulateFromAccountIndices").Params(Id("indices").Index().Uint8(), Id("accountKeys").Index().Qual(PkgSolanaGo, "PublicKey")).Params(Error()),
+		Line(),
+		Id("GetAccountKeys").Params().Params(Index().Qual(PkgSolanaGo, "PublicKey")),
+	)
 
-				block.Switch(Id("discriminator")).BlockFunc(func(switchBlock *Group) {
-					for i, typeName := range typeNames {
-						discriminatorName := discriminatorNames[i]
-						switchBlock.Case(Id(FormatInstructionDiscriminatorName(discriminatorName))).Block(
-							Id("value").Op(":=").New(Id(typeName)),
-							Err().Op(":=").Id("value").Dot("UnmarshalWithDecoder").Call(Id("decoder")),
-							If(Err().Op("!=").Nil()).Block(
-								Return(
-									Nil(),
-									Qual("fmt", "Errorf").Call(Lit("failed to unmarshal instruction as "+typeName+": %w"), Err()),
-								),
+	// Single unified ParseInstruction function with optional accounts
+	code.Line().Line()
+	code.Comment("ParseInstruction parses instruction data and optionally populates accounts")
+	code.Comment("If accountIndicesData is nil or empty, accounts will not be populated")
+	code.Line()
+	code.Func().Id("ParseInstruction").
+		Params(
+			Id("instructionData").Index().Byte(),
+			Id("accountIndicesData").Index().Byte(),
+			Id("accountKeys").Index().Qual(PkgSolanaGo, "PublicKey"),
+		).
+		Params(Id("Instruction"), Error()).
+		BlockFunc(func(block *Group) {
+			block.Comment("Validate inputs")
+			block.If(Len(Id("instructionData")).Op("<").Lit(8)).Block(
+				Return(Nil(), Qual("fmt", "Errorf").Call(Lit("instruction data too short: expected at least 8 bytes, got %d"), Len(Id("instructionData")))),
+			)
+
+			block.Comment("Extract discriminator")
+			block.Id("discriminator").Op(":=").Index(Lit(8)).Byte().Values()
+			block.Copy(Id("discriminator").Index(Op(":")), Id("instructionData").Index(Lit(0), Lit(8)))
+
+			block.Comment("Parse based on discriminator")
+			block.Switch(Id("discriminator")).BlockFunc(func(switchBlock *Group) {
+				// This for loop runs during code generation, not at runtime
+				for i, typeName := range typeNames {
+					discriminatorName := discriminatorNames[i]
+					switchBlock.Case(Id(FormatInstructionDiscriminatorName(discriminatorName))).Block(
+						Id("instruction").Op(":=").New(Id(typeName)),
+						Id("decoder").Op(":=").Qual(PkgBinary, "NewBorshDecoder").Call(Id("instructionData")),
+						Id("err").Op(":=").Id("instruction").Dot("UnmarshalWithDecoder").Call(Id("decoder")),
+						If(Id("err").Op("!=").Nil()).Block(
+							Return(Nil(), Qual("fmt", "Errorf").Call(Lit("failed to unmarshal instruction as "+typeName+": %w"), Id("err"))),
+						),
+						If(Id("accountIndicesData").Op("!=").Nil().Op("&&").Len(Id("accountIndicesData")).Op(">").Lit(0)).Block(
+							Id("indices").Op(",").Id("err").Op(":=").Id("instruction").Dot("UnmarshalAccountIndices").Call(Id("accountIndicesData")),
+							If(Id("err").Op("!=").Nil()).Block(
+								Return(Nil(), Qual("fmt", "Errorf").Call(Lit("failed to unmarshal account indices: %w"), Id("err"))),
 							),
-							Return(Id("value"), Nil()),
-						)
-					}
-					switchBlock.Default().Block(
-						Return(Nil(), Qual("fmt", "Errorf").Call(Lit("unknown discriminator: %s"), Qual(PkgBinary, "FormatDiscriminator").Call(Id("discriminator")))),
+							Id("err").Op("=").Id("instruction").Dot("PopulateFromAccountIndices").Call(Id("indices"), Id("accountKeys")),
+							If(Id("err").Op("!=").Nil()).Block(
+								Return(Nil(), Qual("fmt", "Errorf").Call(Lit("failed to populate accounts: %w"), Id("err"))),
+							),
+						),
+						Return(Id("instruction"), Nil()),
 					)
-				})
+				}
+				switchBlock.Default().Block(
+					Return(Nil(), Qual("fmt", "Errorf").Call(Lit("unknown instruction discriminator: %s"), Qual(PkgBinary, "FormatDiscriminator").Call(Id("discriminator")))),
+				)
 			})
-	}
-	{
-		code.Line().Line()
-		// for each instruction, generate a function to parse it:
-		for i, typeName := range typeNames {
-			discriminatorName := FormatInstructionDiscriminatorName(discriminatorNames[i])
+		})
 
-			code.Func().Id("ParseInstruction_"+typeName).
-				Params(Id("instructionData").Index().Byte()).
-				Params(Op("*").Id(typeName), Error()).
-				BlockFunc(func(block *Group) {
-					block.Id("decoder").Op(":=").Qual(PkgBinary, "NewBorshDecoder").Call(Id("instructionData"))
-					block.List(Id("discriminator"), Err()).Op(":=").Id("decoder").Dot("ReadDiscriminator").Call()
+	// Generic ParseInstructionTyped function for type-safe parsing
+	code.Line().Line()
+	code.Comment("ParseInstructionTyped parses instruction data and returns a specific instruction type")
+	code.Comment("T must implement the Instruction interface")
+	code.Line()
+	code.Func().Id("ParseInstructionTyped").
+		Types(Id("T").Id("Instruction")).
+		Params(
+			Id("instructionData").Index().Byte(),
+			Id("accountIndicesData").Index().Byte(),
+			Id("accountKeys").Index().Qual(PkgSolanaGo, "PublicKey"),
+		).
+		Params(Id("T"), Error()).
+		BlockFunc(func(block *Group) {
+			block.Id("instruction").Op(",").Id("err").Op(":=").Id("ParseInstruction").Call(Id("instructionData"), Id("accountIndicesData"), Id("accountKeys"))
+			block.If(Id("err").Op("!=").Nil()).Block(
+				Return(Op("*").New(Id("T")), Id("err")),
+			)
+			block.Id("typed").Op(",").Id("ok").Op(":=").Id("instruction").Assert(Id("T"))
+			block.If(Op("!").Id("ok")).Block(
+				Return(Op("*").New(Id("T")), Qual("fmt", "Errorf").Call(Lit("instruction is not of expected type"))),
+			)
+			block.Return(Id("typed"), Nil())
+		})
 
-					block.If(Err().Op("!=").Nil()).Block(
-						Return(
-							Nil(),
-							Qual("fmt", "Errorf").Call(Lit("failed to peek discriminator: %w"), Err()),
-						),
-					)
+	// Convenience function for parsing without accounts
+	code.Line().Line()
+	code.Comment("ParseInstructionWithoutAccounts parses instruction data without account information")
+	code.Line()
+	code.Func().Id("ParseInstructionWithoutAccounts").
+		Params(Id("instructionData").Index().Byte()).
+		Params(Id("Instruction"), Error()).
+		Block(
+			Return(Id("ParseInstruction").Call(Id("instructionData"), Nil(), Index().Qual(PkgSolanaGo, "PublicKey").Op("{}"))),
+		)
 
-					block.If(Id("discriminator").Op("!=").Id(discriminatorName)).Block(
-						Return(Nil(), Qual("fmt", "Errorf").Call(Lit("expected discriminator %v, got %s"), Id(discriminatorName), Qual(PkgBinary, "FormatDiscriminator").Call(Id("discriminator")))),
-					)
+	// Convenience function for parsing with accounts
+	code.Line().Line()
+	code.Comment("ParseInstructionWithAccounts parses instruction data with account information")
+	code.Line()
+	code.Func().Id("ParseInstructionWithAccounts").
+		Params(
+			Id("instructionData").Index().Byte(),
+			Id("accountIndicesData").Index().Byte(),
+			Id("accountKeys").Index().Qual(PkgSolanaGo, "PublicKey"),
+		).
+		Params(Id("Instruction"), Error()).
+		Block(
+			Return(Id("ParseInstruction").Call(Id("instructionData"), Id("accountIndicesData"), Id("accountKeys"))),
+		)
 
-					block.Id("instruction").Op(":=").New(Id(typeName))
-					block.Err().Op("=").Id("instruction").Dot("UnmarshalWithDecoder").Call(Id("decoder"))
-
-					block.If(Err().Op("!=").Nil()).Block(
-						Return(
-							Nil(),
-							Qual("fmt", "Errorf").Call(Lit("failed to unmarshal instruction of type "+typeName+": %w"), Err()),
-						),
-					)
-
-					block.Return(Id("instruction"), Nil())
-				})
-			code.Line().Line()
-		}
-	}
 	return code, nil
 }
 
 func (g *Generator) gen_instructionType(instruction idl.IdlInstruction) (Code, error) {
 	code := Empty()
-	typeName := tools.ToCamelUpper(instruction.Name) + "Instruction"
 
-	// Generate the instruction struct type
-	{
-		code.Type().Id(typeName).StructFunc(func(structGroup *Group) {
-			// Add fields for each instruction argument
-			for _, arg := range instruction.Args {
-				fieldType := genTypeName(arg.Ty)
-				if IsOption(arg.Ty) || IsCOption(arg.Ty) {
-					fieldType = Op("*").Add(fieldType)
-				}
-				structGroup.Id(tools.ToCamelUpper(arg.Name)).Add(fieldType).Tag(map[string]string{
-					"json": arg.Name,
-				})
-			}
-		})
+	// Check if the instruction name already ends with "instruction" (case-insensitive)
+	instructionNameLower := strings.ToLower(instruction.Name)
+	var typeName string
+	if strings.HasSuffix(instructionNameLower, "instruction") {
+		// Already has "instruction" suffix, don't add it again
+		typeName = tools.ToCamelUpper(instruction.Name)
+	} else {
+		// Add "Instruction" suffix
+		typeName = tools.ToCamelUpper(instruction.Name) + "Instruction"
 	}
 
-	// Generate UnmarshalWithDecoder method
-	{
-		code.Line().Line()
-		code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("UnmarshalWithDecoder").
-			Params(Id("decoder").Op("*").Qual(PkgBinary, "Decoder")).
-			Params(Error()).
-			BlockFunc(func(block *Group) {
-				// Note: discriminator has already been read and validated by the parser
-				// Read instruction arguments
-				for _, arg := range instruction.Args {
-					fieldName := tools.ToCamelUpper(arg.Name)
-					block.Commentf("Deserialize `%s`:", fieldName)
+	// Generate the instruction struct type
+	code.Type().Id(typeName).StructFunc(func(structGroup *Group) {
+		// Add fields for each instruction argument
+		for _, arg := range instruction.Args {
+			fieldType := genTypeName(arg.Ty)
+			if IsOption(arg.Ty) || IsCOption(arg.Ty) {
+				fieldType = Op("*").Add(fieldType)
+			}
+			structGroup.Id(tools.ToCamelUpper(arg.Name)).Add(fieldType).Tag(map[string]string{
+				"json": arg.Name,
+			})
+		}
 
-					if IsOption(arg.Ty) || IsCOption(arg.Ty) {
-						var optionalityReaderName string
-						switch {
-						case IsOption(arg.Ty):
-							optionalityReaderName = "ReadOption"
-						case IsCOption(arg.Ty):
-							optionalityReaderName = "ReadCOption"
-						}
-
-						block.BlockFunc(func(optGroup *Group) {
-							optGroup.List(Id("ok"), Err()).Op(":=").Id("decoder").Dot(optionalityReaderName).Call()
-							optGroup.If(Err().Op("!=").Nil()).Block(
-								Return(Err()),
-							)
-							optGroup.If(Id("ok")).Block(
-								Err().Op(":=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(fieldName)),
-								If(Err().Op("!=").Nil()).Block(
-									Return(Err()),
-								),
-							)
+		// Add fields for each instruction account
+		if len(instruction.Accounts) > 0 {
+			structGroup.Line().Comment("Accounts:")
+			for _, account := range instruction.Accounts {
+				switch acc := account.(type) {
+				case *idl.IdlInstructionAccount:
+					{
+						// Add account field with metadata
+						fieldName := tools.ToCamelUpper(acc.Name)
+						structGroup.Id(fieldName).Qual(PkgSolanaGo, "PublicKey").Tag(map[string]string{
+							"json": acc.Name,
 						})
-					} else {
-						block.Err().Op(":=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(fieldName))
-						block.If(Err().Op("!=").Nil()).Block(
+
+						// Add account metadata fields
+						if acc.Writable {
+							structGroup.Id(fieldName + "Writable").Bool().Tag(map[string]string{
+								"json": acc.Name + "_writable",
+							})
+						}
+						if acc.Signer {
+							structGroup.Id(fieldName + "Signer").Bool().Tag(map[string]string{
+								"json": acc.Name + "_signer",
+							})
+						}
+						if acc.Optional {
+							structGroup.Id(fieldName + "Optional").Bool().Tag(map[string]string{
+								"json": acc.Name + "_optional",
+							})
+						}
+					}
+				case *idl.IdlInstructionAccounts:
+					{
+						// Handle account groups (not fully implemented yet)
+						structGroup.Commentf("Account group: %s (not fully supported)", acc.Name)
+					}
+				}
+			}
+		}
+	})
+
+	// Generate GetDiscriminator method (required by Instruction interface)
+	code.Line().Line()
+	code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("GetDiscriminator").
+		Params().
+		Params(Index().Byte()).
+		Block(
+			Return(Id(FormatInstructionDiscriminatorName(tools.ToCamelUpper(instruction.Name))).Index(Op(":"))),
+		)
+
+	// Generate UnmarshalWithDecoder method
+	code.Line().Line()
+	code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("UnmarshalWithDecoder").
+		Params(Id("decoder").Op("*").Qual(PkgBinary, "Decoder")).
+		Params(Error()).
+		BlockFunc(func(block *Group) {
+			// Note: discriminator has already been read and validated by the parser
+			// Read instruction arguments
+			if len(instruction.Args) > 0 {
+				block.Var().Id("err").Error()
+			}
+			for _, arg := range instruction.Args {
+				fieldName := tools.ToCamelUpper(arg.Name)
+				block.Commentf("Deserialize `%s`:", fieldName)
+
+				if IsOption(arg.Ty) || IsCOption(arg.Ty) {
+					var optionalityReaderName string
+					switch {
+					case IsOption(arg.Ty):
+						optionalityReaderName = "ReadOption"
+					case IsCOption(arg.Ty):
+						optionalityReaderName = "ReadCOption"
+					}
+
+					block.BlockFunc(func(optGroup *Group) {
+						optGroup.List(Id("ok"), Err()).Op(":=").Id("decoder").Dot(optionalityReaderName).Call()
+						optGroup.If(Err().Op("!=").Nil()).Block(
 							Return(Err()),
 						)
+						optGroup.If(Id("ok")).Block(
+							List(Err()).Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(fieldName)),
+							If(Err().Op("!=").Nil()).Block(
+								Return(Err()),
+							),
+						)
+					})
+				} else {
+					block.List(Err()).Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("obj").Dot(fieldName))
+					block.If(Err().Op("!=").Nil()).Block(
+						Return(Err()),
+					)
+				}
+			}
+
+			// Note: Accounts are not typically serialized in instruction data
+			// They are passed as part of the transaction's account metas
+			// This method only deserializes the instruction arguments
+
+			block.Return(Nil())
+		})
+
+	// Generate account-related methods if instruction has accounts
+	if len(instruction.Accounts) > 0 {
+		// Generate UnmarshalAccountIndices method
+		code.Line().Line()
+		code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("UnmarshalAccountIndices").
+			Params(Id("buf").Index().Byte()).
+			Params(Index().Uint8(), Error()).
+			BlockFunc(func(block *Group) {
+				block.Comment("UnmarshalAccountIndices decodes account indices from Borsh-encoded bytes")
+				block.Id("decoder").Op(":=").Qual(PkgBinary, "NewBorshDecoder").Call(Id("buf"))
+				block.Id("indices").Op(":=").Make(Index().Uint8(), Lit(0))
+				block.Id("index").Op(":=").Uint8().Call(Lit(0))
+				block.Var().Id("err").Error()
+
+				for _, account := range instruction.Accounts {
+					switch acc := account.(type) {
+					case *idl.IdlInstructionAccount:
+						{
+							block.Commentf("Decode from %s account index", acc.Name)
+							block.Id("index").Op("=").Uint8().Call(Lit(0))
+							block.List(Err()).Op("=").Id("decoder").Dot("Decode").Call(Op("&").Id("index"))
+							block.If(Err().Op("!=").Nil()).Block(
+								Return(Nil(), Qual("fmt", "Errorf").Call(Lit("failed to decode %s account index: %%w"), Lit(acc.Name), Err())),
+							)
+							block.Id("indices").Op("=").Append(Id("indices"), Id("index"))
+						}
+					case *idl.IdlInstructionAccounts:
+						{
+							block.Commentf("Account group: %s (not fully supported)", acc.Name)
+						}
+					}
+				}
+
+				block.Return(Id("indices"), Nil())
+			})
+
+		// Generate PopulateFromAccountIndices method
+		code.Line().Line()
+		code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("PopulateFromAccountIndices").
+			Params(Id("indices").Index().Uint8(), Id("accountKeys").Index().Qual(PkgSolanaGo, "PublicKey")).
+			Params(Error()).
+			BlockFunc(func(block *Group) {
+				block.Comment("PopulateFromAccountIndices sets account public keys from indices and account keys array")
+
+				// Count expected accounts
+				expectedAccountCount := 0
+				for _, account := range instruction.Accounts {
+					switch account.(type) {
+					case *idl.IdlInstructionAccount:
+						expectedAccountCount++
+					}
+				}
+
+				block.If(Len(Id("indices")).Op("!=").Lit(expectedAccountCount)).Block(
+					Return(Qual("fmt", "Errorf").Call(Lit("mismatch between expected accounts (%d) and provided indices (%d)"), Lit(expectedAccountCount), Len(Id("indices")))),
+				)
+
+				block.Id("indexOffset").Op(":=").Lit(0)
+
+				for _, account := range instruction.Accounts {
+					switch acc := account.(type) {
+					case *idl.IdlInstructionAccount:
+						{
+							fieldName := tools.ToCamelUpper(acc.Name)
+							block.Commentf("Set %s account from index", acc.Name)
+							block.If(Id("indices").Index(Id("indexOffset")).Op(">=").Uint8().Call(Len(Id("accountKeys")))).Block(
+								Return(Qual("fmt", "Errorf").Call(Lit("account index %d for %s is out of bounds (max: %d)"), Id("indices").Index(Id("indexOffset")), Lit(acc.Name), Len(Id("accountKeys")).Op("-").Lit(1))),
+							)
+							block.Id("obj").Dot(fieldName).Op("=").Id("accountKeys").Index(Id("indices").Index(Id("indexOffset")))
+							block.Id("indexOffset").Op("++")
+						}
+					case *idl.IdlInstructionAccounts:
+						{
+							block.Commentf("Account group: %s (not fully supported)", acc.Name)
+						}
 					}
 				}
 
 				block.Return(Nil())
 			})
+
+		// Generate GetAccountKeys method
+		code.Line().Line()
+		code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("GetAccountKeys").
+			Params().
+			Params(Index().Qual(PkgSolanaGo, "PublicKey")).
+			BlockFunc(func(block *Group) {
+				block.Id("keys").Op(":=").Make(Index().Qual(PkgSolanaGo, "PublicKey"), Lit(0))
+
+				for _, account := range instruction.Accounts {
+					switch acc := account.(type) {
+					case *idl.IdlInstructionAccount:
+						{
+							fieldName := tools.ToCamelUpper(acc.Name)
+							block.Id("keys").Op("=").Append(Id("keys"), Id("obj").Dot(fieldName))
+						}
+					case *idl.IdlInstructionAccounts:
+						{
+							block.Commentf("Account group: %s (not fully supported)", acc.Name)
+						}
+					}
+				}
+
+				block.Return(Id("keys"))
+			})
+	} else {
+		// Generate empty implementations for instructions without accounts
+		code.Line().Line()
+		code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("UnmarshalAccountIndices").
+			Params(Id("buf").Index().Byte()).
+			Params(Index().Uint8(), Error()).
+			Block(
+				Return(Index().Uint8().Op("{}"), Nil()),
+			)
+
+		code.Line().Line()
+		code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("PopulateFromAccountIndices").
+			Params(Id("indices").Index().Uint8(), Id("accountKeys").Index().Qual(PkgSolanaGo, "PublicKey")).
+			Params(Error()).
+			Block(
+				Return(Nil()),
+			)
+
+		code.Line().Line()
+		code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("GetAccountKeys").
+			Params().
+			Params(Index().Qual(PkgSolanaGo, "PublicKey")).
+			Block(
+				Return(Index().Qual(PkgSolanaGo, "PublicKey").Op("{}")),
+			)
 	}
 
 	// Generate Unmarshal method
-	{
-		code.Line().Line()
-		code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("Unmarshal").
-			Params(Id("buf").Index().Byte()).
-			Params(Error()).
-			BlockFunc(func(block *Group) {
-				block.Err().Op(":=").Id("obj").Dot("UnmarshalWithDecoder").Call(
-					Qual(PkgBinary, "NewBorshDecoder").Call(Id("buf")),
-				)
-				block.If(Err().Op("!=").Nil()).Block(
-					Return(
-						Qual("fmt", "Errorf").Call(
-							Lit("error while unmarshaling "+typeName+": %w"),
-							Err(),
-						),
+	code.Line().Line()
+	code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("Unmarshal").
+		Params(Id("buf").Index().Byte()).
+		Params(Error()).
+		BlockFunc(func(block *Group) {
+			block.Var().Id("err").Error()
+			block.List(Err()).Op("=").Id("obj").Dot("UnmarshalWithDecoder").Call(
+				Qual(PkgBinary, "NewBorshDecoder").Call(Id("buf")),
+			)
+			block.If(Err().Op("!=").Nil()).Block(
+				Return(
+					Qual("fmt", "Errorf").Call(
+						Lit("error while unmarshaling "+typeName+": %w"),
+						Err(),
 					),
-				)
-				block.Return(Nil())
-			})
-	}
+				),
+			)
+			block.Return(Nil())
+		})
 
 	// Generate Unmarshal function
-	{
-		code.Line().Line()
-		code.Func().Id("Unmarshal"+typeName).
-			Params(Id("buf").Index().Byte()).
-			Params(Op("*").Id(typeName), Error()).
-			BlockFunc(func(block *Group) {
-				block.Id("obj").Op(":=").New(Id(typeName))
-				block.Err().Op(":=").Id("obj").Dot("Unmarshal").Call(Id("buf"))
-				block.If(Err().Op("!=").Nil()).Block(
-					Return(Nil(), Err()),
-				)
-				block.Return(Id("obj"), Nil())
-			})
-	}
+	code.Line().Line()
+	code.Func().Id("Unmarshal"+typeName).
+		Params(Id("buf").Index().Byte()).
+		Params(Op("*").Id(typeName), Error()).
+		BlockFunc(func(block *Group) {
+			block.Id("obj").Op(":=").New(Id(typeName))
+			block.Var().Id("err").Error()
+			block.List(Err()).Op("=").Id("obj").Dot("Unmarshal").Call(Id("buf"))
+			block.If(Err().Op("!=").Nil()).Block(
+				Return(Nil(), Err()),
+			)
+			block.Return(Id("obj"), Nil())
+		})
 
 	return code, nil
 }
