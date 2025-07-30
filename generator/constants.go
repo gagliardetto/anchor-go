@@ -3,7 +3,9 @@ package generator
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"strconv"
+	"strings"
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/davecgh/go-spew/spew"
@@ -76,7 +78,8 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 			case *idltype.U8:
 				_ = ty
 				// "value":"42"
-				v, err := strconv.ParseUint(co.Value, 10, 8)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseUint(cleanValue, 10, 8)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse u8 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
@@ -85,7 +88,8 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 			case *idltype.I8:
 				_ = ty
 				// "value":"-42"
-				v, err := strconv.ParseInt(co.Value, 10, 8)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseInt(cleanValue, 10, 8)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse i8 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
@@ -94,7 +98,8 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 			case *idltype.U16:
 				_ = ty
 				// "value":"42"
-				v, err := strconv.ParseUint(co.Value, 10, 16)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseUint(cleanValue, 10, 16)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse u16 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
@@ -103,7 +108,8 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 			case *idltype.I16:
 				_ = ty
 				// "value":"-42"
-				v, err := strconv.ParseInt(co.Value, 10, 16)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseInt(cleanValue, 10, 16)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse i16 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
@@ -112,7 +118,8 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 			case *idltype.U32:
 				_ = ty
 				// "value":"42"
-				v, err := strconv.ParseUint(co.Value, 10, 32)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseUint(cleanValue, 10, 32)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse u32 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
@@ -121,7 +128,8 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 			case *idltype.I32:
 				_ = ty
 				// "value":"-42"
-				v, err := strconv.ParseInt(co.Value, 10, 32)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseInt(cleanValue, 10, 32)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse i32 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
@@ -130,7 +138,8 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 			case *idltype.U64:
 				_ = ty
 				// "value":"42"
-				v, err := strconv.ParseUint(co.Value, 10, 64)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseUint(cleanValue, 10, 64)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse u64 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
@@ -139,16 +148,54 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 			case *idltype.I64:
 				_ = ty
 				// "value":"-42"
-				v, err := strconv.ParseInt(co.Value, 10, 64)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseInt(cleanValue, 10, 64)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse i64 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
 				code.Const().Id(co.Name).Op("=").Lit(int64(v))
 				code.Line()
+			case *idltype.U128:
+				_ = ty
+				// "value":"100_000_000"
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				bigInt := new(big.Int)
+				_, ok := bigInt.SetString(cleanValue, 10)
+				if !ok {
+					return nil, fmt.Errorf("failed to parse u128 constants[%d] %s: invalid format", coi, spew.Sdump(co))
+				}
+				// Generate code that creates a big.Int from string
+				code.Var().Id(co.Name).Op("=").Func().Params().Op("*").Qual("math/big", "Int").Block(
+					Id("val").Op(",").Id("ok").Op(":=").New(Qual("math/big", "Int")).Dot("SetString").Call(Lit(cleanValue), Lit(10)),
+					If(Op("!").Id("ok")).Block(
+						Panic(Lit(fmt.Sprintf("invalid u128 constant %s", co.Name))),
+					),
+					Return(Id("val")),
+				).Call()
+				code.Line()
+			case *idltype.I128:
+				_ = ty
+				// "value":"-100_000_000"
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				bigInt := new(big.Int)
+				_, ok := bigInt.SetString(cleanValue, 10)
+				if !ok {
+					return nil, fmt.Errorf("failed to parse i128 constants[%d] %s: invalid format", coi, spew.Sdump(co))
+				}
+				// Generate code that creates a big.Int from string
+				code.Var().Id(co.Name).Op("=").Func().Params().Op("*").Qual("math/big", "Int").Block(
+					Id("val").Op(",").Id("ok").Op(":=").New(Qual("math/big", "Int")).Dot("SetString").Call(Lit(cleanValue), Lit(10)),
+					If(Op("!").Id("ok")).Block(
+						Panic(Lit(fmt.Sprintf("invalid i128 constant %s", co.Name))),
+					),
+					Return(Id("val")),
+				).Call()
+				code.Line()
 			case *idltype.F32:
 				_ = ty
 				// "value":"3.14"
-				v, err := strconv.ParseFloat(co.Value, 32)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseFloat(cleanValue, 32)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse f32 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
@@ -158,7 +205,8 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 				_ = ty
 				// "value":"3.14"
 				// "value":"4e-6"
-				v, err := strconv.ParseFloat(co.Value, 64)
+				cleanValue := strings.ReplaceAll(co.Value, "_", "")
+				v, err := strconv.ParseFloat(cleanValue, 64)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse f64 constants[%d] %s: %w", coi, spew.Sdump(co), err)
 				}
@@ -259,6 +307,36 @@ func (g *Generator) gen_constants() (*OutputFile, error) {
 					}
 				}).Op("}")
 				code.Line()
+
+			case *idltype.Defined:
+				_ = ty
+				// Handle user-defined types like usize, isize, etc.
+				switch ty.Name {
+				case "usize":
+					// usize is typically a pointer-sized unsigned integer
+					// In most cases, this is equivalent to u64 on 64-bit systems
+					cleanValue := strings.ReplaceAll(co.Value, "_", "")
+					v, err := strconv.ParseUint(cleanValue, 10, 64)
+					if err != nil {
+						return nil, fmt.Errorf("failed to parse usize constants[%d] %s: %w", coi, spew.Sdump(co), err)
+					}
+					code.Const().Id(co.Name).Op("=").Lit(uint64(v))
+					code.Line()
+				case "isize":
+					// isize is typically a pointer-sized signed integer
+					// In most cases, this is equivalent to i64 on 64-bit systems
+					cleanValue := strings.ReplaceAll(co.Value, "_", "")
+					v, err := strconv.ParseInt(cleanValue, 10, 64)
+					if err != nil {
+						return nil, fmt.Errorf("failed to parse isize constants[%d] %s: %w", coi, spew.Sdump(co), err)
+					}
+					code.Const().Id(co.Name).Op("=").Lit(int64(v))
+					code.Line()
+				default:
+					// For other defined types, we could try to resolve them,
+					// but for now, we'll return an error with more specific information
+					return nil, fmt.Errorf("unsupported defined type '%s' for constants[%d] %s: %T", ty.Name, coi, spew.Sdump(co), ty)
+				}
 
 			default:
 				return nil, fmt.Errorf("unsupported constant type for constants[%d] %s: %T", coi, spew.Sdump(co), ty)
