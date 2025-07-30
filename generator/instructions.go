@@ -562,10 +562,17 @@ func (g *Generator) gen_instructionType(instruction idl.IdlInstruction) (Code, e
 				block.Comment("Read the discriminator and check it against the expected value:")
 				block.List(Id("discriminator"), Err()).Op(":=").Id("decoder").Dot("ReadDiscriminator").Call()
 				block.If(Err().Op("!=").Nil()).Block(
-					Return(Qual("fmt", "Errorf").Call(Lit("failed to read instruction discriminator: %w"), Err())),
+					Return(Qual("fmt", "Errorf").Call(Lit("failed to read instruction discriminator for %s: %w"), Lit(typeName), Err())),
 				)
 				block.If(Id("discriminator").Op("!=").Id(FormatInstructionDiscriminatorName(tools.ToCamelUpper(instruction.Name)))).Block(
-					Return(Qual("fmt", "Errorf").Call(Lit("instruction discriminator mismatch: expected %s, got %s"), Id(FormatInstructionDiscriminatorName(tools.ToCamelUpper(instruction.Name))), Id("discriminator"))),
+					Return(
+						Qual("fmt", "Errorf").Call(
+							Lit("instruction discriminator mismatch for %s: expected %s, got %s"),
+							Lit(typeName),
+							Id(FormatInstructionDiscriminatorName(tools.ToCamelUpper(instruction.Name))),
+							Id("discriminator"),
+						),
+					),
 				)
 			}
 			for _, arg := range instruction.Args {
