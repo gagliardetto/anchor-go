@@ -70,21 +70,21 @@ func (g *Generator) Generate() (*Output, error) {
 				registerComplexEnums(typ)
 			}
 		}
-		{
+		if len(g.idl.Docs) > 0 {
 			file, err := g.genfile_doc()
 			if err != nil {
 				return nil, err
 			}
 			output.Files = append(output.Files, file)
 		}
-		if g.idl.Accounts != nil && len(g.idl.Accounts) > 0 {
+		if len(g.idl.Accounts) > 0 {
 			file, err := g.genfile_accounts()
 			if err != nil {
 				return nil, err
 			}
 			output.Files = append(output.Files, file)
 		}
-		if g.idl.Events != nil && len(g.idl.Events) > 0 {
+		if len(g.idl.Events) > 0 {
 			file, err := g.genfile_events()
 			if err != nil {
 				return nil, err

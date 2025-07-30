@@ -19,7 +19,7 @@ func (g *Generator) genfile_programID(id solana.PublicKey) (*OutputFile, error) 
 	}
 
 	return &OutputFile{
-		Name: "program-id.go",
+		Name: "program_id.go",
 		File: file,
 	}, nil
 }
