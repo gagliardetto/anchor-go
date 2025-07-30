@@ -556,6 +556,17 @@ func (g *Generator) gen_instructionType(instruction idl.IdlInstruction) (Code, e
 			if len(instruction.Args) > 0 {
 				block.Var().Id("err").Error()
 			}
+			{
+				// Read the discriminator and check it against the expected value
+				block.Comment("Read the discriminator and check it against the expected value:")
+				block.List(Id("discriminator"), Err()).Op(":=").Id("decoder").Dot("ReadDiscriminator").Call()
+				block.If(Err().Op("!=").Nil()).Block(
+					Return(Qual("fmt", "Errorf").Call(Lit("failed to read instruction discriminator: %w"), Err())),
+				)
+				block.If(Id("discriminator").Op("!=").Id(FormatInstructionDiscriminatorName(tools.ToCamelUpper(instruction.Name)))).Block(
+					Return(Qual("fmt", "Errorf").Call(Lit("instruction discriminator mismatch: expected %s, got %s"), Id(FormatInstructionDiscriminatorName(tools.ToCamelUpper(instruction.Name))), Id("discriminator"))),
+				)
+			}
 			for _, arg := range instruction.Args {
 				fieldName := tools.ToCamelUpper(arg.Name)
 				block.Commentf("Deserialize `%s`:", fieldName)
