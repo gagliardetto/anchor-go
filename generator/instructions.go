@@ -364,7 +364,7 @@ func (g *Generator) gen_instructionParser(typeNames []string, discriminatorNames
 
 	// Single unified ParseInstruction function with optional accounts
 	code.Line().Line()
-	code.Comment("ParseInstruction parses instruction data and optionally populates accounts")
+	code.Comment("ParseInstruction parses instruction data and optionally populates accounts").Line()
 	code.Comment("If accountIndicesData is nil or empty, accounts will not be populated")
 	code.Line()
 	code.Func().Id("ParseInstruction").
@@ -547,6 +547,7 @@ func (g *Generator) gen_instructionType(instruction idl.IdlInstruction) (Code, e
 
 	// Generate UnmarshalWithDecoder method
 	code.Line().Line()
+	code.Commentf("UnmarshalWithDecoder unmarshals the %s from Borsh-encoded bytes prefixed with its discriminator.", typeName).Line()
 	code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("UnmarshalWithDecoder").
 		Params(Id("decoder").Op("*").Qual(PkgBinary, "Decoder")).
 		Params(Error()).
@@ -555,6 +556,24 @@ func (g *Generator) gen_instructionType(instruction idl.IdlInstruction) (Code, e
 			// Read instruction arguments
 			if len(instruction.Args) > 0 {
 				block.Var().Id("err").Error()
+			}
+			{
+				// Read the discriminator and check it against the expected value
+				block.Comment("Read the discriminator and check it against the expected value:")
+				block.List(Id("discriminator"), Err()).Op(":=").Id("decoder").Dot("ReadDiscriminator").Call()
+				block.If(Err().Op("!=").Nil()).Block(
+					Return(Qual("fmt", "Errorf").Call(Lit("failed to read instruction discriminator for %s: %w"), Lit(typeName), Err())),
+				)
+				block.If(Id("discriminator").Op("!=").Id(FormatInstructionDiscriminatorName(tools.ToCamelUpper(instruction.Name)))).Block(
+					Return(
+						Qual("fmt", "Errorf").Call(
+							Lit("instruction discriminator mismatch for %s: expected %s, got %s"),
+							Lit(typeName),
+							Id(FormatInstructionDiscriminatorName(tools.ToCamelUpper(instruction.Name))),
+							Id("discriminator"),
+						),
+					),
+				)
 			}
 			for _, arg := range instruction.Args {
 				fieldName := tools.ToCamelUpper(arg.Name)
@@ -730,6 +749,7 @@ func (g *Generator) gen_instructionType(instruction idl.IdlInstruction) (Code, e
 
 	// Generate Unmarshal method
 	code.Line().Line()
+	code.Commentf("Unmarshal unmarshals the %s from Borsh-encoded bytes prefixed with the discriminator.", typeName).Line()
 	code.Func().Params(Id("obj").Op("*").Id(typeName)).Id("Unmarshal").
 		Params(Id("buf").Index().Byte()).
 		Params(Error()).
@@ -751,6 +771,7 @@ func (g *Generator) gen_instructionType(instruction idl.IdlInstruction) (Code, e
 
 	// Generate Unmarshal function
 	code.Line().Line()
+	code.Commentf("Unmarshal%s unmarshals the instruction from Borsh-encoded bytes prefixed with the discriminator.", typeName).Line()
 	code.Func().Id("Unmarshal"+typeName).
 		Params(Id("buf").Index().Byte()).
 		Params(Op("*").Id(typeName), Error()).
