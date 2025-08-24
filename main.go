@@ -144,6 +144,7 @@ func main() {
 			"errorsCount", len(parsedIdl.Errors),
 		)
 	}
+	options.Logger = slog.Default()
 	gen := generator.NewGenerator(parsedIdl, &options)
 	generatedFiles, err := gen.Generate()
 	if err != nil {
