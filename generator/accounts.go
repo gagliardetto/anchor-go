@@ -131,6 +131,9 @@ func (g *Generator) gen_IDLTypeDefTyStruct(
 		code.Type().Id(exportedAccountName).StructFunc(func(fieldsGroup *Group) {
 			switch fields := typ.Fields.(type) {
 			case idl.IdlDefinedFieldsNamed:
+				// Generate unique field names to handle duplicates
+				uniqueFieldNames := generateUniqueFieldNames(fields)
+
 				for fieldIndex, field := range fields {
 
 					// Add docs for the field:
@@ -144,7 +147,8 @@ func (g *Generator) gen_IDLTypeDefTyStruct(
 					optionality := IsOption(field.Ty) || IsCOption(field.Ty)
 
 					// TODO: optionality for complex enums is a nil interface.
-					fieldsGroup.Add(genField(field, optionality)).
+					uniqueFieldName := uniqueFieldNames[field.Name]
+					fieldsGroup.Add(genFieldWithName(field, uniqueFieldName, optionality)).
 						Add(func() Code {
 							tagMap := map[string]string{}
 							if IsOption(field.Ty) {
@@ -153,8 +157,8 @@ func (g *Generator) gen_IDLTypeDefTyStruct(
 							if IsCOption(field.Ty) {
 								tagMap["bin"] = "coption"
 							}
-							// add json tag:
-							tagMap["json"] = tools.ToCamelLower(field.Name) + func() string {
+							// add json tag: use original field name to avoid duplicates
+							tagMap["json"] = field.Name + func() string {
 								if optionality {
 									return ",omitempty"
 								}
@@ -237,8 +241,38 @@ func (g *Generator) gen_IDLTypeDefTyStruct(
 	return st, nil
 }
 
+// generateUniqueFieldNames creates unique Go field names from IDL field names,
+// handling cases where multiple IDL fields would map to the same Go field name
+func generateUniqueFieldNames(fields []idl.IdlField) map[string]string {
+	fieldNameMap := make(map[string]string)
+	usedNames := make(map[string]int)
+
+	for _, field := range fields {
+		baseName := tools.ToCamelUpper(field.Name)
+		finalName := baseName
+
+		// Check if this name has been used before
+		if count, exists := usedNames[baseName]; exists {
+			// Add a numeric suffix to make it unique
+			finalName = baseName + fmt.Sprintf("%d", count+1)
+			usedNames[baseName] = count + 1
+		} else {
+			usedNames[baseName] = 0
+		}
+
+		fieldNameMap[field.Name] = finalName
+	}
+
+	return fieldNameMap
+}
+
 func genField(field idl.IdlField, pointer bool) Code {
 	return genFieldNamed(field.Name, field.Ty, pointer)
+}
+
+// genFieldWithName generates a field with a custom field name (for handling duplicates)
+func genFieldWithName(field idl.IdlField, fieldName string, pointer bool) Code {
+	return genFieldNamed(fieldName, field.Ty, pointer)
 }
 
 func genFieldNamed(name string, typ idltype.IdlType, pointer bool) Code {
